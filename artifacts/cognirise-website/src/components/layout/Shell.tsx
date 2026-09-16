@@ -480,12 +480,12 @@ export function Shell({
             />
           </Link>
 
-          <nav className="hidden min-w-0 h-full items-center 2xl:flex">
-            <ul className="flex items-center gap-1 2xl:gap-2">
+          <nav className="hidden min-w-0 h-full items-center xl:flex">
+            <ul className="flex items-center gap-0 2xl:gap-2">
               {visibleNavigation.map((item) => (
                 <li
                   key={item.id}
-                  className="relative h-full flex items-center px-2 2xl:px-4"
+                  className="relative h-full flex items-center px-1.5 2xl:px-4"
                   onMouseEnter={() => item.items ? handleMouseEnter(item.label) : handleMouseLeave()}
                   onMouseLeave={handleMouseLeave}
                   onFocus={() => item.items && handleMouseEnter(item.label)}
@@ -510,7 +510,7 @@ export function Shell({
                     }}
                   >
                     <span
-                      className={`whitespace-nowrap text-[13px] font-bold tracking-wide transition-colors ${
+                      className={`whitespace-nowrap text-[12px] font-bold tracking-wide transition-colors 2xl:text-[13px] ${
                         isCurrentSection(item.href) ? "text-[hsl(var(--brand-pink))]" : "text-[hsl(var(--brand-deep))] group-hover:text-[hsl(var(--brand-pink))]"
                       }`}
                     >
@@ -566,7 +566,7 @@ export function Shell({
             </ul>
           </nav>
 
-          <div className="relative z-50 hidden shrink-0 items-center gap-4 2xl:gap-6 2xl:flex">
+          <div className="relative z-50 hidden shrink-0 items-center gap-3 2xl:gap-6 xl:flex">
             {marketContext ? (
               <span className="text-xs font-bold uppercase tracking-widest text-[hsl(var(--brand-deep))]">
                 Preview · {getMarketLocationLabel(market)}
@@ -574,11 +574,11 @@ export function Shell({
             ) : import.meta.env?.DEV && marketOptions.length > 0 ? (
               <ReviewVersionSelect markets={marketOptions} market={market} onSelect={setMarket} />
             ) : null}
-            <BrandButton href="/value-scan" className="shrink-0">Bring us one process</BrandButton>
+            <BrandButton href="/value-scan" className="shrink-0 px-4 2xl:px-6">Bring us one process</BrandButton>
           </div>
 
           <button
-            className="2xl:hidden p-2 -mr-2 relative z-50 rounded-sm text-[hsl(var(--brand-deep))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-pink))]"
+            className="xl:hidden p-2 -mr-2 relative z-50 rounded-sm text-[hsl(var(--brand-deep))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-pink))]"
             onClick={() => setIsOpen(!isOpen)}
             aria-label={isOpen ? "Close menu" : "Open menu"}
             aria-expanded={isOpen}
@@ -592,7 +592,7 @@ export function Shell({
       <div className="h-[72px] md:h-[82px] shrink-0" />
 
       {isOpen && (
-        <div className="fixed inset-0 top-[72px] md:top-[82px] z-40 bg-white px-6 py-8 overflow-y-auto 2xl:hidden animate-in fade-in duration-200">
+        <div className="fixed inset-0 top-[72px] md:top-[82px] z-40 bg-white px-6 py-8 overflow-y-auto xl:hidden animate-in fade-in duration-200">
           <nav className="flex flex-col gap-2 pb-12">
             {visibleNavigation.map((item) => (
               <div key={item.id} className="flex flex-col border-b border-border last:border-0">

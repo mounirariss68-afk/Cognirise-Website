@@ -15,7 +15,7 @@ export function NavigationBackControl({ className = "" }: NavigationBackControlP
 
   return (
     <div
-      className={`mx-auto w-full max-w-[1440px] px-6 pt-5 md:px-12 md:pt-6 ${className}`.trim()}
+      className={`mx-auto w-full max-w-[1440px] px-6 pt-3 md:px-[4.8vw] md:pt-4 ${className}`.trim()}
       data-navigation-back-container
     >
       <button
@@ -23,9 +23,9 @@ export function NavigationBackControl({ className = "" }: NavigationBackControlP
         onClick={() => { goBack(); }}
         aria-label="Back to previous page"
         data-testid="navigation-back"
-        className="inline-flex items-center gap-2 rounded-sm border border-border bg-white px-3 py-2 text-xs font-bold uppercase tracking-[0.14em] text-[hsl(var(--brand-deep))] transition-colors hover:border-[hsl(var(--brand-pink))] hover:text-[hsl(var(--brand-pink))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-pink))] focus-visible:ring-offset-2"
+        className="inline-flex items-center gap-1.5 rounded-sm py-1 text-[11px] font-semibold tracking-[0.04em] text-muted-foreground transition-colors hover:text-[hsl(var(--brand-pink))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-pink))] focus-visible:ring-offset-2"
       >
-        <ArrowLeft aria-hidden="true" className="h-3.5 w-3.5" />
+        <ArrowLeft aria-hidden="true" className="h-3 w-3" />
         Back
       </button>
     </div>

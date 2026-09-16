@@ -74,21 +74,27 @@ try {
   const back = `document.querySelector('[data-testid="navigation-back"]')`;
   await send("Page.enable");
   await send("Network.enable");
-  await send("Emulation.setDeviceMetricsOverride", { width: 1536, height: 900, deviceScaleFactor: 1, mobile: false });
+  await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
   await send("Page.navigate", { url: `${base}/?market=ksa` });
   await wait(`document.querySelector('h1') && document.body.textContent.includes('Market view')`);
   assert.equal(await evaluate(`document.querySelectorAll('select[aria-label="Review version"]').length`), 0);
   assert.equal(await evaluate(`Boolean(${back})`), false);
+  assert.equal(await evaluate(`getComputedStyle(document.querySelector('header nav')).display !== 'none'`), true);
+  assert.equal(await evaluate(`Boolean(document.querySelector('button[aria-label="Open menu"]')) && getComputedStyle(document.querySelector('button[aria-label="Open menu"]')).display === 'none'`), true);
+  assert.equal(await evaluate(`document.querySelector('header').scrollWidth <= document.querySelector('header').clientWidth + 1`), true);
   await wait(`document.body.textContent.includes('Saudi Arabia')`);
   // Native hash entry followed by a real full-document link, then shared Back.
   await evaluate(`location.hash='service-lines'`);
   await delay(200);
   await evaluate(`{ const a=document.createElement('a'); a.href='/platforms?market=ksa'; a.textContent='Test internal'; document.body.append(a); a.click(); }`);
   await wait(`location.pathname==='/platforms' && Boolean(${back}) && document.querySelector('h1')`);
+  assert.equal(await evaluate(`${back}.className.includes('border')`), false);
+  assert.equal(await evaluate(`${back}.getBoundingClientRect().height < 32`), true);
+  assert.equal(await evaluate(`${back}.closest('[data-navigation-back-container]').nextElementSibling !== null`), true);
   await evaluate(`${back}.click()`);
   await wait(`location.pathname==='/' && location.hash==='#service-lines' && document.querySelector('h1')`);
   assert.equal(await evaluate(`Boolean(${back})`), false);
-  console.log("PASS production desktop hiding, regional delivery, native hash and full-document Back");
+  console.log("PASS laptop navigation, regional delivery, native hash and subtle full-document Back");
   // Navigate through Wouter to a real dirty assessment; dismiss then accept.
   await evaluate(`document.querySelector('a[href="/methodologies"]').click()`);
   await wait(`location.pathname==='/methodologies'`);
@@ -104,6 +110,9 @@ try {
   await evaluate(`window.confirm=()=>true; ${back}.click()`);
   await wait(`location.pathname==='/methodologies'`);
   console.log("PASS canceled dirty-assessment traversal followed by shared Back");
+  await send("Emulation.setDeviceMetricsOverride", { width: 1279, height: 844, deviceScaleFactor: 1, mobile: false });
+  assert.equal(await evaluate(`getComputedStyle(document.querySelector('header nav')).display === 'none'`), true);
+  assert.equal(await evaluate(`getComputedStyle(document.querySelector('button[aria-label="Open menu"]')).display !== 'none'`), true);
   await send("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
   await evaluate(`document.querySelector('button[aria-label="Open menu"]').click()`);
   await wait(`document.querySelector('button[aria-label="Close menu"]')`);
