@@ -17,6 +17,12 @@ CMS integration of IDAO is authorized without changing its approved canon. Edito
 
 **How to apply:** Keep canonical stage identities, order and logic read-only and shared with the homepage. Inventory exact editorial and media occurrences, bind them in place, and verify edits in the real page layout rather than an isolated generic renderer.
 
+IDAO delivery-canon imagery is one shared read-only authority across market editions; regional CMS snapshots may localize hero and lifecycle-stage media but must not override the current canon image family.
+
+**Why:** An older UAE draft was reused by every market selector and kept retired canon artwork visible even after the approved canonical replacements merged.
+
+**How to apply:** Render canon cards from the current canonical inventory and keep their approved alt text paired with those assets. Continue resolving hero, lifecycle stages, and editable narrative through the governed market snapshot.
+
 **Why:** Consistent assessment exports are an approved exception to the protection boundary, not permission to redesign or reinterpret the canonical framework.
 
 **How to apply:** Maintain this distinction in later export work. The planned AI Guardrails framework is complementary to Agent Authority; do not merge their logic or invent Guardrails content before it is supplied and approved.

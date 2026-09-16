@@ -322,8 +322,14 @@ function IDAOMethodologyContent() {
           }
         `}</style>
         <div className="idao-canon-grid mt-14 grid items-start gap-x-8 gap-y-10 border-t border-[#cbd3e1] pt-10 md:grid-cols-2 lg:grid-cols-5 lg:gap-y-0">
-          {IDAO_CANON_LAYERS.map((layer, index) => {
-            const layerImage = methodologyEditorialMedia(cms, editorial.canonMedia[index].image);
+          {IDAO_CANON_LAYERS.map((layer) => {
+            // The five delivery-canon records are a shared, read-only
+            // methodology authority. Regional CMS snapshots may localize the
+            // hero and lifecycle stages, but must not retain retired canon art.
+            const layerImage = {
+              src: assetUrl(layer.image),
+              altText: layer.imageAlt,
+            };
             return (
               <div key={layer.num} className="idao-canon-card flex flex-col">
               <div

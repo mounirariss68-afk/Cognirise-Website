@@ -140,9 +140,10 @@ test("IDAO keeps baseline editorial defaults and binds CMS edits in place", () =
   assert.match(page, /methodologyEditorial<"idao", typeof idaoEditorial>\("idao", cms, idaoEditorial\.seed\)/);
   assert.match(page, /methodologyEditorialMedia\(cms, editorial\.delivery\.teamImage\)/);
   assert.match(page, /methodologyEditorialMedia\(cms, editorial\.stageMedia\[index\]\.image\)/);
-  assert.match(page, /methodologyEditorialMedia\(cms, editorial\.canonMedia\[index\]\.image\)/);
   assert.doesNotMatch(page, /assetUrl\(stage\.image\)/);
-  assert.doesNotMatch(page, /assetUrl\(layer\.image\)/);
+  assert.match(page, /assetUrl\(layer\.image\)/);
+  assert.match(page, /altText: layer\.imageAlt/);
+  assert.doesNotMatch(page, /methodologyEditorialMedia\(cms, editorial\.canonMedia/);
   assert.match(page, /editorial\.deliveryTeam\.filter/);
   assert.match(page, /editorial\.startingPoint\.firstParagraph/);
   assert.match(page, /editorial\.lifecycle\.description/);
