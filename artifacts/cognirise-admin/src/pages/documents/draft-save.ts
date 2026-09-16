@@ -198,9 +198,13 @@ export function serverValidationIssues(error: unknown): DraftSaveIssue[] {
   const data = (error as ErrorRecord).data;
   if (!data || typeof data !== "object") return [];
   const record = data as ErrorRecord;
-  const details = Array.isArray(record.details)
-    ? record.details
-    : Array.isArray(record.errors) ? record.errors : [];
+  // API validation retains legacy details:string[] while structured issues are
+  // authoritative for exact controls. Prefer them rather than parsing prose.
+  const details = Array.isArray(record.issues)
+    ? record.issues
+    : Array.isArray(record.details)
+      ? record.details
+      : Array.isArray(record.errors) ? record.errors : [];
   return details.flatMap((item): DraftSaveIssue[] => {
     if (typeof item === "string") return parseDraftIssues([item]);
     if (!item || typeof item !== "object") return [];

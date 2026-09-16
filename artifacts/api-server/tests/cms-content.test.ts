@@ -380,6 +380,59 @@ test("contact site configuration requires a strict valid email", () => {
   assert.equal(isCmsConfigurationIdentityValid("site-configuration", "site-homepage-hero", hero), true);
 });
 
+test("hero-film site configuration drafts validate incrementally without relaxing publish", () => {
+  const draftSteps = [
+    { schemaVersion: 1, page: "homepage" },
+    { schemaVersion: 1, page: "homepage", hero: { posterMediaId: heroIds.poster } },
+    {
+      schemaVersion: 1,
+      page: "homepage",
+      hero: {
+        posterMediaId: heroIds.poster,
+        posterMediaVersionId: heroIds.posterVersion,
+        sources: [{ mediaId: heroIds.mp4, mediaVersionId: heroIds.mp4Version, mimeType: "video/mp4" }],
+      },
+    },
+  ];
+  for (const content of draftSteps) {
+    assert.equal(
+      validateCmsContent("site-configuration", content, "draft").success,
+      true,
+      `incomplete hero-film draft rejected: ${JSON.stringify(content)}`,
+    );
+    assert.equal(
+      validateCmsContent("site-configuration", content, "publish").success,
+      false,
+      "publish must still block every incomplete hero-film step",
+    );
+  }
+
+  assert.equal(validateCmsContent("site-configuration", {
+    schemaVersion: 1, page: "unknown",
+  }, "draft").success, false, "drafts still reject unsupported hero slots");
+  assert.equal(validateCmsContent("site-configuration", {
+    schemaVersion: 1, page: "homepage", hero: { posterMediaId: "not-a-uuid" },
+  }, "draft").success, false, "drafts still validate a present poster pin");
+  assert.equal(validateCmsContent("site-configuration", {
+    schemaVersion: 1, page: "homepage", hero: {
+      sources: [{ mediaId: heroIds.mp4, mediaVersionId: heroIds.mp4Version, mimeType: "image/png" }],
+    },
+  }, "draft").success, false, "drafts still restrict source media types to MP4/WebM");
+  assert.equal(validateCmsContent("site-configuration", {
+    schemaVersion: 1, page: "homepage", hero: { unknown: true },
+  }, "draft").success, false, "drafts reject hidden unknown hero fields");
+  assert.equal(validateCmsContent("site-configuration", {
+    schemaVersion: 1, page: "homepage", hiddenStoredData: true,
+  }, "draft").success, false, "drafts reject hidden unknown top-level fields");
+
+  assert.equal(validateCmsContent("site-configuration", {
+    schemaVersion: 1, configuration: "contact-email",
+  }, "draft").success, true, "the contact-email draft branch remains incremental");
+  assert.equal(validateCmsContent("site-configuration", {
+    schemaVersion: 1, configuration: "contact-email", contactEmail: "not-an-email",
+  }, "draft").success, false, "the contact-email draft branch still validates email syntax");
+});
+
 test("publication requires a known variant and governed article body", () => {
   const valid = validateCmsContent("publication", {
     ...governance,

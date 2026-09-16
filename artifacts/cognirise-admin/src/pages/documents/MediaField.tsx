@@ -27,22 +27,28 @@ export type MediaSelection = {
   altText?: string;
 };
 
-export function MediaField({ label, value, legacyMediaId, onChange, accept = "image", required = false, role = "hero", overridePath, disabled = false }: {
+export function MediaField({ label, value, legacyMediaId, onChange, accept = "image", required = false, role = "hero", overridePath, fieldPath, disabled = false }: {
   label: string;
   value?: MediaSelection;
   legacyMediaId?: string;
   onChange: (selection: MediaSelection | undefined) => void;
-  accept?: "image" | "pdf";
+  accept?: "image" | "pdf" | "video";
   required?: boolean;
   role?: MediaSelection["role"];
   /** Stable snapshot path, for example content.heroMedia. */
   overridePath?: string;
+  /** Stable focus target when this picker writes more than one stored field. */
+  fieldPath?: string;
   disabled?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [altText, setAltText] = useState("");
   const [uploadError, setUploadError] = useState("");
+  const targetPath = fieldPath ?? overridePath;
+  const fieldTargetId = targetPath
+    ? `content-${targetPath.replace(/^content\./, "").replace(/[^a-zA-Z0-9_-]/g, "-")}`
+    : undefined;
   const requestUpload = useRequestMediaUpload();
   const finalizeUpload = useFinalizeMediaUpload();
   const params = { page: 1, pageSize: 100, search: search || undefined, collection: "website" as const };
@@ -64,7 +70,11 @@ export function MediaField({ label, value, legacyMediaId, onChange, accept = "im
   const assets = ((media.data?.items ?? []) as Asset[]).filter((asset) =>
     ["ready", "active"].includes(asset.status)
     && Boolean(asset.versionId)
-    && (accept === "pdf" ? asset.mimeType === "application/pdf" : asset.mimeType.startsWith("image/")),
+    && (accept === "pdf"
+      ? asset.mimeType === "application/pdf"
+      : accept === "video"
+        ? asset.mimeType === "video/mp4" || asset.mimeType === "video/webm"
+        : asset.mimeType.startsWith("image/")),
   );
   // Prefer the approved item from the current list over an older exact-item
   // snapshot. Approval changes the API status and appends a metadata version,
@@ -72,7 +82,11 @@ export function MediaField({ label, value, legacyMediaId, onChange, accept = "im
   const selected = assets.find((asset) => asset.id === selectedMediaId)
     ?? (exact.data as Asset | undefined);
   const upload = async (file: File) => {
-    if (!file.type.startsWith("image/") && accept !== "pdf") return;
+    if (
+      (accept === "image" && !file.type.startsWith("image/"))
+      || (accept === "video" && file.type !== "video/mp4" && file.type !== "video/webm")
+      || (accept === "pdf" && file.type !== "application/pdf")
+    ) return;
     const requested = await requestUpload.mutateAsync({ data: {
       filename: file.name, mimeType: file.type, size: file.size, collection: "website",
     } });
@@ -83,14 +97,14 @@ export function MediaField({ label, value, legacyMediaId, onChange, accept = "im
   };
 
   return (
-    <div className="space-y-2">
+    <div id={fieldTargetId} data-field-path={targetPath} tabIndex={fieldTargetId ? -1 : undefined} className="space-y-2">
       {overridePath && overrides.isAdapted && <FieldOverrideIndicator
         label={label}
         isOverride={isOverride}
         canEdit={overrides.canEdit}
         onResetToShared={() => overrides.onReset?.(overridePath)}
       />}
-      <Label>{label} <span className={required ? "text-destructive" : "text-muted-foreground"}>{required ? "(required)" : "(optional)"}</span></Label>
+      <Label>{label} <span className={required ? "text-destructive" : "text-muted-foreground"}>{required ? "(required before publishing)" : "(optional)"}</span></Label>
       {selected ? (
         <div className="flex flex-wrap items-center gap-2 rounded-md border bg-muted/20 p-2 sm:gap-3" data-testid={`selected-media-${label.toLowerCase().replaceAll(" ", "-")}`}>
           {selected.publicUrl && selected.mimeType.startsWith("image/") ? (
@@ -107,8 +121,8 @@ export function MediaField({ label, value, legacyMediaId, onChange, accept = "im
           <Button type="button" size="icon" variant="ghost" disabled={disabled} onClick={() => change(undefined)} aria-label={`Remove ${label}`} data-testid={`button-remove-${label.toLowerCase().replaceAll(" ", "-")}`}><X className="h-4 w-4" /></Button>
         </div>
       ) : (
-        <Button type="button" variant="outline" disabled={disabled} onClick={() => setOpen(true)} data-testid={`button-choose-${label.toLowerCase().replaceAll(" ", "-")}`}>
-          <ImageIcon className="mr-2 h-4 w-4" /> Choose approved {accept}
+          <Button type="button" variant="outline" disabled={disabled} onClick={() => setOpen(true)} data-testid={`button-choose-${label.toLowerCase().replaceAll(" ", "-")}`}>
+           <ImageIcon className="mr-2 h-4 w-4" /> Choose approved {accept}
         </Button>
       )}
       <p className="text-xs text-muted-foreground">Choose by preview and filename. The saved revision pins the exact approved asset version.</p>
@@ -116,7 +130,7 @@ export function MediaField({ label, value, legacyMediaId, onChange, accept = "im
         <DialogContent className="w-[calc(100%-1rem)] max-w-3xl p-4 sm:p-6">
           <DialogHeader>
             <DialogTitle>Select {label}</DialogTitle>
-            <DialogDescription>Only approved, versioned {accept === "pdf" ? "PDFs" : "images"} are shown.</DialogDescription>
+            <DialogDescription>Only approved, versioned {accept === "pdf" ? "PDFs" : accept === "video" ? "MP4 and WebM video" : "images"} are shown.</DialogDescription>
           </DialogHeader>
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -124,7 +138,7 @@ export function MediaField({ label, value, legacyMediaId, onChange, accept = "im
           </div>
           <div className="rounded-md border border-dashed p-3">
             <Label htmlFor="contextual-media-upload" className="text-xs">Upload a new asset</Label>
-            <Input id="contextual-media-upload" type="file" accept={accept === "pdf" ? "application/pdf" : "image/*"} className="mt-2" onChange={async (event) => {
+            <Input id="contextual-media-upload" type="file" accept={accept === "pdf" ? "application/pdf" : accept === "video" ? "video/mp4,video/webm" : "image/*"} className="mt-2" onChange={async (event) => {
               const file = event.target.files?.[0];
               if (!file) return;
               try { setUploadError(""); await upload(file); setOpen(false); } catch (error) { setUploadError(error instanceof Error ? error.message : "Upload failed"); }

@@ -63,6 +63,7 @@ import { BatchUploadZone } from "./BatchUploadZone";
 import { MediaAssetDetailsPanel } from "./MediaAssetDetailsPanel";
 import { MediaReviewHistory } from "./MediaReviewHistory";
 import type { FocalPoint } from "./FocalPointPicker";
+import { canAccessAnyContentCapability } from "@/lib/content-capability";
 
 export type MediaCollection = "website" | "linkedin" | "motion";
 export type LinkedInAssetKind = "post" | "header";
@@ -113,6 +114,9 @@ export type ExtendedMediaAsset = {
   motionMetadata?: MotionMetadata | null;
   focalPoint?: FocalPoint | null;
   updatedAt?: string;
+  canEdit?: boolean;
+  canReview?: boolean;
+  canInspect?: boolean;
 };
 
 type HeroSlot = CmsHeroFilmSlot;
@@ -556,8 +560,9 @@ export default function MediaLibrary() {
   const updateMedia = useUpdateMedia();
   const reviewMedia = useReviewMedia();
   const { data: session } = useGetSession();
-  const canReview = session?.user?.role === "administrator" || session?.user?.role === "publisher";
-  const canEdit = session?.user?.role !== "viewer";
+  // Per-asset API permissions replace broad session role checks
+  // (`session?.user?.role === "administrator"` / `session?.user?.role === "publisher"`).
+  const canUpload = canAccessAnyContentCapability(session?.user, "edit");
 
   const websiteCount = useListMedia({ page: 1, pageSize: 1, collection: "website" });
   const linkedinCount = useListMedia({ page: 1, pageSize: 1, collection: "linkedin" });
@@ -588,7 +593,7 @@ export default function MediaLibrary() {
   };
 
   const openEditor = (asset: ExtendedMediaAsset) => {
-    if (!canEdit) return;
+    if (asset.canEdit !== true) return;
     setEditingAsset(asset);
     setCampaignFields({
       ...EMPTY_CAMPAIGN,
@@ -624,7 +629,7 @@ export default function MediaLibrary() {
   };
 
   const saveAssetMetadata = async () => {
-    if (!editingAsset) return;
+    if (!editingAsset || editingAsset.canEdit !== true) return;
     if (!title.trim()) {
       toast({ title: "Asset title is required", description: "Enter a filename before saving metadata.", variant: "destructive" });
       return;
@@ -721,7 +726,7 @@ export default function MediaLibrary() {
   };
 
   const submitReview = async (decision: "approve" | "reject") => {
-    if (!reviewAsset || !canReview || reviewSubmitting.current) return;
+    if (!reviewAsset || reviewAsset.canReview !== true || reviewSubmitting.current) return;
     if (decision === "approve" && (!sourceRightsApproved || !accessibilityApproved)) return;
     reviewSubmitting.current = true;
     setReviewPending(true);
@@ -775,7 +780,7 @@ export default function MediaLibrary() {
     const downloadable = Boolean(asset.publicUrl) && ["review", "ready", "active"].includes(asset.status);
     return (
       <div className={`flex ${compact ? "flex-col items-end" : "flex-nowrap items-center"} gap-2`}>
-        {asset.status === "review" && canReview && (
+        {asset.status === "review" && asset.canReview === true && (
           <Button
             variant="outline"
             size="sm"
@@ -934,7 +939,7 @@ export default function MediaLibrary() {
         </TabsList>
       </Tabs>
 
-      {collection === "motion" && <HeroAssignments canEdit={canEdit} />}
+      {collection === "motion" && <HeroAssignments canEdit={canUpload} />}
 
       <div className="flex flex-1 flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-muted/20 p-4">
@@ -1025,7 +1030,7 @@ export default function MediaLibrary() {
                                {campaign.pulseSource && <p className="truncate text-muted-foreground">Pulse: {campaign.pulseSource}</p>}
                                {campaign.approvedUse && <p className="line-clamp-2 text-muted-foreground">Approved: {campaign.approvedUse}</p>}
                              </div>
-                             <Button disabled={!canEdit} variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={() => openEditor(asset)} aria-label={`Edit campaign metadata for ${asset.filename}`}>
+                             <Button disabled={asset.canEdit !== true} variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={() => openEditor(asset)} aria-label={`Edit campaign metadata for ${asset.filename}`}>
                                <Pencil className="h-3.5 w-3.5" />
                              </Button>
                            </div>
@@ -1043,7 +1048,7 @@ export default function MediaLibrary() {
                               )}
                               {asset.caption && <p className="line-clamp-2 text-muted-foreground">Usage: {asset.caption}</p>}
                             </div>
-                            <Button disabled={!canEdit} variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={() => openEditor(asset)} aria-label={`Edit video metadata for ${asset.filename}`}>
+                            <Button disabled={asset.canEdit !== true} variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={() => openEditor(asset)} aria-label={`Edit video metadata for ${asset.filename}`}>
                               <Pencil className="h-3.5 w-3.5" />
                             </Button>
                           </div>
@@ -1053,13 +1058,13 @@ export default function MediaLibrary() {
                       <p className="truncate text-[10px] font-mono text-muted-foreground" title={asset.credit || undefined}>
                         {asset.credit ? `Credit: ${asset.credit}` : "Credit not recorded"}
                       </p>
-                      {asset.status === "review" && !canReview && (
+                      {asset.status === "review" && asset.canReview !== true && (
                         <p className="text-[10px] font-mono text-amber-700">Awaiting a publisher review</p>
                       )}
                        {assetActions(asset)}
                        {collection === "website" && (
                          <Button
-                           disabled={!canEdit}
+                           disabled={asset.canEdit !== true}
                            variant="outline"
                            size="sm"
                            className="w-full gap-1.5"
@@ -1115,7 +1120,7 @@ export default function MediaLibrary() {
                              {campaign.purpose && <p className="mt-1 max-w-72 text-xs text-muted-foreground">Purpose: {campaign.purpose}</p>}
                              {campaign.pulseSource && <p className="max-w-72 text-xs text-muted-foreground">Pulse: {campaign.pulseSource}</p>}
                              {campaign.approvedUse && <p className="max-w-72 text-xs text-muted-foreground">Approved: {campaign.approvedUse}</p>}
-                              <Button disabled={!canEdit} variant="link" size="sm" className="mt-1 h-auto p-0 text-xs" onClick={() => openEditor(asset)}>Edit metadata</Button>
+                              <Button disabled={asset.canEdit !== true} variant="link" size="sm" className="mt-1 h-auto p-0 text-xs" onClick={() => openEditor(asset)}>Edit metadata</Button>
                           </td>
                         )}
                         {collection === "motion" && (
@@ -1129,7 +1134,7 @@ export default function MediaLibrary() {
                             <p className="truncate text-xs text-muted-foreground">
                               Poster: {asset.motionMetadata?.posterMediaId || "Not assigned"} • Fallback: {asset.motionMetadata?.reducedMotionMediaId || "Not assigned"}
                             </p>
-                            <Button disabled={!canEdit} variant="link" size="sm" className="mt-1 h-auto p-0 text-xs" onClick={() => openEditor(asset)}>Edit metadata</Button>
+                              <Button disabled={asset.canEdit !== true} variant="link" size="sm" className="mt-1 h-auto p-0 text-xs" onClick={() => openEditor(asset)}>Edit metadata</Button>
                           </td>
                         )}
                         <td className="max-w-64 px-4 py-3">
@@ -1139,13 +1144,13 @@ export default function MediaLibrary() {
                         <td className="px-4 py-3"><StatusBadge status={asset.status} /></td>
                         <td className="px-4 py-3 text-right">
                           <p className="mb-2 text-xs font-mono text-muted-foreground">{format(new Date(asset.createdAt), "MMM d, yyyy")}</p>
-                          {asset.status === "review" && !canReview && (
+                          {asset.status === "review" && asset.canReview !== true && (
                             <p className="mb-2 text-[10px] font-mono text-amber-700">Awaiting publisher review</p>
                           )}
                           {assetActions(asset, true)}
                            {collection === "website" && (
                              <Button
-                               disabled={!canEdit}
+                               disabled={asset.canEdit !== true}
                                variant="link"
                                size="sm"
                                className="mt-1 h-auto p-0 text-xs"
@@ -1191,7 +1196,7 @@ export default function MediaLibrary() {
               Keep the governed metadata for {editingAsset?.filename} current without changing its source bytes.
             </DialogDescription>
           </DialogHeader>
-          <fieldset disabled={!canEdit} className="space-y-4 py-4">
+          <fieldset disabled={editingAsset?.canEdit !== true} className="space-y-4 py-4">
             {editingAsset && (
               <MediaAssetDetailsPanel
                 asset={editingAsset}
@@ -1200,7 +1205,7 @@ export default function MediaLibrary() {
                 altText={altText}
                 credit={credit}
                 focalPoint={focalPoint}
-                disabled={!canEdit}
+                disabled={editingAsset?.canEdit !== true}
                 onTitleChange={setTitle}
                 onUsageChange={setUsage}
                 onAltTextChange={setAltText}
@@ -1210,11 +1215,11 @@ export default function MediaLibrary() {
               />
             )}
             {editingAsset?.collection === "motion" ? motionForm : editingAsset?.collection === "linkedin" ? campaignForm : null}
-            {editingAsset && <MediaReviewHistory asset={editingAsset} canInspect={session?.user?.role === "administrator"} />}
           </fieldset>
+          {editingAsset && <MediaReviewHistory asset={editingAsset} canInspect={editingAsset.canInspect === true} />}
           <DialogFooter>
             <Button variant="ghost" onClick={() => setEditingAsset(null)}>Cancel</Button>
-            <Button onClick={saveAssetMetadata} disabled={!canEdit || updateMedia.isPending}>
+            <Button onClick={saveAssetMetadata} disabled={editingAsset?.canEdit !== true || updateMedia.isPending}>
               {updateMedia.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Save metadata
             </Button>

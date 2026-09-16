@@ -72,3 +72,9 @@ Verify the published subsection in the rendered page, not only in the public API
 **Why:** A valid published response can still be ignored by a page whose CMS cutover is disabled. That leaves the old compiled page visible and makes successful publication appear to have done nothing.
 
 **How to apply:** Check the actual heading and figures in the public DOM after asynchronous loading. Activate only the authorized page when unrelated pages are not ready for CMS cutover.
+
+Keep authority origin separate from exact copied-payload identity.
+
+**Why:** Editing shared wording invalidates an exact-copy claim but must not discard the source restrictions needed for the next edit. Conversely, retaining the old copy identity can cause changed shared wording to masquerade as the selected published revision.
+
+**How to apply:** Carry immutable authority separately across successors. Select edited shared content by its own saved version, not its originating regional revision. Preserve the distinction between deliberately neutral authorship and genuinely unknown historical ownership.

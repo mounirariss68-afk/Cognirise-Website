@@ -19,17 +19,23 @@ function blockLabel(type: string) {
   return type === "heading" ? "Heading" : type === "list" ? "List" : type === "quote" ? "Quotation" : "Paragraph";
 }
 
-export function RichListItems({ label, value, onChange, maximum = 50 }: {
+function targetId(path?: string) {
+  return path ? `content-${path.replace(/^content\./, "").replace(/[^a-zA-Z0-9_-]/g, "-")}` : undefined;
+}
+
+export function RichListItems({ label, value, onChange, maximum = 50, path }: {
   label: string;
   value: unknown;
   onChange: (value: string[]) => void;
   maximum?: number;
+  /** Exact stored path used by readiness focus actions. */
+  path?: string;
 }) {
   const items = Array.isArray(value)
     ? value.filter((item): item is string => typeof item === "string")
     : [];
   return (
-    <section className="space-y-3 rounded-md bg-muted/30 p-3">
+    <section id={targetId(path)} data-field-path={path} tabIndex={path ? -1 : undefined} className="space-y-3 rounded-md bg-muted/30 p-3">
       <div className="flex items-center justify-between">
         <Label>{label}</Label>
         <Button type="button" size="sm" variant="outline" disabled={items.length >= maximum} onClick={() => onChange([...items, ""])}>
@@ -40,6 +46,8 @@ export function RichListItems({ label, value, onChange, maximum = 50 }: {
       {items.map((item, index) => (
         <div key={index} className="space-y-2">
           <Textarea
+             id={targetId(path ? `${path}.${index}` : undefined)}
+             data-field-path={path ? `${path}.${index}` : undefined}
             aria-label={`${label} ${index + 1}`}
             value={item}
             onChange={(event) => onChange(items.map((current, currentIndex) => currentIndex === index ? event.target.value : current))}
@@ -55,18 +63,20 @@ export function RichListItems({ label, value, onChange, maximum = 50 }: {
   );
 }
 
-export function RichBlockEditor({ label, value, onChange, required, maximum = 200 }: {
+export function RichBlockEditor({ label, value, onChange, required, maximum = 200, path }: {
   label: string;
   value: unknown;
   onChange: (value: RichBlockValue[]) => void;
   required?: boolean;
   maximum?: number;
+  /** Exact array path; individual controls append their array index/key. */
+  path?: string;
 }) {
   const blocks = richBlockValues(value);
   const update = (index: number, next: RichBlockValue) => onChange(updateRichBlock(value, index, next));
   const supported = blocks.filter(isRichBlock);
   return (
-    <section className="space-y-3">
+    <section id={targetId(path)} data-field-path={path} tabIndex={path ? -1 : undefined} className="space-y-3">
       <div className="flex items-center justify-between">
         <div>
           <Label>{label} {required && <span className="text-destructive">(required)</span>}</Label>
@@ -105,7 +115,7 @@ export function RichBlockEditor({ label, value, onChange, required, maximum = 20
               <div className="space-y-2">
                 <Label>{label} {index + 1} type</Label>
                 <Select value={block.type} onValueChange={(type) => update(index, changeRichBlockType(block, type as RichBlockType))}>
-                  <SelectTrigger aria-label={`${label} ${index + 1} type`}><SelectValue /></SelectTrigger>
+                  <SelectTrigger id={targetId(path ? `${path}.${index}.type` : undefined)} data-field-path={path ? `${path}.${index}.type` : undefined} aria-label={`${label} ${index + 1} type`}><SelectValue /></SelectTrigger>
                   <SelectContent>{typeOptions.map((type) => <SelectItem value={type} key={type}>{blockLabel(type)}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
@@ -113,7 +123,7 @@ export function RichBlockEditor({ label, value, onChange, required, maximum = 20
                 <div className="space-y-2">
                   <Label>{label} {index + 1} level</Label>
                   <Select value={String(block.level ?? 2)} onValueChange={(level) => update(index, { ...block, level: Number(level) as 2 | 3 })}>
-                    <SelectTrigger aria-label={`${label} ${index + 1} level`}><SelectValue /></SelectTrigger>
+                    <SelectTrigger id={targetId(path ? `${path}.${index}.level` : undefined)} data-field-path={path ? `${path}.${index}.level` : undefined} aria-label={`${label} ${index + 1} level`}><SelectValue /></SelectTrigger>
                     <SelectContent><SelectItem value="2">H2</SelectItem><SelectItem value="3">H3</SelectItem></SelectContent>
                   </Select>
                 </div>
@@ -122,7 +132,7 @@ export function RichBlockEditor({ label, value, onChange, required, maximum = 20
                 <div className="space-y-2">
                   <Label>{label} {index + 1} style</Label>
                   <Select value={block.style ?? "bullet"} onValueChange={(style) => update(index, { ...block, style: style as "bullet" | "numbered" })}>
-                    <SelectTrigger aria-label={`${label} ${index + 1} style`}><SelectValue /></SelectTrigger>
+                    <SelectTrigger id={targetId(path ? `${path}.${index}.style` : undefined)} data-field-path={path ? `${path}.${index}.style` : undefined} aria-label={`${label} ${index + 1} style`}><SelectValue /></SelectTrigger>
                     <SelectContent><SelectItem value="bullet">Bulleted</SelectItem><SelectItem value="numbered">Numbered</SelectItem></SelectContent>
                   </Select>
                 </div>
@@ -132,6 +142,7 @@ export function RichBlockEditor({ label, value, onChange, required, maximum = 20
               <RichListItems
                 label={`${label} ${index + 1} items`}
                 value={block.items}
+                path={path ? `${path}.${index}.items` : undefined}
                 onChange={(items) => update(index, { ...block, items })}
               />
             ) : (
@@ -139,6 +150,8 @@ export function RichBlockEditor({ label, value, onChange, required, maximum = 20
                 <div className="space-y-2">
                   <Label>{label} {index + 1} text</Label>
                   <Textarea
+                   id={targetId(path ? `${path}.${index}.text` : undefined)}
+                   data-field-path={path ? `${path}.${index}.text` : undefined}
                     aria-label={`${label} ${index + 1} text`}
                     value={block.text ?? ""}
                     onChange={(event) => update(index, { ...block, text: event.target.value })}
@@ -149,6 +162,8 @@ export function RichBlockEditor({ label, value, onChange, required, maximum = 20
                   <div className="space-y-2">
                     <Label>{label} {index + 1} attribution <span className="text-muted-foreground">(optional)</span></Label>
                     <Input
+                     id={targetId(path ? `${path}.${index}.attribution` : undefined)}
+                     data-field-path={path ? `${path}.${index}.attribution` : undefined}
                       aria-label={`${label} ${index + 1} attribution`}
                       value={block.attribution ?? ""}
                       onChange={(event) => update(index, { ...block, attribution: event.target.value || undefined })}

@@ -6,4 +6,8 @@
  * OpenAPI spec version: 0.2.0
  */
 
-export type SharedMarketBaselineSnapshot = { [key: string]: unknown };
+/**
+ * Raw baseline snapshot. Null when its governing source cannot be resolved; use the regional materialized revision and recovery guidance instead.
+ * @nullable
+ */
+export type SharedMarketBaselineSnapshot = { [key: string]: unknown } | null;

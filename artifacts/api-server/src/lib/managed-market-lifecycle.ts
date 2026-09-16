@@ -68,6 +68,42 @@ export async function revalidateMutationAuth(
       ORDER BY market_code`,
     [auth.user.id],
   );
+  // Capability rows are as mutable as role/assignment rows. Revalidate them
+  // inside the mutation transaction so a just-saved explicit matrix is usable
+  // immediately, and a just-revoked grant cannot survive in a session object
+  // captured before the lock was acquired.
+  let capabilityMatrixConfigured = auth.user.capabilityMatrixConfigured;
+  let capabilityGrants = auth.user.capabilityGrants;
+  try {
+    const [configuration, grants] = await Promise.all([
+      client.query(
+        "SELECT 1 FROM cms_user_capability_configurations WHERE user_id=$1 LIMIT 1 FOR SHARE",
+        [auth.user.id],
+      ),
+      client.query(
+        `SELECT topic,capability,scope,market_code
+           FROM cms_user_capability_grants
+          WHERE user_id=$1
+          ORDER BY topic,capability,scope,market_code
+          FOR SHARE`,
+        [auth.user.id],
+      ),
+    ]);
+    capabilityMatrixConfigured = Boolean(configuration.rowCount);
+    capabilityGrants = grants.rows.map((row: {
+      topic: string; capability: string; scope: "regional" | "shared"; market_code: string;
+    }) => ({
+      topic: row.topic as any,
+      capability: row.capability as any,
+      scope: row.scope,
+      marketCode: row.market_code,
+    }));
+  } catch (error: any) {
+    // Older rolling-deploy schemas have no explicit-matrix tables. Preserve
+    // their pre-existing compatibility behavior; 0040 policy lookup remains
+    // independently fail-closed for legacy administrators without a snapshot.
+    if (error?.code !== "42P01") throw error;
+  }
   return {
     ...auth,
     user: {
@@ -75,6 +111,8 @@ export async function revalidateMutationAuth(
       role: user.rows[0].role,
       status: user.rows[0].status,
       marketCodes: assignments.rows.map((row: { market_code: string }) => String(row.market_code)),
+      capabilityMatrixConfigured,
+      capabilityGrants,
     },
   };
 }

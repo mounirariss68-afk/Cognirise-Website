@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "wouter";
+import { Link, useLocation, useSearch } from "wouter";
 import { formatDistanceToNow } from "date-fns";
 import { Bell, CheckCheck, CircleAlert, Clock3, Loader2, MailCheck, UserRoundCheck, UsersRound } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +22,7 @@ import {
   markAllEditorialNotificationsRead,
   markEditorialNotificationRead,
   markEditorialNotificationUnread,
+  requestRevisionReview,
   saveDigestPreferences,
   type EditorialWorkItem,
   type EditorialWorkStatus,
@@ -30,11 +31,13 @@ import { editorialAdminHref, isOverdue, revisionStateLabel } from "./editorial-w
 
 type Panel = "my-work" | "team" | "notifications";
 
-function QueueCard({ item, canDecide, onDecision, deciding }: {
+function QueueCard({ item, canDecide, onDecision, deciding, onRecovery, recovering }: {
   item: EditorialWorkItem;
   canDecide: boolean;
   onDecision: (reviewRequestId: string, decision: "approved" | "rejected") => void;
   deciding: boolean;
+  onRecovery: (revisionId: string) => void;
+  recovering: boolean;
 }) {
   const href = editorialAdminHref(item.link, {
     documentId: item.documentId,
@@ -45,8 +48,15 @@ function QueueCard({ item, canDecide, onDecision, deciding }: {
   const pendingReviewRequest = item.reviewRequest?.status === "requested"
     ? item.reviewRequest
     : undefined;
+  const canRecoverReview = Boolean(
+    item.status === "blocked"
+    && item.blockedReason === "The requested reviewer is unavailable or no longer authorized for this exact edition."
+    && pendingReviewRequest
+    && item.reviewRevisionId
+    && item.currentRevisionId === item.reviewRevisionId,
+  );
   return (
-    <article className="rounded-lg border bg-card p-4 shadow-sm">
+    <article id={item.reviewRequest ? `review-${item.reviewRequest.id}` : undefined} tabIndex={-1} className="rounded-lg border bg-card p-4 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0">
           <Link href={href} className="font-semibold text-foreground hover:underline">{item.documentTitle}</Link>
@@ -72,6 +82,17 @@ function QueueCard({ item, canDecide, onDecision, deciding }: {
             <Button type="button" size="sm" variant="outline" className="text-destructive" disabled={deciding} onClick={() => onDecision(pendingReviewRequest.id, "rejected")}>Request changes</Button>
           </>
         )}
+        {canRecoverReview && (
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            disabled={recovering}
+            onClick={() => onRecovery(item.reviewRevisionId!)}
+          >
+            {recovering ? "Finding reviewer…" : "Find eligible reviewer"}
+          </Button>
+        )}
       </div>
     </article>
   );
@@ -87,6 +108,8 @@ function QueueState({
   canDecide,
   onDecision,
   deciding,
+  onRecovery,
+  recovering,
 }: {
   isLoading: boolean;
   isError: boolean;
@@ -97,20 +120,34 @@ function QueueState({
   canDecide?: (item: EditorialWorkItem) => boolean;
   onDecision?: (reviewRequestId: string, decision: "approved" | "rejected") => void;
   deciding?: boolean;
+  onRecovery: (revisionId: string) => void;
+  recovering?: boolean;
 }) {
   if (isLoading) return <div className="flex min-h-48 items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
   if (isError) return <div role="alert" className="rounded-lg border border-destructive/30 bg-destructive/5 p-5 text-sm text-destructive">Work queue could not be loaded. {editorialErrorMessage(error, "Check your access and try again.")} <Button variant="link" className="h-auto p-1 text-destructive" onClick={onRetry}>Retry</Button></div>;
   if (emptyState === "no-access") return <div role="alert" className="rounded-lg border border-amber-400/50 bg-amber-50 p-5 text-sm text-amber-950">You do not have access to this queue. Access is not represented as an empty work list.</div>;
   if (!items?.length) return <div className="rounded-lg border bg-card p-8 text-center text-sm text-muted-foreground">{emptyState === "load-failed" ? "The server could not load this queue. Retry to see current work." : "No editorial work matches this queue."}</div>;
-  return <div className="grid gap-3 lg:grid-cols-2">{items.map((item) => <QueueCard key={item.id} item={item} canDecide={Boolean(canDecide?.(item))} onDecision={onDecision ?? (() => {})} deciding={Boolean(deciding)} />)}</div>;
+  return <div className="grid gap-3 lg:grid-cols-2">{items.map((item) => <QueueCard key={item.id} item={item} canDecide={Boolean(canDecide?.(item))} onDecision={onDecision ?? (() => {})} deciding={Boolean(deciding)} onRecovery={onRecovery} recovering={Boolean(recovering)} />)}</div>;
 }
 
 export default function EditorialWork() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: session } = useGetSession();
-  const canViewTeam = session?.user.role === "publisher" || session?.user.role === "administrator";
-  const [panel, setPanel] = useState<Panel>("my-work");
+  const [location, setLocation] = useLocation();
+  const search = useSearch();
+  const view = new URLSearchParams(search).get("view");
+  const targetRequestId = new URLSearchParams(search).get("request");
+  const panel: Panel = view === "team" ? "team" : view === "notifications" ? "notifications" : "my-work";
+  const setPanel = (next: Panel) => {
+    const query = new URLSearchParams(search);
+    query.set("view", next === "my-work" ? "my" : next);
+    query.delete("request");
+    setLocation(`${location}?${query.toString()}`);
+  };
+  const canViewTeam = session?.user.capabilityMatrixConfigured
+    ? session.user.capabilityGrants?.some((grant) => grant.capability === "review")
+    : ["editor", "publisher", "administrator"].includes(session?.user.role ?? "");
   const [teamMarket, setTeamMarket] = useState("");
   const [teamAssigneeId, setTeamAssigneeId] = useState("");
   const [teamStatus, setTeamStatus] = useState<EditorialWorkStatus | undefined>();
@@ -194,14 +231,45 @@ export default function EditorialWork() {
       variant: "destructive",
     }),
   });
+  const recoverReview = useMutation({
+    mutationFn: (revisionId: string) => requestRevisionReview(revisionId, {}),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["editorial-work", "my"] }),
+        queryClient.invalidateQueries({ queryKey: ["editorial-work", "team"] }),
+        queryClient.invalidateQueries({ queryKey: ["editorial-work", "notifications"] }),
+      ]);
+      toast({ title: "Review request routed", description: "An eligible central reviewer was notified in-app." });
+    },
+    onError: (error) => toast({
+      title: "Reviewer could not be found",
+      description: editorialErrorMessage(error, "Only the exact editor or an authorized central review manager can recover this request."),
+      variant: "destructive",
+    }),
+  });
   const unreadCount = notifications.data?.items.filter((item) => !item.readAt).length ?? 0;
+  const visibleQueue = panel === "team" ? teamWork : myWork;
+  const targetFound = visibleQueue.data?.items.some((item) => item.reviewRequest?.id === targetRequestId);
+  useEffect(() => {
+    if (!targetRequestId || !targetFound) return;
+    const target = document.getElementById(`review-${targetRequestId}`);
+    target?.focus();
+    target?.scrollIntoView({ block: "nearest" });
+  }, [targetRequestId, targetFound, panel]);
   const canDecide = (item: EditorialWorkItem) => Boolean(
     session?.user.id && item.reviewRequest?.reviewerId === session.user.id
-    && ["publisher", "administrator"].includes(session.user.role),
+    && (session.user.capabilityMatrixConfigured
+      ? session.user.capabilityGrants?.some((grant) =>
+        grant.capability === "review" && grant.topic === item.documentKind &&
+        (item.market === "shared-source" ? grant.scope === "shared" : grant.scope === "regional" && grant.marketCode === item.market))
+      : ["editor", "publisher", "administrator"].includes(session.user.role)),
   );
 
   return (
     <div className="mx-auto w-full max-w-7xl p-6 md:p-8">
+      {targetRequestId && !visibleQueue.isLoading && !visibleQueue.isError && !targetFound && (
+        <p role="status" className="mb-4 rounded border p-3 text-sm">This exact review request is not in this queue. It may belong to another reviewer, have been completed, or no longer be accessible. Check Team queue if you have Review access.</p>
+      )}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight"><UserRoundCheck className="h-6 w-6 text-primary" />Editorial work</h1>
@@ -241,7 +309,7 @@ export default function EditorialWork() {
       <section className="mt-6">
         {panel === "my-work" && <>
           <div className="mb-3 flex items-center gap-2"><Clock3 className="h-4 w-4 text-muted-foreground" /><h2 className="text-sm font-semibold">My work</h2></div>
-          <QueueState isLoading={myWork.isLoading} isError={myWork.isError} error={myWork.error} emptyState={myWork.data?.emptyState} items={myWork.data?.items} onRetry={() => void myWork.refetch()} canDecide={canDecide} deciding={decideReview.isPending} onDecision={(reviewRequestId, decision) => { setDecisionNote(""); setDecisionTarget({ reviewRequestId, decision }); }} />
+          <QueueState isLoading={myWork.isLoading} isError={myWork.isError} error={myWork.error} emptyState={myWork.data?.emptyState} items={myWork.data?.items} onRetry={() => void myWork.refetch()} canDecide={canDecide} deciding={decideReview.isPending} onDecision={(reviewRequestId, decision) => { setDecisionNote(""); setDecisionTarget({ reviewRequestId, decision }); }} onRecovery={(revisionId) => recoverReview.mutate(revisionId)} recovering={recoverReview.isPending} />
         </>}
         {panel === "team" && canViewTeam && <>
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2"><UsersRound className="h-4 w-4 text-muted-foreground" /><h2 className="text-sm font-semibold">Team queue</h2></div><label className="flex items-center gap-2 text-xs text-muted-foreground"><Switch checked={includeUnassigned} onCheckedChange={setIncludeUnassigned} />Include unassigned</label></div>
@@ -253,7 +321,7 @@ export default function EditorialWork() {
               <SelectContent><SelectItem value="all">All statuses</SelectItem><SelectItem value="active">Active</SelectItem><SelectItem value="blocked">Blocked</SelectItem><SelectItem value="completed">Completed</SelectItem></SelectContent>
             </Select>
           </div>
-          <QueueState isLoading={teamWork.isLoading} isError={teamWork.isError} error={teamWork.error} emptyState={teamWork.data?.emptyState} items={teamWork.data?.items} onRetry={() => void teamWork.refetch()} canDecide={canDecide} deciding={decideReview.isPending} onDecision={(reviewRequestId, decision) => { setDecisionNote(""); setDecisionTarget({ reviewRequestId, decision }); }} />
+           <QueueState isLoading={teamWork.isLoading} isError={teamWork.isError} error={teamWork.error} emptyState={teamWork.data?.emptyState} items={teamWork.data?.items} onRetry={() => void teamWork.refetch()} canDecide={canDecide} deciding={decideReview.isPending} onDecision={(reviewRequestId, decision) => { setDecisionNote(""); setDecisionTarget({ reviewRequestId, decision }); }} onRecovery={(revisionId) => recoverReview.mutate(revisionId)} recovering={recoverReview.isPending} />
         </>}
         {panel === "notifications" && <>
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2"><Bell className="h-4 w-4 text-muted-foreground" /><h2 className="text-sm font-semibold">Notifications</h2></div><div className="flex items-center gap-2"><label className="flex items-center gap-2 text-xs text-muted-foreground"><Switch checked={unreadOnly} onCheckedChange={setUnreadOnly} />Unread only</label><Button size="sm" variant="outline" disabled={markAllRead.isPending || !unreadCount} onClick={() => markAllRead.mutate()}><CheckCheck className="mr-1 h-3.5 w-3.5" />Mark all read</Button></div></div>

@@ -1,6 +1,16 @@
 import type { CmsDocumentKind } from "@workspace/api-zod";
 
-export type CmsFieldConsumer = "public-and-preview" | "public" | "preview-only" | "schema-only" | "derived";
+/** Consumer is intentionally narrower than "public": it states the delivery
+ * surface that was found in source, not an assumption made from a field name. */
+export type CmsFieldConsumer =
+  | "public-detail"
+  | "public-card"
+  | "public-detail-and-card"
+  | "public-metadata"
+  | "preview-only"
+  | "internal"
+  | "schema-only"
+  | "derived";
 
 export type CmsFieldCoverage = {
   path: string;
@@ -8,17 +18,37 @@ export type CmsFieldCoverage = {
   draft: "editable" | "derived" | "read-only";
   publish: "required" | "optional" | "not-applicable";
   consumer: CmsFieldConsumer;
+  classification: "public-content" | "public-metadata" | "internal" | "preview-only" | "schema-only" | "derived";
   note?: string;
 };
 
-const editable = (path: string, editor: string, publish: CmsFieldCoverage["publish"], consumer: CmsFieldConsumer = "public-and-preview", note?: string): CmsFieldCoverage => ({
-  path, editor, draft: "editable", publish, consumer, note,
-});
+const governancePaths = new Set(["visibility", "order", "sources[]", "verificationDate", "reviewDate", "relatedIds[]"]);
+const classificationFor = (path: string, consumer: CmsFieldConsumer): CmsFieldCoverage["classification"] =>
+  consumer === "schema-only"
+    ? "schema-only"
+    : consumer === "derived"
+      ? "derived"
+      : consumer === "preview-only"
+        ? "preview-only"
+      : consumer === "internal" || governancePaths.has(path)
+        ? "internal"
+        : consumer === "public-metadata"
+          ? "public-metadata"
+          : "public-content";
+
+const editable = (path: string, editor: string, publish: CmsFieldCoverage["publish"], consumer?: CmsFieldConsumer, note?: string): CmsFieldCoverage => {
+  const resolvedConsumer = consumer ?? (governancePaths.has(path) ? "internal" : "public-detail");
+  return {
+    path, editor, draft: "editable", publish, consumer: resolvedConsumer, classification: classificationFor(path, resolvedConsumer), note,
+  };
+};
+const editablePaths = (paths: readonly string[], editor: string, publish: CmsFieldCoverage["publish"] = "optional", consumer?: CmsFieldConsumer) =>
+  paths.map((path) => editable(path, editor, publish, consumer));
 const derived = (path: string, editor: string, consumer: CmsFieldConsumer = "derived", note?: string): CmsFieldCoverage => ({
-  path, editor, draft: "derived", publish: "not-applicable", consumer, note,
+  path, editor, draft: "derived", publish: "not-applicable", consumer, classification: "derived", note,
 });
 const readOnly = (path: string, editor: string, consumer: CmsFieldConsumer, note: string): CmsFieldCoverage => ({
-  path, editor, draft: "read-only", publish: "optional", consumer, note,
+  path, editor, draft: "read-only", publish: "optional", consumer, classification: classificationFor(path, consumer), note,
 });
 
 /**
@@ -37,6 +67,7 @@ export const CMS_FIELD_COVERAGE: Record<CmsDocumentKind, readonly CmsFieldCovera
     editable("contribution", "ContentEditor → Contribution", "optional"),
     editable("focusAreas[]", "ContentEditor → Focus areas", "optional"),
     editable("profileLinks[]", "ContentEditor → Profile links", "optional"),
+    ...editablePaths(["focusAreas[].title", "focusAreas[].detail", "profileLinks[].label", "profileLinks[].url", "identityMedia.mediaId", "identityMedia.mediaVersionId", "identityMedia.role", "identityMedia.altText"], "ContentEditor → Nested person controls"),
     editable("identityMedia", "ContentEditor → Identity image", "optional"),
     readOnly("identityMediaId", "legacy immutable media compatibility", "preview-only", "Deprecated legacy media id is preserved; new selections use a versioned media reference."),
     editable("approvedFallback", "ContentEditor → Approved fallback", "optional"),
@@ -46,6 +77,7 @@ export const CMS_FIELD_COVERAGE: Record<CmsDocumentKind, readonly CmsFieldCovera
     editable("verificationDate", "ContentEditor → Governance", "required", "preview-only"),
     editable("reviewDate", "ContentEditor → Governance", "required", "preview-only"),
     editable("relatedIds[]", "ContentEditor → Related record picker", "optional", "schema-only", "No confirmed public consumer; selected UUIDs are retained and removable explicitly."),
+    ...editablePaths(["sources[].label", "sources[].url", "sources[].accessedAt"], "ContentEditor → Source trail", "required", "preview-only"),
   ],
   partner: [
     derived("schemaVersion", "runtime contract"),
@@ -57,6 +89,7 @@ export const CMS_FIELD_COVERAGE: Record<CmsDocumentKind, readonly CmsFieldCovera
     editable("contribution", "ContentEditor → Contribution", "optional"),
     editable("website", "ContentEditor → Website", "optional"),
     editable("logoMedia", "ContentEditor → Partner logo", "optional"),
+    ...editablePaths(["facts[].value", "facts[].label", "evidence[].statement", "evidence[].source.label", "evidence[].source.url", "evidence[].approved", "logoMedia.mediaId", "logoMedia.mediaVersionId", "logoMedia.role", "logoMedia.altText"], "ContentEditor → Nested partner controls"),
     readOnly("logoMediaId", "legacy immutable media compatibility", "preview-only", "Deprecated legacy media id is preserved."),
     editable("relationshipStatus", "ContentEditor → Relationship status", "required"),
     editable("visibility", "ContentEditor → Governance", "required"),
@@ -65,6 +98,7 @@ export const CMS_FIELD_COVERAGE: Record<CmsDocumentKind, readonly CmsFieldCovera
     editable("verificationDate", "ContentEditor → Governance", "required", "preview-only"),
     editable("reviewDate", "ContentEditor → Governance", "required", "preview-only"),
     editable("relatedIds[]", "ContentEditor → Related record picker", "optional", "schema-only"),
+    ...editablePaths(["sources[].label", "sources[].url", "sources[].accessedAt"], "ContentEditor → Source trail", "required", "preview-only"),
   ],
   platform: [
     derived("schemaVersion", "runtime contract"),
@@ -74,15 +108,19 @@ export const CMS_FIELD_COVERAGE: Record<CmsDocumentKind, readonly CmsFieldCovera
     readOnly("heroMediaId", "legacy immutable media compatibility", "preview-only", "Deprecated legacy media id is preserved."),
     editable("template", "ContentEditor → Template", "required"),
     editable("sections[]", "ContentEditor → Structured page sections", "optional"),
+    editable("sections[].heading", "ContentEditor → Structured page sections", "optional"),
+    editable("sections[].body[]", "ContentEditor → Structured page sections", "optional"),
     editable("capabilities[]", "ContentEditor → Capabilities", "optional"),
     editable("differentiators[]", "ContentEditor → Differentiators", "optional"),
     editable("cta", "ContentEditor → Safe destination", "optional"),
+    ...editablePaths(["heroMedia.mediaId", "heroMedia.mediaVersionId", "heroMedia.role", "heroMedia.altText", "cta.label", "cta.href", "sections[].body[].type", "sections[].body[].text", "sections[].body[].level", "sections[].body[].items", "sections[].body[].style"], "ContentEditor → Nested platform controls"),
     editable("visibility", "ContentEditor → Governance", "required"),
     editable("order", "ContentEditor → Governance", "optional"),
     editable("sources[]", "ContentEditor → Sources", "required", "preview-only"),
     editable("verificationDate", "ContentEditor → Governance", "required", "preview-only"),
     editable("reviewDate", "ContentEditor → Governance", "required", "preview-only"),
     editable("relatedIds[]", "ContentEditor → Related record picker", "optional", "schema-only"),
+    ...editablePaths(["sources[].label", "sources[].url", "sources[].accessedAt"], "ContentEditor → Source trail", "required", "preview-only"),
   ],
   publication: [
     derived("schemaVersion", "runtime contract"),
@@ -103,6 +141,7 @@ export const CMS_FIELD_COVERAGE: Record<CmsDocumentKind, readonly CmsFieldCovera
     readOnly("social.title", "advanced structured view", "schema-only", "No confirmed public consumer; preserve stored social copy until its consumer is defined."),
     readOnly("social.description", "advanced structured view", "schema-only", "No confirmed public consumer; preserve stored social copy until its consumer is defined."),
     editable("social.imageMedia", "ContentEditor → Social sharing image", "optional"),
+    ...editablePaths(["heroMedia.mediaId", "heroMedia.mediaVersionId", "heroMedia.role", "heroMedia.altText", "pdfMedia.mediaId", "pdfMedia.mediaVersionId", "pdfMedia.role", "pdfMedia.altText", "social.imageMedia.mediaId", "social.imageMedia.mediaVersionId", "social.imageMedia.role", "social.imageMedia.altText", "body[].type", "body[].text", "body[].level", "body[].items", "body[].style"], "ContentEditor → Nested publication controls"),
     readOnly("social.imageMediaId", "legacy immutable media compatibility", "preview-only", "Deprecated legacy media id is preserved."),
     editable("visibility", "ContentEditor → Governance", "required"),
     editable("order", "ContentEditor → Governance", "optional"),
@@ -110,21 +149,26 @@ export const CMS_FIELD_COVERAGE: Record<CmsDocumentKind, readonly CmsFieldCovera
     editable("verificationDate", "ContentEditor → Governance", "required", "preview-only"),
     editable("reviewDate", "ContentEditor → Governance", "required", "preview-only"),
     editable("relatedIds[]", "ContentEditor → Related record picker", "optional", "schema-only"),
+    ...editablePaths(["sources[].label", "sources[].url", "sources[].accessedAt"], "ContentEditor → Source trail", "required", "preview-only"),
   ],
   "case-study": [
     derived("schemaVersion", "runtime contract"),
-    editable("variant", "ContentEditor → Case variant", "required"),
-    editable("disclosure", "ContentEditor → Disclosure", "required"),
-    editable("sector", "ContentEditor → Approved sector multi-select", "required"),
-    editable("organizationDescriptor", "ContentEditor → Organization descriptor", "required"),
-    editable("engagementType", "ContentEditor → Engagement type", "required"),
-    editable("deliveryStage", "ContentEditor → Delivery stage", "required"),
-    editable("impactClassification", "ContentEditor → Impact classification", "required"),
-    editable("impactStatement", "ContentEditor → Public capability statement", "required"),
+    editable("variant", "ContentEditor → Case variant", "required", "internal"),
+    editable("disclosure", "ContentEditor → Disclosure", "required", "public-detail"),
+    editable("sector", "ContentEditor → Approved sector multi-select", "required", "public-detail-and-card"),
+    editable("organizationDescriptor", "ContentEditor → Organization descriptor", "required", "public-detail-and-card"),
+    editable("engagementType", "ContentEditor → Engagement type", "required", "internal"),
+    editable("deliveryStage", "ContentEditor → Delivery stage", "required", "public-detail-and-card"),
+    editable("impactClassification", "ContentEditor → Impact classification", "required", "internal"),
+    editable("impactStatement", "ContentEditor → Public capability statement", "required", "public-detail-and-card"),
     editable("disclosureNote", "ContentEditor → Disclosure note", "required"),
-    editable("publicEvidenceStatus", "ContentEditor → Evidence approval", "required"),
+    editable("publicEvidenceStatus", "ContentEditor → Evidence approval", "required", "internal"),
     editable("relatedIndustries[]", "ContentEditor → Approved industry multi-select", "optional"),
-    editable("visual", "ContentEditor → Reconstruction fields", "required"),
+    editable("visual.template", "ContentEditor → Reconstruction fields", "required"),
+    editable("visual.caption", "ContentEditor → Reconstruction fields", "required"),
+    editable("visual.altText", "ContentEditor → Reconstruction fields", "required"),
+    editable("visual.textEquivalent", "ContentEditor → Reconstruction fields", "required"),
+    editable("visual.fixtureLabels[]", "ContentEditor → Reconstruction fields", "required"),
     editable("mandate", "ContentEditor → Mandate", "required"),
     editable("context", "ContentEditor → Context", "optional"),
     editable("constraints[]", "ContentEditor → Constraints", "optional"),
@@ -133,15 +177,21 @@ export const CMS_FIELD_COVERAGE: Record<CmsDocumentKind, readonly CmsFieldCovera
     editable("outcomes[]", "ContentEditor → Outcomes", "optional"),
     editable("evidence[]", "ContentEditor → Evidence", "optional"),
     editable("quote", "ContentEditor → Quote and attribution", "optional"),
+    editable("quote.text", "ContentEditor → Quote and attribution", "optional"),
+    editable("quote.attribution", "ContentEditor → Quote and attribution", "optional"),
     editable("heroMedia", "ContentEditor → Case-study hero image", "optional"),
     readOnly("heroMediaId", "legacy immutable media compatibility", "preview-only", "Deprecated legacy media id is preserved."),
     editable("cta", "ContentEditor → Safe destination", "optional"),
+    editable("cta.label", "ContentEditor → Safe destination", "optional"),
+    editable("cta.href", "ContentEditor → Safe destination", "optional"),
+    ...editablePaths(["heroMedia.mediaId", "heroMedia.mediaVersionId", "heroMedia.role", "heroMedia.altText", "evidence[].statement", "evidence[].source.label", "evidence[].source.url", "evidence[].approved", "work[].type", "work[].text", "work[].level", "work[].items", "work[].style"], "ContentEditor → Nested case-study controls"),
     editable("visibility", "ContentEditor → Governance", "required"),
     editable("order", "ContentEditor → Governance", "optional"),
     editable("sources[]", "ContentEditor → Sources", "required", "preview-only"),
     editable("verificationDate", "ContentEditor → Governance", "required", "preview-only"),
     editable("reviewDate", "ContentEditor → Governance", "required", "preview-only"),
     editable("relatedIds[]", "ContentEditor → Related record picker", "optional", "schema-only"),
+    ...editablePaths(["sources[].label", "sources[].url", "sources[].accessedAt"], "ContentEditor → Source trail", "required", "preview-only"),
   ],
   industry: [
     derived("schemaVersion", "runtime contract"),
@@ -153,28 +203,73 @@ export const CMS_FIELD_COVERAGE: Record<CmsDocumentKind, readonly CmsFieldCovera
     editable("dek", "IndustryVisualWorkspace → Hero", "required"),
     editable("opportunity", "IndustryVisualWorkspace → Opportunity", "required"),
     editable("capabilities[]", "IndustryVisualWorkspace → Capabilities", "required"),
-    editable("selectedWork", "IndustryVisualWorkspace → Selected work", "required"),
+    editable("selectedWork.description", "IndustryVisualWorkspace → Selected work", "required"),
     editable("image", "IndustryVisualWorkspace → Legacy image", "required"),
     editable("imageAlt", "IndustryVisualWorkspace → Hero image", "required"),
     editable("variant", "IndustryVisualWorkspace → Variant", "required"),
     editable("pressures[]", "IndustryVisualWorkspace → Pressures", "required"),
-    editable("reversal", "IndustryVisualWorkspace → Reversal", "required"),
-    editable("myth", "IndustryVisualWorkspace → Myth", "required"),
+    editable("reversal.title", "IndustryVisualWorkspace → Reversal", "required"),
+    editable("reversal.body", "IndustryVisualWorkspace → Reversal", "required"),
+    editable("myth.claim", "IndustryVisualWorkspace → Myth", "required"),
+    editable("myth.verdict", "IndustryVisualWorkspace → Myth", "required"),
     editable("gcc", "IndustryVisualWorkspace → GCC context", "required"),
-    editable("service", "IndustryVisualWorkspace → Service destination", "required"),
-    editable("uses[]", "IndustryVisualWorkspace → Evidence uses", "required"),
+    editable("service.label", "IndustryVisualWorkspace → Service destination", "required"),
+    editable("service.href", "IndustryVisualWorkspace → Service destination", "required"),
+    editable("service.firstMove", "IndustryVisualWorkspace → Service destination", "required"),
+    editable("uses[].use", "IndustryVisualWorkspace → Evidence uses", "required"),
+    editable("uses[].description", "IndustryVisualWorkspace → Evidence uses", "optional"),
+    editable("uses[].evidence", "IndustryVisualWorkspace → Evidence uses", "required"),
+    editable("uses[].boundary", "IndustryVisualWorkspace → Evidence uses", "required"),
+    editable("uses[].sourceUrls[]", "IndustryVisualWorkspace → Evidence uses", "required"),
     editable("sources[]", "IndustryVisualWorkspace → Source trail", "required", "preview-only"),
-    editable("educationPov", "ContentEditor → Education specialist fields", "optional"),
-    editable("bankingPov", "ContentEditor → Banking specialist fields", "optional"),
-    editable("publicSectorPov", "ContentEditor → Public Sector specialist fields", "optional"),
+    ...editablePaths([
+      "capabilities[].title", "capabilities[].body", "pressures[].title", "pressures[].body",
+      "sources[].publisher", "sources[].kind", "sources[].market", "sources[].supports", "sources[].limitation",
+      "heroMedia.mediaId", "heroMedia.mediaVersionId", "heroMedia.role", "heroMedia.altText",
+      "educationPov.version", "educationPov.introduction", "educationPov.strategicShift", "educationPov.patternQuote", "educationPov.globalDirection", "educationPov.leadershipTest",
+      "educationPov.convictions[].title", "educationPov.convictions[].body", "educationPov.convictions[].market",
+      "educationPov.valueDomains[].title", "educationPov.valueDomains[].body", "educationPov.valueDomains[].examples[]",
+      "educationPov.targetState[].title", "educationPov.targetState[].body",
+      "educationPov.applications[].title", "educationPov.applications[].items[].title", "educationPov.applications[].items[].body", "educationPov.applications[].items[].market", "educationPov.applications[].items[].sourceUrls[]",
+      "educationPov.signals[].institution", "educationPov.signals[].signal", "educationPov.signals[].implication", "educationPov.signals[].market", "educationPov.signals[].sourceUrls[]",
+      "educationPov.roadmap[].horizon", "educationPov.roadmap[].title", "educationPov.roadmap[].body",
+      "educationPov.imagery.educatorPractice.src", "educationPov.imagery.educatorPractice.altText", "educationPov.imagery.educatorPractice.media.mediaId", "educationPov.imagery.educatorPractice.media.mediaVersionId", "educationPov.imagery.educatorPractice.media.role", "educationPov.imagery.educatorPractice.media.altText",
+      "educationPov.imagery.researchCoordination.src", "educationPov.imagery.researchCoordination.altText", "educationPov.imagery.researchCoordination.media.mediaId", "educationPov.imagery.researchCoordination.media.mediaVersionId", "educationPov.imagery.researchCoordination.media.role", "educationPov.imagery.researchCoordination.media.altText",
+    ], "ContentEditor → Education nested specialist controls"),
+    ...editablePaths([
+      "bankingPov.descriptor",
+      "bankingPov.hero.eyebrow", "bankingPov.hero.heading", "bankingPov.hero.body", "bankingPov.hero.startingPointsAnchorLabel", "bankingPov.hero.selectedWorkAnchorLabel",
+      "bankingPov.evidenceSignals[].statement", "bankingPov.evidenceSignals[].qualification", "bankingPov.evidenceSignals[].label", "bankingPov.evidenceSignals[].publisher", "bankingPov.evidenceSignals[].publicationPeriod", "bankingPov.evidenceSignals[].accessedAt", "bankingPov.evidenceSignals[].jurisdiction", "bankingPov.evidenceSignals[].kind", "bankingPov.evidenceSignals[].url",
+      "bankingPov.valueOutcomes[].title", "bankingPov.valueOutcomes[].body", "bankingPov.valueOutcomes[].measures[]",
+      "bankingPov.adoptionLevels[].title", "bankingPov.adoptionLevels[].value", "bankingPov.adoptionLevels[].illustrativeWork[]", "bankingPov.adoptionLevels[].owner", "bankingPov.adoptionLevels[].readiness[]", "bankingPov.adoptionLevels[].measures[]", "bankingPov.adoptionLevels[].decisionBoundary",
+      "bankingPov.valueDomains[].purpose", "bankingPov.valueDomains[].examples[]", "bankingPov.valueDomains[].measures[]",
+      "bankingPov.startingPoints[].valueProposition", "bankingPov.startingPoints[].problem", "bankingPov.startingPoints[].cogniriseRole", "bankingPov.startingPoints[].requiredInputs[]", "bankingPov.startingPoints[].firstDeliverable", "bankingPov.startingPoints[].measures[]", "bankingPov.startingPoints[].decisionBoundary", "bankingPov.startingPoints[].action.label", "bankingPov.startingPoints[].action.href", "bankingPov.startingPoints[].image.mediaId", "bankingPov.startingPoints[].image.mediaVersionId", "bankingPov.startingPoints[].image.role", "bankingPov.startingPoints[].image.altText", "bankingPov.startingPoints[].focalPoint.x", "bankingPov.startingPoints[].focalPoint.y",
+      "bankingPov.voiceBanking.platform.contribution", "bankingPov.voiceBanking.platform.href", "bankingPov.voiceBanking.platform.qualification", "bankingPov.voiceBanking.cogniriseContribution", "bankingPov.voiceBanking.journeys[].scope", "bankingPov.voiceBanking.journeys[].measures[]", "bankingPov.voiceBanking.journeys[].controlBoundary",
+      "bankingPov.productionReadiness.eyebrow", "bankingPov.productionReadiness.heading", "bankingPov.productionReadiness.body", "bankingPov.productionReadiness.practices[]", "bankingPov.productionReadiness.image.mediaId", "bankingPov.productionReadiness.image.mediaVersionId", "bankingPov.productionReadiness.image.role", "bankingPov.productionReadiness.image.altText", "bankingPov.productionReadiness.focalPoint.x", "bankingPov.productionReadiness.focalPoint.y", "bankingPov.productionReadiness.annotation",
+      "bankingPov.deliveryPath.stages[].stage", "bankingPov.deliveryPath.stages[].owner", "bankingPov.deliveryPath.stages[].outcome", "bankingPov.deliveryPath.practices[]",
+      "bankingPov.partners[].name", "bankingPov.partners[].contribution", "bankingPov.partners[].qualification", "bankingPov.partners[].href",
+      "bankingPov.cta.heading", "bankingPov.cta.body", "bankingPov.cta.label", "bankingPov.cta.href",
+    ], "ContentEditor → Banking nested specialist controls"),
+    ...editablePaths(["bankingPov.version", "bankingPov.market", "bankingPov.caseMembershipSnapshot[].slug", "bankingPov.caseMembershipSnapshot[].title", "bankingPov.caseMembershipSnapshot[].order", "bankingPov.caseMembershipSnapshot[].digest"], "ContentEditor → Banking protected-market and case-receipt controls", "optional", "internal"),
+    ...editablePaths([
+      "publicSectorPov.version", "publicSectorPov.market", "publicSectorPov.marketLabel", "publicSectorPov.pressuresHeading", "publicSectorPov.capabilitiesIntroduction", "publicSectorPov.applicationsDisclaimer", "publicSectorPov.marketHeading", "publicSectorPov.sourcesIntroduction", "publicSectorPov.reviewBlockers[]",
+      "publicSectorPov.opportunity[].type", "publicSectorPov.opportunity[].level", "publicSectorPov.opportunity[].style", "publicSectorPov.opportunity[].text", "publicSectorPov.opportunity[].items[]",
+      "publicSectorPov.marketContext[].type", "publicSectorPov.marketContext[].level", "publicSectorPov.marketContext[].style", "publicSectorPov.marketContext[].text", "publicSectorPov.marketContext[].items[]",
+      "publicSectorPov.nextAction[].type", "publicSectorPov.nextAction[].level", "publicSectorPov.nextAction[].style", "publicSectorPov.nextAction[].text", "publicSectorPov.nextAction[].items[]",
+    ], "ContentEditor → Public Sector nested specialist controls"),
     editable("heroMedia", "IndustryVisualWorkspace → Hero media", "optional"),
     readOnly("heroMediaId", "legacy immutable media compatibility", "preview-only", "Deprecated legacy media id is preserved."),
     editable("supportingMedia[]", "IndustryVisualWorkspace → Supporting media", "optional"),
+    editable("supportingMedia[].mediaId", "ContentEditor → Supporting industry media", "optional"),
+    editable("supportingMedia[].mediaVersionId", "ContentEditor → Supporting industry media", "optional"),
+    editable("supportingMedia[].role", "ContentEditor → Supporting industry media", "optional"),
+    editable("supportingMedia[].altText", "ContentEditor → Supporting industry media", "optional"),
     editable("verificationDate", "IndustryVisualWorkspace → Governance", "required", "preview-only"),
     editable("reviewDate", "IndustryVisualWorkspace → Governance", "required", "preview-only"),
     editable("visibility", "IndustryVisualWorkspace → Governance", "required"),
     editable("order", "IndustryVisualWorkspace → Governance", "optional"),
     editable("relatedIds[]", "ContentEditor → Related record picker", "optional", "schema-only"),
+    ...editablePaths(["sources[].label", "sources[].url", "sources[].accessedAt"], "ContentEditor → Source trail", "required", "preview-only"),
   ],
   framework: [
     derived("schemaVersion", "runtime contract"),
@@ -226,6 +321,24 @@ export const CMS_FIELD_COVERAGE: Record<CmsDocumentKind, readonly CmsFieldCovera
     editable("guardrails.secondFigure.captionBody", "ContentEditor → Guardrails and authority subsection", "optional"),
     derived("guardrails.secondFigure.asset", "fixed local diagram identifier"),
     editable("guardrails.designRule", "ContentEditor → Guardrails and authority subsection", "optional"),
+    ...editablePaths([
+      "hero.media.mediaId", "hero.media.mediaVersionId", "hero.media.role", "hero.media.altText",
+      "cta.label", "cta.href", "heroMedia.mediaId", "heroMedia.mediaVersionId", "heroMedia.role", "heroMedia.altText",
+      "methodology[].type", "methodology[].text", "methodology[].level", "methodology[].items", "methodology[].style",
+      "workedExample.sector", "workedExample.title", "workedExample.handover", "workedExample.reversibility", "workedExample.reach", "workedExample.exposureBand", "workedExample.oversight", "workedExample.detail", "workedExample.requestedAuthority", "workedExample.interventionWindow", "workedExample.accountableRole", "workedExample.authorityArtefact", "workedExample.promotionEvidence", "workedExample.automaticDemotion",
+      "sectorExamples[].sector", "sectorExamples[].example", "sectorExamples[].notes",
+      "guardrails.bankExample.beforeQuote", "guardrails.bankExample.quote", "guardrails.bankExample.afterQuote",
+      "guardrails.comparisonColumns.guardrails", "guardrails.comparisonColumns.authorityModel", "guardrails.comparisonRows[].label", "guardrails.comparisonRows[].guardrails", "guardrails.comparisonRows[].guardrailsEmphasis", "guardrails.comparisonRows[].authorityModel", "guardrails.comparisonRows[].authorityModelEmphasis",
+      "guardrails.unit.heading", "guardrails.unit.paragraphs[]", "guardrails.unit.emphasis",
+      "guardrails.summary.rules[].title", "guardrails.summary.rules[].body",
+      "guardrails.interaction.heading", "guardrails.interaction.introduction", "guardrails.interaction.exposure.lead", "guardrails.interaction.exposure.body", "guardrails.interaction.evidence.lead", "guardrails.interaction.evidence.body", "guardrails.interaction.controlsIntroduction",
+      "guardrails.interaction.requiredControls.lead", "guardrails.interaction.requiredControls.bodyBeforeExamples", "guardrails.interaction.requiredControls.assuranceExample", "guardrails.interaction.requiredControls.betweenExamples", "guardrails.interaction.requiredControls.controlExample", "guardrails.interaction.requiredControls.conclusion",
+      "guardrails.interaction.compensatingControls.lead", "guardrails.interaction.compensatingControls.bodyBeforeContent", "guardrails.interaction.compensatingControls.content", "guardrails.interaction.compensatingControls.bodyAfterContent",
+      "guardrails.designRule.heading", "guardrails.designRule.quote", "guardrails.designRule.conclusion", "guardrails.designRule.failure", "guardrails.designRule.closingEmphasis",
+      // Template-specific slot controls vary by governed methodology. Their
+      // segment names are contract-owned, while each leaf remains editable.
+      "editorial.*", "editorial.*.label", "editorial.*.href", "editorial.*.altText", "editorial.*.media.mediaId", "editorial.*.media.mediaVersionId", "editorial.*.media.role", "editorial.*.items[]",
+    ], "ContentEditor → Framework nested controls"),
     editable("heroMedia", "ContentEditor → Framework hero image", "required"),
     readOnly("heroMediaId", "legacy immutable media compatibility", "preview-only", "Deprecated legacy media id is preserved."),
     editable("cta", "ContentEditor → Safe destination", "optional"),
@@ -235,6 +348,7 @@ export const CMS_FIELD_COVERAGE: Record<CmsDocumentKind, readonly CmsFieldCovera
     editable("verificationDate", "ContentEditor → Governance", "required", "preview-only"),
     editable("reviewDate", "ContentEditor → Governance", "required", "preview-only"),
     editable("relatedIds[]", "ContentEditor → Related record picker", "optional", "schema-only"),
+    ...editablePaths(["sources[].label", "sources[].url", "sources[].accessedAt"], "ContentEditor → Source trail", "required", "preview-only"),
   ],
   office: [
     derived("schemaVersion", "runtime contract"),
@@ -247,32 +361,46 @@ export const CMS_FIELD_COVERAGE: Record<CmsDocumentKind, readonly CmsFieldCovera
     editable("verificationDate", "ContentEditor → Governance", "not-applicable", "preview-only"),
     editable("reviewDate", "ContentEditor → Governance", "not-applicable", "preview-only"),
     editable("relatedIds[]", "ContentEditor → Related record picker", "optional", "schema-only"),
+    ...editablePaths(["sources[].label", "sources[].url", "sources[].accessedAt"], "ContentEditor → Source trail", "not-applicable", "preview-only"),
   ],
   "site-configuration": [
     derived("schemaVersion", "runtime contract"),
-    editable("configuration", "ContactSettings / ContentEditor", "required", "public"),
-    editable("contactEmail", "ContactSettings / ContentEditor", "required", "public"),
-    editable("page", "ContentEditor → Hero film assignment", "required", "public"),
-    editable("hero.posterMediaId", "ContentEditor → Poster media", "required", "public"),
-    editable("hero.posterMediaVersionId", "ContentEditor → Poster media version", "required", "public"),
-    editable("hero.sources[]", "ContentEditor → MP4/WebM sources", "required", "public"),
+    editable("configuration", "ContactSettings / ContentEditor", "required", "internal", "Variant discriminator; it chooses the contact-email configuration record."),
+    editable("contactEmail", "ContactSettings / ContentEditor", "required", "public-detail"),
+    editable("page", "ContentEditor → Hero film assignment", "required", "internal", "Variant discriminator; actual hero output is the poster and sources."),
+    editable("hero.posterMediaId", "ContentEditor → Hero film poster", "required", "public-detail"),
+    editable("hero.posterMediaVersionId", "ContentEditor → Hero film poster", "required", "public-detail"),
+    editable("hero.sources[].mediaId", "ContentEditor → Hero MP4/WebM sources", "required", "public-detail"),
+    editable("hero.sources[].mediaVersionId", "ContentEditor → Hero MP4/WebM sources", "required", "public-detail"),
+    editable("hero.sources[].mimeType", "ContentEditor → Hero MP4/WebM sources", "required", "internal"),
   ],
   "landing-page": [
     derived("schemaVersion", "runtime contract"),
-    editable("pagePath", "ContentEditor → Public page path", "required", "public"),
-    editable("template", "ContentEditor → Governed template", "required", "public"),
-    editable("narrative", "ContentEditor → Opening narrative", "required", "public"),
-    editable("sections[]", "ContentEditor → Governed page sections", "required", "public"),
-    editable("cta", "ContentEditor → Safe destination", "optional", "public"),
-    editable("seo", "DocumentDetail → SEO controls", "optional", "public-and-preview"),
-    editable("legal", "ContentEditor → Legal disclaimer", "optional", "public"),
-    editable("visualReferences[]", "ContentEditor → Governed visual references", "optional", "public"),
-    editable("visibility", "ContentEditor → Governance", "required", "public"),
-    editable("order", "ContentEditor → Governance", "optional", "public"),
+    editable("pagePath", "ContentEditor → Public page path", "required", "internal"),
+    editable("template", "ContentEditor → Governed template", "required", "internal"),
+    editable("narrative", "ContentEditor → Opening narrative", "required", "public-detail"),
+    editable("sections[]", "ContentEditor → Governed page sections", "required", "public-detail"),
+    editable("cta", "ContentEditor → Safe destination", "optional", "public-detail"),
+    editable("seo", "DocumentDetail → SEO controls", "optional", "public-metadata"),
+    editable("legal", "ContentEditor → Legal disclaimer", "optional", "public-detail"),
+    editable("visualReferences[].mediaId", "ContentEditor → Governed visual references", "optional", "public-detail"),
+    editable("visualReferences[].mediaVersionId", "ContentEditor → Governed visual references", "optional", "public-detail"),
+    editable("visualReferences[].role", "ContentEditor → Governed visual references", "optional", "internal"),
+    editable("visualReferences[].altText", "ContentEditor → Governed visual references", "optional", "public-detail"),
+    ...editablePaths([
+      "narrative[].type", "narrative[].text", "narrative[].level", "narrative[].items[]", "narrative[].style",
+      "cta.label", "cta.href",
+      "sections[].id", "sections[].order", "sections[].type", "sections[].heading",
+      "sections[].body[].type", "sections[].body[].text", "sections[].body[].level", "sections[].body[].items[]", "sections[].body[].style",
+      "sections[].label", "sections[].href", "sections[].style", "sections[].text",
+      "sections[].references[].mediaId", "sections[].references[].mediaVersionId", "sections[].references[].role", "sections[].references[].altText",
+      "legal.disclaimer", "seo.title", "seo.description",
+    ], "ContentEditor → Landing nested controls"),
     editable("sources[]", "ContentEditor → Sources", "required", "preview-only"),
     editable("verificationDate", "ContentEditor → Governance", "required", "preview-only"),
     editable("reviewDate", "ContentEditor → Governance", "required", "preview-only"),
     editable("relatedIds[]", "ContentEditor → Related record picker", "optional", "schema-only"),
+    ...editablePaths(["sources[].label", "sources[].url", "sources[].accessedAt"], "ContentEditor → Source trail", "required", "preview-only"),
   ],
 };
 

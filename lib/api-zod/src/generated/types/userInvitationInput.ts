@@ -5,6 +5,7 @@
  * First-party Cognirise website and mini CMS API.
  * OpenAPI spec version: 0.2.0
  */
+import type { CapabilityGrantInput } from './capabilityGrantInput';
 import type { UserRole } from './userRole';
 
 export interface UserInvitationInput {
@@ -24,4 +25,5 @@ export interface UserInvitationInput {
      * @items.maxLength 24
      */
   marketCodes?: string[];
+  capabilityGrants?: CapabilityGrantInput[];
 }

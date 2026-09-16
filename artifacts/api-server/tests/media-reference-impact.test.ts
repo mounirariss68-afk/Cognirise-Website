@@ -31,9 +31,28 @@ test("media reference impact returns pinned version and document identity", {
           user_updated_at: now,
           must_rotate: false,
           mfa_enabled: true,
+           market_codes: ["uae"],
+           legacy_administrator_market_codes: ["uae"],
+           capability_matrix_configured: false,
+           capability_grants: [],
         }],
       };
     }
+     if (statement.includes("SELECT 1 FROM cms_user_capability_configurations")
+       || statement.includes("FROM cms_user_capability_grants")) {
+       return { rowCount: 0, rows: [] };
+     }
+     if (statement.includes("FROM cms_legacy_administrator_market_snapshots")) {
+       return { rowCount: 1, rows: [{ market_codes: ["uae"] }] };
+     }
+     if (statement.includes("SELECT e.id edition_id,e.content_mode,d.kind")) {
+       return String(values?.[0]) === "document-1"
+         ? { rowCount: 1, rows: [{ edition_id: "edition-1", content_mode: "custom", kind: "case-study" }] }
+         : { rowCount: 0, rows: [] };
+     }
+     if (statement.includes("FROM cms_market_edition_bindings binding")) {
+       return { rowCount: 0, rows: [] };
+     }
     if (statement.includes("FROM cms_media_references")) {
       return {
         rowCount: 1,
@@ -47,6 +66,8 @@ test("media reference impact returns pinned version and document identity", {
           document_title: "Governed case study",
           canonical_slug: "governed-case-study",
           document_status: "active",
+           market: "uae",
+           locale: "en",
         }],
       };
     }

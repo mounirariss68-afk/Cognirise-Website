@@ -9,6 +9,11 @@ pnpm --filter @workspace/db prepare-schema-push
 # reconciliation runs. Keep this boundary non-destructive so immutable media
 # review metadata survives a merge.
 pnpm --filter @workspace/db push
+# Task 345 database recovery is intentionally additive and receipt-backed. It
+# runs only for a local development schema; it never invokes content release.
+if [[ "${NODE_ENV:-}" == "development" && "${REPLIT_DEPLOYMENT:-}" != "1" ]]; then
+  pnpm --filter @workspace/scripts cms:regional-editor-schema -- --apply --development
+fi
 # Task 316 owns the exact Financial Services thesis successor. Run it before
 # generic inventory reconciliation so its edition lock can preserve a newer
 # editorial draft instead of allowing a full canonical payload merge.

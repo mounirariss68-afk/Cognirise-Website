@@ -22,9 +22,11 @@ test("administrator publishes a saved shared draft without review", {
   const client = await pool.connect();
   const fixtureId = randomUUID();
   const userId = randomUUID();
+  const reviewerId = randomUUID();
   const assetId = randomUUID();
   const mediaVersionId = randomUUID();
   const token = randomUUID();
+  const reviewerToken = randomUUID();
   const slug = `postgres-publish-${fixtureId.slice(0, 8)}`;
   let documentId: string | undefined;
   let reviewedDocumentId: string | undefined;
@@ -95,6 +97,47 @@ test("administrator publishes a saved shared draft without review", {
       [userId, security.hashToken(token)],
     );
     await client.query(
+      `INSERT INTO cms_user_capability_configurations(user_id)
+       VALUES ($1) ON CONFLICT (user_id) DO NOTHING`,
+      [userId],
+    );
+    const enabledMarkets = await client.query<{ code: string }>(
+      "SELECT code FROM market_editions WHERE enabled=true ORDER BY code",
+    );
+    assert.ok(enabledMarkets.rowCount);
+    await client.query(
+      `INSERT INTO cms_user_capability_grants(user_id,topic,capability,scope,market_code)
+       SELECT $1,'publication',capability,scope,market_code
+         FROM unnest(ARRAY['view','edit','review','publish']::text[]) capability
+         CROSS JOIN unnest(ARRAY['regional','shared']::text[]) scope
+         CROSS JOIN unnest($2::text[]) market_code`,
+      [userId, enabledMarkets.rows.map((row) => row.code)],
+    );
+    await client.query(
+      `INSERT INTO cms_users(id,email,display_name,role,status)
+       VALUES ($1,$2,'CMS publishing reviewer','editor','active')`,
+      [reviewerId, `${slug}-reviewer@example.com`],
+    );
+    await client.query(
+      `INSERT INTO cms_totp_credentials(user_id,encrypted_secret,encryption_key_version,verified_at)
+       VALUES ($1,'fixture',1,now())`,
+      [reviewerId],
+    );
+    await client.query(
+      `INSERT INTO cms_sessions(user_id,token_digest,mfa_satisfied_at,expires_at)
+       VALUES ($1,$2,now(),now()+interval '1 hour')`,
+      [reviewerId, security.hashToken(reviewerToken)],
+    );
+    await client.query(`INSERT INTO cms_user_capability_configurations(user_id) VALUES ($1)`, [reviewerId]);
+    await client.query(
+      `INSERT INTO cms_user_capability_grants(user_id,topic,capability,scope,market_code)
+       SELECT $1,'person',capability,scope,market_code
+         FROM unnest(ARRAY['view','edit','review','publish']::text[]) capability
+         CROSS JOIN unnest(ARRAY['regional','shared']::text[]) scope
+         CROSS JOIN unnest($2::text[]) market_code`,
+      [reviewerId, enabledMarkets.rows.map((row) => row.code)],
+    );
+    await client.query(
       `INSERT INTO cms_media_assets
          (id,storage_key,filename,original_filename,media_type,byte_size,checksum,status,uploaded_by_user_id)
        VALUES ($1,$2,'hero.png','hero.png','image/png',4,$3,'active',$4)`,
@@ -124,6 +167,11 @@ test("administrator publishes a saved shared draft without review", {
       headers,
       body: JSON.stringify(body),
     });
+    const reviewerCsrf = auth.csrfForSession(security.hashToken(reviewerToken));
+    const reviewerHeaders = { ...headers, "x-csrf-token": reviewerCsrf,
+      cookie: `${auth.SESSION_COOKIE}=${reviewerToken}; ${auth.CSRF_COOKIE}=${reviewerCsrf}` };
+    const reviewerPost = (path: string, body: Record<string, unknown>) =>
+      fetch(`${origin}${path}`, { method: "POST", headers: reviewerHeaders, body: JSON.stringify(body) });
 
     const create = await post("/api/documents", {
       kind: "publication",
@@ -138,6 +186,11 @@ test("administrator publishes a saved shared draft without review", {
       currentRevisionId: string;
     };
     documentId = created.id;
+    const confirmation = await post(
+      `/api/documents/${documentId}/revisions/${created.currentRevisionId}/accuracy-confirmation`,
+      {},
+    );
+    assert.equal(confirmation.status, 200, await confirmation.text());
 
     const previewStart = await fetch(
       `${origin}/api/documents/${documentId}/preview?market=uae&locale=en`,
@@ -184,11 +237,45 @@ test("administrator publishes a saved shared draft without review", {
     });
     assert.equal(staleAvailabilityPublish.status, 409, await staleAvailabilityPublish.text());
 
+    const exactEdition = await pool.query<{ id: string }>(
+      "SELECT id::text id FROM cms_market_editions WHERE document_id=$1 AND market='uae' AND locale='en'",
+      [documentId],
+    );
+    assert.equal(exactEdition.rowCount, 1);
+    const reviewRequestId = randomUUID();
+    await client.query(
+      `INSERT INTO cms_review_requests
+         (id,edition_id,revision_id,requester_user_id,reviewer_user_id,status)
+       VALUES ($1,$2,$3,$4,$4,'requested')`,
+      [reviewRequestId, exactEdition.rows[0].id, created.currentRevisionId, userId],
+    );
+    const activeReviewPublish = await post(`/api/documents/${documentId}/publish`, {
+      revisionId: created.currentRevisionId,
+      availabilityVersion: 2,
+    });
+    assert.equal(activeReviewPublish.status, 409, await activeReviewPublish.text());
+    await client.query("DELETE FROM cms_review_requests WHERE id=$1", [reviewRequestId]);
+
     const publish = await post(`/api/documents/${documentId}/publish`, {
       revisionId: created.currentRevisionId,
       availabilityVersion: 2,
     });
-    assert.equal(publish.status, 200);
+    assert.equal(publish.status, 200, await publish.text());
+    const directState = await pool.query<{ workflow_state: string }>(
+      `SELECT workflow_state FROM cms_revisions WHERE id=$1`,
+      [created.currentRevisionId],
+    );
+    assert.equal(directState.rows[0]?.workflow_state, "approved");
+    const directAudit = await pool.query<{ direct: boolean }>(
+      `SELECT (metadata->>'directAdministratorPublish')::boolean direct
+         FROM cms_audit_events
+        WHERE action='document.published' AND target_id=$1
+          AND metadata->>'revisionId'=$2
+        ORDER BY occurred_at DESC
+        LIMIT 1`,
+      [documentId, created.currentRevisionId],
+    );
+    assert.equal(directAudit.rows[0]?.direct, true);
     const pinned = await pool.query<{ media_version_id: string }>(
       `SELECT media_version_id FROM cms_media_references
         WHERE document_id=$1 AND field_path LIKE $2`,
@@ -216,9 +303,17 @@ test("administrator publishes a saved shared draft without review", {
     const editorPublish = await post(`/api/documents/${documentId}/publish`, {
       revisionId: created.currentRevisionId,
     });
-    assert.equal(editorPublish.status, 403, await editorPublish.text());
+    assert.equal(editorPublish.status, 409, await editorPublish.text());
 
     await client.query("UPDATE cms_users SET role='administrator' WHERE id=$1", [userId]);
+    await client.query(
+      `INSERT INTO cms_user_capability_grants(user_id,topic,capability,scope,market_code)
+       SELECT $1,'person',capability,scope,market_code
+         FROM unnest(ARRAY['view','edit','review','publish']::text[]) capability
+         CROSS JOIN unnest(ARRAY['regional','shared']::text[]) scope
+         CROSS JOIN unnest($2::text[]) market_code`,
+      [userId, enabledMarkets.rows.map((row) => row.code)],
+    );
     const personCreate = await post("/api/documents", {
       kind: "person",
       slug: `${slug}-person`,
@@ -247,7 +342,12 @@ test("administrator publishes a saved shared draft without review", {
     assert.equal(personCreate.status, 201);
     const person = await personCreate.json() as { id: string; currentRevisionId: string };
     reviewedDocumentId = person.id;
-    const review = await post(`/api/documents/${person.id}/availability/review`, { version: 1 });
+    const personConfirmation = await post(
+      `/api/documents/${person.id}/revisions/${person.currentRevisionId}/accuracy-confirmation`,
+      {},
+    );
+    assert.equal(personConfirmation.status, 200, await personConfirmation.text());
+    const review = await reviewerPost(`/api/documents/${person.id}/availability/review`, { version: 1 });
     assert.equal(review.status, 200, await review.text());
     const submit = await post(`/api/documents/${person.id}/submit`, {
       revisionId: person.currentRevisionId,
@@ -304,6 +404,11 @@ test("administrator publishes a saved shared draft without review", {
     await client.query("DELETE FROM cms_sessions WHERE user_id=$1", [userId]);
     await client.query("DELETE FROM cms_totp_credentials WHERE user_id=$1", [userId]);
     await client.query("DELETE FROM cms_users WHERE id=$1", [userId]);
+    await client.query("DELETE FROM cms_sessions WHERE user_id=$1", [reviewerId]);
+    await client.query("DELETE FROM cms_totp_credentials WHERE user_id=$1", [reviewerId]);
+    await client.query("DELETE FROM cms_user_capability_grants WHERE user_id=$1", [reviewerId]);
+    await client.query("DELETE FROM cms_user_capability_configurations WHERE user_id=$1", [reviewerId]);
+    await client.query("DELETE FROM cms_users WHERE id=$1", [reviewerId]);
     client.release();
     await pool.end();
     if (previousSessionSecret === undefined) delete process.env.SESSION_SECRET;

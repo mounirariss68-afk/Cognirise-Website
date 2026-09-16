@@ -18,7 +18,6 @@ import { projectIndustrySnapshotForMarket } from "./industry-market-projection";
 import {
   methodologyEditorialDefinition,
   methodologyEditorialMediaValues,
-  missingMethodologyMediaPins,
 } from "./methodology-editorial";
 
 export const CMS_CONTRACT_VERSION = 1 as const;
@@ -1201,6 +1200,45 @@ export const siteConfigurationContentSchema = z.union([
   contactEmailConfigurationContentSchema,
 ]);
 
+/**
+ * Site configuration has two intentionally disjoint authoring variants. A
+ * draft may be saved as a hero film is assembled, but it must still name only
+ * real fields from its chosen variant. Do not use `deepPartial()` on the
+ * published union: it retains the two-source array length and makes the
+ * discriminator too permissive for incremental hero authoring.
+ */
+const heroSiteConfigurationDraftSchema = z.object({
+  schemaVersion: z.literal(CMS_CONTRACT_VERSION).optional(),
+  page: z.enum(CMS_HERO_FILM_SLOTS).optional(),
+  hero: z.object({
+    posterMediaId: z.string().uuid().optional(),
+    posterMediaVersionId: z.string().uuid().optional(),
+    // A source is an immutable, complete media pin once it is added. Drafts
+    // may contain zero or one source while the second format is pending.
+    sources: z.array(heroMediaReferenceSchema).max(2).optional(),
+  }).strict().optional(),
+}).strict();
+
+const contactEmailConfigurationDraftSchema = z.object({
+  schemaVersion: z.literal(CMS_CONTRACT_VERSION).optional(),
+  configuration: z.literal("contact-email").optional(),
+  contactEmail: z.string().trim().email("Enter a valid email address.").max(254).optional(),
+}).strict();
+
+const siteConfigurationDraftContentSchema = z.preprocess((value) => {
+  const content = value && typeof value === "object" && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : {};
+  // Select the contact arm before parsing so an invalid contact email reports
+  // its email error rather than the hero arm's unrelated strict-key error.
+  const contact = content.configuration === "contact-email"
+    || Object.prototype.hasOwnProperty.call(content, "contactEmail");
+  return { variant: contact ? "contact" : "hero", content: value };
+}, z.discriminatedUnion("variant", [
+  z.object({ variant: z.literal("hero"), content: heroSiteConfigurationDraftSchema }).strict(),
+  z.object({ variant: z.literal("contact"), content: contactEmailConfigurationDraftSchema }).strict(),
+]).transform(({ content }) => content));
+
 /** Authoritative composition contract for pages whose narrative was previously
  * compiled into the website. Sections are intentionally governed (not HTML)
  * so the same payload can be safely rendered by admin previews and the site. */
@@ -1308,72 +1346,115 @@ export type LandingPageContent = z.infer<typeof cmsLandingPageContentSchema>;
 export type SiteConfigurationContent = z.infer<typeof siteConfigurationContentSchema>;
 export type CmsContent = PersonContent | PartnerContent | PlatformContent | PublicationContent | CaseStudyContent | IndustryContent | FrameworkContent | OfficeContent | SiteConfigurationContent | LandingPageContent;
 
-function publishErrors(kind: CmsDocumentKind, value: CmsContent): string[] {
-  const errors: string[] = [];
-  if (kind === "site-configuration") return errors;
+/**
+ * Keep the publish target alongside the rule that created it.  The older
+ * helper returns prose for compatibility with callers outside this validator;
+ * using it here would make a path depend on wording again.
+ */
+function missingMethodologyMediaPinPaths(slot: unknown, value: unknown, path = "content.editorial"): string[] {
+  if (!value || typeof value !== "object") return [path];
+  const definition = slot as {
+    kind?: string;
+    fields?: Record<string, unknown>;
+    items?: unknown[];
+  };
+  if (definition.kind === "media") {
+    return !(value as { media?: unknown }).media ? [`${path}.media`] : [];
+  }
+  if (definition.kind === "group") {
+    return Object.entries(definition.fields ?? {}).flatMap(([key, child]) =>
+      missingMethodologyMediaPinPaths(child, (value as Record<string, unknown>)[key], `${path}.${key}`),
+    );
+  }
+  if (definition.kind === "fixed-list") {
+    return (definition.items ?? []).flatMap((child, index) =>
+      missingMethodologyMediaPinPaths(child, (value as unknown[])[index], `${path}.${index}`),
+    );
+  }
+  return [];
+}
+
+type PublicationRuleIssue = {
+  /** Stable rule identifier. The public error copy remains deliberately separate. */
+  rule: string;
+  /** Absolute snapshot content target. */
+  path: string;
+  message: string;
+};
+
+function publishRuleIssues(kind: CmsDocumentKind, value: CmsContent): PublicationRuleIssue[] {
+  const issues: PublicationRuleIssue[] = [];
+  const add = (rule: string, path: string, message: string) => issues.push({ rule, path, message });
+  if (kind === "site-configuration") return issues;
   const governed = value as Exclude<CmsContent, SiteConfigurationContent>;
-  if (governed.visibility !== "public") errors.push("Only public content can be published.");
-  if (kind === "office") return errors;
-  if (!governed.sources.length) errors.push("At least one source is required.");
-  if (!governed.verificationDate) errors.push("A verification date is required.");
-  if (!governed.reviewDate) errors.push("A review date is required.");
+  if (governed.visibility !== "public") add("PUBLIC_VISIBILITY", "content.visibility", "Only public content can be published.");
+  if (kind === "office") return issues;
+  if (!governed.sources.length) add("SOURCE_REQUIRED", "content.sources", "At least one source is required.");
+  if (!governed.verificationDate) add("VERIFICATION_DATE_REQUIRED", "content.verificationDate", "A verification date is required.");
+  if (!governed.reviewDate) add("REVIEW_DATE_REQUIRED", "content.reviewDate", "A review date is required.");
   if (kind === "person") {
     const person = value as PersonContent;
-    if (!person.identityMedia && !person.identityMediaId && !person.approvedFallback) errors.push("An approved identity image or fallback is required.");
-    if (person.role !== "advisor" && !person.biography) errors.push("A biography is required.");
-    if (person.role === "advisor" && !person.contribution) errors.push("An advisor contribution is required.");
+    if (!person.identityMedia && !person.identityMediaId && !person.approvedFallback) add("IDENTITY_REQUIRED", "content.identityMedia", "An approved identity image or fallback is required.");
+    if (person.role !== "advisor" && !person.biography) add("BIOGRAPHY_REQUIRED", "content.biography", "A biography is required.");
+    if (person.role === "advisor" && !person.contribution) add("ADVISOR_CONTRIBUTION_REQUIRED", "content.contribution", "An advisor contribution is required.");
   }
   if (kind === "partner") {
     const partner = value as PartnerContent;
-    if (partner.relationshipStatus !== "active") errors.push("Only active partnerships can be published.");
-    if (partner.evidence.some((claim) => !claim.approved)) errors.push("Every partner evidence statement must be approved.");
+    if (partner.relationshipStatus !== "active") add("ACTIVE_RELATIONSHIP_REQUIRED", "content.relationshipStatus", "Only active partnerships can be published.");
+    partner.evidence.forEach((claim, index) => {
+      if (!claim.approved) add("EVIDENCE_APPROVAL_REQUIRED", `content.evidence.${index}.approved`, "Every partner evidence statement must be approved.");
+    });
   }
   if (kind === "publication") {
     const publication = value as PublicationContent;
-    if (!publication.body.length) errors.push("A publication body is required.");
-    if (publication.variant === "pov" && !publication.pdfMedia && !publication.pdfMediaId) errors.push("A POV document requires an approved PDF.");
+    if (!publication.body.length) add("BODY_REQUIRED", "content.body", "A publication body is required.");
+    if (publication.variant === "pov" && !publication.pdfMedia && !publication.pdfMediaId) add("POV_DOCUMENT_REQUIRED", "content.pdfMedia", "A POV document requires an approved PDF.");
   }
   if (kind === "case-study") {
     const caseStudy = value as CaseStudyContent;
-    if (caseStudy.disclosure === "restricted") errors.push("Restricted case studies cannot be published publicly.");
-    if (caseStudy.variant === "summary" && caseStudy.disclosure !== "anonymized") errors.push("A public case-study summary must be anonymized.");
-    if (caseStudy.publicEvidenceStatus !== "approved") errors.push("Public case-study evidence must be approved.");
+    if (caseStudy.disclosure === "restricted") add("PUBLIC_DISCLOSURE_REQUIRED", "content.disclosure", "Restricted case studies cannot be published publicly.");
+    if (caseStudy.variant === "summary" && caseStudy.disclosure !== "anonymized") add("SUMMARY_ANONYMIZATION_REQUIRED", "content.disclosure", "A public case-study summary must be anonymized.");
+    if (caseStudy.publicEvidenceStatus !== "approved") add("PUBLIC_EVIDENCE_APPROVAL_REQUIRED", "content.publicEvidenceStatus", "Public case-study evidence must be approved.");
     if (caseStudy.deliveryStage !== "production" && caseStudy.impactClassification === "observed") {
-      errors.push("Non-production impact must be explicitly qualified as pilot/demo, simulated, projected, or unavailable.");
+      add("NON_PRODUCTION_IMPACT_QUALIFICATION_REQUIRED", "content.impactClassification", "Non-production impact must be explicitly qualified as pilot/demo, simulated, projected, or unavailable.");
     }
-    if (caseStudy.variant === "full" && !caseStudy.work.length) errors.push("A full case study requires a work narrative.");
-    if (caseStudy.evidence.some((claim) => !claim.approved)) errors.push("Every case-study evidence statement must be approved.");
+    if (caseStudy.variant === "full" && !caseStudy.work.length) add("WORK_NARRATIVE_REQUIRED", "content.work", "A full case study requires a work narrative.");
+    caseStudy.evidence.forEach((claim, index) => {
+      if (!claim.approved) add("EVIDENCE_APPROVAL_REQUIRED", `content.evidence.${index}.approved`, "Every case-study evidence statement must be approved.");
+    });
   }
   if (kind === "industry") {
     const industry = value as IndustryContent;
-    if (industry.pressures.length < 3) errors.push("At least three operating pressures are required.");
-    if (industry.capabilities.length < 2) errors.push("At least two build capabilities are required.");
-    if (!industry.imageAlt) errors.push("Industry hero imagery requires alternative text.");
+    if (industry.pressures.length < 3) add("PRESSURES_REQUIRED", "content.pressures", "At least three operating pressures are required.");
+    if (industry.capabilities.length < 2) add("CAPABILITIES_REQUIRED", "content.capabilities", "At least two build capabilities are required.");
+    if (!industry.imageAlt) add("HERO_ALT_TEXT_REQUIRED", "content.imageAlt", "Industry hero imagery requires alternative text.");
     if (industry.publicSectorPov?.reviewBlockers?.length) {
-      errors.push("Public Sector review blockers must be cleared before publication.");
+      add("PUBLIC_SECTOR_REVIEW_BLOCKERS", "content.publicSectorPov.reviewBlockers", "Public Sector review blockers must be cleared before publication.");
     }
   }
   if (kind === "framework") {
     const framework = value as FrameworkContent;
     if (framework.template === "guardrails") {
       if ("presentation" in framework && framework.presentation && !framework.heroMedia && !framework.heroMediaId) {
-        errors.push("The Guardrails redesign presentation requires immutable hero media.");
+        add("GUARDRAILS_HERO_MEDIA_REQUIRED", "content.heroMedia", "The Guardrails redesign presentation requires immutable hero media.");
       }
-      return errors;
+      return issues;
     }
     if (framework.template !== "agent-authority") {
       if (!framework.hero.media && !framework.hero.mediaId) {
-        errors.push("A methodology framework requires approved hero media.");
+        add("METHODOLOGY_HERO_MEDIA_REQUIRED", "content.hero.media", "A methodology framework requires approved hero media.");
       }
       const definition = methodologyEditorialDefinition(framework.template);
       if (!definition) {
-        errors.push(`Methodology template "${framework.template}" has no registered editorial slot definition.`);
+        add("METHODOLOGY_SLOT_DEFINITION_MISSING", "content.editorial", `Methodology template "${framework.template}" has no registered editorial slot definition.`);
       } else {
-        errors.push(...missingMethodologyMediaPins(definition.slots, framework.editorial));
+        missingMethodologyMediaPinPaths(definition.slots, framework.editorial).forEach((path) =>
+          add("METHODOLOGY_MEDIA_PIN_REQUIRED", path, `${path.replace(/^content\./, "")} requires an immutable mediaId and mediaVersionId before publication.`),
+        );
       }
-      return errors;
+      return issues;
     }
-    if (!framework.heroMedia && !framework.heroMediaId) errors.push("A framework requires approved hero media.");
+    if (!framework.heroMedia && !framework.heroMediaId) add("HERO_MEDIA_REQUIRED", "content.heroMedia", "A framework requires approved hero media.");
     for (const [index, example] of [framework.workedExample, ...framework.sectorExamples].entries()) {
       const rScore = Number(example.reversibility.slice(1)) as RScore;
       const hScore = Number(example.reach.slice(1)) as HScore;
@@ -1381,10 +1462,10 @@ function publishErrors(kind: CmsDocumentKind, value: CmsContent): string[] {
       const expectedCeiling = getCeiling(expectedBand);
       const location = index === 0 ? "Worked example" : `Sector example ${index}`;
       if (example.exposureBand !== `E${expectedBand}`) {
-        errors.push(`${location} exposure must be E${expectedBand} for ${example.reversibility}/${example.reach}.`);
+        add("EXPOSURE_BAND_MISMATCH", index === 0 ? "content.workedExample.exposureBand" : `content.sectorExamples.${index - 1}.exposureBand`, `${location} exposure must be E${expectedBand} for ${example.reversibility}/${example.reach}.`);
       }
       if (example.oversight !== OVERSIGHT_LABELS[expectedCeiling]) {
-        errors.push(`${location} oversight must match the calculated ${OVERSIGHT_LABELS[expectedCeiling]} ceiling.`);
+        add("OVERSIGHT_MISMATCH", index === 0 ? "content.workedExample.oversight" : `content.sectorExamples.${index - 1}.oversight`, `${location} oversight must match the calculated ${OVERSIGHT_LABELS[expectedCeiling]} ceiling.`);
       }
     }
     const workedBand = getEBand(
@@ -1396,38 +1477,38 @@ function publishErrors(kind: CmsDocumentKind, value: CmsContent): string[] {
       (workedCeiling === "on-loop" || framework.workedExample.requestedAuthority === "on-loop") &&
       !framework.workedExample.interventionWindow
     ) {
-      errors.push("The worked example requires a stated intervention window for on-the-loop operation.");
+      add("INTERVENTION_WINDOW_REQUIRED", "content.workedExample.interventionWindow", "The worked example requires a stated intervention window for on-the-loop operation.");
     }
     if (
       isRequestedAboveCeiling(framework.workedExample.requestedAuthority as Oversight, workedCeiling) &&
       !framework.workedExample.authorityArtefact
     ) {
-      errors.push("The worked example must name the approved artefact carrying authority above the ceiling.");
+      add("AUTHORITY_ARTEFACT_REQUIRED", "content.workedExample.authorityArtefact", "The worked example must name the approved artefact carrying authority above the ceiling.");
     }
   }
   if (kind === "landing-page") {
     const landing = value as LandingPageContent;
     if (isCmsRetiredLandingPagePath(landing.pagePath)) {
-      errors.push(`Landing page "${landing.pagePath}" is retired and cannot be published.`);
+      add("RETIRED_PAGE_PATH", "content.pagePath", `Landing page "${landing.pagePath}" is retired and cannot be published.`);
     }
-    if (!landing.sections.length) errors.push("At least one governed page section is required.");
+    if (!landing.sections.length) add("SECTION_REQUIRED", "content.sections", "At least one governed page section is required.");
     if (new Set(landing.sections.map((section) => section.id)).size !== landing.sections.length) {
-      errors.push("Landing page section ids must be unique.");
+      add("SECTION_ID_UNIQUE", "content.sections", "Landing page section ids must be unique.");
     }
     if (new Set(landing.sections.map((section) => section.order)).size !== landing.sections.length) {
-      errors.push("Landing page section order values must be unique.");
+      add("SECTION_ORDER_UNIQUE", "content.sections", "Landing page section order values must be unique.");
     }
     if (!landing.sections.some((section) => section.type === "cta") && !landing.cta) {
-      errors.push("A landing page requires a governed call to action.");
+      add("CTA_REQUIRED", "content.cta", "A landing page requires a governed call to action.");
     }
     if (landing.sections.some((section) => section.type === "migration-media")) {
-      errors.push("Compiled landing media must be resolved to an approved immutable media version before publication.");
+      add("MIGRATION_MEDIA_RESOLUTION_REQUIRED", "content.sections", "Compiled landing media must be resolved to an approved immutable media version before publication.");
     }
     const contract = landingPageSlotContract[landing.pagePath as GovernedLandingPagePath] as
       | Record<string, GovernedLandingSlotType>
       | undefined;
     if (!contract) {
-      errors.push(`Unknown governed landing page template "${landing.pagePath}".`);
+      add("GOVERNED_TEMPLATE_UNKNOWN", "content.pagePath", `Unknown governed landing page template "${landing.pagePath}".`);
     } else {
       const sectionsById = new Map<string, typeof landing.sections>();
       for (const section of landing.sections) {
@@ -1441,16 +1522,17 @@ function publishErrors(kind: CmsDocumentKind, value: CmsContent): string[] {
         const expectedType = inventoryType === "migration-media" ? "media" : inventoryType;
         const matches = sectionsById.get(slotId) ?? [];
         if (matches.length === 0) {
-          errors.push(`Landing page "${landing.pagePath}" is missing required slot "${slotId}" (${expectedType}).`);
+          add("REQUIRED_SLOT_MISSING", "content.sections", `Landing page "${landing.pagePath}" is missing required slot "${slotId}" (${expectedType}).`);
         } else if (matches.length !== 1) {
-          errors.push(`Landing page "${landing.pagePath}" must contain required slot "${slotId}" exactly once.`);
+          add("REQUIRED_SLOT_DUPLICATED", "content.sections", `Landing page "${landing.pagePath}" must contain required slot "${slotId}" exactly once.`);
         } else if (matches[0].type !== expectedType) {
-          errors.push(`Landing page "${landing.pagePath}" slot "${slotId}" must have type "${expectedType}", received "${matches[0].type}".`);
+          const index = landing.sections.indexOf(matches[0]);
+          add("REQUIRED_SLOT_TYPE_MISMATCH", `content.sections.${index}.type`, `Landing page "${landing.pagePath}" slot "${slotId}" must have type "${expectedType}", received "${matches[0].type}".`);
         }
       }
     }
   }
-  return errors;
+  return issues;
 }
 
 const guardrailsDraftStructuralKeys = new Set([
@@ -1488,6 +1570,51 @@ function normalizeGuardrailsDraftText(value: unknown, key?: string): unknown {
     );
   }
   return value;
+}
+
+/**
+ * Machine-readable validation data travels alongside the legacy string list.
+ * `errors` remains for existing callers and audit history, while new UI and
+ * API consumers can use a canonical target without parsing prose.
+ */
+export type CmsContentValidationIssue = {
+  code: string;
+  path: string;
+  message: string;
+  scope: CmsValidationMode;
+  action: "focus-title" | "focus-content-field" | "focus-seo";
+};
+
+function validationCode(kind: CmsDocumentKind, mode: CmsValidationMode, path: string, source: string) {
+  return `CMS_${mode.toUpperCase()}_${kind.toUpperCase().replace(/[^A-Z0-9]+/g, "_")}_${source.toUpperCase().replace(/[^A-Z0-9]+/g, "_")}_${path.toUpperCase().replace(/[^A-Z0-9]+/g, "_")}`;
+}
+
+function validationAction(path: string): CmsContentValidationIssue["action"] {
+  if (path === "title") return "focus-title";
+  if (path === "seo" || path.startsWith("seo.")) return "focus-seo";
+  return "focus-content-field";
+}
+
+function publicationValidationIssues(kind: CmsDocumentKind, mode: CmsValidationMode, value: CmsContent): CmsContentValidationIssue[] {
+  return publishRuleIssues(kind, value).map((issue) => ({
+    code: validationCode(kind, mode, issue.path, issue.rule),
+    path: issue.path,
+    message: issue.message,
+    scope: mode,
+    action: validationAction(issue.path),
+  }));
+}
+
+/** Snapshot delivery guards do not name an editor control. They are surfaced as
+ * an explicit delivery receipt target instead of inferring a field from prose. */
+function deliveryValidationIssues(kind: CmsDocumentKind, mode: CmsValidationMode, errors: string[]): CmsContentValidationIssue[] {
+  return errors.map((message, index) => ({
+    code: validationCode(kind, mode, "content.delivery", `delivery-${index + 1}`),
+    path: "content.delivery",
+    message,
+    scope: mode,
+    action: "focus-content-field",
+  }));
 }
 
 export function validateCmsContent(kind: CmsDocumentKind, input: unknown, mode: CmsValidationMode = "draft") {
@@ -1537,6 +1664,8 @@ export function validateCmsContent(kind: CmsDocumentKind, input: unknown, mode: 
     ? frameworkDraftSchema!
     : mode === "draft" && kind === "landing-page"
     ? cmsLandingPageContentBaseSchema.deepPartial()
+    : mode === "draft" && kind === "site-configuration"
+    ? siteConfigurationDraftContentSchema
     : mode === "draft" && kind !== "site-configuration"
       ? ((cmsContentSchemas[kind] instanceof z.ZodEffects
           ? cmsContentSchemas[kind]._def.schema
@@ -1547,11 +1676,22 @@ export function validateCmsContent(kind: CmsDocumentKind, input: unknown, mode: 
     return {
       success: false as const,
       errors: parsed.error.issues.map((issue: z.ZodIssue) => `${issue.path.join(".") || "content"}: ${issue.message}`),
+      issues: parsed.error.issues.map((issue: z.ZodIssue) => {
+        const relativePath = issue.path.join(".");
+        const path = relativePath ? `content.${relativePath}` : "content";
+        return {
+          code: validationCode(kind, mode, path, issue.code),
+          path,
+          message: issue.message,
+          scope: mode,
+          action: validationAction(path),
+        };
+      }),
     };
   }
-  const errors = mode === "publish" ? publishErrors(kind, parsed.data as CmsContent) : [];
-  return errors.length
-    ? { success: false as const, errors }
+  const issues = mode === "publish" ? publicationValidationIssues(kind, mode, parsed.data as CmsContent) : [];
+  return issues.length
+    ? { success: false as const, errors: issues.map((issue) => issue.message), issues }
     : {
       success: true as const,
       // Blank Guardrails prose is normalized only while checking a draft. Keep
@@ -1584,6 +1724,16 @@ function validateCmsSnapshotStructure(
     return {
       success: false as const,
       errors: snapshot.error.issues.map((issue) => `${issue.path.join(".") || "document"}: ${issue.message}`),
+      issues: snapshot.error.issues.map((issue) => {
+        const path = issue.path.join(".") || "document";
+        return {
+          code: validationCode(kind, mode, path, issue.code),
+          path,
+          message: issue.message,
+          scope: mode,
+          action: validationAction(path),
+        };
+      }),
     };
   }
   const content = validateCmsContent(kind, snapshot.data.content, mode);
@@ -1591,7 +1741,18 @@ function validateCmsSnapshotStructure(
   if (mode === "publish" && kind === "case-study") {
     const caseStudy = content.data as CaseStudyContent;
     if (caseStudy.variant === "summary" && !snapshot.data.summary?.trim()) {
-      return { success: false as const, errors: ["A public case-study summary is required and must be anonymized."] };
+      const errors = ["A public case-study summary is required and must be anonymized."];
+      return {
+        success: false as const,
+        errors,
+        issues: [{
+          code: validationCode(kind, mode, "summary", "case-study-summary-required"),
+          path: "summary",
+          message: errors[0],
+          scope: mode,
+          action: "focus-content-field" as const,
+        }],
+      };
     }
   }
   const references = collectCmsMediaReferences(kind, content.data, snapshot.data.mediaIds, snapshot.data.seo);
@@ -1604,6 +1765,16 @@ function validateCmsSnapshotStructure(
       return {
         success: false as const,
         errors: [`Media asset ${reference.mediaId} cannot reference multiple versions in one revision.`],
+        issues: [{
+          // Point at the second conflicting editor selection, not the
+          // derived snapshot mediaIds receipt. That keeps readiness focus on
+          // the exact mutable media control.
+          code: validationCode(kind, mode, reference.fieldPath, "immutable-media-version-conflict"),
+          path: reference.fieldPath,
+          message: `Media asset ${reference.mediaId} cannot reference multiple versions in one revision.`,
+          scope: mode,
+          action: "focus-content-field",
+        }],
       };
     }
     exactVersions.set(reference.mediaId, reference.mediaVersionId);
@@ -1664,7 +1835,9 @@ export function validateCmsSnapshotForDelivery(
     ...bankingDeliveryErrors(source.data),
     ...publicSectorDeliveryErrors(source.data),
   ];
-  return errors.length ? { success: false as const, errors } : source;
+  return errors.length
+    ? { success: false as const, errors, issues: deliveryValidationIssues(kind, mode, errors) }
+    : source;
 }
 
 const EDUCATION_DELIVERY_MARKETS = ["uae", "ksa", "turkiye", "europe"] as const;
@@ -1793,7 +1966,7 @@ export function validateCmsSnapshot(
     ...educationDerivativeErrors(source.data),
   ];
   return errors.length
-    ? { success: false as const, errors }
+    ? { success: false as const, errors, issues: deliveryValidationIssues(kind, mode, errors) }
     : source;
 }
 

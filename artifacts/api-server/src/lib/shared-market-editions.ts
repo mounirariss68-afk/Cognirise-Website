@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { isDeepStrictEqual } from "node:util";
 import type { IRouter } from "express";
 import { pool } from "@workspace/db";
 import {
@@ -15,6 +16,7 @@ import {
   mergeSharedBaselineUpdate,
   resolveSharedBaselineUpdate,
   type SharedOverrideOperation,
+  type CmsCapability,
   type CmsDocumentKind,
   validateCmsSnapshot,
 } from "@workspace/api-zod";
@@ -26,6 +28,7 @@ import {
   revalidateMutationAuth,
 } from "./managed-market-lifecycle";
 import { destinationRevisionMatchesExpected, localeLanguageIdentity } from "./shared-market-reuse-guard";
+import { canAccessContent } from "./policy";
 
 type BindingRow = Record<string, any>;
 const digest = (snapshot: unknown) => createHash("sha256").update(JSON.stringify(snapshot)).digest("hex");
@@ -36,13 +39,26 @@ type ReadinessIssue = {
   category: "missing" | "validation" | "workflow";
   message: string;
   action: "create" | "edit" | "review";
+  path?: string;
+  code?: string;
 };
 
 export function savedRevisionReadiness(kind: string, snapshot: unknown, workflowState: unknown) {
   const validation = validateCmsSnapshot(kind as any, snapshot, "publish");
   const issues: ReadinessIssue[] = validation.success
     ? []
-    : validation.errors.map((message) => ({ category: "validation", message, action: "edit" }));
+    : (("issues" in validation ? validation.issues : undefined) ?? validation.errors.map((message) => ({
+      code: "CMS_LEGACY_VALIDATION",
+      path: "content",
+      message,
+      scope: "publish" as const,
+    }))).map((issue) => ({
+      category: "validation" as const,
+      message: issue.message,
+      action: "edit" as const,
+      path: issue.path,
+      code: issue.code,
+    }));
   if (workflowState !== "approved") {
     issues.push({
       category: "workflow",
@@ -91,20 +107,26 @@ function copyResponse(
 async function canAccessCopiedRevisionLineage(
   client: Queryable,
   auth: AuthContext,
+  documentId: string,
   revisionId: string,
-  canAccessMarket: (auth: AuthContext, market: string) => boolean,
+  capability: CmsCapability,
+  canAccessEditionTarget: (
+    client: Queryable, auth: AuthContext, documentId: string, market: string, locale: string,
+    capability: CmsCapability,
+  ) => Promise<boolean>,
+  proposedDestination?: { market: string; locale: string },
 ) {
-  if (auth.user.role === "administrator") return true;
   const resolved = await client.query(
     `SELECT resolved.baseline_revision_id,
             binding.mode,
-            baseline.source_revision_id baseline_source_revision_id,
-            source_edition.market source_market
+             COALESCE(baseline.governing_source_revision_id,baseline.source_revision_id) baseline_source_revision_id,
+             source_edition.market source_market,source_edition.locale source_locale
        FROM cms_resolved_market_revisions resolved
        JOIN cms_market_edition_bindings binding ON binding.id=resolved.binding_id
        LEFT JOIN cms_shared_baseline_revisions baseline
          ON baseline.id=resolved.baseline_revision_id
-       LEFT JOIN cms_revisions source_revision ON source_revision.id=baseline.source_revision_id
+        LEFT JOIN cms_revisions source_revision
+          ON source_revision.id=COALESCE(baseline.governing_source_revision_id,baseline.source_revision_id)
        LEFT JOIN cms_market_editions source_edition ON source_edition.id=source_revision.edition_id
       WHERE resolved.cms_revision_id=$1
       FOR KEY SHARE OF resolved,binding`,
@@ -118,7 +140,10 @@ async function canAccessCopiedRevisionLineage(
   if (!lineage.baseline_revision_id) return lineage.mode === "independent";
   if (lineage.source_market == null) return true;
   return typeof lineage.source_market === "string"
-    && canAccessMarket(auth, String(lineage.source_market));
+    && typeof lineage.source_locale === "string"
+    && await canAccessEditionTarget(
+      client, auth, documentId, String(lineage.source_market), String(lineage.source_locale), capability,
+    );
 }
 
 function mediaPinsForSnapshot(
@@ -195,11 +220,84 @@ export async function mediaPinsForNewSharedSnapshot(
   return mediaPinsForSnapshot(snapshot, kind, inherited.rows);
 }
 
-function sourceMarketAllowed(auth: AuthContext, row: Record<string, any>, canAccessMarket: (auth: AuthContext, market: string) => boolean) {
-  if (row.source_market == null && row.baseline_source_revision_id == null) return true;
-  return typeof row.source_market === "string"
-    && row.source_market.length > 0
-    && canAccessMarket(auth, row.source_market);
+async function sourceMarketAllowed(
+  client: Queryable,
+  auth: AuthContext,
+  documentId: string,
+  row: Record<string, any>,
+  capability: CmsCapability,
+  canAccessEditionTarget: (
+    client: Queryable, auth: AuthContext, documentId: string, market: string, locale: string,
+    capability: CmsCapability,
+  ) => Promise<boolean>,
+  proposedDestination?: { market: string; locale: string },
+) {
+  if (typeof row.source_market === "string" && row.source_market.length > 0
+    && typeof row.source_locale === "string") {
+    return await canAccessEditionTarget(client, auth, documentId, row.source_market, row.source_locale, capability);
+  }
+  const baselineRevisionId = row.based_on_baseline_revision_id ?? row.baseline_revision_id ?? row.revision_id ?? row.id;
+  if (typeof baselineRevisionId !== "string") return false;
+  // A null source is never implicitly neutral. Only an audit proof pinned to
+  // this immutable baseline revision grants the countryless authority path.
+  const neutral = await client.query(
+    `SELECT d.kind,b.id baseline_id,b.locale
+       FROM cms_shared_baseline_revisions revision
+       JOIN cms_shared_baselines b ON b.id=revision.baseline_id
+       JOIN cms_documents d ON d.id=b.document_id
+      WHERE revision.id=$1 AND b.document_id=$2
+        AND EXISTS (
+          SELECT 1 FROM cms_audit_events proof
+           WHERE proof.action='shared-neutral-baseline-created'
+             AND proof.target_type='shared-baseline'
+             AND proof.target_id=b.id::text
+             AND proof.metadata->>'documentId'=b.document_id::text
+             AND proof.metadata->>'baselineRevisionId'=revision.id::text
+             AND proof.metadata->>'locale'=b.locale
+             AND proof.metadata->>'authorityProof'='explicit-shared-and-regional-all-destinations'
+        )`,
+    [baselineRevisionId, documentId],
+  );
+  if (!neutral.rows[0]) return false;
+  let targets = await client.query(
+    `SELECT market.code market,binding.locale
+       FROM cms_market_edition_bindings binding
+       JOIN market_editions market ON market.id=binding.market_edition_id
+      WHERE binding.document_id=$1 AND binding.baseline_id=$2
+        AND binding.mode IN ('shared','adapted')`,
+    [documentId, neutral.rows[0].baseline_id],
+  );
+  if (!targets.rows.length) {
+    targets = await client.query(
+      `SELECT market.code market,supported.locale
+         FROM market_editions market
+         CROSS JOIN LATERAL (
+           SELECT DISTINCT configured_locale locale
+             FROM unnest(ARRAY[market.default_locale,market.fallback_locale]) configured_locale
+            WHERE configured_locale IS NOT NULL
+              AND lower(split_part(configured_locale,'-',1))
+                  = lower(split_part($1,'-',1))
+         ) supported
+        WHERE market.enabled=true`,
+      [neutral.rows[0].locale],
+    );
+  }
+  const targetRows = [...targets.rows];
+  if (proposedDestination && !targetRows.some((target) =>
+    String(target.market) === proposedDestination.market && String(target.locale) === proposedDestination.locale,
+  )) {
+    targetRows.push(proposedDestination);
+  }
+  if (!targetRows.length) return false;
+  const markets = targetRows.map((target) => String(target.market));
+  return (await Promise.all(targetRows.map(async (target) =>
+    await canAccessEditionTarget(client, auth, documentId, String(target.market), String(target.locale), capability)
+    && await canAccessContent(auth.user, {
+      topic: neutral.rows[0].kind as CmsDocumentKind, capability,
+      marketCode: String(target.market), scope: "shared",
+      sourceMarketCode: String(target.market), destinationMarketCodes: markets,
+    })
+  ))).every(Boolean);
 }
 
 async function assertExactImmutableMediaPins(
@@ -393,6 +491,7 @@ export function registerSharedMarketEditionRoutes(
       documentId: string,
       market: string,
       locale: string,
+      capability: CmsCapability,
     ) => Promise<boolean>;
     revisionMediaGovernanceErrors: (
       client: Queryable,
@@ -424,8 +523,8 @@ export function registerSharedMarketEditionRoutes(
         res.status(404).json({ error: "The destination market edition is unavailable." });
         return;
       }
-      if (!options.canAccessMarket(auth, targetMarket)) {
-        res.status(403).json({ error: "You are not assigned to the destination market." });
+      if (!await options.canAccessEditionTarget(pool, auth, documentId, targetMarket, targetLocale, "view")) {
+        res.status(403).json({ error: "You are not authorized to view the destination market." });
         return;
       }
       if (![target.rows[0].default_locale, target.rows[0].fallback_locale].includes(targetLocale)) {
@@ -465,16 +564,16 @@ export function registerSharedMarketEditionRoutes(
           documentId,
           targetMarket,
           targetLocale,
-          auth.user.role === "administrator" ? null : auth.user.marketCodes,
+          null,
         ],
       );
       const authorizedCandidates = [];
       for (const candidate of candidates.rows) {
         if (!await options.canAccessEditionTarget(
-          pool, auth, documentId, String(candidate.market), String(candidate.locale),
+          pool, auth, documentId, String(candidate.market), String(candidate.locale), "view",
         )) continue;
         if (!await canAccessCopiedRevisionLineage(
-          pool, auth, String(candidate.revision_id), options.canAccessMarket,
+          pool, auth, documentId, String(candidate.revision_id), "view", options.canAccessEditionTarget,
         )) continue;
         const readiness = savedRevisionReadiness(
           candidate.kind,
@@ -530,7 +629,6 @@ export function registerSharedMarketEditionRoutes(
   router.post(
     "/documents/:documentId/market-edition-copies",
     options.requireCsrf,
-    options.requireEditor,
     asyncRoute(async (req, res) => {
       const parsed = CopyDocumentMarketEditionBody.safeParse(req.body);
       if (!parsed.success) {
@@ -552,7 +650,7 @@ export function registerSharedMarketEditionRoutes(
           res.status(404).json({ error: "Document not found." });
           return;
         }
-        const transactionAuth = await revalidateMutationAuth(client, auth, "editor");
+        const transactionAuth = await revalidateMutationAuth(client, auth);
         if (!transactionAuth) {
           await client.query("ROLLBACK");
           res.status(403).json({ error: "Authentication is no longer valid." });
@@ -570,7 +668,9 @@ export function registerSharedMarketEditionRoutes(
           return;
         }
         const destinationMarketCode = String(destinationMarketRow.code);
-        if (!options.canAccessMarket(transactionAuth, destinationMarketCode)) {
+        if (!await options.canAccessEditionTarget(
+          client, transactionAuth, documentId, destinationMarketCode, body.destinationLocale, "edit",
+        )) {
           await client.query("ROLLBACK");
           res.status(403).json({ error: "You are not assigned to the destination market." });
           return;
@@ -603,9 +703,9 @@ export function registerSharedMarketEditionRoutes(
           return;
         }
         if (!await options.canAccessEditionTarget(
-          client, transactionAuth, documentId, String(source.market), String(source.locale),
+          client, transactionAuth, documentId, String(source.market), String(source.locale), "edit",
         ) || !await canAccessCopiedRevisionLineage(
-          client, transactionAuth, String(source.id), options.canAccessMarket,
+          client, transactionAuth, documentId, String(source.id), "edit", options.canAccessEditionTarget,
         )) {
           await client.query("ROLLBACK");
           res.status(403).json({ error: "You are not authorized for the selected source revision and its immutable lineage." });
@@ -747,25 +847,52 @@ export function registerSharedMarketEditionRoutes(
   router.get("/documents/:documentId/shared-market", asyncRoute(async (req, res) => {
     const documentId = String(req.params.documentId);
     const auth = res.locals.auth as AuthContext;
-    const permittedMarkets = auth.user.role === "administrator" ? null : auth.user.marketCodes;
+    // Matrix grants, rather than the legacy assignment list, decide which
+    // exact shared targets may be returned below.
+    const permittedMarkets: string[] | null = null;
     const [baselines, bindings] = await Promise.all([
       pool.query(
-        `SELECT b.id,b.document_id,b.locale,r.id revision_id,r.revision_number,r.source_revision_id,
-                r.snapshot,r.media_references,b.created_at
+         `SELECT b.id,b.document_id,b.locale,d.kind,r.id revision_id,r.revision_number,r.source_revision_id,
+                  r.governing_source_revision_id,
+                  CASE WHEN source_edition.id IS NOT NULL
+                    THEN COALESCE(r.governing_source_revision_id,r.source_revision_id)
+                  END effective_governing_source_revision_id,
+                  neutral_proof.intentional_neutral,
+                 r.snapshot,r.media_references,b.created_at,
+                 source_edition.market source_market,source_edition.locale source_locale
            FROM cms_shared_baselines b
+            JOIN cms_documents d ON d.id=b.document_id
            JOIN cms_shared_baseline_revisions r ON r.id=b.active_revision_id
-            LEFT JOIN cms_revisions source_revision ON source_revision.id=r.source_revision_id
-            LEFT JOIN cms_market_editions source_edition ON source_edition.id=source_revision.edition_id
+            LEFT JOIN cms_revisions source_revision
+              ON source_revision.id=COALESCE(r.governing_source_revision_id,r.source_revision_id)
+            LEFT JOIN cms_market_editions source_edition
+              ON source_edition.id=source_revision.edition_id
+              AND source_edition.document_id=b.document_id
+             AND source_edition.market NOT IN ('shared-source','und')
+             LEFT JOIN LATERAL (
+               SELECT true intentional_neutral
+                 FROM cms_audit_events proof
+                WHERE proof.action='shared-neutral-baseline-created'
+                  AND proof.target_type='shared-baseline'
+                  AND proof.target_id=b.id::text
+                  AND proof.metadata->>'documentId'=b.document_id::text
+                  AND proof.metadata->>'baselineRevisionId'=r.id::text
+                  AND proof.metadata->>'locale'=b.locale
+                  AND proof.metadata->>'authorityProof'='explicit-shared-and-regional-all-destinations'
+                LIMIT 1
+             ) neutral_proof ON true
            WHERE b.document_id=$1
              AND (
                (
-                 source_revision.id IS NOT NULL
+                  source_edition.id IS NOT NULL
                  AND source_edition.market IS NOT NULL
                  AND ($2::text[] IS NULL OR source_edition.market=ANY($2::text[]))
                )
                OR (
-                 source_revision.id IS NULL
-                 AND EXISTS (
+                  source_edition.id IS NULL
+                  AND (
+                    neutral_proof.intentional_neutral IS TRUE
+                    OR EXISTS (
                    SELECT 1
                      FROM cms_market_edition_bindings neutral_binding
                      JOIN market_editions neutral_target
@@ -774,18 +901,21 @@ export function registerSharedMarketEditionRoutes(
                       AND neutral_binding.baseline_id=b.id
                       AND neutral_binding.mode IN ('shared','adapted')
                       AND ($2::text[] IS NULL OR neutral_target.code=ANY($2::text[]))
-                 )
+                    )
+                  )
                )
              )
            ORDER BY b.locale`,
         [documentId, permittedMarkets],
       ),
       pool.query(
-        `SELECT binding.*
+         `SELECT binding.*,target.code market,
+                 source_edition.market source_market,source_edition.locale source_locale
            FROM cms_market_edition_bindings binding
            JOIN market_editions target ON target.id=binding.market_edition_id
            LEFT JOIN cms_shared_baseline_revisions adopted ON adopted.id=binding.based_on_baseline_revision_id
-           LEFT JOIN cms_revisions source_revision ON source_revision.id=adopted.source_revision_id
+           LEFT JOIN cms_revisions source_revision
+             ON source_revision.id=COALESCE(adopted.governing_source_revision_id,adopted.source_revision_id)
            LEFT JOIN cms_market_editions source_edition ON source_edition.id=source_revision.edition_id
           WHERE binding.document_id=$1
              AND ($2::text[] IS NULL OR target.code=ANY($2::text[]))
@@ -794,7 +924,7 @@ export function registerSharedMarketEditionRoutes(
                OR (
                  adopted.id IS NOT NULL
                  AND (
-                   adopted.source_revision_id IS NULL
+                    source_edition.id IS NULL
                    OR (
                      source_edition.market IS NOT NULL
                      AND ($2::text[] IS NULL OR source_edition.market=ANY($2::text[]))
@@ -806,19 +936,118 @@ export function registerSharedMarketEditionRoutes(
         [documentId, permittedMarkets],
       ),
     ]);
+    const visibleBindings = (await Promise.all(bindings.rows.map(async (binding) =>
+      await options.canAccessEditionTarget(
+        pool, auth, documentId, String(binding.market), String(binding.locale), "view",
+      ) && (binding.source_market == null || await sourceMarketAllowed(
+        pool, auth, documentId, binding, "view", options.canAccessEditionTarget,
+      )) ? binding : null,
+    ))).filter((binding): binding is Record<string, any> => binding !== null);
+    const visibleBaselineIds = new Set(visibleBindings.map((binding) => String(binding.baseline_id)));
+    const visibleBaselines = (await Promise.all(baselines.rows.map(async (baseline) => {
+       if (baseline.source_market == null) {
+         return baseline.intentional_neutral === true || visibleBaselineIds.has(String(baseline.id))
+           ? baseline : null;
+       }
+      return await options.canAccessEditionTarget(
+        pool, auth, documentId, String(baseline.source_market), String(baseline.source_locale), "view",
+      ) ? baseline : null;
+    }))).filter((baseline): baseline is Record<string, any> => baseline !== null);
+    const baselineAuthority = new Map<string, {
+      affectedDestinationMarkets: string[]; canView: boolean; canEdit: boolean; editReason: string | null;
+    }>();
+    await Promise.all(visibleBaselines.map(async (baseline) => {
+      const bound = (await pool.query(
+        `SELECT target.code market,binding.locale
+           FROM cms_market_edition_bindings binding
+           JOIN market_editions target ON target.id=binding.market_edition_id
+          WHERE binding.document_id=$1 AND binding.baseline_id=$2
+            AND binding.mode IN ('shared','adapted')`,
+        [documentId, baseline.id],
+      )).rows;
+      const targets = bound.length ? bound : (await pool.query(
+        `SELECT market.code market,supported.locale
+           FROM market_editions market
+           CROSS JOIN LATERAL (
+             SELECT DISTINCT configured_locale locale
+               FROM unnest(ARRAY[market.default_locale,market.fallback_locale]) configured_locale
+              WHERE configured_locale IS NOT NULL
+                AND lower(split_part(configured_locale,'-',1))=lower(split_part($1,'-',1))
+           ) supported
+          WHERE market.enabled=true`,
+        [baseline.locale],
+      )).rows;
+      const markets = targets.map((target) => String(target.market));
+       const intentionalNeutral = baseline.intentional_neutral === true;
+       if (!baseline.effective_governing_source_revision_id && !intentionalNeutral) {
+        baselineAuthority.set(String(baseline.id), {
+           affectedDestinationMarkets: markets, canView: false, canEdit: false,
+          editReason: "Select an exact saved source revision; this baseline has no durable real-market origin.",
+        });
+        return;
+      }
+       const destinationsAllowed = targets.length > 0 && (await Promise.all(targets.map((target) =>
+         options.canAccessEditionTarget(pool, auth, documentId, String(target.market), String(target.locale), "edit"),
+       ))).every(Boolean);
+       if (intentionalNeutral) {
+         const neutralSharedAllowed = async (capability: CmsCapability) =>
+           (await Promise.all(markets.map((market) => canAccessContent(auth.user, {
+             topic: baseline.kind as CmsDocumentKind,
+             capability, marketCode: market, scope: "shared",
+             sourceMarketCode: market, destinationMarketCodes: markets,
+           })))).every(Boolean);
+         const viewTargetsAllowed = targets.length > 0 && (await Promise.all(targets.map((target) =>
+           options.canAccessEditionTarget(pool, auth, documentId, String(target.market), String(target.locale), "view"),
+         ))).every(Boolean);
+         const canView = Boolean(viewTargetsAllowed && await neutralSharedAllowed("view"));
+         const canEdit = Boolean(destinationsAllowed && await neutralSharedAllowed("edit"));
+         baselineAuthority.set(String(baseline.id), {
+           affectedDestinationMarkets: markets, canView, canEdit,
+           editReason: canEdit ? null : "You need Shared and regional Edit access to every affected destination.",
+         });
+         return;
+       }
+      const sourceAllowed = await options.canAccessEditionTarget(
+        pool, auth, documentId, String(baseline.source_market), String(baseline.source_locale), "edit",
+      ) && await canAccessContent(auth.user, {
+        topic: baseline.kind as CmsDocumentKind,
+        capability: "edit", marketCode: String(baseline.source_market), scope: "shared",
+        sourceMarketCode: String(baseline.source_market), destinationMarketCodes: markets,
+      });
+      baselineAuthority.set(String(baseline.id), {
+         affectedDestinationMarkets: markets, canView: true, canEdit: Boolean(sourceAllowed && destinationsAllowed),
+        editReason: sourceAllowed && destinationsAllowed ? null : "You need Edit access to the governing source, shared source, and every affected destination.",
+      });
+    }));
     res.json({
-      baselines: baselines.rows.map((row) => ({
+      baselines: visibleBaselines.map((row) => ({
         id: String(row.id), documentId: String(row.document_id), locale: row.locale,
         revisionId: String(row.revision_id), revisionNumber: Number(row.revision_number),
         sourceRevisionId: row.source_revision_id ? String(row.source_revision_id) : null,
-         snapshot: row.snapshot, mediaReferences: row.media_references ?? [],
+         governingSourceRevisionId: row.effective_governing_source_revision_id
+           ? String(row.effective_governing_source_revision_id) : null,
+         authorityKind: row.effective_governing_source_revision_id
+           ? "regional"
+           : row.intentional_neutral === true ? "neutral" : "unresolved",
+        // A local binding may remain readable through its materialized
+        // regional revision, but it must not grant raw neutral-baseline
+        // content when that baseline has no resolvable governing source.
+        // Keep the baseline record visible for recovery guidance while
+        // redacting payload and media pins.
+         snapshot: (row.effective_governing_source_revision_id && row.source_market)
+           || baselineAuthority.get(String(row.id))?.canView ? row.snapshot : null,
+         mediaReferences: (row.effective_governing_source_revision_id && row.source_market)
+           || baselineAuthority.get(String(row.id))?.canView ? row.media_references ?? [] : [],
+        affectedDestinationMarkets: baselineAuthority.get(String(row.id))?.affectedDestinationMarkets ?? [],
+        canEdit: baselineAuthority.get(String(row.id))?.canEdit ?? false,
+        editReason: baselineAuthority.get(String(row.id))?.editReason ?? "Baseline authority is unavailable.",
         createdAt: row.created_at,
       })),
-      bindings: bindings.rows.map(mapBinding),
+      bindings: visibleBindings.map(mapBinding),
     });
   }));
 
-  router.post("/documents/:documentId/shared-market", options.requireCsrf, options.requireAdministrator,
+  router.post("/documents/:documentId/shared-market", options.requireCsrf,
     asyncRoute(async (req, res) => {
       const parsed = EstablishSharedMarketBaselineBody.safeParse(req.body);
       if (!parsed.success) {
@@ -835,7 +1064,7 @@ export function registerSharedMarketEditionRoutes(
           res.status(404).json({ error: "Document not found." });
           return;
         }
-        const auth = await revalidateMutationAuth(client, res.locals.auth as AuthContext, "administrator");
+        const auth = await revalidateMutationAuth(client, res.locals.auth as AuthContext);
         if (!auth) {
           await client.query("ROLLBACK");
           res.status(403).json({ error: "Authentication is no longer valid." });
@@ -844,22 +1073,37 @@ export function registerSharedMarketEditionRoutes(
         const existing = await client.query(
           `SELECT b.id,b.created_at,b.active_revision_id,
                   r.revision_number,r.snapshot,r.media_references,r.source_revision_id,
+                  COALESCE(r.governing_source_revision_id,r.source_revision_id) governing_source_revision_id,
+                   neutral_proof.intentional_neutral,
                   d.kind
              FROM cms_shared_baselines b
              JOIN cms_documents d ON d.id=b.document_id
              LEFT JOIN cms_shared_baseline_revisions r ON r.id=b.active_revision_id
+              LEFT JOIN LATERAL (
+                SELECT true intentional_neutral
+                  FROM cms_audit_events proof
+                 WHERE proof.action='shared-neutral-baseline-created'
+                   AND proof.target_type='shared-baseline'
+                   AND proof.target_id=b.id::text
+                   AND proof.metadata->>'documentId'=b.document_id::text
+                   AND proof.metadata->>'baselineRevisionId'=r.id::text
+                   AND proof.metadata->>'locale'=b.locale
+                   AND proof.metadata->>'authorityProof'='explicit-shared-and-regional-all-destinations'
+                 LIMIT 1
+              ) neutral_proof ON true
             WHERE b.document_id=$1 AND b.locale=$2
             FOR UPDATE OF b`,
           [documentId, body.locale],
         );
         const sourceRevisionId = body.sourceRevisionId ? String(body.sourceRevisionId) : null;
         let source: { rows: Array<Record<string, any>> };
+        let governingSource: { rows: Array<Record<string, any>> };
         if (sourceRevisionId) {
           // A baseline may still be established from an explicitly named
           // real-market historical revision. No legacy source is inferred or
           // relocated.
           source = await client.query(
-            `SELECT d.kind,r.id,r.revision_number,r.payload,e.market
+            `SELECT d.kind,r.id,r.revision_number,r.payload,e.market,e.locale
                  FROM cms_revisions r
                  JOIN cms_market_editions e ON e.id=r.edition_id
                  JOIN cms_documents d ON d.id=e.document_id
@@ -873,6 +1117,16 @@ export function registerSharedMarketEditionRoutes(
             res.status(404).json({ error: "The selected revision is not an exact source in this locale." });
             return;
           }
+          governingSource = source;
+          // The server, not an optimistic client, is authoritative for an
+          // exact published/historical source. Keep accepting the existing
+          // matching client snapshot for compatibility, but reject a stale or
+          // substituted payload rather than silently publishing it.
+          if (body.snapshot !== undefined && !isDeepStrictEqual(body.snapshot, source.rows[0].payload)) {
+            await client.query("ROLLBACK");
+            res.status(409).json({ error: "The supplied snapshot does not match the selected exact source revision." });
+            return;
+          }
         } else {
           if (!existing.rows[0]?.active_revision_id || !existing.rows[0]?.kind) {
             await client.query("ROLLBACK");
@@ -881,17 +1135,121 @@ export function registerSharedMarketEditionRoutes(
             });
             return;
           }
-          source = {
+           if (!existing.rows[0].governing_source_revision_id && !existing.rows[0].intentional_neutral) {
+            await client.query("ROLLBACK");
+            res.status(409).json({
+              error: "This neutral baseline has no durable real-market origin. Select an exact saved source revision before replacing it.",
+            });
+            return;
+          }
+           governingSource = existing.rows[0].intentional_neutral
+             ? {
+               rows: [{
+                 kind: existing.rows[0].kind, id: null, revision_number: existing.rows[0].revision_number,
+                 payload: existing.rows[0].snapshot, market: null, locale: null,
+               }],
+             }
+             : await client.query(
+            `SELECT d.kind,r.id,r.revision_number,r.payload,e.market,e.locale
+               FROM cms_revisions r
+               JOIN cms_market_editions e ON e.id=r.edition_id
+               JOIN cms_documents d ON d.id=e.document_id
+              WHERE e.document_id=$1 AND r.id=$2 AND e.locale=$3
+                AND e.market<>'shared-source' AND e.locale<>'und'
+              FOR KEY SHARE OF r,e`,
+            [documentId, existing.rows[0].governing_source_revision_id, body.locale],
+          );
+           if (!governingSource.rows[0]) {
+            await client.query("ROLLBACK");
+            res.status(409).json({
+              error: "This neutral baseline's durable source is unavailable. Select an exact saved source revision before replacing it.",
+            });
+            return;
+          }
+           source = {
             rows: [{
               kind: existing.rows[0].kind,
               id: null,
               revision_number: existing.rows[0].revision_number,
               payload: existing.rows[0].snapshot,
               market: null,
+              locale: null,
             }],
           };
         }
-        const validation = validateCmsSnapshot(source.rows[0].kind, body.snapshot, "draft");
+        // A baseline with active shared/adapted bindings affects exactly those
+        // bound editions. A first baseline, and an unused successor whose
+        // editions are all independent/custom, has no such bindings yet; its
+        // prospective fan-out remains every enabled same-language market.
+        // This keeps reusable-content establishment non-circular while still
+        // requiring authority over every market it could be adopted into.
+        const boundDestinations = existing.rows[0]
+          ? (await client.query(
+            `SELECT market.code market,binding.locale
+               FROM cms_market_edition_bindings binding
+               JOIN market_editions market ON market.id=binding.market_edition_id
+              WHERE binding.document_id=$1
+                AND binding.baseline_id=$2
+                AND binding.mode IN ('shared','adapted')
+              FOR KEY SHARE OF binding,market`,
+            [documentId, existing.rows[0].id],
+          )).rows
+          : [];
+        const affectedDestinations = boundDestinations.length
+          ? boundDestinations
+          : (await client.query(
+            `SELECT market.code market,supported.locale
+               FROM market_editions market
+               CROSS JOIN LATERAL (
+                 SELECT DISTINCT configured_locale locale
+                   FROM unnest(ARRAY[market.default_locale,market.fallback_locale]) configured_locale
+                  WHERE configured_locale IS NOT NULL
+                    AND lower(split_part(configured_locale,'-',1))
+                        = lower(split_part($1,'-',1))
+               ) supported
+              WHERE market.enabled=true
+              FOR KEY SHARE OF market`,
+            [body.locale],
+          )).rows;
+        const suppliedSourceAllowed = existing.rows[0]?.intentional_neutral && !sourceRevisionId
+          ? (await Promise.all(affectedDestinations.map((target) => {
+            const market = String(target.market);
+            return canAccessContent(auth.user, {
+              topic: existing.rows[0].kind as CmsDocumentKind,
+              capability: "edit", marketCode: market, scope: "shared",
+              sourceMarketCode: market,
+              destinationMarketCodes: affectedDestinations.map((destination) => String(destination.market)),
+            });
+          }))).every(Boolean)
+          : (
+          await options.canAccessEditionTarget(
+            client, auth, documentId, String(governingSource.rows[0].market), String(governingSource.rows[0].locale), "edit",
+          )
+          && await canAccessContent(auth.user, {
+            topic: governingSource.rows[0].kind as CmsDocumentKind,
+            capability: "edit",
+            marketCode: String(governingSource.rows[0].market),
+            scope: "shared",
+            sourceMarketCode: String(governingSource.rows[0].market),
+            destinationMarketCodes: affectedDestinations.map((target) => String(target.market)),
+          })
+        );
+        const affectedDestinationsAllowed = await Promise.all(affectedDestinations.map((target) =>
+          options.canAccessEditionTarget(
+            client, auth, documentId, String(target.market), String(target.locale), "edit",
+          )));
+        if (!affectedDestinations.length || !suppliedSourceAllowed || !affectedDestinationsAllowed.every(Boolean)) {
+          await client.query("ROLLBACK");
+          res.status(403).json({ error: "You are not authorized to edit every affected exact edition." });
+          return;
+        }
+        const authoritativeSnapshot = sourceRevisionId ? source.rows[0].payload : body.snapshot;
+        if (authoritativeSnapshot === undefined) {
+          await client.query("ROLLBACK");
+          res.status(400).json({ error: "A snapshot is required when no exact source revision is supplied." });
+          return;
+        }
+        const validation = validateCmsSnapshot(source.rows[0].kind, authoritativeSnapshot, "draft");
         if (!validation.success) {
           await client.query("ROLLBACK");
           res.status(422).json({ error: "The shared baseline does not satisfy this document's content contract.", details: validation.errors });
@@ -924,12 +1282,12 @@ export function registerSharedMarketEditionRoutes(
         await assertExactImmutableMediaPins(client, baselineMediaReferences);
         const revision = await client.query(
           `INSERT INTO cms_shared_baseline_revisions(baseline_id,revision_number,snapshot,media_references,
-                                                      content_digest,source_revision_id,created_by_user_id)
+                                                      content_digest,source_revision_id,governing_source_revision_id,created_by_user_id)
            VALUES ($1,COALESCE((SELECT max(revision_number)+1 FROM cms_shared_baseline_revisions WHERE baseline_id=$1),1),
-                   $2,$3,$4,$5,$6) RETURNING id,revision_number`,
+                   $2,$3,$4,$5,$6,$7) RETURNING id,revision_number`,
             [baseline.rows[0]!.id, validation.data,
                JSON.stringify(baselineMediaReferences), digest(validation.data),
-              sourceRevisionId, auth.user.id],
+               sourceRevisionId, sourceRevisionId ?? existing.rows[0]?.governing_source_revision_id, auth.user.id],
         );
         await client.query("UPDATE cms_shared_baselines SET active_revision_id=$2,updated_at=now() WHERE id=$1",
           [baseline.rows[0]!.id, revision.rows[0]!.id]);
@@ -948,6 +1306,14 @@ export function registerSharedMarketEditionRoutes(
         );
         await audit(auth, "shared-baseline-established", "document", documentId,
           { locale: body.locale, sourceRevisionId }, client);
+        if (existing.rows[0]?.intentional_neutral && !sourceRevisionId) {
+          await audit(auth, "shared-neutral-baseline-created", "shared-baseline",
+            String(baseline.rows[0]!.id), {
+              documentId, baselineRevisionId: String(revision.rows[0]!.id), locale: body.locale,
+              destinationMarkets: affectedDestinations.map((target) => String(target.market)),
+              authorityProof: "explicit-shared-and-regional-all-destinations",
+            }, client);
+        }
         await client.query("COMMIT");
         res.status(201).json({
           id: String(baseline.rows[0]!.id), documentId, locale: body.locale,
@@ -967,7 +1333,7 @@ export function registerSharedMarketEditionRoutes(
     }),
   );
 
-  router.put("/documents/:documentId/shared-market/bindings", options.requireCsrf, options.requireEditor,
+  router.put("/documents/:documentId/shared-market/bindings", options.requireCsrf,
     asyncRoute(async (req, res) => {
       const parsed = BindSharedMarketEditionBody.safeParse(req.body);
       if (!parsed.success) {
@@ -986,8 +1352,8 @@ export function registerSharedMarketEditionRoutes(
         return;
       }
       const market = String(destination.rows[0].code);
-      if (!options.canAccessMarket(auth, market)) {
-        res.status(403).json({ error: "You are not assigned to this market." });
+      if (!await options.canAccessEditionTarget(pool, auth, documentId, market, body.locale, "edit")) {
+        res.status(403).json({ error: "You are not authorized to edit this market." });
         return;
       }
       const client = await pool.connect();
@@ -998,7 +1364,7 @@ export function registerSharedMarketEditionRoutes(
           res.status(404).json({ error: "Document not found." });
           return;
         }
-        const transactionAuth = await revalidateMutationAuth(client, auth, "editor");
+        const transactionAuth = await revalidateMutationAuth(client, auth);
         if (!transactionAuth) {
           await client.query("ROLLBACK");
           res.status(403).json({ error: "Authentication is no longer valid." });
@@ -1014,7 +1380,9 @@ export function registerSharedMarketEditionRoutes(
           return;
         }
         const lockedMarket = String(lockedDestination.rows[0].code);
-        if (!options.canAccessMarket(transactionAuth, lockedMarket)) {
+        if (!await options.canAccessEditionTarget(
+          client, transactionAuth, documentId, lockedMarket, body.locale, "edit",
+        )) {
           await client.query("ROLLBACK");
           res.status(403).json({ error: "You are not assigned to this market." });
           return;
@@ -1072,14 +1440,17 @@ export function registerSharedMarketEditionRoutes(
           return;
         }
         const existing = await client.query(
-          `SELECT binding.*,adopted.source_revision_id baseline_source_revision_id,
-                  source_edition.market source_market
+          `SELECT binding.*,COALESCE(adopted.governing_source_revision_id,adopted.source_revision_id) baseline_source_revision_id,
+                  source_edition.market source_market,source_edition.locale source_locale
              FROM cms_market_edition_bindings binding
              LEFT JOIN cms_shared_baseline_revisions adopted
                ON adopted.id=binding.based_on_baseline_revision_id
-             LEFT JOIN cms_revisions source_revision ON source_revision.id=adopted.source_revision_id
-             LEFT JOIN cms_market_editions source_edition ON source_edition.id=source_revision.edition_id
-            WHERE binding.document_id=$1 AND binding.market_edition_id=$2 AND binding.locale=$3
+             LEFT JOIN cms_revisions source_revision ON source_revision.id=COALESCE(adopted.governing_source_revision_id,adopted.source_revision_id)
+             LEFT JOIN cms_market_editions source_edition
+               ON source_edition.id=source_revision.edition_id
+              AND source_edition.document_id=binding.document_id
+              AND source_edition.market NOT IN ('shared-source','und')
+             WHERE binding.document_id=$1 AND binding.market_edition_id=$2 AND binding.locale=$3
             FOR UPDATE OF binding`,
           [documentId, body.marketEditionId, body.locale],
         );
@@ -1095,7 +1466,9 @@ export function registerSharedMarketEditionRoutes(
           return;
         }
         if (existingBinding && existingBinding.mode !== "independent"
-          && !sourceMarketAllowed(transactionAuth, existingBinding, options.canAccessMarket)) {
+          && !await sourceMarketAllowed(
+            client, transactionAuth, documentId, existingBinding, "edit", options.canAccessEditionTarget,
+          )) {
           await client.query("ROLLBACK");
           res.status(403).json({ error: "You are not assigned to the current shared baseline source market." });
           return;
@@ -1162,12 +1535,12 @@ export function registerSharedMarketEditionRoutes(
         if (body.mode !== "independent") {
           const baselineId = body.baselineId ?? existingBinding?.baseline_id;
           const result = await client.query(
-          `SELECT b.id,b.active_revision_id,r.id revision_id,r.snapshot,r.media_references,
-                 r.source_revision_id baseline_source_revision_id,
-                 source_edition.market source_market
+           `SELECT b.id,b.active_revision_id,r.id revision_id,r.snapshot,r.media_references,
+                  COALESCE(r.governing_source_revision_id,r.source_revision_id) baseline_source_revision_id,
+                  source_edition.market source_market,source_edition.locale source_locale
                FROM cms_shared_baselines b
                 JOIN cms_shared_baseline_revisions r ON r.id=$4
-                LEFT JOIN cms_revisions source_revision ON source_revision.id=r.source_revision_id
+                LEFT JOIN cms_revisions source_revision ON source_revision.id=COALESCE(r.governing_source_revision_id,r.source_revision_id)
                 LEFT JOIN cms_market_editions source_edition ON source_edition.id=source_revision.edition_id
                 WHERE b.id=$1 AND b.document_id=$2
                   AND lower(split_part(b.locale,'-',1))=$3
@@ -1190,7 +1563,10 @@ export function registerSharedMarketEditionRoutes(
             });
             return;
           }
-          if (!sourceMarketAllowed(transactionAuth, baseline, options.canAccessMarket)) {
+          if (!await sourceMarketAllowed(
+            client, transactionAuth, documentId, baseline, "edit", options.canAccessEditionTarget,
+            { market: lockedMarket, locale: body.locale },
+          )) {
             await client.query("ROLLBACK");
             res.status(403).json({ error: "You are not assigned to the shared baseline source market." });
             return;
@@ -1199,17 +1575,19 @@ export function registerSharedMarketEditionRoutes(
         let translationSourceRevisionId: string | null = null;
         if (body.mode !== "independent" && body.translationSourceRevisionId) {
           const translationSource = await client.query(
-            `SELECT revision.id,revision.source_revision_id baseline_source_revision_id,
-                    source_edition.market source_market
+            `SELECT revision.id,COALESCE(revision.governing_source_revision_id,revision.source_revision_id) baseline_source_revision_id,
+                    source_edition.market source_market,source_edition.locale source_locale
                FROM cms_shared_baseline_revisions revision
                JOIN cms_shared_baselines source_baseline ON source_baseline.id=revision.baseline_id
-               LEFT JOIN cms_revisions source_revision ON source_revision.id=revision.source_revision_id
+               LEFT JOIN cms_revisions source_revision ON source_revision.id=COALESCE(revision.governing_source_revision_id,revision.source_revision_id)
                LEFT JOIN cms_market_editions source_edition ON source_edition.id=source_revision.edition_id
                WHERE revision.id=$1 AND source_baseline.document_id=$2
                 AND source_baseline.active_revision_id=revision.id`,
             [body.translationSourceRevisionId, documentId],
           );
-          if (!translationSource.rows[0] || !sourceMarketAllowed(transactionAuth, translationSource.rows[0], options.canAccessMarket)) {
+          if (!translationSource.rows[0] || !await sourceMarketAllowed(
+            client, transactionAuth, documentId, translationSource.rows[0], "edit", options.canAccessEditionTarget,
+          )) {
             await client.query("ROLLBACK");
             res.status(409).json({ error: "The translation source revision is not an authorized baseline for this document." });
             return;
@@ -1345,7 +1723,7 @@ export function registerSharedMarketEditionRoutes(
   );
 
   router.put("/documents/:documentId/shared-market/bindings/:bindingId/overrides",
-    options.requireCsrf, options.requireEditor, asyncRoute(async (req, res) => {
+    options.requireCsrf, asyncRoute(async (req, res) => {
       const parsed = SaveSharedMarketOverridesBody.safeParse(req.body);
       if (!parsed.success) {
         res.status(400).json({ error: "Invalid sparse overrides.", details: parsed.error.issues });
@@ -1368,7 +1746,7 @@ export function registerSharedMarketEditionRoutes(
           res.status(404).json({ error: "Document not found." });
           return;
         }
-        const auth = await revalidateMutationAuth(client, res.locals.auth as AuthContext, "editor");
+        const auth = await revalidateMutationAuth(client, res.locals.auth as AuthContext);
         if (!auth) {
           await client.query("ROLLBACK");
           res.status(403).json({ error: "Authentication is no longer valid." });
@@ -1392,15 +1770,15 @@ export function registerSharedMarketEditionRoutes(
           return;
         }
         const bindingResult = await client.query(
-         `SELECT binding.*,market.code market,document.kind document_kind,
-                 adopted_revision.source_revision_id baseline_source_revision_id,
-                 source_edition.market source_market
+          `SELECT binding.*,market.code market,document.kind document_kind,
+                  COALESCE(adopted_revision.governing_source_revision_id,adopted_revision.source_revision_id) baseline_source_revision_id,
+                  source_edition.market source_market,source_edition.locale source_locale
              FROM cms_market_edition_bindings binding
              JOIN market_editions market ON market.id=binding.market_edition_id
              JOIN cms_documents document ON document.id=binding.document_id
               LEFT JOIN cms_shared_baseline_revisions adopted_revision
                 ON adopted_revision.id=binding.based_on_baseline_revision_id
-              LEFT JOIN cms_revisions source_revision ON source_revision.id=adopted_revision.source_revision_id
+              LEFT JOIN cms_revisions source_revision ON source_revision.id=COALESCE(adopted_revision.governing_source_revision_id,adopted_revision.source_revision_id)
               LEFT JOIN cms_market_editions source_edition ON source_edition.id=source_revision.edition_id
              WHERE binding.id=$1 AND binding.document_id=$2 FOR UPDATE OF binding`,
           [bindingId, documentId],
@@ -1411,12 +1789,16 @@ export function registerSharedMarketEditionRoutes(
           res.status(404).json({ error: "Shared-market binding not found." });
           return;
         }
-        if (!options.canAccessMarket(auth, String(binding.market))) {
+        if (!await options.canAccessEditionTarget(
+          client, auth, documentId, String(binding.market), String(binding.locale), "edit",
+        )) {
           await client.query("ROLLBACK");
           res.status(403).json({ error: "You are not assigned to this market." });
           return;
         }
-        if (!sourceMarketAllowed(auth, binding, options.canAccessMarket)) {
+        if (!await sourceMarketAllowed(
+          client, auth, documentId, binding, "edit", options.canAccessEditionTarget,
+        )) {
           await client.query("ROLLBACK");
           res.status(403).json({ error: "You are not assigned to the shared baseline source market." });
           return;
@@ -1498,11 +1880,11 @@ export function registerSharedMarketEditionRoutes(
       const bindingId = String(req.params.bindingId);
       const result = await pool.query(
         `SELECT binding.*,target.code market,current_revision.id current_id,
-                current_revision.snapshot current_snapshot,previous_revision.snapshot previous_snapshot,
-                 resolved.snapshot local_snapshot,
-                 source_edition.market current_source_market,
-                 adopted_source_edition.market adopted_source_market,
-                 resolved_source_edition.market local_source_market
+                 current_revision.snapshot current_snapshot,previous_revision.id previous_id,previous_revision.snapshot previous_snapshot,
+                  resolved.baseline_revision_id local_baseline_revision_id,resolved.snapshot local_snapshot,
+                 source_edition.market current_source_market,source_edition.locale current_source_locale,
+                 adopted_source_edition.market adopted_source_market,adopted_source_edition.locale adopted_source_locale,
+                 resolved_source_edition.market local_source_market,resolved_source_edition.locale local_source_locale
            FROM cms_market_edition_bindings binding
            JOIN market_editions target ON target.id=binding.market_edition_id
            JOIN cms_shared_baselines base ON base.id=binding.baseline_id
@@ -1511,13 +1893,16 @@ export function registerSharedMarketEditionRoutes(
              ON previous_revision.id=binding.based_on_baseline_revision_id
            LEFT JOIN cms_resolved_market_revisions resolved
              ON resolved.cms_revision_id=binding.materialized_revision_id
-           LEFT JOIN cms_revisions source_revision ON source_revision.id=current_revision.source_revision_id
+           LEFT JOIN cms_revisions source_revision
+             ON source_revision.id=COALESCE(current_revision.governing_source_revision_id,current_revision.source_revision_id)
            LEFT JOIN cms_market_editions source_edition ON source_edition.id=source_revision.edition_id
-            LEFT JOIN cms_revisions adopted_source_revision ON adopted_source_revision.id=previous_revision.source_revision_id
+             LEFT JOIN cms_revisions adopted_source_revision
+               ON adopted_source_revision.id=COALESCE(previous_revision.governing_source_revision_id,previous_revision.source_revision_id)
             LEFT JOIN cms_market_editions adopted_source_edition ON adopted_source_edition.id=adopted_source_revision.edition_id
             LEFT JOIN cms_shared_baseline_revisions resolved_baseline
               ON resolved_baseline.id=resolved.baseline_revision_id
-            LEFT JOIN cms_revisions resolved_source_revision ON resolved_source_revision.id=resolved_baseline.source_revision_id
+           LEFT JOIN cms_revisions resolved_source_revision
+             ON resolved_source_revision.id=COALESCE(resolved_baseline.governing_source_revision_id,resolved_baseline.source_revision_id)
             LEFT JOIN cms_market_editions resolved_source_edition ON resolved_source_edition.id=resolved_source_revision.edition_id
           WHERE binding.id=$1 AND binding.document_id=$2`,
         [bindingId, documentId],
@@ -1528,13 +1913,18 @@ export function registerSharedMarketEditionRoutes(
         return;
       }
       const auth = res.locals.auth as AuthContext;
-      const requiredSources = [
-        row.current_source_market,
-        row.adopted_source_market,
-        row.local_source_market,
-      ].filter((market): market is string => typeof market === "string" && market.length > 0);
-      if (!options.canAccessMarket(auth, String(row.market))
-        || requiredSources.some((market) => !options.canAccessMarket(auth, market))) {
+       const requiredLineages = [
+         [row.current_id, row.current_source_market, row.current_source_locale],
+         [row.previous_id, row.adopted_source_market, row.adopted_source_locale],
+         [row.local_baseline_revision_id, row.local_source_market, row.local_source_locale],
+       ].filter((lineage): lineage is [string, string | null, string | null] => typeof lineage[0] === "string");
+      if (!await options.canAccessEditionTarget(
+        pool, auth, documentId, String(row.market), String(row.locale), "view",
+       ) || !(await Promise.all(requiredLineages.map(([revisionId, market, locale]) =>
+         sourceMarketAllowed(pool, auth, documentId, {
+           baseline_revision_id: revisionId, source_market: market, source_locale: locale,
+         }, "view", options.canAccessEditionTarget),
+       ))).every(Boolean)) {
         res.status(403).json({ error: "You are not assigned to this shared-market binding and source." });
         return;
       }
@@ -1557,7 +1947,7 @@ export function registerSharedMarketEditionRoutes(
   );
 
   router.post("/documents/:documentId/shared-market/bindings/:bindingId/resolve",
-    options.requireCsrf, options.requireEditor, asyncRoute(async (req, res) => {
+    options.requireCsrf, asyncRoute(async (req, res) => {
       const parsed = ResolveSharedMarketBaselineUpdateBody.safeParse(req.body);
       if (!parsed.success) {
         res.status(400).json({ error: "Invalid baseline resolution.", details: parsed.error.issues });
@@ -1575,7 +1965,7 @@ export function registerSharedMarketEditionRoutes(
           res.status(404).json({ error: "Document not found." });
           return;
         }
-        const transactionAuth = await revalidateMutationAuth(client, auth, "editor");
+        const transactionAuth = await revalidateMutationAuth(client, auth);
         if (!transactionAuth) {
           await client.query("ROLLBACK");
           res.status(403).json({ error: "Authentication is no longer valid." });
@@ -1602,15 +1992,15 @@ export function registerSharedMarketEditionRoutes(
           `SELECT binding.*,target.code market,document.kind document_kind,
                   adopted.snapshot adopted_snapshot,adopted.media_references adopted_media_references,
                   resolved.snapshot local_snapshot,resolved.media_references local_media_references,
-                  adopted.source_revision_id baseline_source_revision_id,
-                  source_edition.market source_market
+                  COALESCE(adopted.governing_source_revision_id,adopted.source_revision_id) baseline_source_revision_id,
+                  source_edition.market source_market,source_edition.locale source_locale
              FROM cms_market_edition_bindings binding
              JOIN market_editions target ON target.id=binding.market_edition_id
              JOIN cms_documents document ON document.id=binding.document_id
              LEFT JOIN cms_shared_baseline_revisions adopted ON adopted.id=binding.based_on_baseline_revision_id
              LEFT JOIN cms_resolved_market_revisions resolved
                ON resolved.binding_id=binding.id AND resolved.cms_revision_id=binding.materialized_revision_id
-             LEFT JOIN cms_revisions source_revision ON source_revision.id=adopted.source_revision_id
+             LEFT JOIN cms_revisions source_revision ON source_revision.id=COALESCE(adopted.governing_source_revision_id,adopted.source_revision_id)
              LEFT JOIN cms_market_editions source_edition ON source_edition.id=source_revision.edition_id
             WHERE binding.id=$1 AND binding.document_id=$2
             FOR UPDATE OF binding`,
@@ -1622,19 +2012,22 @@ export function registerSharedMarketEditionRoutes(
           res.status(409).json({ error: "The binding changed, is independent, or has no baseline to resolve." });
           return;
         }
-        if (!options.canAccessMarket(transactionAuth, String(binding.market))
-          || !sourceMarketAllowed(transactionAuth, binding, options.canAccessMarket)) {
+        if (!await options.canAccessEditionTarget(
+          client, transactionAuth, documentId, String(binding.market), String(binding.locale), "edit",
+        ) || !await sourceMarketAllowed(
+          client, transactionAuth, documentId, binding, "edit", options.canAccessEditionTarget,
+        )) {
           await client.query("ROLLBACK");
           res.status(403).json({ error: "You are not assigned to this shared-market binding and source." });
           return;
         }
         const targetResult = await client.query(
           `SELECT revision.id,revision.snapshot,revision.media_references,
-                  revision.source_revision_id baseline_source_revision_id,
-                  source_edition.market source_market
+                  COALESCE(revision.governing_source_revision_id,revision.source_revision_id) baseline_source_revision_id,
+                  source_edition.market source_market,source_edition.locale source_locale
              FROM cms_shared_baselines baseline
              JOIN cms_shared_baseline_revisions revision ON revision.id=$3
-             LEFT JOIN cms_revisions source_revision ON source_revision.id=revision.source_revision_id
+             LEFT JOIN cms_revisions source_revision ON source_revision.id=COALESCE(revision.governing_source_revision_id,revision.source_revision_id)
              LEFT JOIN cms_market_editions source_edition ON source_edition.id=source_revision.edition_id
             WHERE baseline.id=$1 AND baseline.document_id=$2 AND revision.baseline_id=baseline.id
             FOR UPDATE OF baseline`,
@@ -1646,7 +2039,9 @@ export function registerSharedMarketEditionRoutes(
           res.status(409).json({ error: "The requested baseline revision is not available to resolve this binding." });
           return;
         }
-        if (!sourceMarketAllowed(transactionAuth, target, options.canAccessMarket)) {
+        if (!await sourceMarketAllowed(
+          client, transactionAuth, documentId, target, "edit", options.canAccessEditionTarget,
+        )) {
           await client.query("ROLLBACK");
           res.status(403).json({ error: "You are not assigned to the requested baseline source market." });
           return;
@@ -1764,7 +2159,7 @@ export function registerSharedMarketEditionRoutes(
   );
 
   router.post("/documents/:documentId/shared-market/migration-report", options.requireCsrf,
-    options.requireAdministrator, asyncRoute(async (req, res) => {
+    asyncRoute(async (req, res) => {
       const parsed = ReportSharedMarketMigrationBody.safeParse(req.body);
       if (!parsed.success) {
         res.status(400).json({ error: "Invalid migration report request." });
@@ -1776,6 +2171,13 @@ export function registerSharedMarketEditionRoutes(
            FROM cms_market_editions e WHERE e.document_id=$1 AND e.market<>'shared-source'`,
         [documentId],
       );
+      const auth = res.locals.auth as AuthContext;
+      if (!(await Promise.all(candidates.rows.map((row) => options.canAccessEditionTarget(
+        pool, auth, documentId, String(row.market), String(row.locale), "view",
+      )))).every(Boolean)) {
+        res.status(403).json({ error: "You are not authorized to view every exact edition in this report." });
+        return;
+      }
       const report = {
         dryRun: parsed.data.dryRun,
         receiptId: null as string | null,

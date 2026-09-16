@@ -5,6 +5,7 @@
  * First-party Cognirise website and mini CMS API.
  * OpenAPI spec version: 0.2.0
  */
+import type { CapabilityGrantInput } from './capabilityGrantInput';
 import type { UserRole } from './userRole';
 import type { UserStatus } from './userStatus';
 
@@ -21,4 +22,6 @@ export interface UserUpdate {
      * @items.maxLength 24
      */
   marketCodes?: string[];
+  /** Replaces all explicit content grants and configures matrix mode. Supply [] for an intentional deny-all matrix; legacy compatibility cannot be restored once configured. */
+  capabilityGrants?: CapabilityGrantInput[];
 }

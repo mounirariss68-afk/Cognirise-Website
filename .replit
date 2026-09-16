@@ -31,3 +31,23 @@ VITE_CMS_CUTOVER_INDUSTRIES = "true"
 [userenv.shared]
 EDITORIAL_DIGEST_FROM = "Cognirise Editorial <support@cognirise.ai>"
 EDITORIAL_DIGEST_SAFE_RECIPIENT = "mounir@cognirise.ai"
+
+[[ports]]
+localPort = 8080
+externalPort = 8080
+
+[[ports]]
+localPort = 8081
+externalPort = 8081
+
+[[ports]]
+localPort = 18741
+externalPort = 80
+
+[[ports]]
+localPort = 22090
+externalPort = 3000
+
+[[ports]]
+localPort = 26081
+externalPort = 3001

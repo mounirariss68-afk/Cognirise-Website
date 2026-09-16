@@ -88,9 +88,24 @@ test("Task 328 issues exact shared-person previews without readiness gating", {
           must_rotate: false,
           mfa_enabled: role !== "viewer",
           market_codes: marketCodes,
+           legacy_administrator_market_codes: [],
+           capability_matrix_configured: false,
+           capability_grants: [],
         }],
       };
     }
+     if (statement.includes("SELECT 1 FROM cms_user_capability_configurations")
+       || statement.includes("FROM cms_user_capability_grants")) {
+       return { rowCount: 0, rows: [] };
+     }
+     if (statement.includes("FROM cms_legacy_administrator_market_snapshots")) {
+       return { rowCount: 0, rows: [] };
+     }
+     if (statement.includes("SELECT e.id edition_id,e.content_mode,d.kind")) {
+       return String(values[0]) === documentId
+         ? { rowCount: 1, rows: [{ edition_id: editionId, content_mode: "shared", kind: "person" }] }
+         : { rowCount: 0, rows: [] };
+     }
     if (statement.includes("SELECT content_mode FROM cms_market_editions")) {
       assert.deepEqual(values.slice(0, 3), [documentId, "uae", "en"]);
       return { rowCount: 1, rows: [{ content_mode: "shared", default_locale: "en" }] };

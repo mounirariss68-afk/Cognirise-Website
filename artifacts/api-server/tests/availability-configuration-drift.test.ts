@@ -66,7 +66,7 @@ test("availability publish rejects an enabled market or locale added after revie
       assert.deepEqual(values, ["administrator-id"]);
       return { rowCount: 0, rows: [] };
     }
-    if (statement.includes("SELECT draft_version,reviewed_version,reviewed_selections")) {
+    if (statement.includes("SELECT state.draft_version,state.reviewed_version,state.reviewed_selections")) {
       return {
         rowCount: 1,
         rows: [{

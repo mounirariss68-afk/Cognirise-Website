@@ -7,7 +7,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AlertTriangle, Check, GitCompare, Link2, Loader2 } from "lucide-react";
 import { FieldOverrideIndicator } from "./FieldOverrideIndicator";
 import { EditionReuseFlow } from "./EditionReuseFlow";
-import { localeLanguage, type ReuseDestinationOutcome, type ReuseDestinationRequest } from "./edition-reuse";
+import {
+  localeLanguage,
+  type ReuseDestinationOutcome,
+  type ReuseDestinationRequest,
+  type ReuseSourceCandidate,
+} from "./edition-reuse";
 
 export type ExactEdition = {
   market: string;
@@ -30,12 +35,17 @@ export type SharedEditionPanelProps = {
   matrix?: SharedMarketEditionMatrix;
   markets: Market[];
   exactEditions: ExactEdition[];
+  /** Bounded current-draft/published source identities, never arbitrary history. */
+  reuseSourceCandidates?: ReuseSourceCandidate[];
+  canReadReuseSource?: (market: string, locale: string) => boolean;
   selectedMarket: string;
   selectedLocale: string;
   currentRevisionId?: string | null;
   currentRevisionNumber?: number | null;
   canEdit: boolean;
   canManageBaselines: boolean;
+  /** Source + all affected destinations authority for establishing a baseline. */
+  canSaveReusableSource?: (sourceMarket: string, affectedDestinationMarkets: string[]) => boolean;
   hasUnsaved?: boolean;
   busy?: boolean;
   onSelectEdition: (market: string, locale: string) => void;
@@ -75,6 +85,8 @@ export type SharedEditionPanelProps = {
   compact?: boolean;
   /** Start a saved, effective-market customization without changing source ownership. */
   onCustomize?: () => void;
+  /** Opens the guarded same-language, saved-version reuse workflow. */
+  onOpenReuse?: () => void;
   /** The selected exact edition is the canonical shared source. */
   isSharedSource?: boolean;
 };
@@ -97,12 +109,15 @@ export function SharedEditionPanel({
   matrix,
   markets,
   exactEditions,
+  reuseSourceCandidates,
+  canReadReuseSource,
   selectedMarket,
   selectedLocale,
   currentRevisionId,
   currentRevisionNumber,
   canEdit,
   canManageBaselines,
+  canSaveReusableSource,
   hasUnsaved = false,
   busy,
   onSelectEdition,
@@ -115,6 +130,7 @@ export function SharedEditionPanel({
   canEditDestination,
   compact = false,
   onCustomize,
+  onOpenReuse,
   isSharedSource: isSharedSourceProp = false,
 }: SharedEditionPanelProps) {
   const market = markets.find((item) => item.code === selectedMarket);
@@ -124,10 +140,14 @@ export function SharedEditionPanel({
     [matrix?.baselines, selectedLocale],
   );
   const sourceCandidates = useMemo(
-    () => exactEditions.filter((item) => Boolean(item.revisionId)
-      && localeLanguage(item.locale) === localeLanguage(selectedLocale)
-      && item.market !== "shared-source"),
-    [exactEditions, selectedLocale],
+    () => (reuseSourceCandidates ?? exactEditions.flatMap((item) => (
+      item.revisionId ? [{ ...item, revisionId: item.revisionId, sourceKind: "saved-draft" as const }] : []
+    ))).filter((item) => (
+      localeLanguage(item.locale) === localeLanguage(selectedLocale)
+      && (item.market !== "shared-source" || item.sourceKind === "shared")
+      && (canReadReuseSource?.(item.market, item.locale) ?? true)
+    )),
+    [canReadReuseSource, exactEditions, reuseSourceCandidates, selectedLocale],
   );
   const [sourceRevisionId, setSourceRevisionId] = useState("");
   const [mode, setMode] = useState<Mode>("adapted");
@@ -135,11 +155,32 @@ export function SharedEditionPanel({
   const [translationRevisionId, setTranslationRevisionId] = useState("");
   const [confirming, setConfirming] = useState(false);
 
-  const source = sourceCandidates.find((item) => item.revisionId === sourceRevisionId)
-    ?? sourceCandidates.find((item) => item.revisionId === currentRevisionId);
+  const activeBaseline = localeBaselines.find((item) => item.revisionId === binding?.baselineRevisionId)
+    ?? localeBaselines[0];
+  const authorityOrigin = activeBaseline?.governingSourceRevisionId ?? activeBaseline?.sourceRevisionId;
+  // An intentional neutral baseline is allowed to have no country revision
+  // lineage at all. The API proves that state with authorityKind; only an
+  // unresolved legacy row needs a real-market source for recovery. Keep the
+  // origin fallback for DTOs predating authorityKind.
+  const requiresExplicitSource = Boolean(
+    activeBaseline
+    && (activeBaseline.authorityKind === "unresolved"
+      || (activeBaseline.authorityKind === undefined && !authorityOrigin)),
+  );
+  const baselineSourceCandidates = sourceCandidates.filter((item) => item.sourceKind !== "shared");
+  const baselineSource = sourceRevisionId
+    ? baselineSourceCandidates.find((item) => item.revisionId === sourceRevisionId)
+    : requiresExplicitSource
+      ? undefined
+      : baselineSourceCandidates.find((item) => item.revisionId === currentRevisionId);
+  const baselineCanEdit = activeBaseline
+    ? activeBaseline.canEdit ?? (activeBaseline.authorityKind === undefined ? canManageBaselines : false)
+    : canManageBaselines;
+  const canRepairUnknownBaseline = requiresExplicitSource && Boolean(sourceRevisionId);
+  const canEstablishBaseline = baselineCanEdit || canRepairUnknownBaseline;
+  const sourceSelectorValue = sourceRevisionId || (requiresExplicitSource ? "" : currentRevisionId || "");
   const baseline = localeBaselines.find((item) => item.revisionId === baselineRevisionId)
     ?? localeBaselines.find((item) => item.revisionId === binding?.baselineRevisionId);
-  const selectedIsSource = Boolean(source && source.market === selectedMarket && source.locale === selectedLocale);
   const currentExactEdition = exactEditions.find((item) => (
     item.market === selectedMarket && item.locale === selectedLocale
   ));
@@ -182,14 +223,17 @@ export function SharedEditionPanel({
           </div>
           <Badge variant="outline" className="shrink-0 uppercase">{binding?.mode ?? (isSharedSource ? "shared" : "independent")}</Badge>
         </div>
-        {isSharedSource && localeBaselines[0] && (
+        {isSharedSource && activeBaseline && (
           <div className="flex flex-wrap items-center justify-between gap-2 rounded border bg-muted/20 p-2">
             <div>
-              <p className="text-[11px] font-medium">Neutral source · {localeBaselines[0].locale}</p>
-              <p className="mt-0.5 text-[10px] text-muted-foreground">Baseline revision {localeBaselines[0].revisionNumber} · regional editions remain independently governed.</p>
+              <p className="text-[11px] font-medium">Neutral source · {activeBaseline.locale}</p>
+              <p className="mt-0.5 text-[10px] text-muted-foreground">Baseline revision {activeBaseline.revisionNumber} · regional editions remain independently governed.</p>
+              {activeBaseline.affectedDestinationMarkets !== undefined && <p className="mt-1 text-[10px] text-muted-foreground">Governed destinations: {activeBaseline.affectedDestinationMarkets.length ? activeBaseline.affectedDestinationMarkets.join(", ") : "none reported"}.</p>}
+              {!baselineCanEdit && activeBaseline.editReason && <p className="mt-1 text-[10px] text-amber-800">{activeBaseline.editReason}</p>}
+              {!baselineCanEdit && !activeBaseline.editReason && <p className="mt-1 text-[10px] text-amber-800">The document API has not authorized editing this saved baseline.</p>}
             </div>
-            {canManageBaselines && (
-              <Button type="button" size="sm" variant="outline" disabled={busy || hasUnsaved} onClick={() => onEditBaseline(localeBaselines[0]!)}>
+            {baselineCanEdit && (
+              <Button type="button" size="sm" variant="outline" disabled={busy || hasUnsaved} onClick={() => onEditBaseline(activeBaseline)}>
                 Edit shared content
               </Button>
             )}
@@ -204,6 +248,17 @@ export function SharedEditionPanel({
               Customize this market
             </Button>
           </div>
+        )}
+        {onOpenReuse && currentRevisionId && (
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            disabled={busy || hasUnsaved}
+            onClick={onOpenReuse}
+          >
+            Use saved content in other regions
+          </Button>
         )}
         {hasLocalOverrides && (
           <div className="space-y-2 rounded border border-primary/20 bg-primary/[0.025] p-2">
@@ -300,29 +355,34 @@ export function SharedEditionPanel({
 
       {!market && <p className="rounded border border-amber-400/50 bg-amber-50 p-2 text-xs text-amber-900">This selected market is not in the market catalog, so it cannot be bound to shared content.</p>}
       <div className="space-y-1">
-        <Label className="text-xs">Saved source</Label>
-        <Select value={sourceRevisionId || currentRevisionId || ""} onValueChange={setSourceRevisionId}>
+        <Label className="text-xs">Copy source</Label>
+        <Select value={sourceSelectorValue} onValueChange={setSourceRevisionId}>
           <SelectTrigger aria-label="Saved source for reuse"><SelectValue placeholder="Choose a saved same-language edition" /></SelectTrigger>
           <SelectContent>
             {sourceCandidates.map((candidate) => (
               <SelectItem key={candidate.revisionId!} value={candidate.revisionId!}>
-                {candidate.market.toUpperCase()} · {candidate.locale} · saved revision {candidate.revisionNumber}
+                {candidate.sourceKind === "published"
+                  ? "Published version"
+                  : candidate.sourceKind === "shared" ? "Saved shared version" : "Saved draft"} · {candidate.market === "shared-source" ? "SHARED" : candidate.market.toUpperCase()} · {candidate.locale} · revision {candidate.revisionNumber}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        <p className="text-xs text-muted-foreground">Choose the exact saved content to reuse. This does not select where it appears on the website.</p>
+         <p className="text-xs text-muted-foreground">Choose the current saved draft, its distinct exact published version, or a saved shared baseline snapshot. This does not select where it appears on the website.</p>
       </div>
       <EditionReuseFlow
-        key={sourceRevisionId || currentRevisionId || "no-source"}
+        key={sourceSelectorValue || "no-source"}
         documentId={documentId}
         matrix={matrix}
         markets={markets}
         exactEditions={exactEditions}
-        sourceRevisionId={sourceRevisionId || currentRevisionId || ""}
+        sourceCandidates={reuseSourceCandidates}
+        canReadSource={canReadReuseSource}
+        sourceRevisionId={sourceSelectorValue}
         currentRevisionId={currentRevisionId}
           legacySharedSource={selectedMarket === "shared-source" && selectedLocale === "und"}
         canManageBaselines={canManageBaselines}
+        canSaveReusableSource={canSaveReusableSource}
         canEditDestination={destinationPermission}
         hasUnsaved={hasUnsaved}
         busy={busy}
@@ -347,26 +407,33 @@ export function SharedEditionPanel({
               <Select value={sourceRevisionId} onValueChange={setSourceRevisionId}>
                 <SelectTrigger aria-label="Neutral baseline source"><SelectValue placeholder="Current exact editions only" /></SelectTrigger>
                 <SelectContent>
-                  {sourceCandidates.map((candidate) => (
+                  {baselineSourceCandidates.map((candidate) => (
                     <SelectItem key={candidate.revisionId!} value={candidate.revisionId!}>
-                      {candidate.market.toUpperCase()} · {candidate.locale} · Rev {candidate.revisionNumber}
+                  {candidate.sourceKind === "published"
+                    ? "Published version"
+                    : candidate.sourceKind === "shared" ? "Saved shared version" : "Saved draft"} · {candidate.market === "shared-source" ? "SHARED" : candidate.market.toUpperCase()} · {candidate.locale} · revision {candidate.revisionNumber}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
              <div className="flex flex-wrap items-end gap-2">
-               {!selectedIsSource && source && <Button type="button" size="sm" variant="outline" className="max-w-full whitespace-normal text-left leading-tight" onClick={() => onSelectEdition(source.market, source.locale)}>Open selected source</Button>}
+               {baselineSource && (baselineSource.market !== selectedMarket || baselineSource.locale !== selectedLocale) && <Button type="button" size="sm" variant="outline" className="max-w-full whitespace-normal text-left leading-tight" onClick={() => onSelectEdition(baselineSource.market, baselineSource.locale)}>Open selected source</Button>}
               <Button
                 type="button"
                 size="sm"
                 variant="outline"
-                disabled={!canManageBaselines || !selectedIsSource || !source?.revisionId || busy || hasUnsaved}
-                 onClick={() => onEstablishBaseline(source!.revisionId!, source!.locale, localeBaselines.find((item) => item.locale === source!.locale)?.revisionNumber)}
+                  disabled={!canEstablishBaseline || !baselineSource || baselineSource.market !== selectedMarket || baselineSource.locale !== selectedLocale || busy || hasUnsaved}
+                  onClick={() => onEstablishBaseline(baselineSource!.revisionId!, baselineSource!.locale, activeBaseline?.revisionNumber)}
               >
                 {busy && <Loader2 className="mr-1 h-3 w-3 animate-spin" />} Save neutral baseline
               </Button>
             </div>
+             {requiresExplicitSource && !sourceRevisionId && (
+               <p className="text-[11px] text-amber-800">
+                 This baseline has no durable source origin. Select an exact saved source above before saving a successor.
+               </p>
+             )}
           </div>
 
           {!frozenBinding && <><div className="grid gap-3 border-t pt-3 sm:grid-cols-3">
@@ -397,10 +464,23 @@ export function SharedEditionPanel({
             </div>}
           </div>
           </>}
-           {localeBaselines.length > 0 && <div className="flex flex-wrap items-center justify-between gap-2 rounded border bg-muted/20 p-2 text-xs">
-             <span className="min-w-0 flex-1">Active neutral baseline revision {localeBaselines[0]!.revisionNumber}; regional drafts remain unchanged until explicit adoption.</span>
-             {canManageBaselines && <Button type="button" size="sm" variant="outline" className="shrink-0" disabled={busy || hasUnsaved} onClick={() => onEditBaseline(localeBaselines[0]!)}>Edit Shared</Button>}
-          </div>}
+             {activeBaseline && <div className="space-y-2 rounded border bg-muted/20 p-2 text-xs">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="min-w-0 flex-1">Active neutral baseline revision {activeBaseline.revisionNumber}; regional drafts remain unchanged until explicit adoption.</span>
+                {baselineCanEdit && <Button type="button" size="sm" variant="outline" className="shrink-0" disabled={busy || hasUnsaved} onClick={() => onEditBaseline(activeBaseline)}>Edit Shared</Button>}
+              </div>
+              {activeBaseline.affectedDestinationMarkets !== undefined && (
+                <p className="text-[11px] text-muted-foreground">
+                  Governed destinations: {activeBaseline.affectedDestinationMarkets.length ? activeBaseline.affectedDestinationMarkets.join(", ") : "none reported"}.
+                </p>
+              )}
+              {!baselineCanEdit && activeBaseline.editReason && (
+                <p className="text-[11px] text-amber-800">{activeBaseline.editReason}</p>
+              )}
+              {!baselineCanEdit && !activeBaseline.editReason && (
+                <p className="text-[11px] text-amber-800">The document API has not authorized editing this saved baseline.</p>
+              )}
+           </div>}
           {binding && <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
             <span>Frozen baseline: {binding.baselineRevisionId ?? "none"}</span>
             <span>· source lineage: {binding.translationSourceRevisionId ?? "not acknowledged"}</span>

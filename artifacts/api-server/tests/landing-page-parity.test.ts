@@ -26,7 +26,7 @@ const seeds = JSON.parse(
   readFileSync(resolve(workspace, "lib/db/landing-page-inventory.json"), "utf8"),
 ) as Seed[];
 const expectedCounts = {
-  "/": 56,
+  "/": 44,
   "/about": 12,
   "/partners": 16,
   "/platforms": 17,

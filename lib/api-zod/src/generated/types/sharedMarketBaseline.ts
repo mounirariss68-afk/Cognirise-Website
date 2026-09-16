@@ -5,6 +5,7 @@
  * First-party Cognirise website and mini CMS API.
  * OpenAPI spec version: 0.2.0
  */
+import type { SharedMarketBaselineAuthorityKind } from './sharedMarketBaselineAuthorityKind';
 import type { SharedMarketBaselineMediaReferencesItem } from './sharedMarketBaselineMediaReferencesItem';
 import type { SharedMarketBaselineSnapshot } from './sharedMarketBaselineSnapshot';
 
@@ -16,7 +17,27 @@ export interface SharedMarketBaseline {
   revisionNumber: number;
   /** @nullable */
   sourceRevisionId: string | null;
+  /**
+     * Durable authorization origin. It can remain set when sourceRevisionId is null for an independently edited neutral successor.
+     * @nullable
+     */
+  governingSourceRevisionId?: string | null;
+  /** Authoritative classification for baseline access. Neutral denotes a server-proven intentionally countryless baseline; unresolved requires selecting an exact real-market source. */
+  authorityKind: SharedMarketBaselineAuthorityKind;
+  /**
+     * Raw baseline snapshot. Null when its governing source cannot be resolved; use the regional materialized revision and recovery guidance instead.
+     * @nullable
+     */
   snapshot: SharedMarketBaselineSnapshot;
   mediaReferences: SharedMarketBaselineMediaReferencesItem[];
+  /** Server-authoritative markets affected by saving this baseline revision. */
+  affectedDestinationMarkets?: string[];
+  /** Whether the current user satisfies exact source */
+  canEdit?: boolean;
+  /**
+     * Recoverable reason editing is unavailable.
+     * @nullable
+     */
+  editReason?: string | null;
   createdAt: Date;
 }

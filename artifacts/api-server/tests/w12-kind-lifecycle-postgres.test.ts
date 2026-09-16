@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
+import { readFile } from "node:fs/promises";
+import { resolve } from "node:path";
 import test from "node:test";
 import {
   cmsDocumentKinds,
@@ -347,6 +349,68 @@ async function clonePublicTables(admin: PoolLike, schema: string) {
   }
 }
 
+async function applyTask345Migrations(admin: PoolLike) {
+  const migration = async (name: string) =>
+    readFile(resolve(process.cwd(), "../../lib/db/migrations", name), "utf8");
+  const hasTable = async (name: string) => Boolean((await admin.query<{ exists: boolean }>(
+    "SELECT to_regclass($1) IS NOT NULL AS exists", [name],
+  )).rows[0]?.exists);
+  const hasColumn = async (table: string, column: string) => Boolean((await admin.query<{ exists: boolean }>(
+    `SELECT EXISTS(
+       SELECT 1
+         FROM pg_catalog.pg_attribute attribute
+         JOIN pg_catalog.pg_class relation ON relation.oid=attribute.attrelid
+        WHERE relation.relnamespace=current_schema()::regnamespace
+          AND relation.relname=$1
+          AND attribute.attname=$2
+          AND attribute.attnum>0
+          AND NOT attribute.attisdropped
+     ) AS exists`,
+    [table, column],
+  )).rows[0]?.exists);
+  if (!await hasTable("cms_revision_accuracy_confirmations")) {
+    await admin.query(await migration("0035_cms_revision_accuracy_confirmations.sql"));
+  }
+  if (await hasTable("cms_review_requests") && !await hasColumn("cms_review_requests", "accountable_editor_user_id")) {
+    await admin.query(await migration("0036_cms_review_request_accountability_snapshot.sql"));
+  }
+  if (!await hasTable("cms_user_capability_grants")) {
+    await admin.query(await migration("0037_cms_capability_matrix_access_projection.sql"));
+  }
+  if (await hasTable("cms_review_requests")) {
+    await admin.query(await migration("0038_cms_review_capability_reviewers.sql"));
+  }
+  if (await hasTable("cms_user_capability_grants") && !await hasTable("cms_user_capability_configurations")) {
+    await admin.query(await migration("0039_cms_capability_matrix_configuration.sql"));
+  }
+  if (!await hasTable("cms_legacy_administrator_market_snapshots")) {
+    await admin.query(await migration("0040_cms_legacy_administrator_market_snapshots.sql"));
+  }
+}
+
+async function installIsolatedTriggers(admin: PoolLike, schema: string) {
+  const triggers = await admin.query<{ table_name: string; definition: string }>(
+    `SELECT relation.relname table_name,pg_get_triggerdef(trigger_row.oid,true) definition
+       FROM pg_catalog.pg_trigger trigger_row
+       JOIN pg_catalog.pg_class relation ON relation.oid=trigger_row.tgrelid
+       JOIN pg_catalog.pg_namespace namespace ON namespace.oid=relation.relnamespace
+      WHERE namespace.nspname='public' AND NOT trigger_row.tgisinternal
+      ORDER BY relation.relname,trigger_row.tgname`,
+  );
+  for (const trigger of triggers.rows) {
+    const target = trigger.table_name.replace(/"/g, "\"\"");
+    let definition = trigger.definition.replace(
+      new RegExp(`\\bON\\s+(?:ONLY\\s+)?(?:(?:"?public"?\\.)?)"?${target}"?`, "i"),
+      `ON "${schema}"."${target}"`,
+    );
+    definition = definition.replace(
+      /\b(?:"?public"?\.)?cms_assert_review_request_target\s*\(/gi,
+      "cms_assert_review_request_target(",
+    );
+    await admin.query(definition);
+  }
+}
+
 async function seedLifecycleMedia(
   admin: PoolLike,
   userId: string,
@@ -355,7 +419,14 @@ async function seedLifecycleMedia(
   const media = new Map<string, string>();
   for (const fixture of Object.values(fixtures)) {
     for (const reference of collectCmsMediaReferences(fixture.kind, fixture.content)) {
-      if (reference.mediaVersionId) media.set(reference.mediaId, reference.mediaVersionId);
+      if (!reference.mediaVersionId) continue;
+      const prior = media.get(reference.mediaId);
+      if (prior && prior !== reference.mediaVersionId) {
+        throw new Error(
+          `W12 fixture media asset ${reference.mediaId} has conflicting versions ${prior} and ${reference.mediaVersionId}.`,
+        );
+      }
+      media.set(reference.mediaId, reference.mediaVersionId);
     }
   }
   for (const [assetId, versionId] of media) {
@@ -397,7 +468,9 @@ test("W12 parameterized PostgreSQL lifecycle is isolated and preserves published
   let routePool: PoolLike | undefined;
   let server: ReturnType<Awaited<typeof import("../src/app.ts")>["default"]["listen"]> | undefined;
   const userId = randomUUID();
+    const reviewerId = randomUUID();
   const token = randomUUID();
+    const reviewerToken = randomUUID();
   const now = new Date();
 
   try {
@@ -413,15 +486,44 @@ test("W12 parameterized PostgreSQL lifecycle is isolated and preserves published
       t.skip("DATABASE_URL does not contain the CMS lifecycle tables");
       return;
     }
+    await applyTask345Migrations(admin);
+    await installIsolatedTriggers(admin, schema);
+    const completeSchema = await admin.query<{ ready: boolean }>(
+      `SELECT to_regclass('cms_review_requests') IS NOT NULL
+         AND to_regclass('cms_revision_accuracy_confirmations') IS NOT NULL
+         AND to_regclass('cms_user_capability_grants') IS NOT NULL
+          AND to_regclass('cms_user_capability_configurations') IS NOT NULL
+          AND to_regclass('cms_legacy_administrator_market_snapshots') IS NOT NULL AS ready`,
+    );
+    if (!completeSchema.rows[0]?.ready) {
+      t.skip("DATABASE_URL does not contain the complete Task 345 review/capability schema");
+      return;
+    }
+    await admin.query(
+      `INSERT INTO market_editions
+         (id,code,display_name,default_locale,fallback_market_code,fallback_locale,enabled,is_canonical)
+       VALUES ($1,'uae','United Arab Emirates','en',NULL,NULL,true,true)`,
+      [randomUUID()],
+    );
     await admin.query(
       `INSERT INTO cms_users(id,email,display_name,role,status)
        VALUES ($1,$2,'W12 PostgreSQL lifecycle administrator','administrator','active')`,
       [userId, `${schema}@example.com`],
     );
     await admin.query(
+      `INSERT INTO cms_users(id,email,display_name,role,status)
+       VALUES ($1,$2,'W12 PostgreSQL lifecycle reviewer','publisher','active')`,
+      [reviewerId, `${schema}.reviewer@example.com`],
+    );
+    await admin.query(
+      `INSERT INTO cms_user_market_assignments(user_id,market_code)
+       VALUES ($1,'uae')`,
+      [reviewerId],
+    );
+    await admin.query(
       `INSERT INTO cms_totp_credentials(user_id,encrypted_secret,encryption_key_version,verified_at)
-       VALUES ($1,'w12-fixture',1,now())`,
-      [userId],
+       VALUES ($1,'w12-fixture',1,now()),($2,'w12-fixture',1,now())`,
+      [userId, reviewerId],
     );
     await admin.query(
       `INSERT INTO cms_sessions(user_id,token_digest,mfa_satisfied_at,expires_at)
@@ -429,10 +531,9 @@ test("W12 parameterized PostgreSQL lifecycle is isolated and preserves published
       [userId, (await import("../src/lib/security.ts")).hashToken(token)],
     );
     await admin.query(
-      `INSERT INTO market_editions
-         (id,code,display_name,default_locale,fallback_market_code,fallback_locale,enabled,is_canonical)
-       VALUES ($1,'uae','United Arab Emirates','en',NULL,NULL,true,true)`,
-      [randomUUID()],
+      `INSERT INTO cms_sessions(user_id,token_digest,mfa_satisfied_at,expires_at)
+       VALUES ($1,$2,now(),now()+interval '1 hour')`,
+      [reviewerId, (await import("../src/lib/security.ts")).hashToken(reviewerToken)],
     );
     await seedLifecycleMedia(admin, userId, fixtures);
 
@@ -450,19 +551,33 @@ test("W12 parameterized PostgreSQL lifecycle is isolated and preserves published
     const address = server.address();
     assert.ok(address && typeof address !== "string");
     const origin = `http://127.0.0.1:${address.port}`;
-    const csrf = auth.csrfForSession(security.hashToken(token));
-    const headers = {
-      "content-type": "application/json",
-      origin,
-      "x-csrf-token": csrf,
-      cookie: `${auth.SESSION_COOKIE}=${token}; ${auth.CSRF_COOKIE}=${csrf}`,
+    const sessionHeaders = (sessionToken: string) => {
+      const csrf = auth.csrfForSession(security.hashToken(sessionToken));
+      return {
+        "content-type": "application/json",
+        origin,
+        "x-csrf-token": csrf,
+        cookie: `${auth.SESSION_COOKIE}=${sessionToken}; ${auth.CSRF_COOKIE}=${csrf}`,
+      };
     };
-    const request = (path: string, method: "GET" | "POST" | "PATCH" | "DELETE", body?: Record<string, unknown>) =>
+    const requestAs = (
+      sessionToken: string,
+      path: string,
+      method: "GET" | "POST" | "PATCH" | "DELETE",
+      body?: Record<string, unknown>,
+    ) =>
       fetch(`${origin}${path}`, {
         method,
-        headers,
+        headers: sessionHeaders(sessionToken),
         ...(body ? { body: JSON.stringify(body) } : {}),
       });
+    const request = (path: string, method: "GET" | "POST" | "PATCH" | "DELETE", body?: Record<string, unknown>) =>
+      requestAs(token, path, method, body);
+    const reviewerRequest = (
+      path: string,
+      method: "GET" | "POST" | "PATCH" | "DELETE",
+      body?: Record<string, unknown>,
+    ) => requestAs(reviewerToken, path, method, body);
     const expectStatus = async (response: Response, expected: number, label: string) => {
       const text = await response.text();
       assert.equal(response.status, expected, `${label}: ${text}`);
@@ -502,14 +617,30 @@ test("W12 parameterized PostgreSQL lifecycle is isolated and preserves published
       const revisionId = created.currentRevisionId;
       assert.equal(created.revisionNumber, 1);
 
+      const accuracy = await request(
+        `/api/documents/${documentId}/revisions/${revisionId}/accuracy-confirmation`,
+        "POST",
+      );
+      await expectStatus(accuracy, 200, `${kind} exact revision accuracy confirmation`);
       const submit = await request(`/api/documents/${documentId}/submit`, "POST", {
         revisionId,
       });
       await expectStatus(submit, 200, `${kind} submit`);
-      const rejected = await request(`/api/documents/${documentId}/reject`, "POST", {
-        revisionId,
-        body: "W12 rejection round trip",
-      });
+      const requestedReview = await admin.query<{ id: string; reviewer_user_id: string; status: string }>(
+        `SELECT id::text id,reviewer_user_id::text,status
+           FROM cms_review_requests
+          WHERE revision_id=$1
+          ORDER BY requested_at DESC,id DESC
+          LIMIT 1`,
+        [revisionId],
+      );
+      assert.equal(requestedReview.rows[0]?.reviewer_user_id, reviewerId);
+      assert.equal(requestedReview.rows[0]?.status, "requested");
+      const rejected = await reviewerRequest(
+        `/api/editorial-work/review-requests/${requestedReview.rows[0]!.id}/decision`,
+        "POST",
+        { decision: "rejected", note: "W12 rejection round trip" },
+      );
       await expectStatus(rejected, 200, `${kind} reject`);
       const rejectedState = await admin.query<{ workflow_state: string }>(
         `SELECT workflow_state FROM cms_revisions WHERE id=$1`,
@@ -524,7 +655,23 @@ test("W12 parameterized PostgreSQL lifecycle is isolated and preserves published
 
       const resubmit = await request(`/api/documents/${documentId}/submit`, "POST", { revisionId });
       await expectStatus(resubmit, 200, `${kind} resubmit`);
-      const availabilityReview = await request(`/api/documents/${documentId}/availability/review`, "POST", {
+      const approvedReview = await admin.query<{ id: string; reviewer_user_id: string; status: string }>(
+        `SELECT id::text id,reviewer_user_id::text,status
+           FROM cms_review_requests
+          WHERE revision_id=$1
+          ORDER BY requested_at DESC,id DESC
+          LIMIT 1`,
+        [revisionId],
+      );
+      assert.equal(approvedReview.rows[0]?.reviewer_user_id, reviewerId);
+      assert.equal(approvedReview.rows[0]?.status, "requested");
+      const approval = await reviewerRequest(
+        `/api/editorial-work/review-requests/${approvedReview.rows[0]!.id}/decision`,
+        "POST",
+        { decision: "approved" },
+      );
+      await expectStatus(approval, 200, `${kind} approve`);
+      const availabilityReview = await reviewerRequest(`/api/documents/${documentId}/availability/review`, "POST", {
         version: 1,
       });
       await expectStatus(availabilityReview, 200, `${kind} destination review`);

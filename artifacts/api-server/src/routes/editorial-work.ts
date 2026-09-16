@@ -1,16 +1,18 @@
 import { Router, type IRouter } from "express";
 import { pool } from "@workspace/db";
-import { authenticate, requireCsrf, requireEditor, requireMfa, requirePublisher, type AuthContext } from "../lib/auth";
+import { authenticate, requireCsrf, requireMfa, type AuthContext } from "../lib/auth";
 import { audit } from "../lib/cms";
 import { asyncRoute } from "../lib/http";
 import { lockDocumentForMutation, revalidateMutationAuth } from "../lib/managed-market-lifecycle";
 import { editorialDigestConfigured } from "../lib/editorial-work";
 import { canAccessEditionTarget } from "./documents";
+import type { CmsCapability } from "../lib/policy";
 
 const router: IRouter = Router();
 router.use("/editorial-work", authenticate, requireMfa);
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const REVIEW_RECOVERY_BLOCKED_REASON = "The requested reviewer is unavailable or no longer authorized for this exact edition.";
 type Queryable = { query: (sql: string, values?: unknown[]) => Promise<{ rows: any[]; rowCount?: number | null }> };
 
 function uuid(value: unknown): value is string {
@@ -52,21 +54,38 @@ async function editionTarget(client: Queryable, editionId: string, lock = false)
   );
   return result.rows[0] as Record<string, any> | undefined;
 }
-async function hasEditionAccess(client: Queryable, userId: string, role: string, target: Record<string, any>) {
+async function hasEditionAccess(
+  client: Queryable,
+  userId: string,
+  role: string,
+  target: Record<string, any>,
+  capability: CmsCapability = "view",
+) {
+  const user = await client.query(
+    `SELECT id,status,role
+       FROM cms_users
+      WHERE id=$1
+      FOR SHARE`,
+    [userId],
+  );
+  if (!user.rowCount || user.rows[0].status !== "active") return false;
   const assignments = await client.query(
     "SELECT market_code FROM cms_user_market_assignments WHERE user_id=$1 ORDER BY market_code",
     [userId],
   );
   // Delegate the subtle shared/adopted binding boundary to the same authority
-  // routine that guards document mutations and previews.
+  // routine that guards document mutations and previews. canAccessContent reads
+  // the durable capability matrix by subject id, so a reviewer whose central
+  // grant was revoked is denied even when a legacy market assignment remains.
   return canAccessEditionTarget(client, {
     id: "", tokenHash: "", mfaVerified: true, createdAt: new Date(0), expiresAt: new Date(0),
     user: {
-      id: userId, name: "", email: "", role: role as AuthContext["user"]["role"], status: "active",
+      id: userId, name: "", email: "", role: (user.rows[0].role ?? role) as AuthContext["user"]["role"], status: "active",
       marketCodes: assignments.rows.map((row: { market_code: string }) => String(row.market_code)),
+      capabilityMatrixConfigured: false, capabilityGrants: [], legacyAdministratorMarketCodes: [],
       mfaEnabled: true, mustRotate: false, lastLoginAt: null, createdAt: new Date(0), updatedAt: new Date(0),
     },
-  }, String(target.document_id), String(target.market), String(target.locale));
+  }, String(target.document_id), String(target.market), String(target.locale), capability);
 }
 async function eligibleAssignee(client: Queryable, userId: string | null, target: Record<string, any>) {
   if (!userId) return true;
@@ -74,17 +93,77 @@ async function eligibleAssignee(client: Queryable, userId: string | null, target
     `SELECT id,role,status FROM cms_users WHERE id=$1 FOR SHARE`,
     [userId],
   );
-  if (!user.rowCount || user.rows[0].status !== "active" || user.rows[0].role === "viewer") return false;
-  return hasEditionAccess(client, userId, String(user.rows[0].role), target);
+  if (!user.rowCount || user.rows[0].status !== "active") return false;
+  return hasEditionAccess(client, userId, String(user.rows[0].role), target, "edit");
 }
 async function eligibleReviewer(client: Queryable, userId: string | null, target: Record<string, any>) {
   if (!userId) return true;
   const user = await client.query(
     `SELECT id,role,status FROM cms_users
-      WHERE id=$1 AND status='active' AND role IN ('administrator','publisher') FOR SHARE`,
+      WHERE id=$1 AND status='active'
+        AND role IN ('administrator','publisher') FOR SHARE`,
     [userId],
   );
-  return Boolean(user.rowCount) && hasEditionAccess(client, userId, String(user.rows[0].role), target);
+  return Boolean(user.rowCount) && hasEditionAccess(client, userId, String(user.rows[0].role), target, "review");
+}
+
+/**
+ * Reviewer routing is a central capability decision, not an assignment
+ * lookup. The caller supplies the complete separation-of-duties set so a
+ * recovery can never select the requester, revision author, accountable
+ * editor, or the recovery actor.
+ */
+async function centralEligibleReviewer(
+  client: Queryable,
+  target: Record<string, any>,
+  excludedReviewerIds: ReadonlySet<string>,
+  requestedReviewerId?: string | null,
+) {
+  const candidates = await client.query(
+    `SELECT id,role FROM cms_users
+      WHERE status='active'
+        AND role IN ('administrator','publisher')
+       ORDER BY CASE WHEN role='publisher' THEN 0 ELSE 1 END,
+                display_name NULLS LAST,email,id
+      FOR SHARE`,
+  );
+  const orderedCandidates = requestedReviewerId
+    ? [
+      ...candidates.rows.filter((candidate) => String(candidate.id) === requestedReviewerId),
+      ...candidates.rows.filter((candidate) => String(candidate.id) !== requestedReviewerId),
+    ]
+    : candidates.rows;
+  for (const candidate of orderedCandidates) {
+    const candidateId = String(candidate.id);
+    if (excludedReviewerIds.has(candidateId)) continue;
+    if (await hasEditionAccess(client, candidateId, String(candidate.role), target, "review")) {
+      return candidateId;
+    }
+  }
+  return null;
+}
+
+/**
+ * A requester may recover its own exact request with Edit authority. A
+ * publisher/administrator with current exact Review authority is the central
+ * routing command path. Explicit matrix users with Review authority are also
+ * treated as routing managers; read the grant again so a long-lived session
+ * cannot make a newly granted command path unusable.
+ */
+async function isCentralReviewManager(client: Queryable, auth: AuthContext) {
+  if (["publisher", "administrator"].includes(auth.user.role)) return true;
+  try {
+    const grant = await client.query(
+      `SELECT 1 FROM cms_user_capability_grants
+        WHERE user_id=$1 AND capability='review'
+        LIMIT 1`,
+      [auth.user.id],
+    );
+    return Boolean(grant.rowCount);
+  } catch (error: any) {
+    if (error?.code === "42P01") return false;
+    throw error;
+  }
 }
 async function queueRows(auth: AuthContext, team: boolean, includeUnassigned: boolean) {
   const result = await pool.query(
@@ -108,6 +187,8 @@ async function queueRows(auth: AuthContext, team: boolean, includeUnassigned: bo
                     WHERE access_assignment.user_id=assignment.reviewer_user_id
                       AND access_assignment.market_code=e.market) THEN true ELSE false END reviewer_access,
              request.id review_request_id,request.status review_status,request.blocked_reason review_blocked_reason,request.revision_id review_revision_id,
+             request.reviewer_user_id review_reviewer_user_id,
+             request_reviewer.display_name review_reviewer_name,request_reviewer.status review_reviewer_status,request_reviewer.role review_reviewer_role,
              true accessible
        FROM cms_documents d
        LEFT JOIN cms_editorial_assignments assignment
@@ -128,9 +209,11 @@ async function queueRows(auth: AuthContext, team: boolean, includeUnassigned: bo
         ) request ON true
        LEFT JOIN cms_users editor ON editor.id=assignment.editor_user_id
        LEFT JOIN cms_users reviewer ON reviewer.id=assignment.reviewer_user_id
+        LEFT JOIN cms_users request_reviewer ON request_reviewer.id=request.reviewer_user_id
        WHERE assignment.id IS NOT NULL
-         AND ($1::boolean OR assignment.editor_user_id=$2 OR assignment.reviewer_user_id=$2
-               OR (request.reviewer_user_id=$2 AND request.status='requested'))
+          AND ($1::boolean OR assignment.editor_user_id=$2 OR assignment.reviewer_user_id=$2
+                OR (request.reviewer_user_id=$2 AND request.status='requested')
+                OR (request.requester_user_id=$2 AND request.status='requested'))
       UNION ALL
      SELECT assignment.id,assignment.document_id,assignment.edition_id,assignment.editor_user_id,
             assignment.reviewer_user_id,assignment.due_at,assignment.created_at,assignment.updated_at,
@@ -150,7 +233,9 @@ async function queueRows(auth: AuthContext, team: boolean, includeUnassigned: bo
                    SELECT 1 FROM cms_user_market_assignments access_assignment
                     WHERE access_assignment.user_id=assignment.reviewer_user_id
                       AND access_assignment.market_code=e.market) THEN true ELSE false END,
-             request.id,request.status,request.blocked_reason,request.revision_id,
+              request.id,request.status,request.blocked_reason,request.revision_id,
+              request.reviewer_user_id,
+              request_reviewer.display_name,request_reviewer.status,request_reviewer.role,
              true
        FROM cms_editorial_assignments assignment
        JOIN cms_documents d ON d.id=assignment.document_id
@@ -170,6 +255,7 @@ async function queueRows(auth: AuthContext, team: boolean, includeUnassigned: bo
         ) request ON true
        LEFT JOIN cms_users editor ON editor.id=assignment.editor_user_id
        LEFT JOIN cms_users reviewer ON reviewer.id=assignment.reviewer_user_id
+        LEFT JOIN cms_users request_reviewer ON request_reviewer.id=request.reviewer_user_id
        WHERE ($1::boolean OR assignment.editor_user_id=$2 OR assignment.reviewer_user_id=$2
                OR (request.reviewer_user_id=$2 AND request.status='requested'))
       ORDER BY due_at NULLS LAST,updated_at DESC`,
@@ -182,15 +268,17 @@ async function queueRows(auth: AuthContext, team: boolean, includeUnassigned: bo
             request.requested_at updated_at,d.title document_title,d.kind document_kind,e.market,e.locale,
              e.published_revision_id,binding.mode,binding.translation_state,binding.based_on_baseline_revision_id,baseline.active_revision_id,
              latest.id current_revision_id,latest.revision_number current_revision_number,
-            latest.workflow_state,NULL::text editor_name,reviewer.display_name reviewer_name,
-            NULL::text editor_status,reviewer.status reviewer_status,NULL::text editor_role,reviewer.role reviewer_role,
+             latest.workflow_state,NULL::text editor_name,reviewer.display_name reviewer_name,
+             NULL::text editor_status,reviewer.status reviewer_status,NULL::text editor_role,reviewer.role reviewer_role,
              true editor_access,true reviewer_access,request.id review_request_id,request.status review_status,request.blocked_reason review_blocked_reason,
             request.revision_id review_revision_id,
+             request.reviewer_user_id review_reviewer_user_id,
+             reviewer.display_name review_reviewer_name,reviewer.status review_reviewer_status,reviewer.role review_reviewer_role,
              true accessible
        FROM cms_review_requests request
        JOIN cms_market_editions e ON e.id=request.edition_id
        JOIN cms_documents d ON d.id=e.document_id
-       JOIN cms_users reviewer ON reviewer.id=request.reviewer_user_id
+        LEFT JOIN cms_users reviewer ON reviewer.id=request.reviewer_user_id
        LEFT JOIN cms_editorial_assignments assignment ON assignment.edition_id=e.id
         LEFT JOIN market_editions catalogue ON catalogue.code=e.market
         LEFT JOIN cms_market_edition_bindings binding ON binding.document_id=d.id
@@ -200,11 +288,12 @@ async function queueRows(auth: AuthContext, team: boolean, includeUnassigned: bo
          SELECT id,revision_number,workflow_state FROM cms_revisions
           WHERE edition_id=e.id ORDER BY revision_number DESC LIMIT 1
        ) latest ON true
-        WHERE assignment.id IS NULL
+         WHERE assignment.id IS NULL
           AND request.id=(SELECT newest.id FROM cms_review_requests newest
                            WHERE newest.edition_id=e.id
                            ORDER BY newest.requested_at DESC,newest.id DESC LIMIT 1)
-          AND ($1::boolean OR (request.reviewer_user_id=$2 AND request.status='requested'))`,
+           AND ($1::boolean OR (request.reviewer_user_id=$2 AND request.status='requested')
+                OR (request.requester_user_id=$2 AND request.status='requested'))`,
     [team, auth.user.id],
   );
   rows.push(...reviewOnly.rows);
@@ -249,9 +338,14 @@ async function queueRows(auth: AuthContext, team: boolean, includeUnassigned: bo
     editor: !row.editor_user_id || !row.edition_id
       ? true
       : await hasEditionAccess(pool, String(row.editor_user_id), String(row.editor_role), row),
-    reviewer: !row.reviewer_user_id || !row.edition_id
-      ? true
+    reviewer: !row.reviewer_user_id
+      ? !row.review_request_id
+      : !row.edition_id
+        ? true
       : await hasEditionAccess(pool, String(row.reviewer_user_id), String(row.reviewer_role), row),
+    reviewRequestReviewer: !row.review_request_id || !row.review_reviewer_user_id || !row.edition_id
+      ? !row.review_request_id
+      : await hasEditionAccess(pool, String(row.review_reviewer_user_id), String(row.review_reviewer_role), row),
   })));
   return rows
     .filter((_row, index) => authorized[index])
@@ -259,6 +353,10 @@ async function queueRows(auth: AuthContext, team: boolean, includeUnassigned: bo
     .map((row, _filteredIndex) => {
       const rowIndex = rows.indexOf(row);
       const rights = assigneeRights[rowIndex];
+      const requestReviewerBlocked = row.review_status === "requested"
+        && (!row.review_reviewer_user_id
+          || row.review_reviewer_status !== "active"
+          || !rights?.reviewRequestReviewer);
       const assigneeBlocked = (row.editor_status && row.editor_status !== "active")
         || (row.reviewer_status && row.reviewer_status !== "active")
         || !rights?.editor || !rights?.reviewer;
@@ -268,11 +366,14 @@ async function queueRows(auth: AuthContext, team: boolean, includeUnassigned: bo
             && row.based_on_baseline_revision_id !== row.active_baseline_revision_id));
       const reviewBlocked = ["rejected", "superseded", "blocked"].includes(String(row.review_status));
       const completed = !assigneeBlocked && !sharedBlocked && !reviewBlocked
+        && !requestReviewerBlocked
         && row.review_status !== "requested"
         && Boolean(row.current_revision_id)
         && (row.workflow_state === "approved" || row.published_revision_id === row.current_revision_id);
       const blockedReason = sharedBlocked
         ? "The shared baseline has changed and this edition must be updated."
+        : requestReviewerBlocked
+          ? REVIEW_RECOVERY_BLOCKED_REASON
         : assigneeBlocked
           ? "An assigned editor or reviewer is inactive or no longer has market access."
           : row.review_status === "rejected"
@@ -282,12 +383,24 @@ async function queueRows(auth: AuthContext, team: boolean, includeUnassigned: bo
               : row.review_status === "blocked"
                 ? (row.review_blocked_reason ?? "The latest review request is blocked.")
                 : null;
-      return {
+       return {
       id: row.id ? String(row.id) : `unassigned:${row.edition_id}`, editionId: row.edition_id ? String(row.edition_id) : null,
       documentId: String(row.document_id), documentTitle: row.document_title, documentKind: row.document_kind,
       market: row.market ?? null, locale: row.locale ?? null,
-      editor: row.editor_user_id ? { id: String(row.editor_user_id), name: row.editor_name, status: row.editor_status } : null,
-      reviewer: row.reviewer_user_id ? { id: String(row.reviewer_user_id), name: row.reviewer_name, status: row.reviewer_status } : null,
+       editor: row.editor_user_id ? { id: String(row.editor_user_id), name: row.editor_name, status: row.editor_status } : null,
+       reviewer: row.review_request_id && row.review_reviewer_user_id
+         ? {
+           id: String(row.review_reviewer_user_id),
+           name: row.review_reviewer_name ?? "Unavailable reviewer",
+           status: row.review_reviewer_status ?? "unavailable",
+         }
+         : row.reviewer_user_id
+           ? {
+             id: String(row.reviewer_user_id),
+             name: row.reviewer_name ?? "Unavailable reviewer",
+             status: row.reviewer_status ?? "unavailable",
+           }
+           : null,
       dueAt: row.due_at, overdue: Boolean(row.due_at && new Date(row.due_at).getTime() < Date.now()),
       status: blockedReason ? "blocked" : completed ? "completed" : "active",
       blockedReason,
@@ -298,11 +411,13 @@ async function queueRows(auth: AuthContext, team: boolean, includeUnassigned: bo
       currentRevisionNumber: row.current_revision_number ?? null, workflowState: row.workflow_state ?? null,
       publishedRevisionId: row.published_revision_id ? String(row.published_revision_id) : null,
       link: link(String(row.document_id), row.market, row.locale),
+       assignedToActor: String(row.editor_user_id ?? "") === auth.user.id
+         || String(row.reviewer_user_id ?? "") === auth.user.id,
     };
     });
 }
 
-router.put("/editorial-work/editions/:editionId/assignment", requireCsrf, requireEditor, asyncRoute(async (req, res) => {
+router.put("/editorial-work/editions/:editionId/assignment", requireCsrf, asyncRoute(async (req, res) => {
   const body = req.body as Record<string, unknown>;
   const editorId = optionalUuid(body.editorId);
   const reviewerId = optionalUuid(body.reviewerId);
@@ -322,13 +437,13 @@ router.put("/editorial-work/editions/:editionId/assignment", requireCsrf, requir
       await client.query("ROLLBACK"); res.status(404).json({ error: "Edition not found." }); return;
     }
     const target = await editionTarget(client, req.params.editionId, true);
-    const auth = await revalidateMutationAuth(client, res.locals.auth as AuthContext, "editor");
+    const auth = await revalidateMutationAuth(client, res.locals.auth as AuthContext);
     if (!target) { await client.query("ROLLBACK"); res.status(404).json({ error: "Edition not found." }); return; }
-    if (!auth || !await hasEditionAccess(client, auth.user.id, auth.user.role, target)) {
+    if (!auth || !await hasEditionAccess(client, auth.user.id, auth.user.role, target, "edit")) {
       await client.query("ROLLBACK"); res.status(403).json({ error: "You are not assigned to this market." }); return;
     }
     if (!await eligibleAssignee(client, editorId, target) || !await eligibleReviewer(client, reviewerId, target)) {
-      await client.query("ROLLBACK"); res.status(409).json({ error: "Editors must be active and authorized; reviewers must be active publishers or administrators authorized for this exact edition." }); return;
+      await client.query("ROLLBACK"); res.status(409).json({ error: "Editors and reviewers must be active and explicitly authorized for this exact edition." }); return;
     }
     const result = await client.query(
       `INSERT INTO cms_editorial_assignments
@@ -378,7 +493,7 @@ router.put("/editorial-work/editions/:editionId/assignment", requireCsrf, requir
   } catch (error) { await client.query("ROLLBACK").catch(() => undefined); throw error; } finally { client.release(); }
 }));
 
-router.delete("/editorial-work/editions/:editionId/assignment", requireCsrf, requireEditor, asyncRoute(async (req, res) => {
+router.delete("/editorial-work/editions/:editionId/assignment", requireCsrf, asyncRoute(async (req, res) => {
   if (!uuid(req.params.editionId)) { res.status(400).json({ error: "Invalid edition." }); return; }
   const client = await pool.connect();
   try {
@@ -388,9 +503,9 @@ router.delete("/editorial-work/editions/:editionId/assignment", requireCsrf, req
       await client.query("ROLLBACK"); res.status(404).json({ error: "Edition not found." }); return;
     }
     const target = await editionTarget(client, req.params.editionId, true);
-    const auth = await revalidateMutationAuth(client, res.locals.auth as AuthContext, "editor");
+    const auth = await revalidateMutationAuth(client, res.locals.auth as AuthContext);
     if (!target) { await client.query("ROLLBACK"); res.status(404).json({ error: "Edition not found." }); return; }
-    if (!auth || !await hasEditionAccess(client, auth.user.id, auth.user.role, target)) {
+    if (!auth || !await hasEditionAccess(client, auth.user.id, auth.user.role, target, "edit")) {
       await client.query("ROLLBACK"); res.status(403).json({ error: "You are not assigned to this market." }); return;
     }
     const superseded = await client.query(
@@ -424,7 +539,7 @@ router.get("/editorial-work/assignments", asyncRoute(async (req, res) => {
   const auth = res.locals.auth as AuthContext;
   const target = await editionTarget(pool, editionId);
   if (!target) { res.status(404).json({ error: "Edition not found." }); return; }
-  if (!await hasEditionAccess(pool, auth.user.id, auth.user.role, target)) {
+  if (!await hasEditionAccess(pool, auth.user.id, auth.user.role, target, "review")) {
     res.status(403).json({ error: "You are not assigned to this market." }); return;
   }
   const result = await pool.query(
@@ -440,7 +555,7 @@ router.get("/editorial-work/assignments", asyncRoute(async (req, res) => {
   res.json({ items: result.rows.map(assignmentJson) });
 }));
 
-router.get("/editorial-work/editions/:editionId/assignees", requireEditor, asyncRoute(async (req, res) => {
+router.get("/editorial-work/editions/:editionId/assignees", asyncRoute(async (req, res) => {
   if (!uuid(req.params.editionId)) { res.status(400).json({ error: "Invalid edition." }); return; }
   const auth = res.locals.auth as AuthContext;
   const target = await editionTarget(pool, req.params.editionId);
@@ -450,17 +565,17 @@ router.get("/editorial-work/editions/:editionId/assignees", requireEditor, async
   }
   const candidates = await pool.query(
     `SELECT id,display_name,role FROM cms_users
-      WHERE status='active' AND role IN ('editor','publisher','administrator')
+      WHERE status='active'
       ORDER BY display_name NULLS LAST,email,id`,
   );
   const authorized = await Promise.all(candidates.rows.map(async (candidate) =>
-    hasEditionAccess(pool, String(candidate.id), String(candidate.role), target)));
+    hasEditionAccess(pool, String(candidate.id), String(candidate.role), target, "review")));
   res.json({ items: candidates.rows
     .filter((_candidate, index) => authorized[index])
     .map((candidate) => ({ id: String(candidate.id), name: candidate.display_name ?? "Unnamed user", role: candidate.role })) });
 }));
 
-router.post("/editorial-work/revisions/:revisionId/request-review", requireCsrf, requireEditor, asyncRoute(async (req, res) => {
+router.post("/editorial-work/revisions/:revisionId/request-review", requireCsrf, asyncRoute(async (req, res) => {
   const body = req.body === undefined || req.body === null
     ? {}
     : typeof req.body === "object" && !Array.isArray(req.body)
@@ -486,50 +601,174 @@ router.post("/editorial-work/revisions/:revisionId/request-review", requireCsrf,
          FROM cms_revisions r JOIN cms_market_editions e ON e.id=r.edition_id
         WHERE r.id=$1
         FOR UPDATE OF r,e`, [req.params.revisionId]);
-    const auth = await revalidateMutationAuth(client, res.locals.auth as AuthContext, "editor");
+    const auth = await revalidateMutationAuth(client, res.locals.auth as AuthContext);
     if (!revision.rowCount) { await client.query("ROLLBACK"); res.status(404).json({ error: "Revision not found." }); return; }
     const target = revision.rows[0];
-    if (!auth || !await hasEditionAccess(client, auth.user.id, auth.user.role, target)) {
+    if (!auth) {
       await client.query("ROLLBACK"); res.status(403).json({ error: "You are not assigned to this market." }); return;
     }
-    const latest = await client.query("SELECT id FROM cms_revisions WHERE edition_id=$1 ORDER BY revision_number DESC LIMIT 1", [target.edition_id]);
+    const latest = await client.query(
+      "SELECT id FROM cms_revisions WHERE edition_id=$1 ORDER BY revision_number DESC,created_at DESC,id DESC LIMIT 1",
+      [target.edition_id],
+    );
     if (String(latest.rows[0]?.id) !== String(target.id) || target.workflow_state !== "in-review") {
       await client.query("ROLLBACK"); res.status(409).json({ error: "Review requests require the current revision already submitted for review." }); return;
     }
-    const assignment = await client.query(
-      "SELECT editor_user_id,reviewer_user_id FROM cms_editorial_assignments WHERE edition_id=$1",
-      [target.edition_id],
-    );
-    const recipient = reviewerId ?? assignment.rows[0]?.reviewer_user_id;
-    if (!recipient || String(recipient) === auth.user.id || String(recipient) === String(target.created_by_user_id)
-      || String(recipient) === String(assignment.rows[0]?.editor_user_id)
-      || !await eligibleReviewer(client, String(recipient), target)) {
-      await client.query("ROLLBACK"); res.status(409).json({ error: "Choose an active, authorized publisher or administrator other than the requester, revision author, or accountable editor." }); return;
+    const exactEdit = await hasEditionAccess(client, auth.user.id, auth.user.role, target, "edit");
+    const exactReview = await hasEditionAccess(client, auth.user.id, auth.user.role, target, "review");
+    const reviewManager = await isCentralReviewManager(client, auth) && exactReview;
+    if (!exactEdit && !reviewManager) {
+      await client.query("ROLLBACK");
+      res.status(403).json({ error: "Only the exact editor or an authorized central review manager can route this revision." });
+      return;
     }
-    const existing = await client.query("SELECT * FROM cms_review_requests WHERE revision_id=$1 AND status='requested' FOR UPDATE", [target.id]);
+    // A retry is a read of the durable exact-revision request, not a new
+    // reviewer-selection operation while the frozen reviewer remains eligible.
+    // A request whose reviewer has since lost authority is the one narrow
+    // recovery path: it is repaired in this same transaction, retaining the
+    // request id and all original attribution.
+    const existing = await client.query(
+      `SELECT * FROM cms_review_requests
+        WHERE revision_id=$1
+        ORDER BY requested_at DESC,id DESC
+        LIMIT 1
+        FOR UPDATE`,
+      [target.id],
+    );
     const prior = existing.rows[0];
-    if (prior && String(prior.reviewer_user_id) !== String(recipient)) {
-      await client.query(
-        `UPDATE cms_review_requests
-            SET status='superseded',superseded_at=now(),
-                blocked_reason='Review was requested from another reviewer.'
-          WHERE id=$1 AND status='requested'`,
-        [prior.id],
+    if (prior) {
+      if (prior.status !== "requested") {
+        await client.query("ROLLBACK");
+        res.status(409).json({
+          error: "This exact revision already has a decided or superseded review request and cannot be rerouted.",
+        });
+        return;
+      }
+      const priorReviewerIsEligible = await eligibleReviewer(client, String(prior.reviewer_user_id), target);
+      if (priorReviewerIsEligible) {
+        if (reviewerId && String(prior.reviewer_user_id) !== String(reviewerId)) {
+          await client.query("ROLLBACK");
+          res.status(409).json({
+            error: "This revision already has an open review request. Reviewer reassignment requires a separate privileged action.",
+          });
+          return;
+        }
+        await client.query("COMMIT");
+        res.json({ reviewRequest: reviewJson(prior) });
+        return;
+      }
+      const isOriginalRequester = String(prior.requester_user_id) === auth.user.id && exactEdit;
+      if (!isOriginalRequester && !reviewManager) {
+        await client.query("ROLLBACK");
+        res.status(403).json({ error: "Only the original exact editor or an authorized central review manager can recover this review request." });
+        return;
+      }
+      const assignment = await client.query(
+        `SELECT editor_user_id FROM cms_editorial_assignments
+          WHERE document_id=$1 AND (edition_id=$2 OR edition_id IS NULL)
+          ORDER BY (edition_id=$2) DESC
+          LIMIT 1`,
+        [target.document_id, target.edition_id],
       );
+      const excludedReviewerIds = new Set([
+        String(prior.requester_user_id),
+        String(target.created_by_user_id),
+        prior.accountable_editor_user_id ? String(prior.accountable_editor_user_id) : null,
+        assignment.rows[0]?.editor_user_id ? String(assignment.rows[0].editor_user_id) : null,
+        auth.user.id,
+      ].filter((value): value is string => Boolean(value)));
+      let recipient: string | null = null;
+      if (reviewerId) {
+        if (excludedReviewerIds.has(String(reviewerId))
+          || !await eligibleReviewer(client, String(reviewerId), target)) {
+          await client.query("ROLLBACK");
+          res.status(409).json({ error: "Choose an active, authorized reviewer other than the requester, revision author, accountable editor, or routing actor." });
+          return;
+        }
+        recipient = String(reviewerId);
+      } else {
+        recipient = await centralEligibleReviewer(client, target, excludedReviewerIds);
+      }
+      if (!recipient) {
+        await client.query("ROLLBACK");
+        res.status(409).json({
+          error: "No eligible reviewer is available. A Users administrator must grant an active user review access to this exact destination.",
+        });
+        return;
+      }
+      const rerouted = await client.query(
+        `UPDATE cms_review_requests
+            SET reviewer_user_id=$2,blocked_reason=NULL
+          WHERE id=$1 AND status='requested'
+          RETURNING *`,
+        [prior.id, recipient],
+      );
+      if (!rerouted.rowCount) {
+        await client.query("ROLLBACK");
+        res.status(409).json({ error: "The review request changed while it was being recovered. Reload the exact revision." });
+        return;
+      }
+      const recoveredRequest = rerouted.rows[0];
       await client.query(
         `INSERT INTO cms_editorial_notifications(user_id,event_key,type,edition_id,document_id,revision_id,review_request_id,title,message,link)
-         VALUES ($1,$2,'review-superseded',$3,$4,$5,$6,'Review request superseded',
-                 'Review was requested from another reviewer before this review was decided.',$7)
+         VALUES ($1,$2,'review-requested',$3,$4,$5,$6,'Review request rerouted',
+                 'An exact submitted revision was rerouted and needs your review.',$7)
          ON CONFLICT (user_id,event_key) DO NOTHING`,
-        [prior.reviewer_user_id, `review-superseded:${prior.id}:reassigned`,
-          target.edition_id, target.document_id, target.id, prior.id,
-          link(String(target.document_id), target.market, target.locale)],
+        [recipient, `review-rerouted:${recoveredRequest.id}:${recipient}`, target.edition_id, target.document_id,
+          target.id, recoveredRequest.id, link(String(target.document_id), target.market, target.locale)],
       );
+      await audit(auth, "editorial.review_rerouted", "review-request", String(recoveredRequest.id), {
+        reviewRequestId: String(recoveredRequest.id),
+        revisionId: String(target.id),
+        previousReviewerId: String(prior.reviewer_user_id),
+        reviewerId: recipient,
+      }, client);
+      await client.query("COMMIT");
+      res.json({ reviewRequest: reviewJson(recoveredRequest) });
+      return;
     }
-    const request = prior && String(prior.reviewer_user_id) === String(recipient) ? prior : (await client.query(
-      `INSERT INTO cms_review_requests(edition_id,revision_id,requester_user_id,reviewer_user_id,note)
-       VALUES ($1,$2,$3,$4,$5) RETURNING *`,
-      [target.edition_id, target.id, auth.user.id, recipient, note],
+    // A frozen edition assignment is the preferred exact reviewer. If there
+    // is none, routing chooses the first independently eligible reviewer.
+    const assignment = await client.query(
+      `SELECT editor_user_id,reviewer_user_id FROM cms_editorial_assignments
+        WHERE document_id=$1 AND (edition_id=$2 OR edition_id IS NULL)
+        ORDER BY (edition_id=$2) DESC
+        LIMIT 1`,
+      [target.document_id, target.edition_id],
+    );
+    const excludedReviewerIds = new Set([
+      auth.user.id,
+      String(target.created_by_user_id),
+      assignment.rows[0]?.editor_user_id ? String(assignment.rows[0].editor_user_id) : null,
+    ].filter((value): value is string => Boolean(value)));
+    let recipient = reviewerId ?? (assignment.rows[0]?.reviewer_user_id
+      ? String(assignment.rows[0].reviewer_user_id) : null);
+    if (recipient) {
+      if (excludedReviewerIds.has(String(recipient))
+        || !await eligibleReviewer(client, String(recipient), target)) {
+        if (reviewerProvided) {
+          await client.query("ROLLBACK");
+          res.status(409).json({ error: "Choose an active, authorized reviewer other than the requester, revision author, or accountable editor." });
+          return;
+        }
+        recipient = null;
+      }
+    }
+    if (!recipient) {
+      recipient = await centralEligibleReviewer(client, target, excludedReviewerIds);
+      if (!recipient) {
+        await client.query("ROLLBACK");
+        res.status(409).json({
+          error: "No eligible reviewer is available. A Users administrator must grant an active user review access to this exact destination.",
+        });
+        return;
+      }
+    }
+    const request = (await client.query(
+      `INSERT INTO cms_review_requests
+         (edition_id,revision_id,requester_user_id,reviewer_user_id,accountable_editor_user_id,note)
+       VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
+      [target.edition_id, target.id, auth.user.id, recipient, assignment.rows[0]?.editor_user_id ?? null, note],
     )).rows[0];
     await client.query(
       `INSERT INTO cms_editorial_notifications(user_id,event_key,type,edition_id,document_id,revision_id,review_request_id,title,message,link)
@@ -540,11 +779,11 @@ router.post("/editorial-work/revisions/:revisionId/request-review", requireCsrf,
         link(String(target.document_id), target.market, target.locale)],
     );
     await audit(auth, "editorial.review_requested", "revision", String(target.id), { reviewRequestId: String(request.id), reviewerId: recipient }, client);
-    await client.query("COMMIT"); res.status(prior && String(prior.reviewer_user_id) === String(recipient) ? 200 : 201).json({ reviewRequest: reviewJson(request) });
+    await client.query("COMMIT"); res.status(201).json({ reviewRequest: reviewJson(request) });
   } catch (error) { await client.query("ROLLBACK").catch(() => undefined); throw error; } finally { client.release(); }
 }));
 
-router.post("/editorial-work/review-requests/:reviewRequestId/decision", requireCsrf, requirePublisher, asyncRoute(async (req, res) => {
+router.post("/editorial-work/review-requests/:reviewRequestId/decision", requireCsrf, asyncRoute(async (req, res) => {
   const body = req.body as Record<string, unknown>;
   const decision = body.decision === "approved" || body.decision === "rejected" ? body.decision : null;
   const note = typeof body.note === "string" && body.note.trim().length <= 2000 ? body.note.trim() || null : body.note === undefined ? null : undefined;
@@ -566,18 +805,15 @@ router.post("/editorial-work/review-requests/:reviewRequestId/decision", require
       await client.query("ROLLBACK"); res.status(404).json({ error: "Review request not found." }); return;
     }
     const request = await client.query(
-      `SELECT request.*,e.document_id,e.market,e.locale,r.created_by_user_id,
-              assignment.editor_user_id accountable_editor_user_id
+      `SELECT request.*,e.document_id,e.market,e.locale,r.created_by_user_id
          FROM cms_review_requests request
          JOIN cms_market_editions e ON e.id=request.edition_id
          JOIN cms_revisions r ON r.id=request.revision_id
-          LEFT JOIN cms_editorial_assignments assignment ON assignment.edition_id=e.id
         WHERE request.id=$1 FOR UPDATE OF request,e,r`, [req.params.reviewRequestId]);
-    const auth = await revalidateMutationAuth(client, res.locals.auth as AuthContext, "publisher");
+    const auth = await revalidateMutationAuth(client, res.locals.auth as AuthContext);
     if (!request.rowCount) { await client.query("ROLLBACK"); res.status(404).json({ error: "Review request not found." }); return; }
     const row = request.rows[0];
-    if (!auth || !["administrator", "publisher"].includes(auth.user.role)
-      || !await hasEditionAccess(client, auth.user.id, auth.user.role, row)
+    if (!auth || !await hasEditionAccess(client, auth.user.id, auth.user.role, row, "review")
       || String(row.reviewer_user_id) !== auth.user.id
       || String(row.created_by_user_id) === auth.user.id
       || String(row.requester_user_id) === auth.user.id
@@ -622,8 +858,9 @@ router.post("/editorial-work/review-requests/:reviewRequestId/decision", require
       );
     }
     const result = await client.query(
-      `UPDATE cms_review_requests SET decision_note=$2
-        WHERE id=$1 RETURNING *`, [row.id, note]);
+      `UPDATE cms_review_requests
+          SET status=$2,decision_note=$3,decided_at=COALESCE(decided_at,now())
+         WHERE id=$1 RETURNING *`, [row.id, decision, note]);
     await audit(auth, "editorial.review_decided", "review-request", String(row.id), { decision }, client);
     await client.query("COMMIT"); res.json({ reviewRequest: reviewJson(result.rows[0]) });
   } catch (error) { await client.query("ROLLBACK").catch(() => undefined); throw error; } finally { client.release(); }
@@ -631,12 +868,37 @@ router.post("/editorial-work/review-requests/:reviewRequestId/decision", require
 
 router.get("/editorial-work/my", asyncRoute(async (_req, res) => {
   const auth = res.locals.auth as AuthContext;
-  const items = await queueRows(auth, false, false);
-  res.json({ items, emptyState: items.length ? null : "no-work" });
+  const rows = await queueRows(auth, false, false);
+  const centralReviewManager = await isCentralReviewManager(pool, auth);
+  const items = (await Promise.all(rows.map(async (item) =>
+    await hasEditionAccess(pool, auth.user.id, auth.user.role, {
+      document_id: item.documentId, market: item.market, locale: item.locale,
+    }, "review")
+      && item.assignedToActor ? item : (
+        item.status === "blocked"
+        && item.blockedReason === REVIEW_RECOVERY_BLOCKED_REASON
+        && item.reviewRequest?.status === "requested"
+        && item.reviewRequest.requesterId === auth.user.id
+        && item.reviewRevisionId === item.currentRevisionId
+        && (
+          await hasEditionAccess(pool, auth.user.id, auth.user.role, {
+            document_id: item.documentId, market: item.market, locale: item.locale,
+          }, "edit")
+          || (centralReviewManager && await hasEditionAccess(pool, auth.user.id, auth.user.role, {
+            document_id: item.documentId, market: item.market, locale: item.locale,
+          }, "review"))
+        )
+      ) ? item : null,
+  ))).filter((item): item is NonNullable<typeof item> => item !== null);
+  res.json({ items: items.map(({ assignedToActor: _assignedToActor, ...item }) => item), emptyState: items.length ? null : "no-work" });
 }));
-router.get("/editorial-work/team", requirePublisher, asyncRoute(async (req, res) => {
+router.get("/editorial-work/team", asyncRoute(async (req, res) => {
   const auth = res.locals.auth as AuthContext;
-  let items = await queueRows(auth, true, req.query.includeUnassigned !== "false");
+  let items = (await Promise.all((await queueRows(auth, true, req.query.includeUnassigned !== "false")).map(async (item) =>
+    await hasEditionAccess(pool, auth.user.id, auth.user.role, {
+      document_id: item.documentId, market: item.market, locale: item.locale,
+    }, "review") ? item : null,
+  ))).filter((item): item is NonNullable<typeof item> => item !== null);
   if (typeof req.query.market === "string") items = items.filter((item) => item.market === req.query.market);
   if (typeof req.query.assigneeId === "string") {
     items = items.filter((item) => item.editor?.id === req.query.assigneeId || item.reviewer?.id === req.query.assigneeId);
@@ -644,7 +906,7 @@ router.get("/editorial-work/team", requirePublisher, asyncRoute(async (req, res)
   if (req.query.status === "active" || req.query.status === "blocked" || req.query.status === "completed") {
     items = items.filter((item) => item.status === req.query.status);
   }
-  res.json({ items, emptyState: items.length ? null : "no-work" });
+  res.json({ items: items.map(({ assignedToActor: _assignedToActor, ...item }) => item), emptyState: items.length ? null : "no-work" });
 }));
 
 router.get("/editorial-work/notifications", asyncRoute(async (req, res) => {

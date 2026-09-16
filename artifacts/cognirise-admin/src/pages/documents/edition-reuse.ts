@@ -19,7 +19,22 @@ export type ReuseExactEdition = {
   revisionNumber: number | null;
 };
 
-export type ReuseSavedSource = ReuseExactEdition & { revisionId: string };
+export type ReuseSavedSource = ReuseExactEdition & {
+  revisionId: string;
+  /** Present only for bounded source choices supplied by the editor. */
+  sourceKind?: "saved-draft" | "published" | "shared";
+  /** Present when the saved source is an actual shared-baseline revision. */
+  baselineId?: string;
+};
+
+/**
+ * Deliberately bounded source identities supplied by the editor: the current
+ * saved exact revision, its distinct exact published revision, or an actual
+ * saved shared-baseline revision. This is not a general historical picker.
+ */
+export type ReuseSourceCandidate = ReuseSavedSource & {
+  sourceKind: "saved-draft" | "published" | "shared";
+};
 
 export type ReuseTarget = {
   key: string;
@@ -121,29 +136,51 @@ export function buildEditionReusePlan({
   exactEditions,
   matrix,
   canEditDestination,
+  sourceCandidates,
+  canReadSource,
 }: {
   sourceRevisionId?: string;
   markets: ReuseMarket[];
   exactEditions: ReuseExactEdition[];
   matrix?: SharedMarketEditionMatrix;
   canEditDestination: (market: string) => boolean;
+  sourceCandidates?: readonly ReuseSourceCandidate[];
+  canReadSource?: (market: string, locale: string) => boolean;
 }): EditionReusePlan {
-  const selectedEdition = exactEditions.find((edition) => edition.revisionId === sourceRevisionId);
-  if (selectedEdition && (selectedEdition.market === "shared-source" || !localeLanguage(selectedEdition.locale))) {
+  const selectableSources = sourceCandidates ?? exactEditions.flatMap((edition) => (
+    edition.revisionId ? [{ ...edition, revisionId: edition.revisionId, sourceKind: "saved-draft" as const }] : []
+  ));
+  const selectedEdition = selectableSources.find((edition) => (
+    edition.revisionId === sourceRevisionId && (canReadSource?.(edition.market, edition.locale) ?? true)
+  ));
+  if (selectedEdition
+    && selectedEdition.sourceKind !== "shared"
+    && (selectedEdition.market === "shared-source" || !localeLanguage(selectedEdition.locale))) {
     return {
       targets: [],
       otherLanguageEditions: [],
       sourceIssue: "The legacy shared-source / und revision has no language. Open a localized exact edition and explicitly choose it as the reuse source.",
     };
   }
-  const sourceCandidate = selectedEdition as ReuseSavedSource | undefined;
+  const sourceCandidate = selectedEdition;
   if (!sourceCandidate) {
     return { targets: [], otherLanguageEditions: [] };
   }
 
-  const baseline = (matrix?.baselines ?? []).find((item) => (
-    item.locale === sourceCandidate.locale && item.sourceRevisionId === sourceCandidate.revisionId
-  ));
+  const baseline = sourceCandidate.sourceKind === "shared"
+    ? (matrix?.baselines ?? []).find((item) => (
+      item.id === sourceCandidate.baselineId && item.revisionId === sourceCandidate.revisionId
+    ))
+    : (matrix?.baselines ?? []).find((item) => (
+      item.locale === sourceCandidate.locale && item.sourceRevisionId === sourceCandidate.revisionId
+    ));
+  if (sourceCandidate.sourceKind === "shared" && (!baseline || baseline.snapshot === null)) {
+    return {
+      targets: [],
+      otherLanguageEditions: [],
+      sourceIssue: "The selected shared baseline snapshot is unavailable. Choose an exact saved regional source and explicitly establish a recoverable baseline first.",
+    };
+  }
   const exactByAddress = new Map(exactEditions.map((edition) => [
     targetKey(edition.market, edition.locale),
     edition,

@@ -161,3 +161,20 @@ test("CmsPreview warns and keeps legacy Guardrails copy when a summary is incomp
   assert.doesNotMatch(html, /Guardrails enforce limits\. The authority model decides/);
   assert.doesNotMatch(html, /Read the full explanation/);
 });
+
+test("protected preview footer uses the returned exact market context", () => {
+  const document = stagedPayload();
+  const preview = previewFor(document);
+  const html = renderPreview({
+    ...preview,
+    market: "ksa",
+    locale: "en",
+    requestedMarket: "ksa",
+    requestedLocale: "en",
+    navigation: { market: "uae", locale: "en", items: [], pages: [] },
+  });
+  assert.match(html, /Market view · Riyadh · Kingdom of Saudi Arabia/);
+  assert.doesNotMatch(html, /Market view · Dubai · UAE/);
+  assert.match(html, /Protected saved-version preview/);
+  assert.doesNotMatch(html, /not published/);
+});

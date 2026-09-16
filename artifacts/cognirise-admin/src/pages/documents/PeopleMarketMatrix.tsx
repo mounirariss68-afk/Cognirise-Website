@@ -10,6 +10,7 @@ type Props = {
   markets: MarketEdition[];
   canManage: boolean;
   isAdministrator: boolean;
+  canManageMarket?: (market: string) => boolean;
   isLoading?: boolean;
   page?: number;
   pageSize?: number;
@@ -28,6 +29,7 @@ export function PeopleMarketMatrix({
   markets,
   canManage,
   isAdministrator,
+  canManageMarket,
   isLoading = false,
   page = 1,
   pageSize = 20,
@@ -93,6 +95,7 @@ export function PeopleMarketMatrix({
                   markets={markets}
                   canManage={canManage}
                   isAdministrator={isAdministrator}
+                  canManageMarket={canManageMarket}
                   // MarketAvailabilityChecklist is rendered by each PeopleTableRow.
                   onOpenSharedContent={() => setLocation(`/content/${person.id}`)}
                 />

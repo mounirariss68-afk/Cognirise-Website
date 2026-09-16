@@ -115,9 +115,25 @@ test("public media stays on the revision pin when a newer asset version appears"
           user_updated_at: now,
           must_rotate: false,
           mfa_enabled: true,
+           market_codes: ["uae"],
+           legacy_administrator_market_codes: ["uae"],
+           capability_matrix_configured: false,
+           capability_grants: [],
         }],
       };
     }
+     if (statement.includes("SELECT 1 FROM cms_user_capability_configurations")
+       || statement.includes("FROM cms_user_capability_grants")) {
+       return { rowCount: 0, rows: [] };
+     }
+     if (statement.includes("FROM cms_legacy_administrator_market_snapshots")) {
+       return { rowCount: 1, rows: [{ market_codes: ["uae"] }] };
+     }
+     if (statement.includes("SELECT e.id edition_id,e.content_mode,d.kind")) {
+       return String(values?.[0]) === documentId
+         ? { rowCount: 1, rows: [{ edition_id: "edition-id", content_mode: "custom", kind: "platform" }] }
+         : { rowCount: 0, rows: [] };
+     }
     if (statement.includes("FROM market_editions WHERE enabled=true")) {
       return {
         rowCount: 1,
@@ -130,6 +146,21 @@ test("public media stays on the revision pin when a newer asset version appears"
         }],
       };
     }
+     if (statement.includes("WITH represented_sources AS")) {
+       return {
+         rowCount: 1,
+         rows: [{
+           kind: "platform",
+           payload: snapshot,
+           available: true,
+           source_rank: 1,
+           public_eligible: true,
+         }],
+       };
+     }
+     if (statement.includes("cms_navigation_published_policies")) {
+       return { rowCount: 0, rows: [] };
+     }
     if (statement.includes("SELECT d.id,d.kind,e.market")) {
       return {
         rowCount: 1,
@@ -148,7 +179,10 @@ test("public media stays on the revision pin when a newer asset version appears"
         }],
       };
     }
-    if (statement.includes("SELECT a.*,v.id version_id")) {
+    if (
+      statement.includes("SELECT a.*,v.id version_id")
+      && statement.includes("FROM cms_media_references ref")
+    ) {
       assert.match(statement, /v\.id=ref\.media_version_id/);
       const version = versions.get(publishedRevision.versionId);
       assert.ok(version);
@@ -163,6 +197,32 @@ test("public media stays on the revision pin when a newer asset version appears"
           metadata: version.metadata,
           alt_text: assetAltText,
           credit: assetCredit,
+        }],
+      };
+    }
+    if (statement.includes("SELECT a.*,v.id version_id")) {
+      const version = versions.get(latestVersion.versionId);
+      assert.ok(version);
+      return {
+        rowCount: 1,
+        rows: [{
+          id: assetId,
+          filename: "asset.png",
+          storage_key: version.storageKey,
+          media_type: "image/png",
+          byte_size: Buffer.byteLength(version.bytes),
+          checksum: "checksum",
+          status: "review",
+          collection: "website",
+          campaign_metadata: null,
+          motion_metadata: null,
+          alt_text: assetAltText,
+          credit: assetCredit,
+          width: version.width,
+          height: 630,
+          metadata: version.metadata,
+          created_at: now,
+          updated_at: now,
         }],
       };
     }
@@ -221,7 +281,7 @@ test("public media stays on the revision pin when a newer asset version appears"
         }],
       };
     }
-    return { rowCount: 0, rows: [] };
+     throw new Error(`unexpected published media SQL: ${statement}`);
   });
   const transactionClient = {
     async query(sql: unknown, values?: unknown[]) {
@@ -243,6 +303,24 @@ test("public media stays on the revision pin when a newer asset version appears"
       if (statement.includes("SELECT market_code") && statement.includes("FROM cms_user_market_assignments")) {
         return { rowCount: 1, rows: [{ market_code: "uae" }] };
       }
+       if (statement.includes("SELECT 1 FROM cms_user_capability_configurations")
+         || statement.includes("FROM cms_user_capability_grants")) {
+         return { rowCount: 0, rows: [] };
+       }
+       if (statement.includes("FROM cms_legacy_administrator_market_snapshots")) {
+         return { rowCount: 1, rows: [{ market_codes: ["uae"] }] };
+       }
+       if (statement.includes("SELECT e.id edition_id,e.content_mode,d.kind")) {
+         return String(values?.[0]) === documentId
+           ? { rowCount: 1, rows: [{ edition_id: "edition-id", content_mode: "custom", kind: "platform" }] }
+           : { rowCount: 0, rows: [] };
+       }
+       if (statement.includes("SELECT binding.mode,adopted.id baseline_id")) {
+         return { rowCount: 0, rows: [] };
+       }
+       if (statement.includes("SELECT binding.id::text,binding.mode,binding.baseline_id")) {
+         return { rowCount: 0, rows: [] };
+       }
       if (statement.includes("SELECT e.id") && statement.includes("FROM cms_revisions r")
         && statement.includes("FOR UPDATE OF e")) {
         return String(values?.[0]) === pendingRevisionId && String(values?.[1]) === documentId
@@ -304,7 +382,8 @@ test("public media stays on the revision pin when a newer asset version appears"
           }],
         };
       }
-      if (statement.includes("SELECT r.id,r.edition_id,r.payload,d.kind")) {
+      if (statement.includes("SELECT r.id,r.edition_id,r.payload")
+        && statement.includes("FROM cms_revisions r")) {
         return {
           rowCount: 1,
           rows: [{
@@ -312,10 +391,23 @@ test("public media stays on the revision pin when a newer asset version appears"
             edition_id: "edition-id",
             payload: snapshot,
             kind: "platform",
-            workflow_state: "in-review",
+            content_digest: "published-media-fixture-digest",
+            canonical_slug: snapshot.slug,
+            market: "uae",
+            locale: "en",
+            editorial_market: "uae",
+            content_mode: "custom",
+            workflow_state: "approved",
             publication_state: "in-review",
+            has_approved_exact_review: true,
           }],
         };
+      }
+      if (statement.includes("SELECT id FROM cms_revisions WHERE id=$1 AND workflow_state='approved'")) {
+        return { rowCount: 1, rows: [{ id: pendingRevisionId }] };
+      }
+      if (statement.includes("FROM cms_revision_accuracy_confirmations")) {
+        return { rowCount: 1, rows: [{ "?column?": 1 }] };
       }
       if (
         statement.includes("INSERT INTO cms_media_references") &&
@@ -340,7 +432,10 @@ test("public media stays on the revision pin when a newer asset version appears"
           }],
         };
       }
-      return { rowCount: 1, rows: [] };
+      if (statement.includes("INSERT INTO cms_audit_events")) {
+        return { rowCount: 1, rows: [] };
+      }
+      throw new Error(`unexpected published media transaction SQL: ${statement}`);
     },
     release() {},
   };

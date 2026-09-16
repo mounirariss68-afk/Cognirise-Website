@@ -38,8 +38,18 @@ test("public landing configuration reports publication history per page path", {
           user_updated_at: now,
           must_rotate: false,
           mfa_enabled: true,
+           market_codes: ["uae"],
+           legacy_administrator_market_codes: ["uae"],
+           capability_matrix_configured: false,
+           capability_grants: [],
         }],
       };
+    }
+    if (statement.includes("cms_user_capability_configurations") || statement.includes("FROM cms_user_capability_grants")) {
+      return { rowCount: 0, rows: [] };
+    }
+    if (statement.includes("FROM cms_legacy_administrator_market_snapshots")) {
+      return { rowCount: 1, rows: [{ market_codes: ["uae"] }] };
     }
     if (statement.includes("SELECT array_agg(market) markets")) {
       return { rowCount: 1, rows: [{ markets: ["uae"] }] };
@@ -80,6 +90,29 @@ test("public landing configuration reports publication history per page path", {
     }
     return { rowCount: 0, rows: [] };
   });
+  t.mock.method(pool, "connect", async () => ({
+    async query(sql: unknown, values: unknown[] = []) {
+      const statement = String(sql);
+      if (["BEGIN", "COMMIT", "ROLLBACK"].includes(statement)) return { rowCount: 0, rows: [] };
+      if (statement === "SELECT id FROM cms_documents WHERE id=$1 FOR UPDATE") {
+        return { rowCount: 1, rows: [{ id: String(values[0]) }] };
+      }
+      if (statement.includes("SELECT role,status") && statement.includes("FROM cms_users")) {
+        return { rowCount: 1, rows: [{ role: "administrator", status: "active" }] };
+      }
+      if (statement.includes("LOCK TABLE cms_user_market_assignments")) return { rowCount: 0, rows: [] };
+      if (statement.includes("cms_user_capability_configurations") || statement.includes("cms_user_capability_grants")) return { rowCount: 0, rows: [] };
+      if (statement.includes("cms_legacy_administrator_market_snapshots")) return { rowCount: 1, rows: [{ market_codes: ["uae"] }] };
+      if (statement.includes("SELECT e.id edition_id,e.content_mode,d.kind FROM cms_documents")) {
+        return { rowCount: 1, rows: [{ edition_id: "landing-edition", content_mode: "custom", kind: "landing-page" }] };
+      }
+       if (statement.includes("SELECT market,locale FROM cms_market_editions")) {
+         return { rowCount: 1, rows: [{ market: "uae", locale: "en" }] };
+       }
+      return pool.query(sql as never, values as never);
+    },
+    release() {},
+  }) as never);
 
   const server = app.listen(0, "127.0.0.1");
   await new Promise<void>((resolve) => server.once("listening", resolve));

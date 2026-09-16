@@ -6,18 +6,31 @@ import test from "node:test";
 test("generic review and publication validate site configuration and pin requested versions", async () => {
   const source = await readFile(resolve(process.cwd(), "src/routes/documents.ts"), "utf8");
   assert.match(source, /validateSnapshot\([^,]+\.kind, [^,]+, "draft"\)/);
-  assert.match(source, /validateSnapshot\(revision\.rows\[0\]\.kind, revision\.rows\[0\]\.payload, "publish"\)/);
-  assert.match(source, /"\/documents\/:documentId\/publish",[\s\S]*?requirePublisher/);
+  assert.match(
+    source,
+    /const validation = await validateSnapshotWithAccuracyConfirmation\([\s\S]*?revision\.rows\[0\]\.kind[\s\S]*?revision\.rows\[0\]\.payload[\s\S]*?revision\.rows\[0\]\.content_digest/,
+  );
+  assert.match(source, /FROM cms_revision_accuracy_confirmations[\s\S]*?WHERE revision_id=\$1 AND content_digest=\$2/);
+  assert.match(source, /"\/documents\/:documentId\/publish",[\s\S]*?revalidateMutationAuth/);
+  assert.match(source, /"\/documents\/:documentId\/publish",[\s\S]*?canAccessEditionTarget\([\s\S]*?"publish"/);
   assert.match(source, /collectCmsMediaReferences/);
   assert.match(source, /reference\.mediaVersionId/);
   assert.match(source, /id::text=\$4::jsonb->>asset\.id::text/);
   assert.match(source, /Publication references unavailable media/);
 });
 
-test("publication aborts before pointer advancement when review transition loses a race", async () => {
+test("publication serializes direct approval before pointer advancement and preserves reviewed release checks", async () => {
   const source = await readFile(resolve(process.cwd(), "src/routes/documents.ts"), "utf8");
-  assert.match(source, /const approved = directAdministratorPublish[\s\S]*?workflow_state='in-review'/);
-  assert.match(source, /if \(approved\.rowCount !== 1\) \{[\s\S]*?ROLLBACK[\s\S]*?selected revision is no longer in review/);
+  assert.match(
+    source,
+    /const approved = directAdministratorPublish[\s\S]*?workflow_state='approved'[\s\S]*?WHERE id=\$1 AND workflow_state IN \('draft','rejected'\)\s+RETURNING id/,
+  );
+  assert.match(source, /: await client\.query\(\s*"SELECT id FROM cms_revisions WHERE id=\$1 AND workflow_state='approved'"/);
+  assert.match(
+    source,
+    /if \(approved\.rowCount !== 1\) \{[\s\S]*?ROLLBACK[\s\S]*?selected saved revision changed before direct publication/,
+  );
+  assert.match(source, /: "The selected revision is no longer approved\."/);
   const transition = source.indexOf("const approved = directAdministratorPublish");
   const pointer = source.indexOf("UPDATE cms_market_editions SET publication_state", transition);
   assert.ok(transition >= 0 && pointer > transition);
@@ -78,9 +91,20 @@ test("publishing both hero slots makes their canonical revision-pinned media pub
           user_updated_at: now,
           must_rotate: false,
           mfa_enabled: true,
+           market_codes: ["uae"],
+           legacy_administrator_market_codes: ["uae"],
+           capability_matrix_configured: false,
+           capability_grants: [],
         }],
       };
     }
+     if (statement.includes("SELECT 1 FROM cms_user_capability_configurations")
+       || statement.includes("FROM cms_user_capability_grants")) {
+       return { rowCount: 0, rows: [] };
+     }
+     if (statement.includes("FROM cms_legacy_administrator_market_snapshots")) {
+       return { rowCount: 1, rows: [{ market_codes: ["uae"] }] };
+     }
     if (statement.includes("FROM market_editions WHERE enabled=true")) {
       return {
         rowCount: 1,
@@ -93,6 +117,14 @@ test("publishing both hero slots makes their canonical revision-pinned media pub
         }],
       };
     }
+     if (statement.includes("SELECT e.id edition_id,e.content_mode,d.kind")) {
+       const fixture = Object.values(fixtures).find(
+         (candidate) => candidate.row.id === String(values?.[0]),
+       );
+       return fixture
+         ? { rowCount: 1, rows: [{ edition_id: fixture.editionId, content_mode: "custom", kind: "site-configuration" }] }
+         : { rowCount: 0, rows: [] };
+     }
     if (statement.includes("d.kind='site-configuration'")) {
       const slug = String(values?.[0]);
       requestedSlugs.push(slug);
@@ -109,12 +141,47 @@ test("publishing both hero slots makes their canonical revision-pinned media pub
         ? { rowCount: fixture.media.length, rows: fixture.media }
         : { rowCount: 0, rows: [] };
     }
-    return { rowCount: 0, rows: [] };
+    if (statement.includes("FROM cms_documents d")) {
+      const fixture = Object.values(fixtures).find(
+        (candidate) => candidate.row.id === String(values?.[0]),
+      );
+      return fixture
+        ? {
+            rowCount: 1,
+            rows: [{
+              id: fixture.row.id,
+              kind: "site-configuration",
+              canonical_slug: fixture.slug,
+              title: fixture.row.payload.title,
+              owner_id: "user-id",
+              root_status: "active",
+              created_at: now,
+              updated_at: now,
+              markets: ["uae"],
+              edition_id: fixture.editionId,
+              revision_id: fixture.row.revision_id,
+              revision_number: fixture.row.revision_number,
+              payload: fixture.row.payload,
+              workflow_state: "approved",
+              publication_state: "published",
+              publish_at: null,
+              published_at: now,
+              published_revision_id: fixture.row.revision_id,
+              can_permanently_delete: false,
+            }],
+          }
+        : { rowCount: 0, rows: [] };
+    }
+    throw new Error(`unexpected hero publication pool SQL: ${statement}`);
   });
   t.mock.method(pool, "connect", async () => ({
     async query(sql: unknown, values?: unknown[]) {
       const statement = String(sql);
-      if (statement.includes("SELECT r.id,r.edition_id,r.payload,d.kind")) {
+      if (statement === "BEGIN" || statement === "COMMIT" || statement === "ROLLBACK") {
+        return { rowCount: 0, rows: [] };
+      }
+      if (statement.includes("SELECT r.id,r.edition_id,r.payload")
+        && statement.includes("FROM cms_revisions r")) {
         const fixture = Object.values(fixtures).find(
           (candidate) =>
             candidate.row.revision_id === String(values?.[0]) &&
@@ -128,8 +195,15 @@ test("publishing both hero slots makes their canonical revision-pinned media pub
                 edition_id: fixture.editionId,
                 payload: fixture.row.payload,
                 kind: "site-configuration",
-                workflow_state: "in-review",
+                content_digest: "hero-publication-fixture-digest",
+                canonical_slug: fixture.slug,
+                market: "uae",
+                locale: "en",
+                editorial_market: "uae",
+                content_mode: "custom",
+                workflow_state: "approved",
                 publication_state: "in-review",
+                has_approved_exact_review: true,
               }],
             }
           : { rowCount: 0, rows: [] };
@@ -151,6 +225,27 @@ test("publishing both hero slots makes their canonical revision-pinned media pub
       if (statement.includes("SELECT market_code") && statement.includes("FROM cms_user_market_assignments")) {
         return { rowCount: 1, rows: [{ market_code: "uae" }] };
       }
+      if (statement.includes("SELECT e.id edition_id,e.content_mode,d.kind")) {
+        const fixture = Object.values(fixtures).find(
+          (candidate) => candidate.row.id === String(values?.[0]),
+        );
+        return fixture
+          ? { rowCount: 1, rows: [{ edition_id: fixture.editionId, content_mode: "custom", kind: "site-configuration" }] }
+          : { rowCount: 0, rows: [] };
+      }
+      if (statement.includes("SELECT 1 FROM cms_user_capability_configurations")
+        || statement.includes("FROM cms_user_capability_grants")) {
+        return { rowCount: 0, rows: [] };
+      }
+      if (statement.includes("FROM cms_legacy_administrator_market_snapshots")) {
+        return { rowCount: 1, rows: [{ market_codes: ["uae"] }] };
+      }
+      if (statement.includes("SELECT binding.mode,adopted.id baseline_id")) {
+        return { rowCount: 0, rows: [] };
+      }
+      if (statement.includes("SELECT binding.id::text,binding.mode,binding.baseline_id")) {
+        return { rowCount: 0, rows: [] };
+      }
       if (statement.includes("SELECT e.id") && statement.includes("FROM cms_revisions r")
         && statement.includes("FOR UPDATE OF e")) {
         const fixture = Object.values(fixtures).find(
@@ -169,13 +264,29 @@ test("publishing both hero slots makes their canonical revision-pinned media pub
           ? { rowCount: fixture.media.length, rows: fixture.media }
           : { rowCount: 0, rows: [] };
       }
+      if (statement.includes("SELECT id FROM cms_revisions WHERE id=$1 AND workflow_state='approved'")) {
+        return { rowCount: 1, rows: [{ id: String(values?.[0]) }] };
+      }
+      if (statement.includes("FROM cms_revision_accuracy_confirmations")) {
+        return { rowCount: 1, rows: [{ "?column?": 1 }] };
+      }
+      if (statement.includes("INSERT INTO cms_media_references")) {
+        return { rowCount: 3, rows: [] };
+      }
+      if (statement.includes("UPDATE cms_media_references ref")) {
+        return { rowCount: 1, rows: [] };
+      }
+      if (statement.includes("INSERT INTO cms_audit_events")) {
+        return { rowCount: 1, rows: [] };
+      }
       if (statement.includes("UPDATE cms_market_editions SET publication_state")) {
         const fixture = Object.values(fixtures).find(
           (candidate) => candidate.row.revision_id === String(values?.[3]),
         );
         if (fixture) publishedSlugs.add(fixture.slug);
+        return { rowCount: 1, rows: [] };
       }
-      return { rowCount: 1, rows: [] };
+      throw new Error(`unexpected hero publication SQL: ${statement}`);
     },
     release() {},
   }) as never);
@@ -334,7 +445,8 @@ test("hero publication rolls back without moving the pointer on a stored MIME mi
   let rolledBack = false;
 
   t.mock.method(pool, "query", async (sql: unknown, values?: unknown[]) => {
-    if (String(sql).includes("FROM cms_sessions s")) {
+    const statement = String(sql);
+    if (statement.includes("FROM cms_sessions s")) {
       return {
         rowCount: 1,
         rows: [{
@@ -353,15 +465,33 @@ test("hero publication rolls back without moving the pointer on a stored MIME mi
           user_updated_at: now,
           must_rotate: false,
           mfa_enabled: true,
+           market_codes: ["uae"],
+           legacy_administrator_market_codes: ["uae"],
+           capability_matrix_configured: false,
+           capability_grants: [],
         }],
       };
     }
-    return { rowCount: 0, rows: [] };
+     if (statement.includes("SELECT 1 FROM cms_user_capability_configurations")
+       || statement.includes("FROM cms_user_capability_grants")) {
+       return { rowCount: 0, rows: [] };
+     }
+     if (statement.includes("FROM cms_legacy_administrator_market_snapshots")) {
+       return { rowCount: 1, rows: [{ market_codes: ["uae"] }] };
+     }
+     if (statement.includes("SELECT e.id edition_id,e.content_mode,d.kind")) {
+       return String(values?.[0]) === documentId
+         ? { rowCount: 1, rows: [{ edition_id: editionId, content_mode: "custom", kind: "site-configuration" }] }
+         : { rowCount: 0, rows: [] };
+     }
+     throw new Error(`unexpected hero MIME pool SQL: ${statement}`);
   });
   const transactionClient = {
     async query(sql: unknown, values?: unknown[]) {
       const statement = String(sql);
-      if (statement === "BEGIN" || statement === "COMMIT") return { rowCount: 0, rows: [] };
+      if (statement === "BEGIN" || statement === "COMMIT") {
+        return { rowCount: 0, rows: [] };
+      }
       if (statement === "ROLLBACK") {
         rolledBack = true;
         return { rowCount: 0, rows: [] };
@@ -380,13 +510,32 @@ test("hero publication rolls back without moving the pointer on a stored MIME mi
       if (statement.includes("SELECT market_code") && statement.includes("FROM cms_user_market_assignments")) {
         return { rowCount: 1, rows: [{ market_code: "uae" }] };
       }
+      if (statement.includes("SELECT e.id edition_id,e.content_mode,d.kind")) {
+        return String(values?.[0]) === documentId
+          ? { rowCount: 1, rows: [{ edition_id: editionId, content_mode: "custom", kind: "site-configuration" }] }
+          : { rowCount: 0, rows: [] };
+      }
+      if (statement.includes("SELECT 1 FROM cms_user_capability_configurations")
+        || statement.includes("FROM cms_user_capability_grants")) {
+        return { rowCount: 0, rows: [] };
+      }
+      if (statement.includes("FROM cms_legacy_administrator_market_snapshots")) {
+        return { rowCount: 1, rows: [{ market_codes: ["uae"] }] };
+      }
+      if (statement.includes("SELECT binding.mode,adopted.id baseline_id")) {
+        return { rowCount: 0, rows: [] };
+      }
+      if (statement.includes("SELECT binding.id::text,binding.mode,binding.baseline_id")) {
+        return { rowCount: 0, rows: [] };
+      }
       if (statement.includes("SELECT e.id") && statement.includes("FROM cms_revisions r")
         && statement.includes("FOR UPDATE OF e")) {
         return String(values?.[0]) === candidateRevisionId && String(values?.[1]) === documentId
           ? { rowCount: 1, rows: [{ id: editionId }] }
           : { rowCount: 0, rows: [] };
       }
-      if (statement.includes("SELECT r.id,r.edition_id,r.payload,d.kind")) {
+      if (statement.includes("SELECT r.id,r.edition_id,r.payload")
+        && statement.includes("FROM cms_revisions r")) {
         return {
           rowCount: 1,
           rows: [{
@@ -394,10 +543,23 @@ test("hero publication rolls back without moving the pointer on a stored MIME mi
             edition_id: editionId,
             payload: snapshot,
             kind: "site-configuration",
-            workflow_state: "in-review",
+            content_digest: "hero-publication-fixture-digest",
+            canonical_slug: "site-homepage-hero",
+            market: "uae",
+            locale: "en",
+            editorial_market: "uae",
+            content_mode: "custom",
+            workflow_state: "approved",
             publication_state: "in-review",
+            has_approved_exact_review: true,
           }],
         };
+      }
+      if (statement.includes("SELECT id FROM cms_revisions WHERE id=$1 AND workflow_state='approved'")) {
+        return { rowCount: 1, rows: [{ id: candidateRevisionId }] };
+      }
+      if (statement.includes("FROM cms_revision_accuracy_confirmations")) {
+        return { rowCount: 1, rows: [{ "?column?": 1 }] };
       }
       if (statement.includes("INSERT INTO cms_media_references")) {
         return { rowCount: 3, rows: [] };
@@ -414,8 +576,12 @@ test("hero publication rolls back without moving the pointer on a stored MIME mi
       }
       if (statement.includes("UPDATE cms_market_editions")) {
         publishedRevisionId = candidateRevisionId;
+        return { rowCount: 1, rows: [] };
       }
-      return { rowCount: 1, rows: [] };
+      if (statement.includes("INSERT INTO cms_audit_events")) {
+        return { rowCount: 1, rows: [] };
+      }
+      throw new Error(`unexpected hero MIME transaction SQL: ${statement}`);
     },
     release() {},
   };

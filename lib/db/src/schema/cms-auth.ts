@@ -139,6 +139,106 @@ export const cmsUserMarketAssignmentsTable = pgTable(
   ],
 );
 
+/**
+ * Explicit, central content authority.  The absence of rows intentionally
+ * means "use the legacy role/market compatibility projection"; once an
+ * administrator grants a capability, rows for that capability are allow-list
+ * authority and no role may fill the gaps.
+ *
+ * `scope` keeps a shared source distinct from a regional destination.  A
+ * shared grant is evaluated together with every affected source/destination
+ * market, never as a shorthand for a single regional checkbox.
+ */
+export const cmsUserCapabilityGrantsTable = pgTable(
+  "cms_user_capability_grants",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id").notNull().references(() => cmsUsersTable.id, { onDelete: "cascade" }),
+    topic: text("topic").notNull(),
+    capability: text("capability").notNull(),
+    scope: text("scope").notNull().default("regional"),
+    marketCode: text("market_code").notNull(),
+    createdByUserId: uuid("created_by_user_id").references(() => cmsUsersTable.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("cms_user_capability_grants_unique").on(
+      table.userId,
+      table.topic,
+      table.capability,
+      table.scope,
+      table.marketCode,
+    ),
+    index("cms_user_capability_grants_lookup_idx").on(
+      table.userId,
+      table.capability,
+      table.topic,
+      table.marketCode,
+    ),
+  ],
+);
+
+/**
+ * A durable sentinel distinguishes an intentionally empty matrix (deny all
+ * content authority) from an account that has never left legacy role/market
+ * compatibility. It must never be inferred from grant row count.
+ */
+export const cmsUserCapabilityConfigurationsTable = pgTable(
+  "cms_user_capability_configurations",
+  {
+    userId: uuid("user_id").primaryKey().references(() => cmsUsersTable.id, {
+      onDelete: "cascade",
+    }),
+    configuredByUserId: uuid("configured_by_user_id").references(() => cmsUsersTable.id, {
+      onDelete: "set null",
+    }),
+    configuredAt: timestamp("configured_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("cms_user_capability_configurations_actor_idx").on(table.configuredByUserId),
+  ],
+);
+
+/** Frozen enabled-market set for an unconfigured legacy administrator. */
+export const cmsLegacyAdministratorMarketSnapshotsTable = pgTable(
+  "cms_legacy_administrator_market_snapshots",
+  {
+    userId: uuid("user_id").primaryKey().references(() => cmsUsersTable.id, { onDelete: "cascade" }),
+    marketCodes: text("market_codes").array().notNull().default(sql`'{}'::text[]`),
+    capturedAt: timestamp("captured_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+);
+
+/**
+ * A dry-run access migration is deliberately a receipt, not an implicit
+ * rewrite of legacy roles, market assignments, review work, or live content.
+ * The before/after projections make an administrator's later explicit grant
+ * decision recoverable and auditable.
+ */
+export const cmsCapabilityMigrationReceiptsTable = pgTable(
+  "cms_capability_migration_receipts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    requestedByUserId: uuid("requested_by_user_id").notNull().references(() => cmsUsersTable.id, {
+      onDelete: "restrict",
+    }),
+    targetUserId: uuid("target_user_id").references(() => cmsUsersTable.id, {
+      onDelete: "set null",
+    }),
+    mode: text("mode").notNull().default("dry-run"),
+    beforeSnapshot: jsonb("before_snapshot").notNull().$type<Record<string, unknown>>(),
+    afterSnapshot: jsonb("after_snapshot").notNull().$type<Record<string, unknown>>(),
+    disposition: text("disposition").notNull().default("no-persistent-access-change"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("cms_capability_migration_receipts_target_idx").on(table.targetUserId, table.createdAt),
+    index("cms_capability_migration_receipts_requester_idx").on(table.requestedByUserId, table.createdAt),
+  ],
+);
+
 export const cmsUserAccessTokensTable = pgTable(
   "cms_user_access_tokens",
   {
@@ -228,5 +328,9 @@ export type CmsRecoveryCode = typeof cmsRecoveryCodesTable.$inferSelect;
 export type CmsSession = typeof cmsSessionsTable.$inferSelect;
 export type CmsLoginAttempt = typeof cmsLoginAttemptsTable.$inferSelect;
 export type CmsUserMarketAssignment = typeof cmsUserMarketAssignmentsTable.$inferSelect;
+export type CmsUserCapabilityGrant = typeof cmsUserCapabilityGrantsTable.$inferSelect;
+export type CmsUserCapabilityConfiguration = typeof cmsUserCapabilityConfigurationsTable.$inferSelect;
+export type CmsLegacyAdministratorMarketSnapshot = typeof cmsLegacyAdministratorMarketSnapshotsTable.$inferSelect;
+export type CmsCapabilityMigrationReceipt = typeof cmsCapabilityMigrationReceiptsTable.$inferSelect;
 export type CmsUserAccessToken = typeof cmsUserAccessTokensTable.$inferSelect;
 export type CmsAccessDeliveryJob = typeof cmsAccessDeliveryJobsTable.$inferSelect;

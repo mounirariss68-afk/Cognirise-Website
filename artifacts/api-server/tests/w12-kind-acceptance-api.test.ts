@@ -8,7 +8,7 @@ import {
   validateCmsSnapshot,
   type CmsDocumentKind,
 } from "@workspace/api-zod";
-import { previewMediaIds } from "../src/routes/documents.ts";
+import { previewMediaIds, projectPreviewDocument } from "../src/routes/documents.ts";
 
 const ids = {
   person: {
@@ -526,6 +526,40 @@ test("W12 media references preserve immutable pins and route preview discovery f
   }
 });
 
+test("platform preview delivery preserves the exact revision summary payload", () => {
+  const exactSummary = "TASK345-KSA-MARKER-1";
+  const projected = projectPreviewDocument("platform", {
+    slug: "task-345-platform",
+    title: "Task 345 Platform",
+    summary: exactSummary,
+    content: {
+      schemaVersion: 1,
+      category: "Specialist",
+      summary: "A governed platform summary.",
+      template: "standard",
+      sections: [],
+      capabilities: [],
+      differentiators: [],
+      visibility: "public",
+      order: 1,
+      sources: [],
+      relatedIds: [],
+    },
+    mediaIds: [],
+    markets: ["ksa"],
+  }, "ksa", "ksa");
+  assert.equal(
+    (projected as { summary?: unknown }).summary,
+    exactSummary,
+    "the protected preview API must return the summary from the selected revision",
+  );
+  assert.equal(
+    ((projected as { content: { summary?: unknown } }).content).summary,
+    "A governed platform summary.",
+    "the regression must keep stale content available to prove the renderer binding",
+  );
+});
+
 test("W12 explicit clear semantics remain available for all document update routes", () => {
   for (const kind of cmsDocumentKinds) {
     const parsed = UpdateDocumentBody.safeParse({
@@ -581,6 +615,12 @@ test("W12 editor and publisher cannot mutate an unassigned market for any docume
         }],
       };
     }
+    if (statement.includes("cms_user_capability_configurations") || statement.includes("FROM cms_user_capability_grants")) {
+      return { rowCount: 0, rows: [] };
+    }
+    if (statement.includes("SELECT e.id edition_id,e.content_mode,d.kind FROM cms_documents")) {
+      return { rowCount: 1, rows: [{ edition_id: "w12-edition", content_mode: "custom", kind: "publication" }] };
+    }
     touchedStatements.push(statement);
     return { rowCount: 0, rows: [] };
   });
@@ -590,6 +630,9 @@ test("W12 editor and publisher cannot mutate an unassigned market for any docume
       touchedStatements.push(statement);
       if (statement === "BEGIN" || statement === "ROLLBACK") return { rowCount: 0, rows: [] };
       if (statement === "LOCK TABLE cms_user_market_assignments IN SHARE MODE") {
+        return { rowCount: 0, rows: [] };
+      }
+      if (statement.includes("cms_user_capability_configurations") || statement.includes("FROM cms_user_capability_grants")) {
         return { rowCount: 0, rows: [] };
       }
       if (statement.includes("SELECT role,status") && statement.includes("FROM cms_users")) {
@@ -603,6 +646,9 @@ test("W12 editor and publisher cannot mutate an unassigned market for any docume
       }
       if (statement.includes("SELECT id FROM cms_market_editions")) {
         return { rowCount: 1, rows: [{ id: "w12-edition" }] };
+      }
+      if (statement.includes("SELECT e.id edition_id,e.content_mode,d.kind FROM cms_documents")) {
+        return { rowCount: 1, rows: [{ edition_id: "w12-edition", content_mode: "custom", kind: "publication" }] };
       }
       if (statement.includes("SELECT e.id,e.published_revision_id,e.content_mode")) {
         return {
@@ -717,6 +763,12 @@ test("W12 prioritized kinds save and reload through the actual document route", 
         }],
       };
     }
+    if (statement.includes("cms_user_capability_configurations") || statement.includes("FROM cms_user_capability_grants")) {
+      return { rowCount: 0, rows: [] };
+    }
+    if (statement.includes("SELECT e.id edition_id,e.content_mode,d.kind FROM cms_documents")) {
+      return { rowCount: 1, rows: [{ edition_id: "w12-edition", content_mode: "custom", kind: currentKind }] };
+    }
     if (statement.includes("INSERT INTO cms_audit_events")) return { rowCount: 1, rows: [] };
     if (statement.includes("FROM cms_documents d") && statement.includes("WHERE d.id=$1")) {
       return {
@@ -756,6 +808,9 @@ test("W12 prioritized kinds save and reload through the actual document route", 
       if (statement === "LOCK TABLE cms_user_market_assignments IN SHARE MODE") {
         return { rowCount: 0, rows: [] };
       }
+      if (statement.includes("cms_user_capability_configurations") || statement.includes("FROM cms_user_capability_grants")) {
+        return { rowCount: 0, rows: [] };
+      }
       if (statement.includes("SELECT role,status") && statement.includes("FROM cms_users")) {
         return { rowCount: 1, rows: [{ role: "editor", status: "active" }] };
       }
@@ -767,6 +822,9 @@ test("W12 prioritized kinds save and reload through the actual document route", 
       }
       if (statement.includes("SELECT id FROM cms_market_editions")) {
         return { rowCount: 1, rows: [{ id: "w12-edition" }] };
+      }
+      if (statement.includes("SELECT e.id edition_id,e.content_mode,d.kind FROM cms_documents")) {
+        return { rowCount: 1, rows: [{ edition_id: "w12-edition", content_mode: "custom", kind: currentKind }] };
       }
       if (statement.includes("SELECT e.id,e.published_revision_id,e.content_mode")) {
         return {

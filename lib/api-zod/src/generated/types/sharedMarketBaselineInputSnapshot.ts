@@ -6,4 +6,7 @@
  * OpenAPI spec version: 0.2.0
  */
 
+/**
+ * Required when sourceRevisionId is omitted. When sourceRevisionId is supplied
+ */
 export type SharedMarketBaselineInputSnapshot = { [key: string]: unknown };

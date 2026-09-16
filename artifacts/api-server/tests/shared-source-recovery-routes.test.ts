@@ -92,6 +92,27 @@ test("rollback and restore advance a shared source before review or customizatio
       [userId, security.hashToken(token)],
     );
     await client.query(
+      `INSERT INTO cms_legacy_administrator_market_snapshots(user_id,market_codes)
+       SELECT $1,COALESCE(array_agg(code ORDER BY code),ARRAY[]::text[])
+         FROM market_editions WHERE enabled=true
+       ON CONFLICT (user_id) DO UPDATE SET market_codes=EXCLUDED.market_codes`,
+      [userId],
+    );
+    await client.query(
+      `INSERT INTO cms_user_capability_configurations(user_id) VALUES ($1)
+       ON CONFLICT (user_id) DO NOTHING`,
+      [userId],
+    );
+    await client.query(
+      `INSERT INTO cms_user_capability_grants(user_id,topic,capability,scope,market_code)
+       SELECT $1,'publication',capability,scope,market.code
+         FROM market_editions market
+         CROSS JOIN unnest(ARRAY['view','edit','review','publish']::text[]) capability
+         CROSS JOIN unnest(ARRAY['regional','shared']::text[]) scope
+        WHERE market.enabled=true`,
+      [userId],
+    );
+    await client.query(
       `INSERT INTO cms_documents(id,kind,canonical_slug,title,owner_id,status)
        VALUES ($1,'publication',$2,$3,$4,'active')`,
       [documentId, sourcePayload.slug, sourcePayload.title, userId],
@@ -180,6 +201,11 @@ test("rollback and restore advance a shared source before review or customizatio
       "approved",
       "recovery must not alter the previously approved source",
     );
+    const confirmedRollback = await post(
+      `/api/documents/${documentId}/revisions/${rolledBack.currentRevisionId}/accuracy-confirmation`,
+      {},
+    );
+    assert.equal(confirmedRollback.status, 200, await confirmedRollback.text());
 
     const submittedRollback = await post(`/api/documents/${documentId}/submit`, {
       revisionId: rolledBack.currentRevisionId,
@@ -229,6 +255,11 @@ test("rollback and restore advance a shared source before review or customizatio
       reviewed_selections: [],
     });
 
+    const confirmedRestore = await post(
+      `/api/documents/${documentId}/revisions/${restored.currentRevisionId}/accuracy-confirmation`,
+      {},
+    );
+    assert.equal(confirmedRestore.status, 200, await confirmedRestore.text());
     const submittedRestore = await post(`/api/documents/${documentId}/submit`, {
       revisionId: restored.currentRevisionId,
     });

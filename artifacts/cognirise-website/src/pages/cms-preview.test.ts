@@ -40,7 +40,7 @@ test("framework previews use the buyer layout without a public CMS request", asy
 test("framework preview keeps warnings and a responsive draft banner visible", async () => {
   const preview = await readFile(pageUrl, "utf8");
 
-  assert.match(preview, /Protected draft preview — not published/);
+  assert.match(preview, /Protected saved-version preview/);
   assert.match(preview, /role="alert"/);
   assert.match(preview, /Media unavailable:/);
   assert.match(preview, /flex-col[\s\S]*sm:flex-row/);

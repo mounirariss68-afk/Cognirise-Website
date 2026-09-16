@@ -46,6 +46,8 @@
     "cms:backup": "tsx ./src/cms/backup.ts",
     "cms:verify-backup": "tsx ./src/cms/verify-backup.ts",
     "cms:rehearse-rollback": "tsx ./src/cms/rehearse-rollback.ts",
+    "cms:task-345-harness": "tsx ./src/cms/task-345-harness.ts",
+    "cms:regional-editor-schema": "tsx ./src/cms/regional-editor-schema.ts",
     "cms:owner-browser-fixture": "tsx ./cms-owner-browser-fixture.ts"
   },
   "dependencies": {

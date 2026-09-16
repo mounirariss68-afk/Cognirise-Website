@@ -1513,6 +1513,48 @@ paths:
                 $ref: "#/components/schemas/DocumentRevision"
         "404":
           $ref: "#/components/responses/NotFound"
+  /documents/{documentId}/revisions/{revisionId}/accuracy-confirmation:
+    parameters:
+      - $ref: "#/components/parameters/DocumentId"
+      - $ref: "#/components/parameters/RevisionId"
+    get:
+      operationId: getDocumentRevisionAccuracyConfirmation
+      tags: [documents]
+      summary: Get the latest explicit accuracy confirmation for a revision
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Latest accuracy confirmation, if any
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [confirmation]
+                properties:
+                  confirmation:
+                    oneOf:
+                      - $ref: "#/components/schemas/DocumentRevisionAccuracyConfirmation"
+                      - type: "null"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    post:
+      operationId: confirmDocumentRevisionAccuracy
+      tags: [documents]
+      summary: Explicitly confirm the accuracy of the current saved revision
+      description: Records actor, time, revision, and immutable content digest. This never changes document content, workflow, or publication state.
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      responses:
+        "200":
+          description: Accuracy confirmation recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentRevisionAccuracyConfirmation"
+        "409":
+          $ref: "#/components/responses/Conflict"
   /documents/{documentId}/submit:
     post:
       operationId: submitDocument
@@ -2288,6 +2330,30 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/User"
+  /users/{userId}/capability-migration/dry-run:
+    post:
+      operationId: dryRunUserCapabilityMigration
+      tags: [users]
+      summary: Record a no-change capability compatibility dry run
+      description: Produces a durable receipt with before and proposed effective-rights snapshots. It never writes grants, roles, markets, editorial work, or publication state.
+      security:
+        - cookieAuth: []
+          csrfToken: []
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CapabilityMigrationDryRunInput"
+      responses:
+        "201":
+          description: Dry-run receipt recorded; no access change was made
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CapabilityMigrationDryRunReceipt"
   /users/{userId}/password-reset:
     post:
       operationId: resetUserPassword
@@ -2782,8 +2848,36 @@ components:
           type: boolean
           description: The state transition committed even though the confirmation response failed; reload before retrying.
         details:
-          type: object
-          additionalProperties: true
+          description: Legacy validation details. Validation responses retain these strings for compatibility.
+          oneOf:
+            - type: object
+              additionalProperties: true
+            - type: array
+              items: { type: string }
+        issues:
+          description: Structured canonical validation targets, supplied alongside legacy details.
+          type: array
+          items: { $ref: "#/components/schemas/CmsValidationIssue" }
+    CmsValidationIssue:
+      type: object
+      additionalProperties: false
+      required: [code, path, message, scope, action]
+      properties:
+        code: { type: string, description: Stable validation-rule identifier. }
+        path: { type: string, description: Canonical action target such as content.heroMedia. }
+        message: { type: string }
+        scope: { type: string, enum: [draft, publish] }
+        action: { type: string, enum: [focus-title, focus-content-field, focus-seo] }
+    DocumentRevisionAccuracyConfirmation:
+      type: object
+      additionalProperties: false
+      required: [id, revisionId, contentDigest, confirmedByUserId, confirmedAt]
+      properties:
+        id: { type: string }
+        revisionId: { type: string }
+        contentDigest: { type: string }
+        confirmedByUserId: { type: string }
+        confirmedAt: { type: string, format: date-time }
     NavigationSetting:
       type: object
       additionalProperties: false
@@ -3572,15 +3666,15 @@ components:
     SharedMarketBaselineInput:
       type: object
       additionalProperties: false
-      required: [locale, snapshot]
+      required: [locale]
       properties:
         locale: { type: string, pattern: '^[a-z]{2}(?:-[A-Z]{2})?$', minLength: 2, maxLength: 16 }
         sourceRevisionId: { type: ["string", "null"], description: Exact real-market source revision for legacy baseline establishment; omit for a successor of an existing neutral baseline. }
-        snapshot: { type: object, additionalProperties: true }
+        snapshot: { type: object, additionalProperties: true, description: Required when sourceRevisionId is omitted. When sourceRevisionId is supplied, an optional snapshot must exactly match that locked revision and the server persists the locked payload. }
         expectedRevisionNumber: { type: number, multipleOf: 1, minimum: 1 }
     SharedMarketBaseline:
       type: object
-      required: [id, documentId, locale, revisionId, revisionNumber, sourceRevisionId, snapshot, mediaReferences, createdAt]
+      required: [id, documentId, locale, revisionId, revisionNumber, sourceRevisionId, authorityKind, snapshot, mediaReferences, createdAt]
       properties:
         id: { type: string }
         documentId: { type: string }
@@ -3588,8 +3682,13 @@ components:
         revisionId: { type: string }
         revisionNumber: { type: number, multipleOf: 1 }
         sourceRevisionId: { type: ["string", "null"] }
-        snapshot: { type: object, additionalProperties: true }
+        governingSourceRevisionId: { type: ["string", "null"], description: Durable authorization origin. It can remain set when sourceRevisionId is null for an independently edited neutral successor. }
+        authorityKind: { type: string, enum: [regional, neutral, unresolved], description: Authoritative classification for baseline access. Neutral denotes a server-proven intentionally countryless baseline; unresolved requires selecting an exact real-market source. }
+        snapshot: { type: ["object", "null"], additionalProperties: true, description: Raw baseline snapshot. Null when its governing source cannot be resolved; use the regional materialized revision and recovery guidance instead. }
         mediaReferences: { type: array, items: { type: object, additionalProperties: true } }
+        affectedDestinationMarkets: { type: array, items: { type: string }, description: Server-authoritative markets affected by saving this baseline revision. }
+        canEdit: { type: boolean, description: Whether the current user satisfies exact source, shared-source, and all affected destination Edit authority. }
+        editReason: { type: ["string", "null"], description: Recoverable reason editing is unavailable. }
         createdAt: { type: string, format: date-time }
     SharedMarketBindingInput:
       type: object
@@ -3687,6 +3786,12 @@ components:
           type: string
           enum: [missing, validation, workflow]
         message: { type: string }
+        code:
+          type: string
+          description: Stable validation-rule identifier. Present for structured contract validation.
+        path:
+          type: string
+          description: Canonical document target such as content.heroMedia or seo.title.
         action:
           type: string
           enum: [create, edit, review]
@@ -4815,7 +4920,7 @@ components:
     DocumentAvailability:
       type: object
       additionalProperties: false
-      required: [documentId, draftVersion, reviewedVersion, publishedVersion, sharedSource, canEditShared, items, affectedEditions]
+      required: [documentId, draftVersion, reviewedVersion, publishedVersion, sharedSource, canEditShared, canReviewShared, reviewBlockedReason, canPublishShared, items, affectedEditions]
       properties:
         documentId: { type: string }
         draftVersion: { type: number, multipleOf: 1, minimum: 0 }
@@ -4835,6 +4940,11 @@ components:
                 sourceRevisionId: { type: ["string", "null"] }
             - type: "null"
         canEditShared: { type: boolean }
+        canReviewShared: { type: boolean }
+        reviewBlockedReason:
+          type: ["string", "null"]
+          enum: [self-review, missing-regional-grant, missing-shared-grant, null]
+        canPublishShared: { type: boolean }
         items:
           type: array
           items:
@@ -5278,6 +5388,15 @@ components:
             - type: "null"
         status:
           $ref: "#/components/schemas/MediaStatus"
+        canEdit:
+          type: boolean
+          description: True only when the caller may update this asset across every referencing edition.
+        canReview:
+          type: boolean
+          description: True only when the caller may review this asset across every referencing edition.
+        canInspect:
+          type: boolean
+          description: True when the caller may inspect the administrator-only media audit history.
         createdBy: { type: string }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
@@ -5486,7 +5605,7 @@ components:
       enum: [invited, active, suspended]
     User:
       type: object
-      required: [id, name, email, role, status, marketCodes, mfaEnabled, mustRotate, createdAt, updatedAt]
+      required: [id, name, email, role, status, marketCodes, legacyAdministratorMarketCodes, capabilityMatrixConfigured, capabilityGrants, mfaEnabled, mustRotate, createdAt, updatedAt]
       properties:
         id: { type: string }
         name: { type: string }
@@ -5498,6 +5617,18 @@ components:
         marketCodes:
           type: array
           items: { type: string, minLength: 2, maxLength: 24 }
+        legacyAdministratorMarketCodes:
+          type: array
+          description: Frozen enabled-market compatibility scope for an unconfigured legacy administrator. Read-only and distinct from marketCodes.
+          items: { type: string, minLength: 2, maxLength: 24 }
+        capabilityMatrixConfigured:
+          type: boolean
+          description: True after the access matrix has been explicitly saved, including an intentionally empty deny-all matrix.
+        capabilityGrants:
+          type: array
+          description: Explicit grants are an allow-list. When capabilityMatrixConfigured is true, an empty array is an intentional deny-all matrix.
+          items:
+            $ref: "#/components/schemas/CapabilityGrant"
         mfaEnabled: { type: boolean }
         mustRotate: { type: boolean }
         lastLoginAt: { type: ["string", "null"], format: date-time }
@@ -5516,6 +5647,11 @@ components:
           type: array
           uniqueItems: true
           items: { type: string, minLength: 2, maxLength: 24 }
+        capabilityGrants:
+          type: array
+          uniqueItems: true
+          items:
+            $ref: "#/components/schemas/CapabilityGrantInput"
     UserInvitation:
       type: object
       required: [id, user, delivery, expiresAt, createdAt]
@@ -5543,6 +5679,52 @@ components:
           type: array
           uniqueItems: true
           items: { type: string, minLength: 2, maxLength: 24 }
+        capabilityGrants:
+          type: array
+          uniqueItems: true
+          description: Replaces all explicit content grants and configures matrix mode. Supply [] for an intentional deny-all matrix; legacy compatibility cannot be restored once configured.
+          items:
+            $ref: "#/components/schemas/CapabilityGrantInput"
+    CmsDocumentTopic:
+      type: string
+      enum: [person, partner, platform, publication, case-study, industry, framework, office, landing-page, site-configuration]
+    CmsCapability:
+      type: string
+      enum: [view, edit, review, publish]
+    CapabilityScope:
+      type: string
+      enum: [regional, shared]
+    CapabilityGrantInput:
+      type: object
+      additionalProperties: false
+      required: [topic, capability, scope, marketCode]
+      properties:
+        topic: { $ref: "#/components/schemas/CmsDocumentTopic" }
+        capability: { $ref: "#/components/schemas/CmsCapability" }
+        scope: { $ref: "#/components/schemas/CapabilityScope" }
+        marketCode: { type: string, pattern: '^[a-z][a-z0-9-]{1,15}$' }
+    CapabilityGrant:
+      allOf:
+        - $ref: "#/components/schemas/CapabilityGrantInput"
+    CapabilityMigrationDryRunInput:
+      type: object
+      additionalProperties: false
+      required: [capabilityGrants]
+      properties:
+        capabilityGrants:
+          type: array
+          uniqueItems: true
+          items: { $ref: "#/components/schemas/CapabilityGrantInput" }
+    CapabilityMigrationDryRunReceipt:
+      type: object
+      required: [id, mode, disposition, beforeSnapshot, afterSnapshot, createdAt]
+      properties:
+        id: { type: string }
+        mode: { type: string, enum: [dry-run] }
+        disposition: { type: string, enum: [no-persistent-access-change] }
+        beforeSnapshot: { type: object, additionalProperties: true }
+        afterSnapshot: { type: object, additionalProperties: true }
+        createdAt: { type: string, format: date-time }
     AccessTokenConsumption:
       type: object
       additionalProperties: false

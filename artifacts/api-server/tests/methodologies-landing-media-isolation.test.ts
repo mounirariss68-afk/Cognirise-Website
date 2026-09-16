@@ -87,10 +87,32 @@ test("methodologies draft and public landing keep separate immutable hero pins",
           user_updated_at: now,
           must_rotate: false,
           mfa_enabled: true,
+           market_codes: ["uae"],
+           legacy_administrator_market_codes: ["uae"],
+           capability_matrix_configured: false,
+           capability_grants: [],
         }],
       };
     }
-    if (statement.includes("FROM market_editions WHERE enabled=true")) {
+     if (statement.includes("SELECT 1 FROM cms_user_capability_configurations")
+       || statement.includes("FROM cms_user_capability_grants")) {
+       return { rowCount: 0, rows: [] };
+     }
+     if (statement.includes("FROM cms_legacy_administrator_market_snapshots")) {
+       return { rowCount: 1, rows: [{ market_codes: ["uae"] }] };
+     }
+     if (statement.includes("SELECT e.id edition_id,e.content_mode,d.kind")) {
+       return String(values[0]) === documentId
+         ? { rowCount: 1, rows: [{ edition_id: editionId, content_mode: "custom", kind: "landing-page" }] }
+         : { rowCount: 0, rows: [] };
+     }
+     if (statement.includes("SELECT binding.mode,adopted.id baseline_id")) {
+       return { rowCount: 0, rows: [] };
+     }
+     if (
+       statement.includes("SELECT code,default_locale,fallback_market_code")
+       && statement.includes("FROM market_editions WHERE enabled=true")
+     ) {
       return {
         rowCount: 1,
         rows: [{
@@ -102,6 +124,21 @@ test("methodologies draft and public landing keep separate immutable hero pins",
         }],
       };
     }
+     if (statement.includes("WITH represented_sources AS")) {
+       return {
+         rowCount: 1,
+         rows: [{
+           kind: "landing-page",
+           payload: publishedSnapshot,
+           available: true,
+           source_rank: 1,
+           public_eligible: true,
+         }],
+       };
+     }
+     if (statement.includes("cms_navigation_published_policies")) {
+       return { rowCount: 0, rows: [] };
+     }
     if (statement.includes("WITH selected AS")) {
       return {
         rowCount: 1,
@@ -176,7 +213,7 @@ test("methodologies draft and public landing keep separate immutable hero pins",
         }],
       };
     }
-    return { rowCount: 0, rows: [] };
+     throw new Error(`unexpected methodologies isolation SQL: ${statement}`);
   });
 
   const server = app.listen(0, "127.0.0.1");

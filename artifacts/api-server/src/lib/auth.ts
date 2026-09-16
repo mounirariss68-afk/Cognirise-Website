@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import { pool } from "@workspace/db";
 import { hashToken, randomToken } from "./security";
-import { roleAtLeast } from "./policy";
+import { roleAtLeast, type CapabilityGrant } from "./policy";
 
 export const SESSION_COOKIE = "__Host-cognirise_session";
 export const CSRF_COOKIE = "__Host-cognirise_csrf";
@@ -16,6 +16,10 @@ export interface AuthUser {
   role: CmsRole;
   status: "invited" | "active" | "suspended";
   marketCodes: string[];
+  /** Frozen compatibility geography for an unconfigured legacy administrator. */
+  legacyAdministratorMarketCodes: string[];
+  capabilityMatrixConfigured: boolean;
+  capabilityGrants: CapabilityGrant[];
   mfaEnabled: boolean;
   mustRotate: boolean;
   lastLoginAt: Date | null;
@@ -86,16 +90,45 @@ export async function createSession(
 }
 
 export async function getUser(userId: string): Promise<AuthUser> {
-  const result = await pool.query(
-    `SELECT u.id,u.display_name name,u.email,u.role,u.status,u.last_login_at,
+  const query = `SELECT u.id,u.display_name name,u.email,u.role,u.status,u.last_login_at,
              u.created_at,u.updated_at,p.must_rotate,
              COALESCE((SELECT array_agg(a.market_code ORDER BY a.market_code)
                FROM cms_user_market_assignments a WHERE a.user_id=u.id),'{}') market_codes,
+              COALESCE((SELECT snapshot.market_codes
+                FROM cms_legacy_administrator_market_snapshots snapshot WHERE snapshot.user_id=u.id),'{}') legacy_administrator_market_codes,
+              EXISTS(SELECT 1 FROM cms_user_capability_configurations c WHERE c.user_id=u.id)
+                capability_matrix_configured,
+              COALESCE((SELECT jsonb_agg(jsonb_build_object(
+                'topic',g.topic,'capability',g.capability,'scope',g.scope,'marketCode',g.market_code
+              ) ORDER BY g.topic,g.capability,g.scope,g.market_code)
+                FROM cms_user_capability_grants g WHERE g.user_id=u.id),'[]'::jsonb) capability_grants,
              EXISTS(SELECT 1 FROM cms_totp_credentials t WHERE t.user_id=u.id
               AND t.verified_at IS NOT NULL AND t.disabled_at IS NULL) mfa_enabled
-       FROM cms_users u LEFT JOIN cms_password_credentials p ON p.user_id=u.id WHERE u.id=$1`,
-    [userId],
-  );
+       FROM cms_users u LEFT JOIN cms_password_credentials p ON p.user_id=u.id WHERE u.id=$1`;
+  let result;
+  try {
+    result = await pool.query(query, [userId]);
+  } catch (error: any) {
+    // Rolling deployments may authenticate before additive matrix sentinel
+    // migration 0039 is visible. Preserve legacy behavior until it is.
+    if (error?.code !== "42P01") throw error;
+    const withoutSnapshot = query.replace(
+        /COALESCE\(\(SELECT snapshot\.market_codes\s+FROM cms_legacy_administrator_market_snapshots snapshot WHERE snapshot\.user_id=u\.id\),'{}'\)/,
+        "'{}'",
+      );
+    try {
+      result = await pool.query(withoutSnapshot, [userId]);
+    } catch (fallbackError: any) {
+      if (fallbackError?.code !== "42P01") throw fallbackError;
+      result = await pool.query(
+        withoutSnapshot.replace(
+          "EXISTS(SELECT 1 FROM cms_user_capability_configurations c WHERE c.user_id=u.id)",
+          "false",
+        ),
+        [userId],
+      );
+    }
+  }
   if (!result.rowCount) throw new Error("User not found");
   const row = result.rows[0];
   return {
@@ -105,6 +138,9 @@ export async function getUser(userId: string): Promise<AuthUser> {
     role: row.role,
     status: row.status,
     marketCodes: row.market_codes ?? [],
+    legacyAdministratorMarketCodes: row.legacy_administrator_market_codes ?? [],
+    capabilityMatrixConfigured: Boolean(row.capability_matrix_configured),
+    capabilityGrants: row.capability_grants ?? [],
     mfaEnabled: row.mfa_enabled,
     mustRotate: Boolean(row.must_rotate),
     lastLoginAt: row.last_login_at ? new Date(row.last_login_at) : null,
@@ -141,6 +177,14 @@ export async function authenticate(
              u.updated_at user_updated_at,p.must_rotate,
              COALESCE((SELECT array_agg(a.market_code ORDER BY a.market_code)
                FROM cms_user_market_assignments a WHERE a.user_id=u.id),'{}') market_codes,
+              COALESCE((SELECT snapshot.market_codes
+                FROM cms_legacy_administrator_market_snapshots snapshot WHERE snapshot.user_id=u.id),'{}') legacy_administrator_market_codes,
+             EXISTS(SELECT 1 FROM cms_user_capability_configurations c WHERE c.user_id=u.id)
+               capability_matrix_configured,
+             COALESCE((SELECT jsonb_agg(jsonb_build_object(
+               'topic',g.topic,'capability',g.capability,'scope',g.scope,'marketCode',g.market_code
+             ) ORDER BY g.topic,g.capability,g.scope,g.market_code)
+               FROM cms_user_capability_grants g WHERE g.user_id=u.id),'[]'::jsonb) capability_grants,
             EXISTS(SELECT 1 FROM cms_totp_credentials t WHERE t.user_id=u.id
               AND t.verified_at IS NOT NULL AND t.disabled_at IS NULL) mfa_enabled
        FROM cms_sessions s
@@ -166,6 +210,9 @@ export async function authenticate(
       role: row.role,
       status: row.status,
       marketCodes: row.market_codes ?? [],
+        legacyAdministratorMarketCodes: row.legacy_administrator_market_codes ?? [],
+        capabilityMatrixConfigured: Boolean(row.capability_matrix_configured),
+        capabilityGrants: row.capability_grants ?? [],
       mfaEnabled: row.mfa_enabled,
       mustRotate: Boolean(row.must_rotate),
       lastLoginAt: row.last_login_at ? new Date(row.last_login_at) : null,
@@ -203,18 +250,39 @@ export function requireMfa(
   _req: Request,
   res: Response,
   next: NextFunction,
-): void {
+): void | Promise<void> {
   const auth = res.locals.auth as AuthContext;
-  const privileged = ["administrator", "publisher", "editor"].includes(auth.user.role);
-  if (auth.user.mustRotate) {
-    res.status(403).json({ error: "Password change is required." });
-    return;
-  }
-  if (privileged && (!auth.user.mfaEnabled || !auth.mfaVerified)) {
-    res.status(403).json({ error: "Multi-factor authentication is required." });
-    return;
-  }
-  next();
+  // A viewer may receive explicit Edit/Review/Publish authority. Check the
+  // current database grants on every privileged request so a matrix grant
+  // cannot bypass MFA and a revocation takes effect without a new login.
+  const enforce = async () => {
+    // A rolling deploy may serve code just before the additive migration is
+    // visible. There can be no explicit grants until that table exists, so
+    // retaining the old role gate is safe; any other database failure remains
+    // an error and never becomes an authorization fallback.
+    let explicitPrivilege: { rowCount: number | null } = { rowCount: 0 };
+    try {
+      explicitPrivilege = await pool.query(
+        `SELECT 1 FROM cms_user_capability_grants
+          WHERE user_id=$1 AND capability IN ('edit','review','publish') LIMIT 1`,
+        [auth.user.id],
+      );
+    } catch (error: any) {
+      if (error?.code !== "42P01") throw error;
+    }
+    const privileged = ["administrator", "publisher", "editor"].includes(auth.user.role) ||
+      Boolean(explicitPrivilege.rowCount);
+    if (auth.user.mustRotate) {
+      res.status(403).json({ error: "Password change is required." });
+      return;
+    }
+    if (privileged && (!auth.user.mfaEnabled || !auth.mfaVerified)) {
+      res.status(403).json({ error: "Multi-factor authentication is required for privileged content authority." });
+      return;
+    }
+    next();
+  };
+  return enforce().catch(next);
 }
 
 export function requireRoles(...roles: CmsRole[]) {

@@ -37,6 +37,9 @@ export const cmsReviewRequestsTable = pgTable("cms_review_requests", {
   revisionId: uuid("revision_id").notNull().references(() => cmsRevisionsTable.id, { onDelete: "cascade" }),
   requesterUserId: uuid("requester_user_id").notNull().references(() => cmsUsersTable.id, { onDelete: "restrict" }),
   reviewerUserId: uuid("reviewer_user_id").notNull().references(() => cmsUsersTable.id, { onDelete: "restrict" }),
+  // Captured at request creation. Current assignments are historical
+  // attribution only and must not alter an already-open review's safeguards.
+  accountableEditorUserId: uuid("accountable_editor_user_id").references(() => cmsUsersTable.id, { onDelete: "set null" }),
   status: text("status").notNull().default("requested"),
   note: text("note"),
   decisionNote: text("decision_note"),

@@ -6,4 +6,7 @@
  * OpenAPI spec version: 0.2.0
  */
 
-export type ApiErrorDetails = { [key: string]: unknown };
+/**
+ * Legacy validation details. Validation responses retain these strings for compatibility.
+ */
+export type ApiErrorDetails = { [key: string]: unknown } | string[];

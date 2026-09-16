@@ -164,6 +164,11 @@ export type PreviewNavigationSnapshot = {
   pages?: Array<Record<string, unknown>>;
 };
 
+export type PreviewMarketContext = {
+  market: string;
+  locale: string;
+};
+
 const compiledNavigation: NavigationItem[] = [
   {
     id: "what-we-do",
@@ -264,25 +269,30 @@ function AnalyticsPreference() {
 export function Shell({
   children,
   navigationOverride,
+  marketContext,
 }: {
   children: React.ReactNode;
   /** Capability-issued navigation. Never persisted or used by public routes. */
   navigationOverride?: PreviewNavigationSnapshot;
+  /** Capability-issued market context. It never writes to public preferences. */
+  marketContext?: PreviewMarketContext;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
   const [location, setLocation] = useLocation();
-  const { market, locale, setMarket } = useMarketStore();
+  const { market: publicMarket, locale: publicLocale, setMarket } = useMarketStore();
+  const market = marketContext?.market ?? publicMarket;
+  const locale = marketContext?.locale ?? publicLocale;
   const publicConfiguration = useGetPublicConfiguration();
   const marketOptions = publicConfiguration.data?.markets ?? [];
   useEffect(() => {
-    if (!publicConfiguration.data) return;
+    if (!publicConfiguration.data || marketContext) return;
     configurePublicMarkets(
       publicConfiguration.data.markets,
       publicConfiguration.data.markets.find((option) => option.isCanonical)?.code,
     );
-  }, [publicConfiguration.data]);
+  }, [marketContext, publicConfiguration.data]);
   const navigationSettings = useGetPublicNavigationSettings({ market, locale }, {
     query: { queryKey: ["public-navigation", market, locale], enabled: !navigationOverride },
   });
@@ -557,9 +567,13 @@ export function Shell({
           </nav>
 
           <div className="relative z-50 hidden shrink-0 items-center gap-4 2xl:gap-6 2xl:flex">
-            {import.meta.env?.DEV && marketOptions.length > 0 && (
+            {marketContext ? (
+              <span className="text-xs font-bold uppercase tracking-widest text-[hsl(var(--brand-deep))]">
+                Preview · {getMarketLocationLabel(market)}
+              </span>
+            ) : import.meta.env?.DEV && marketOptions.length > 0 ? (
               <ReviewVersionSelect markets={marketOptions} market={market} onSelect={setMarket} />
-            )}
+            ) : null}
             <BrandButton href="/value-scan" className="shrink-0">Bring us one process</BrandButton>
           </div>
 
@@ -638,11 +652,15 @@ export function Shell({
             </div>
           </nav>
           
-          {import.meta.env?.DEV && marketOptions.length > 0 && (
+          {marketContext ? (
+            <div className="pb-12 border-t border-border pt-8 text-xs font-bold uppercase tracking-widest text-[hsl(var(--brand-deep))]">
+              Preview · {getMarketLocationLabel(market)}
+            </div>
+          ) : import.meta.env?.DEV && marketOptions.length > 0 ? (
             <div className="pb-12 border-t border-border pt-8">
               <ReviewVersionSelect markets={marketOptions} market={market} onSelect={setMarket} />
             </div>
-          )}
+          ) : null}
         </div>
       )}
 

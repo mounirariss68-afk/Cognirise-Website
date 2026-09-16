@@ -9,6 +9,9 @@ const restrictedEditor = {
 function clientForBinding(row: Record<string, unknown> | null) {
   return {
     async query(sql: string) {
+      if (sql.includes("SELECT e.id edition_id,e.content_mode,d.kind FROM cms_documents")) {
+        return { rowCount: 1, rows: [{ edition_id: "edition-id", content_mode: "custom", kind: "publication" }] };
+      }
       if (sql.includes("SELECT content_mode FROM cms_market_editions")) {
         return { rowCount: 1, rows: [{ content_mode: "custom" }] };
       }

@@ -46,14 +46,14 @@ function Router() {
        <Route path="/editorial-work" component={() => <AppLayout><EditorialWork /></AppLayout>} />
       
       {/* Content routes */}
-      <Route path="/people" component={() => <AppLayout><DocumentList kind="person" /></AppLayout>} />
-      <Route path="/partners" component={() => <AppLayout><DocumentList kind="partner" /></AppLayout>} />
-      <Route path="/platforms" component={() => <AppLayout><DocumentList kind="platform" /></AppLayout>} />
-      <Route path="/publications" component={() => <AppLayout><DocumentList kind="publication" /></AppLayout>} />
-      <Route path="/case-studies" component={() => <AppLayout><DocumentList kind="case-study" /></AppLayout>} />
-      <Route path="/industries" component={() => <AppLayout><DocumentList kind="industry" /></AppLayout>} />
-      <Route path="/frameworks" component={() => <AppLayout><DocumentList kind="framework" /></AppLayout>} />
-      <Route path="/offices" component={() => <AppLayout><DocumentList kind="office" /></AppLayout>} />
+      <Route path="/people" component={() => <AppLayout contentTopic="person"><DocumentList kind="person" /></AppLayout>} />
+      <Route path="/partners" component={() => <AppLayout contentTopic="partner"><DocumentList kind="partner" /></AppLayout>} />
+      <Route path="/platforms" component={() => <AppLayout contentTopic="platform"><DocumentList kind="platform" /></AppLayout>} />
+      <Route path="/publications" component={() => <AppLayout contentTopic="publication"><DocumentList kind="publication" /></AppLayout>} />
+      <Route path="/case-studies" component={() => <AppLayout contentTopic="case-study"><DocumentList kind="case-study" /></AppLayout>} />
+      <Route path="/industries" component={() => <AppLayout contentTopic="industry"><DocumentList kind="industry" /></AppLayout>} />
+      <Route path="/frameworks" component={() => <AppLayout contentTopic="framework"><DocumentList kind="framework" /></AppLayout>} />
+      <Route path="/offices" component={() => <AppLayout contentTopic="office"><DocumentList kind="office" /></AppLayout>} />
       
       {/* Content detail */}
       <Route path="/content/:id" component={() => <AppLayout><DocumentDetail /></AppLayout>} />

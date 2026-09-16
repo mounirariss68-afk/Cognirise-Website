@@ -22,7 +22,7 @@ function PreviewBanner({ preview }: { preview: Preview }) {
   return (
     <header className="sticky top-0 z-[60] border-b border-amber-300 bg-amber-50 px-4 py-3 text-amber-950 sm:px-6 sm:py-4">
       <div className="mx-auto flex max-w-[1100px] flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-3">
-        <strong>Protected draft preview — not published</strong>
+        <strong>Protected saved-version preview</strong>
         <span className="font-mono text-[10px] uppercase sm:text-xs">{preview.requestedMarket} / {preview.requestedLocale} · revision {preview.revisionNumber}{preview.usedFallback ? " · fallback" : ""}</span>
       </div>
     </header>
@@ -96,7 +96,10 @@ export function CmsPreviewFramework({
   ];
   if (missingFrameworkMedia.length) {
     return (
-      <Shell navigationOverride={preview.navigation}>
+      <Shell
+        navigationOverride={preview.navigation}
+        marketContext={{ market: preview.market, locale: preview.locale }}
+      >
         <PreviewBanner preview={preview} />
         <PreviewWarningPanel warnings={warnings} missingMedia={missingFrameworkMedia} />
         <ProtectedPreviewError message="This saved framework revision references draft media that is unavailable. It has not been completed with public media." />
@@ -104,7 +107,10 @@ export function CmsPreviewFramework({
     );
   }
   return (
-    <Shell navigationOverride={preview.navigation}>
+    <Shell
+      navigationOverride={preview.navigation}
+      marketContext={{ market: preview.market, locale: preview.locale }}
+    >
       <main className="min-h-screen bg-background">
         <PreviewBanner preview={preview} />
         <PreviewWarningPanel warnings={warnings} missingMedia={preview.missingMediaIds} />

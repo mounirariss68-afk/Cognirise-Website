@@ -15,6 +15,13 @@ test("availability release paths reject stale, unauthorized, and standalone shar
   ]);
   let role: "editor" | "administrator" = "editor";
   let draftVersion = 1;
+  const capabilityGrants = ["ksa", "uae"].flatMap((marketCode) => [
+    { topic: "publication", capability: "view", scope: "regional", market_code: marketCode },
+    { topic: "publication", capability: "review", scope: "regional", market_code: marketCode },
+    { topic: "publication", capability: "publish", scope: "regional", market_code: marketCode },
+    { topic: "publication", capability: "review", scope: "shared", market_code: marketCode },
+    { topic: "publication", capability: "publish", scope: "shared", market_code: marketCode },
+  ]);
   const now = new Date();
   const query = async (sql: unknown, values: unknown[] = []) => {
     const statement = String(sql);
@@ -33,7 +40,7 @@ test("availability release paths reject stale, unauthorized, and standalone shar
     if (statement.includes("SELECT id,kind FROM cms_documents")) {
       return { rowCount: 1, rows: [{ id: "document-id", kind: "publication" }] };
     }
-    if (statement.includes("SELECT id FROM cms_documents")) {
+    if (statement.includes("SELECT id FROM cms_documents") || statement.includes("SELECT 1 FROM cms_documents")) {
       return values[0] === "document-id"
         ? { rowCount: 1, rows: [{ id: "document-id" }] }
         : { rowCount: 0, rows: [] };
@@ -53,6 +60,12 @@ test("availability release paths reject stale, unauthorized, and standalone shar
         rows: role === "administrator" ? [] : [{ market_code: "ksa" }],
       };
     }
+    if (statement.includes("cms_user_capability_configurations")) {
+      return { rowCount: 1, rows: [{}] };
+    }
+    if (statement.includes("FROM cms_user_capability_grants")) {
+      return { rowCount: capabilityGrants.length, rows: capabilityGrants };
+    }
     if (statement.includes("SELECT draft_version FROM cms_document_availability_states")) {
       return { rowCount: 1, rows: [{ draft_version: draftVersion, shared_source_edition_id: null }] };
     }
@@ -62,7 +75,24 @@ test("availability release paths reject stale, unauthorized, and standalone shar
         rows: [{
           draft_version: draftVersion, reviewed_version: 1, reviewed_selections: [],
           shared_source_revision_id: "source-draft", reviewed_source_revision_id: "source-draft",
+          shared_source_edition_id: "source-edition", published_source_revision_id: null,
+          updated_by_user_id: "another-user", kind: "publication",
         }],
+      };
+    }
+    if (statement.includes("FROM market_editions m") && !statement.includes("FOR UPDATE OF m")) {
+      return {
+        rowCount: 2,
+        rows: [
+          {
+            market_edition_id: "ksa-id", market: "ksa", locale: "en", display_name: "KSA",
+            draft_decision: "show", published_decision: "off",
+          },
+          {
+            market_edition_id: "uae-id", market: "uae", locale: "en", display_name: "UAE",
+            draft_decision: "show", published_decision: "off",
+          },
+        ],
       };
     }
     if (statement.includes("FROM market_editions m") && statement.includes("FOR UPDATE OF m")) {
@@ -99,6 +129,17 @@ test("availability release paths reject stale, unauthorized, and standalone shar
     "content-type": "application/json", origin, "x-csrf-token": csrf,
     cookie: `${auth.SESSION_COOKIE}=session-token; ${auth.CSRF_COOKIE}=${csrf}`,
   };
+
+  const availabilityResponse = await fetch(`${origin}/api/documents/document-id/availability`, { headers });
+  assert.equal(availabilityResponse.status, 200);
+  const availability = await availabilityResponse.json() as {
+    canReviewShared: boolean;
+    reviewBlockedReason: string | null;
+    canPublishShared: boolean;
+  };
+  assert.equal(availability.canReviewShared, true);
+  assert.equal(availability.reviewBlockedReason, null);
+  assert.equal(availability.canPublishShared, true);
 
   const stale = await fetch(`${origin}/api/documents/document-id/availability`, {
     method: "PUT", headers,

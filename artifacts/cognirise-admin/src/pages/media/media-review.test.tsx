@@ -49,6 +49,9 @@ type Asset = {
   status: string;
   createdAt: string;
   collection: "website";
+  canEdit: boolean;
+  canReview: boolean;
+  canInspect: boolean;
 };
 
 type ReviewInput = {
@@ -81,6 +84,9 @@ const sourceAsset: Asset = {
   status: "review",
   createdAt: "2026-01-01T00:00:00.000Z",
   collection: "website",
+  canEdit: true,
+  canReview: true,
+  canInspect: false,
 };
 
 let assets: Asset[] = [];
@@ -326,7 +332,13 @@ if (typeof moduleMock !== "function") {
   test("unavailable card downloads remain disabled and editors cannot review", async () => {
     resetState();
     role = "editor";
-    assets = [{ ...sourceAsset, publicUrl: "" }];
+    assets = [{
+      ...sourceAsset,
+      publicUrl: "",
+      canEdit: false,
+      canReview: false,
+      canInspect: false,
+    }];
     const view = await renderLibrary();
     try {
       assert.equal(button(view.container, "Download").disabled, true);

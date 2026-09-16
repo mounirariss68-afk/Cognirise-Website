@@ -50,6 +50,87 @@ test("reuse plan shows only same-language destinations and protects legacy, inde
   assert.deepEqual(plan.otherLanguageEditions.map((edition) => edition.revisionId), ["uk-arabic"]);
 });
 
+test("reuse source selection admits only supplied saved/published exact identities with read access", () => {
+  const exactEditions = [
+    { market: "uae", locale: "en-US", revisionId: "saved-draft-4", revisionNumber: 4 },
+    { market: "ksa", locale: "en-US", revisionId: "ksa-current", revisionNumber: 2 },
+  ];
+  const sourceCandidates = [
+    { ...exactEditions[0]!, revisionId: "saved-draft-4", sourceKind: "saved-draft" as const },
+    { market: "uae", locale: "en-US", revisionId: "published-3", revisionNumber: 3, sourceKind: "published" as const },
+  ];
+  const published = buildEditionReusePlan({
+    sourceRevisionId: "published-3", markets, exactEditions, sourceCandidates,
+    matrix: { baselines: [], bindings: [] },
+    canEditDestination: () => true,
+    canReadSource: (market, locale) => market === "uae" && locale === "en-US",
+  });
+  assert.equal(published.source?.revisionId, "published-3");
+  // Destination inspection still starts from the current exact destination,
+  // rather than treating the selected source identity as a live pointer.
+  assert.equal(published.targets.find((target) => target.key === "ksa|en-US")?.exactEdition?.revisionId, "ksa-current");
+
+  const arbitraryHistory = buildEditionReusePlan({
+    sourceRevisionId: "older-history-1", markets, exactEditions, sourceCandidates,
+    matrix: { baselines: [], bindings: [] }, canEditDestination: () => true,
+  });
+  assert.equal(arbitraryHistory.source, undefined);
+  const unreadPublished = buildEditionReusePlan({
+    sourceRevisionId: "published-3", markets, exactEditions, sourceCandidates,
+    matrix: { baselines: [], bindings: [] }, canEditDestination: () => true,
+    canReadSource: () => false,
+  });
+  assert.equal(unreadPublished.source, undefined);
+});
+
+test("a saved shared-baseline revision is copied by its own identity, never by a null-origin CMS source id", () => {
+  const sharedBaseline = {
+    id: "shared-baseline", documentId: "document", locale: "en-US",
+    revisionId: "shared-baseline-2", revisionNumber: 2, sourceRevisionId: null,
+    snapshot: { title: "Edited shared title" }, mediaReferences: [], createdAt: new Date(),
+  };
+  const plan = buildEditionReusePlan({
+    sourceRevisionId: "shared-baseline-2",
+    markets,
+    exactEditions: [{ market: "ksa", locale: "en-US", revisionId: "ksa-current", revisionNumber: 4 }],
+    sourceCandidates: [{
+      market: "shared-source", locale: "en-US", revisionId: "shared-baseline-2",
+      revisionNumber: 2, sourceKind: "shared", baselineId: "shared-baseline",
+    }],
+    matrix: { baselines: [sharedBaseline], bindings: [] },
+    canEditDestination: () => true,
+  });
+  assert.equal(plan.source?.sourceKind, "shared");
+  assert.equal(plan.baseline?.revisionId, "shared-baseline-2");
+  assert.equal(plan.targets.find((target) => target.key === "ksa|en-US")?.exactEdition?.revisionId, "ksa-current");
+  const staleSharedSelection = buildEditionReusePlan({
+    sourceRevisionId: "shared-baseline-2",
+    markets,
+    exactEditions: [{ market: "ksa", locale: "en-US", revisionId: "ksa-current", revisionNumber: 4 }],
+    sourceCandidates: [{
+      market: "shared-source", locale: "en-US", revisionId: "shared-baseline-2",
+      revisionNumber: 2, sourceKind: "shared", baselineId: "different-baseline",
+    }],
+    matrix: { baselines: [sharedBaseline], bindings: [] },
+    canEditDestination: () => true,
+  });
+  assert.match(staleSharedSelection.sourceIssue ?? "", /unavailable|changed/i);
+  assert.equal(staleSharedSelection.source, undefined);
+
+  const mistakenCmsSource = buildEditionReusePlan({
+    sourceRevisionId: "governing-cms-revision",
+    markets,
+    exactEditions: [{ market: "ksa", locale: "en-US", revisionId: "ksa-current", revisionNumber: 4 }],
+    sourceCandidates: [{
+      market: "uae", locale: "en-US", revisionId: "governing-cms-revision",
+      revisionNumber: 9, sourceKind: "saved-draft",
+    }],
+    matrix: { baselines: [sharedBaseline], bindings: [] },
+    canEditDestination: () => true,
+  });
+  assert.equal(mistakenCmsSource.baseline, undefined);
+});
+
 test("reuse requests require explicit replacement and retain each binding version", () => {
   const plan = buildEditionReusePlan({
     sourceRevisionId: "source-2",

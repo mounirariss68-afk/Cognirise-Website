@@ -425,7 +425,27 @@ test("upload requests and renewals preserve identity, ownership and retry safety
           user_updated_at: now,
           must_rotate: false,
           mfa_enabled: true,
+          market_codes: ["uae"],
+          legacy_administrator_market_codes: [],
+          capability_matrix_configured: false,
+          capability_grants: [],
         }],
+      };
+    }
+    if (statement.includes("cms_user_capability_configurations")) {
+      return { rowCount: 0, rows: [] };
+    }
+    if (statement.includes("cms_user_capability_grants")) {
+      return { rowCount: 0, rows: [] };
+    }
+    if (statement.includes("cms_legacy_administrator_market_snapshots")) {
+      return { rowCount: 0, rows: [] };
+    }
+    if (statement.includes("SELECT a.uploaded_by_user_id,r.id reference_id")) {
+      const row = assets.get(String(values?.[0]));
+      return {
+        rowCount: row ? 1 : 0,
+        rows: row ? [{ uploaded_by_user_id: row.uploaded_by_user_id }] : [],
       };
     }
     if (statement.includes("INSERT INTO cms_media_assets")) {
@@ -598,8 +618,27 @@ test("publisher-only review decisions enforce valid transitions and write audit 
           user_updated_at: now,
           must_rotate: false,
           mfa_enabled: true,
+          market_codes: ["uae"],
+          legacy_administrator_market_codes: [],
+          capability_matrix_configured: false,
+          capability_grants: [],
         }],
       };
+    }
+    if (statement.includes("SELECT a.uploaded_by_user_id,r.id reference_id")) {
+      return {
+        rowCount: 1,
+        rows: [{ uploaded_by_user_id: "publisher-user" }],
+      };
+    }
+    if (statement.includes("cms_user_capability_configurations")) {
+      return { rowCount: 0, rows: [] };
+    }
+    if (statement.includes("cms_user_capability_grants")) {
+      return { rowCount: 0, rows: [] };
+    }
+    if (statement.includes("cms_legacy_administrator_market_snapshots")) {
+      return { rowCount: 0, rows: [] };
     }
     return { rowCount: 0, rows: [] };
   });

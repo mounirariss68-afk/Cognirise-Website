@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 import { Globe2, Languages, MapPin } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -30,11 +29,7 @@ export type DocumentGeographySelectorProps = {
   disabled?: boolean;
   onSelectEdition: (market: string, locale: string) => void;
   onSelectShared?: (locale: string) => void;
-  /**
-   * The source control and the geographic controls intentionally stay
-   * separate. A region can inherit the shared source without an editor
-   * having to choose a source market first.
-   */
+  /** Retained for compatibility; selecting Shared is part of Version below. */
   showSourceControl?: boolean;
 };
 
@@ -60,10 +55,9 @@ export function marketLocaleOptions(
 }
 
 /**
- * The editor context is deliberately content-first: source selection is a
- * single, explicit action, while market and language remain independent
- * selectors. This avoids silently treating a known regional edition as a
- * request to pick (or promote) a shared source.
+ * One edition selector establishes whether the editor is acting on neutral
+ * shared content or one named regional version. Language is deliberately a
+ * separate selector: it never implies a destination or a translation action.
  */
 export function DocumentGeographySelector({
   markets,
@@ -76,7 +70,6 @@ export function DocumentGeographySelector({
   disabled = false,
   onSelectEdition,
   onSelectShared,
-  showSourceControl = true,
 }: DocumentGeographySelectorProps) {
   const enabledMarkets = useMemo(
     () => markets.filter((market) => market.enabled !== false),
@@ -132,30 +125,17 @@ export function DocumentGeographySelector({
               : "This market resolves the content below. Choose Customize only when this region needs a local difference."}
           </p>
         </div>
-        {showSourceControl && onSelectShared && sharedAvailable && (
-          <Button
-            type="button"
-            variant={isShared ? "default" : "outline"}
-            size="sm"
-            disabled={disabled}
-            onClick={() => onSelectShared(effectiveSharedLocale ?? sharedLocale ?? "en")}
-            data-testid="button-edit-shared-content"
-          >
-            <Globe2 className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
-            {isShared ? "Shared content" : "Edit shared content"}
-          </Button>
-        )}
       </div>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <div className="space-y-1.5">
           <Label htmlFor="geography-market" className="flex items-center gap-1.5 text-xs">
             <MapPin className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
-            Market
+            Version
           </Label>
           <Select value={selectedMarket || undefined} onValueChange={selectMarket} disabled={disabled}>
-            <SelectTrigger id="geography-market" aria-label="Market">
-              <SelectValue placeholder="Choose a market" />
+            <SelectTrigger id="geography-market" aria-label="Content version">
+              <SelectValue placeholder="Choose Shared or a region" />
             </SelectTrigger>
             <SelectContent>
               {sharedAvailable && <SelectItem value="shared-source">Shared content</SelectItem>}
@@ -197,7 +177,7 @@ export function DocumentGeographySelector({
         </div>
       </div>
       <p className="mt-3 text-[11px] text-muted-foreground">
-        Source and geography are independent: a regional edition can stay independent, inherit shared content, or carry an explicit local customization.
+        Choose Shared for the neutral source or a named region for its exact saved version. Source lineage and destination visibility are managed under Regions.
       </p>
     </section>
   );

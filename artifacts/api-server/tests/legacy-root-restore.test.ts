@@ -58,6 +58,8 @@ test("legacy root restore activates only the selected authorized edition", { con
     },
   };
   let latestPayload = stalePayload;
+  let restoreReleaseReceiptPending = false;
+  let accuracyConfirmed = false;
 
   t.mock.method(pool, "query", async (sql: unknown, values: unknown[] = []) => {
     const statement = String(sql);
@@ -85,6 +87,9 @@ test("legacy root restore activates only the selected authorized edition", { con
       };
     }
     if (statement.includes("INSERT INTO cms_audit_events")) return { rowCount: 1, rows: [] };
+    if (statement.includes("FROM cms_revision_accuracy_confirmations")) {
+      return accuracyConfirmed ? { rowCount: 1, rows: [{}] } : { rowCount: 0, rows: [] };
+    }
     if (statement.includes("FROM market_editions WHERE enabled=true")) {
       return {
         rowCount: 1,
@@ -181,6 +186,9 @@ test("legacy root restore activates only the selected authorized edition", { con
       if (statement.includes("SELECT status FROM cms_documents")) {
         return { rowCount: 1, rows: [{ status: rootStatus }] };
       }
+      if (statement.includes("FROM cms_revision_accuracy_confirmations")) {
+        return accuracyConfirmed ? { rowCount: 1, rows: [{}] } : { rowCount: 0, rows: [] };
+      }
       if (statement.includes("LOCK TABLE cms_user_market_assignments IN SHARE MODE")) {
         return { rowCount: 0, rows: [] };
       }
@@ -225,6 +233,10 @@ test("legacy root restore activates only the selected authorized edition", { con
           }],
         };
       }
+      if (statement.includes("SELECT e.id edition_id,e.content_mode,d.kind FROM cms_documents")) {
+        assert.deepEqual(values.slice(0, 3), ["legacy-document", "ksa", "en"]);
+        return { rowCount: 1, rows: [{ edition_id: "ksa-edition", content_mode: "custom", kind: "publication" }] };
+      }
       if (
         statement.includes("FROM cms_revisions published")
         && statement.includes("cms_resolved_market_revisions")
@@ -250,8 +262,31 @@ test("legacy root restore activates only the selected authorized edition", { con
           rows: [{
             id: latestRevisionId,
             payload: approvedPayload,
+            content_digest: "approved-digest",
           }],
         };
+      }
+      if (statement.includes("INSERT INTO cms_restore_release_receipts")) {
+        restoreReleaseReceiptPending = true;
+        return { rowCount: 1, rows: [{ id: "restore-receipt" }] };
+      }
+      if (statement.includes("INSERT INTO cms_revision_accuracy_confirmations")) {
+        accuracyConfirmed = true;
+        return { rowCount: 1, rows: [] };
+      }
+      if (statement.includes("FROM cms_restore_release_receipts")
+        && statement.includes("authorized_actor_user_id")) {
+        return restoreReleaseReceiptPending
+          ? {
+              rowCount: 1,
+              rows: [{
+                id: "restore-receipt",
+                revision_id: latestRevisionId,
+                content_digest: "approved-digest",
+                authorized_actor_user_id: "user-id",
+              }],
+            }
+          : { rowCount: 0, rows: [] };
       }
       if (
         statement.includes("FROM cms_revisions r")
@@ -263,6 +298,7 @@ test("legacy root restore activates only the selected authorized edition", { con
             id: latestRevisionId,
             edition_id: "ksa-edition",
             payload: latestPayload,
+            content_digest: "approved-digest",
             kind: "publication",
             canonical_slug: "legacy-document",
             workflow_state: latestWorkflow,
@@ -294,6 +330,7 @@ test("legacy root restore activates only the selected authorized edition", { con
             id: latestRevisionId,
             edition_id: "ksa-edition",
             payload: latestPayload,
+            content_digest: "approved-digest",
             kind: "publication",
             canonical_slug: "legacy-document",
             workflow_state: latestWorkflow,
@@ -303,7 +340,7 @@ test("legacy root restore activates only the selected authorized edition", { con
           }],
         };
       }
-      if (statement.includes("SELECT r.id,r.edition_id,r.payload,d.kind")) {
+      if (statement.includes("SELECT r.id,r.edition_id,r.payload") && statement.includes("FROM cms_revisions r")) {
         if (values[0] !== latestRevisionId) return { rowCount: 0, rows: [] };
         return {
           rowCount: 1,
@@ -323,6 +360,10 @@ test("legacy root restore activates only the selected authorized edition", { con
       if (statement.includes("UPDATE cms_revisions SET workflow_state='approved'")) {
         latestWorkflow = "approved";
         return { rowCount: 1, rows: [] };
+      }
+      if (statement.includes("UPDATE cms_restore_release_receipts")) {
+        restoreReleaseReceiptPending = false;
+        return { rowCount: 1, rows: [{ id: "restore-receipt" }] };
       }
       if (statement.includes("UPDATE cms_market_editions SET publication_state=$2")) {
         states.ksa = "published";

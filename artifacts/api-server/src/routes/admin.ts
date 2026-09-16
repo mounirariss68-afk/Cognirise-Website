@@ -11,6 +11,7 @@ import {
   RevokeUserSessionsBody,
   UpdateMarketEditionBody,
   UpdateUserBody,
+  DryRunUserCapabilityMigrationBody,
 } from "@workspace/api-zod";
 import {
   authenticate,
@@ -39,6 +40,11 @@ import {
   publicAccessDeliveryJob,
   retryAccessDeliveryJob,
 } from "../lib/access-delivery";
+import {
+  capabilityGrantPrerequisiteErrors,
+  capabilityProjection,
+  type CapabilityGrant,
+} from "../lib/policy";
 
 const router: IRouter = Router();
 router.use(
@@ -55,6 +61,9 @@ function userFromRow(row: Record<string, any>) {
     role: row.role,
     status: row.status,
     marketCodes: row.market_codes ?? [],
+    legacyAdministratorMarketCodes: row.legacy_administrator_market_codes ?? [],
+    capabilityGrants: row.capability_grants ?? [],
+    capabilityMatrixConfigured: Boolean(row.capability_matrix_configured),
     mfaEnabled: Boolean(row.mfa_enabled),
     mustRotate: Boolean(row.must_rotate),
     lastLoginAt: row.last_login_at,
@@ -164,6 +173,14 @@ router.get(
     const result = await pool.query(
       `SELECT u.*,p.must_rotate,COALESCE((SELECT array_agg(a.market_code ORDER BY a.market_code)
           FROM cms_user_market_assignments a WHERE a.user_id=u.id),'{}') market_codes,
+        COALESCE((SELECT jsonb_agg(jsonb_build_object(
+          'topic',g.topic,'capability',g.capability,'scope',g.scope,'marketCode',g.market_code
+        ) ORDER BY g.topic,g.capability,g.scope,g.market_code)
+          FROM cms_user_capability_grants g WHERE g.user_id=u.id),'[]'::jsonb) capability_grants,
+        COALESCE((SELECT snapshot.market_codes
+          FROM cms_legacy_administrator_market_snapshots snapshot WHERE snapshot.user_id=u.id),'{}') legacy_administrator_market_codes,
+        EXISTS(SELECT 1 FROM cms_user_capability_configurations c WHERE c.user_id=u.id)
+          capability_matrix_configured,
         EXISTS(SELECT 1 FROM cms_totp_credentials t WHERE t.user_id=u.id
         AND t.verified_at IS NOT NULL AND t.disabled_at IS NULL) mfa_enabled,
          count(*) OVER() total_count FROM cms_users u LEFT JOIN cms_password_credentials p ON p.user_id=u.id
@@ -196,6 +213,15 @@ router.post(
     const auth = res.locals.auth as AuthContext;
     if (!(await marketCodesValid(parsed.data.marketCodes ?? []))) {
       res.status(400).json({ error: "One or more market assignments are invalid." });
+      return;
+    }
+    const capabilityError = await validateCapabilityGrants(
+      parsed.data.capabilityGrants,
+      parsed.data.marketCodes ?? [],
+      parsed.data.role,
+    );
+    if (capabilityError) {
+      res.status(400).json({ error: capabilityError });
       return;
     }
     const token = randomToken();
@@ -261,6 +287,11 @@ router.post(
       const user = userFromRow(result.rows[0]);
       await replaceMarketAssignments(client, user.id, parsed.data.marketCodes ?? []);
       user.marketCodes = parsed.data.marketCodes ?? [];
+       if (parsed.data.capabilityGrants !== undefined) {
+         await replaceCapabilityGrants(client, user.id, parsed.data.capabilityGrants, auth.user.id);
+         user.capabilityGrants = parsed.data.capabilityGrants;
+         user.capabilityMatrixConfigured = true;
+       }
       const tokenResult = await client.query(
         `INSERT INTO cms_user_access_tokens
           (user_id,purpose,token_digest,expires_at,created_by_user_id)
@@ -350,6 +381,34 @@ router.patch(
       res.status(400).json({ error: "One or more market assignments are invalid." });
       return;
     }
+    const currentUser = await pool.query(
+      `SELECT u.*,COALESCE((SELECT array_agg(a.market_code ORDER BY a.market_code)
+          FROM cms_user_market_assignments a WHERE a.user_id=u.id),'{}') market_codes
+          ,COALESCE((SELECT snapshot.market_codes
+             FROM cms_legacy_administrator_market_snapshots snapshot
+            WHERE snapshot.user_id=u.id),'{}') legacy_administrator_market_codes
+          ,EXISTS(SELECT 1 FROM cms_user_capability_configurations c WHERE c.user_id=u.id)
+            capability_matrix_configured
+       FROM cms_users u WHERE u.id=$1`,
+      [userId],
+    );
+    if (!currentUser.rowCount) {
+      res.status(404).json({ error: "User not found." });
+      return;
+    }
+    const nextMarkets = parsed.data.marketCodes ?? currentUser.rows[0].market_codes ?? [];
+    const nextRole = parsed.data.role ?? currentUser.rows[0].role;
+    const currentGrants = await capabilityGrants(userId);
+    const currentConfigured = Boolean(currentUser.rows[0].capability_matrix_configured);
+    const capabilityError = await validateCapabilityGrants(
+      parsed.data.capabilityGrants ?? currentGrants,
+      nextMarkets,
+      nextRole,
+    );
+    if (capabilityError) {
+      res.status(400).json({ error: capabilityError });
+      return;
+    }
     const client = await pool.connect();
     await client.query("BEGIN");
     let result;
@@ -361,6 +420,15 @@ router.patch(
       );
       if (result.rowCount && parsed.data.marketCodes !== undefined) {
         await replaceMarketAssignments(client, userId, parsed.data.marketCodes);
+      }
+      if (result.rowCount && parsed.data.capabilityGrants !== undefined) {
+        await replaceCapabilityGrants(client, userId, parsed.data.capabilityGrants, auth.user.id);
+        // Policy reads grants per operation, but revoking active sessions also
+        // prevents stale clients from retaining any unrelated privileged state.
+        await client.query(
+          "UPDATE cms_sessions SET revoked_at=now() WHERE user_id=$1 AND revoked_at IS NULL",
+          [userId],
+        );
       }
       if (result.rowCount && parsed.data.status === "suspended") {
         await client.query(
@@ -384,7 +452,90 @@ router.patch(
     }
     const updated = userFromRow(result.rows[0]);
     updated.marketCodes = parsed.data.marketCodes ?? (await marketAssignments(userId));
+    updated.capabilityGrants = await capabilityGrants(userId);
+    updated.capabilityMatrixConfigured = parsed.data.capabilityGrants !== undefined || currentConfigured;
     res.json(updated);
+  }),
+);
+
+router.post(
+  "/users/:userId/capability-migration/dry-run",
+  requireCsrf,
+  requireAdministrator,
+  asyncRoute(async (req, res) => {
+    const parsed = DryRunUserCapabilityMigrationBody.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: "Invalid capability migration dry run." });
+      return;
+    }
+    const userId = String(req.params.userId);
+    const target = await pool.query(
+      `SELECT u.*,COALESCE((SELECT array_agg(a.market_code ORDER BY a.market_code)
+          FROM cms_user_market_assignments a WHERE a.user_id=u.id),'{}') market_codes
+          ,EXISTS(SELECT 1 FROM cms_user_capability_configurations c WHERE c.user_id=u.id)
+            capability_matrix_configured
+       FROM cms_users u WHERE u.id=$1`,
+      [userId],
+    );
+    if (!target.rowCount) {
+      res.status(404).json({ error: "User not found." });
+      return;
+    }
+    const capabilityError = await validateCapabilityGrants(
+      parsed.data.capabilityGrants,
+      target.rows[0].market_codes ?? [],
+      target.rows[0].role,
+    );
+    if (capabilityError) {
+      res.status(400).json({ error: capabilityError });
+      return;
+    }
+    const enabledMarkets = await pool.query(
+      "SELECT code FROM market_editions WHERE enabled=true ORDER BY code",
+    );
+    const beforeGrants = await capabilityGrants(userId);
+    const frozenLegacyAdministrator = target.rows[0].role === "administrator"
+      && !target.rows[0].capability_matrix_configured;
+    const subject = {
+      id: userId,
+      // `canAccessLegacyContent` has an administrator compatibility shortcut.
+      // Project the frozen 0040 scope as publisher compatibility instead, so
+      // a receipt cannot claim every currently enabled market for a legacy
+      // administrator merely because a later market was enabled.
+      role: frozenLegacyAdministrator ? "publisher" : target.rows[0].role,
+      marketCodes: frozenLegacyAdministrator
+        ? target.rows[0].legacy_administrator_market_codes ?? []
+        : target.rows[0].market_codes ?? [],
+    };
+    const markets = enabledMarkets.rows.map((row) => row.code);
+    const beforeSnapshot = capabilityProjection(
+      subject,
+      beforeGrants,
+      frozenLegacyAdministrator ? subject.marketCodes : markets,
+      Boolean(target.rows[0].capability_matrix_configured),
+    );
+    const afterSnapshot = capabilityProjection(subject, parsed.data.capabilityGrants, markets, true);
+    const auth = res.locals.auth as AuthContext;
+    const receipt = await pool.query(
+      `INSERT INTO cms_capability_migration_receipts(
+        requested_by_user_id,target_user_id,before_snapshot,after_snapshot
+       ) VALUES ($1,$2,$3::jsonb,$4::jsonb)
+       RETURNING id,mode,disposition,before_snapshot,after_snapshot,created_at`,
+      [auth.user.id, userId, JSON.stringify(beforeSnapshot), JSON.stringify(afterSnapshot)],
+    );
+    await audit(auth, "user.capability_migration_dry_run", "user", userId, {
+      receiptId: String(receipt.rows[0].id),
+      disposition: "no-persistent-access-change",
+    });
+    const row = receipt.rows[0];
+    res.status(201).json({
+      id: String(row.id),
+      mode: row.mode,
+      disposition: row.disposition,
+      beforeSnapshot: row.before_snapshot,
+      afterSnapshot: row.after_snapshot,
+      createdAt: row.created_at,
+    });
   }),
 );
 
@@ -597,6 +748,67 @@ async function replaceMarketAssignments(client: QueryClient, userId: string, mar
     await client.query(
       "INSERT INTO cms_user_market_assignments(user_id,market_code) VALUES ($1,$2)",
       [userId, code],
+    );
+  }
+}
+
+async function capabilityGrants(userId: string): Promise<CapabilityGrant[]> {
+  const result = await pool.query(
+    `SELECT topic,capability,scope,market_code FROM cms_user_capability_grants
+      WHERE user_id=$1 ORDER BY topic,capability,scope,market_code`,
+    [userId],
+  );
+  return result.rows.map((row) => ({
+    topic: row.topic,
+    capability: row.capability,
+    scope: row.scope,
+    marketCode: row.market_code,
+  })) as CapabilityGrant[];
+}
+
+async function validateCapabilityGrants(
+  grants: CapabilityGrant[] | undefined,
+  marketCodes: string[],
+  role: string,
+): Promise<string | null> {
+  if (grants === undefined) return null;
+  const duplicate = new Set<string>();
+  for (const grant of grants) {
+    const key = `${grant.topic}/${grant.capability}/${grant.scope}/${grant.marketCode}`;
+    if (duplicate.has(key)) return "Capability grants must be unique.";
+    duplicate.add(key);
+  }
+  const prerequisiteErrors = capabilityGrantPrerequisiteErrors(grants);
+  if (prerequisiteErrors.length) return prerequisiteErrors[0];
+  if (!(await marketCodesValid(grants.map((grant) => grant.marketCode)))) {
+    return "One or more capability grant geographies are invalid or disabled.";
+  }
+  if (role !== "administrator" && grants.some((grant) => !marketCodes.includes(grant.marketCode))) {
+    return "Capability grants must use geographies assigned to the user.";
+  }
+  return null;
+}
+
+async function replaceCapabilityGrants(
+  client: QueryClient,
+  userId: string,
+  grants: CapabilityGrant[],
+  actorUserId: string,
+) {
+  await client.query(
+    `INSERT INTO cms_user_capability_configurations(user_id,configured_by_user_id,configured_at)
+     VALUES ($1,$2,now())
+     ON CONFLICT (user_id) DO UPDATE
+       SET configured_by_user_id=excluded.configured_by_user_id,configured_at=excluded.configured_at`,
+    [userId, actorUserId],
+  );
+  await client.query("DELETE FROM cms_user_capability_grants WHERE user_id=$1", [userId]);
+  for (const grant of grants) {
+    await client.query(
+      `INSERT INTO cms_user_capability_grants(
+        user_id,topic,capability,scope,market_code,created_by_user_id
+       ) VALUES ($1,$2,$3,$4,$5,$6)`,
+      [userId, grant.topic, grant.capability, grant.scope, grant.marketCode, actorUserId],
     );
   }
 }

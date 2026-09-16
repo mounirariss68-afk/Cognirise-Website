@@ -68,11 +68,9 @@ export const INDUSTRY_SECTION_CONTENT_PATHS: Readonly<Record<IndustrySectionId, 
 };
 
 export function belongsToIndustrySection(path: string, section: IndustrySectionId) {
+  const contentPath = path.replace(/^content\./, "");
   return INDUSTRY_SECTION_CONTENT_PATHS[section].some((prefix) =>
-    path === prefix
-    || path.startsWith(`${prefix}.`)
-    || path.startsWith(`content.${prefix}`)
-    || path.includes(`.${prefix}.`),
+    contentPath === prefix || contentPath.startsWith(`${prefix}.`),
   );
 }
 

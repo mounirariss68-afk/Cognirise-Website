@@ -14,17 +14,21 @@ import {
   useGetSession,
   getGetDocumentQueryKey,
   getListDocumentRevisionsQueryKey,
-  DocumentStatus,
+   DocumentStatus,
+   type DocumentKind,
+  confirmDocumentRevisionAccuracy,
+  getGetDocumentRevisionAccuracyConfirmationQueryKey,
+  useGetDocumentRevisionAccuracyConfirmation,
 } from "@workspace/api-client-react";
- import { getListMarketEditionsQueryKey, useListMarketEditions, getListDocumentEditionsQueryKey, useListDocumentEditions, getDocumentAvailability, getGetDocumentAvailabilityQueryKey, useGetDocumentAvailability, useReviewDocumentAvailability, usePublishDocumentAvailability, useSelectDocumentAvailabilitySource, getListDocumentReviewCommentsQueryKey, useListDocumentReviewComments, useAddDocumentReviewComment, useRejectDocumentRevision, getGetSharedMarketEditionMatrixQueryKey, useGetSharedMarketEditionMatrix, getCompareSharedMarketBaselineQueryKey, useEstablishSharedMarketBaseline, useBindSharedMarketEdition, useSaveSharedMarketOverrides, useCompareSharedMarketBaseline, useResolveSharedMarketBaselineUpdate, type SharedMarketBinding, type SharedMarketOverride } from "@workspace/api-client-react";
+ import { getListMarketEditionsQueryKey, useListMarketEditions, getListDocumentEditionsQueryKey, useListDocumentEditions, getDocumentAvailability, getGetDocumentAvailabilityQueryKey, useGetDocumentAvailability, useReviewDocumentAvailability, usePublishDocumentAvailability, useSelectDocumentAvailabilitySource, getListDocumentReviewCommentsQueryKey, useListDocumentReviewComments, useAddDocumentReviewComment, getGetSharedMarketEditionMatrixQueryKey, useGetSharedMarketEditionMatrix, getCompareSharedMarketBaselineQueryKey, useEstablishSharedMarketBaseline, useBindSharedMarketEdition, useSaveSharedMarketOverrides, useCompareSharedMarketBaseline, useResolveSharedMarketBaselineUpdate, getListPublishedContentQueryKey, useListPublishedContent, type SharedMarketBinding, type SharedMarketOverride } from "@workspace/api-client-react";
 import { DocumentEditorContext } from "./DocumentEditorContext";
 import { DocumentCompareModal } from "./DocumentCompareModal";
 import { FieldOverrideIndicator } from "./FieldOverrideIndicator";
 import { readSharedOverridePath, resetSharedOverridePath } from "@workspace/api-zod";
 import { compareSharedMarketBaseline } from "@workspace/api-client-react";
 import { OverridesContext } from "./OverridesContext";
-import { type CmsDocumentKind, validateCmsContent } from "@workspace/api-zod";
-import { useQueryClient } from "@tanstack/react-query";
+import { cmsPublicRoute, isCmsRetiredLandingPagePath, type CmsContent, type CmsDocumentKind, validateCmsContent } from "@workspace/api-zod";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -58,14 +62,16 @@ import { SharedBaselineEditor } from "./SharedBaselineEditor";
 // hint: Logic changed on both sides. Requires understanding intent of each change.
 import { applyLocalSuccessorToEditionMatrix, previewPinForEditionRevision, previewResponseMatchesTarget, type PreviewTarget } from "./preview-revision-lifecycle";
 import { createDraftRecoveryExport, downloadDraftRecovery } from "./draft-operation-safety";
-import { EditionAssignmentControl } from "./EditionAssignmentControl";
+import { getTeamEditorialWork, requestRevisionReview } from "@/lib/editorial-work";
 import { DocumentGeographySelector } from "./DocumentGeographySelector";
 import { PublicationImpactSummary } from "./PublicationImpactSummary";
 import { ContentEditor, contentFieldId } from "./ContentEditor";
 import { MediaField } from "./MediaField";
 import { buildDocumentReadiness as documentReadiness, collectContentMediaIds, CONTENT_GUIDANCE, editionAuthoringActions, readinessCounts, type ReadinessIssue } from "./authoring";
-import { reuseFailureOutcome } from "./edition-reuse";
+import { localeLanguage, reuseFailureOutcome, type ReuseSourceCandidate } from "./edition-reuse";
+import { canSaveReusableSourceFromAuthority } from "./EditionReuseFlow";
 import { ReadinessPanel } from "./ReadinessPanel";
+import { CMS_FIELD_COVERAGE } from "./field-coverage";
 
 function documentListPath(kind: CmsDocumentKind): string {
   switch (kind) {
@@ -117,6 +123,309 @@ type PreviewFailure = {
   detail: string;
   sharedDestinationAuthority: boolean;
 };
+
+type PublicRouteOwnership = "cms" | "code" | "contextual" | "retired" | "unsupported" | "unknown";
+type PublicDeliveryState = "cms" | "compiled-fallback" | "intentional-empty" | "loading" | "api-error" | "contract-error" | "retired" | "unsupported" | "visibility-blocked";
+
+type PublicDisclosureDocument = {
+  kind: CmsDocumentKind;
+  slug: string;
+  content: Record<string, unknown>;
+  contentConfiguration?: PublicContentConfigurationState;
+};
+
+type PublicContentConfigurationState = {
+  data?: {
+    configuredPagePaths?: string[];
+    isConfigured?: boolean;
+    items?: Array<{ slug: string }>;
+  };
+  isLoading?: boolean;
+  isFetching?: boolean;
+  isError?: boolean;
+};
+
+type PublicRouteMetadata = {
+  route?: string | null;
+  routeReported: boolean;
+  ownership?: PublicRouteOwnership;
+  delivery?: PublicDeliveryState;
+  configured?: boolean;
+  configuredPagePaths?: string[];
+};
+
+type PublicDisclosure = {
+  context: "Detail page" | "Card / list / section" | "Global settings" | "No standalone route";
+  route: string | null;
+  ownership: PublicRouteOwnership;
+  delivery?: PublicDeliveryState;
+  configured?: boolean;
+  configurationSource?: "route" | "kind";
+  purpose: string;
+};
+
+/**
+ * These are route facts from the website's compiled presentation, not CMS
+ * feature flags. They are useful when a document exists for a route which is
+ * deliberately still rendered by code (for example CogniOS).
+ */
+const CODE_OWNED_PUBLIC_ROUTES = new Set([
+  "/",
+  "/platforms/cognios",
+]);
+
+const CONTEXTUAL_DOCUMENT_KINDS = new Set<CmsDocumentKind>([
+  "person",
+  "partner",
+  "office",
+  "site-configuration",
+]);
+
+function asPublicRecord(value: unknown): Record<string, unknown> | undefined {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : undefined;
+}
+
+function hasPublicProperty(record: Record<string, unknown>, key: string): boolean {
+  return Object.prototype.hasOwnProperty.call(record, key);
+}
+
+function publicString(value: unknown): string | undefined {
+  return typeof value === "string" && value.trim() ? value.trim() : undefined;
+}
+
+function publicDelivery(value: unknown): PublicDeliveryState | undefined {
+  return ["cms", "compiled-fallback", "intentional-empty", "loading", "api-error", "contract-error", "retired", "unsupported", "visibility-blocked"]
+    .includes(String(value))
+    ? value as PublicDeliveryState
+    : undefined;
+}
+
+function publicOwnership(value: unknown): PublicRouteOwnership | undefined {
+  const normalized = publicString(value)?.toLowerCase().replaceAll("_", "-");
+  if (!normalized) return undefined;
+  if (["cms", "cms-owned", "cms-route"].includes(normalized)) return "cms";
+  if (["code", "code-owned", "code-route", "compiled", "compiled-fallback"].includes(normalized)) return "code";
+  if (["contextual", "no-route", "no-standalone-route"].includes(normalized)) return "contextual";
+  if (["retired", "retired-route"].includes(normalized)) return "retired";
+  if (["unsupported", "unsupported-route"].includes(normalized)) return "unsupported";
+  return undefined;
+}
+
+/**
+ * The document contract can gain read-only delivery metadata without making
+ * the editor depend on a generated client version. Until the API supplies it,
+ * this intentionally reports the absence instead of guessing a cutover flag.
+ */
+function publicRouteMetadata(document: unknown): PublicRouteMetadata {
+  const root = asPublicRecord(document) ?? {};
+  const publicDeliveryRecord = asPublicRecord(root.publicDelivery);
+  const routeRecord = asPublicRecord(root.publicRoute);
+  const routeProperty = hasPublicProperty(root, "publicRoute");
+  const route = publicString(root.publicRoute)
+    ?? publicString(routeRecord?.path)
+    ?? publicString(publicDeliveryRecord?.route)
+    ?? (routeProperty ? null : undefined);
+  const ownership = publicOwnership(
+    root.publicRouteOwnership
+      ?? routeRecord?.owner
+      ?? routeRecord?.ownership
+      ?? (typeof root.publicDelivery === "string" ? root.publicDelivery : undefined)
+      ?? publicDeliveryRecord?.ownership
+      ?? root.routeOwnership,
+  );
+  const delivery = publicDelivery(
+    root.publicDeliveryState
+      ?? root.deliveryState
+      ?? (typeof root.publicDelivery === "string" ? root.publicDelivery : undefined)
+      ?? routeRecord?.delivery
+      ?? routeRecord?.status
+      ?? publicDeliveryRecord?.state
+      ?? publicDeliveryRecord?.status
+      ?? root.delivery,
+  );
+  const configuredValue = root.publicRouteConfigured
+    ?? routeRecord?.configured
+    ?? publicDeliveryRecord?.configured
+    ?? root.isConfigured;
+  const configured = typeof configuredValue === "boolean" ? configuredValue : undefined;
+  const configuredPagePathsValue = root.configuredPagePaths
+    ?? routeRecord?.configuredPagePaths
+    ?? publicDeliveryRecord?.configuredPagePaths;
+  const configuredPagePaths = Array.isArray(configuredPagePathsValue)
+    ? configuredPagePathsValue.filter((path): path is string => typeof path === "string")
+    : undefined;
+  return { route, routeReported: routeProperty || Boolean(routeRecord), ownership, delivery, configured, configuredPagePaths };
+}
+
+function publicRouteCandidate(document: PublicDisclosureDocument): string | null {
+  // cmsPublicRoute deliberately honours visibility. For an editor disclosure
+  // we also need to show the route a hidden draft would own after publication.
+  const content = document.content.visibility === "public"
+    ? document.content
+    : { ...document.content, visibility: "public" };
+  return cmsPublicRoute(document.kind, document.slug, content as CmsContent);
+}
+
+function publicDisclosureFor(document: PublicDisclosureDocument): PublicDisclosure {
+  const metadata = publicRouteMetadata(document);
+  const content = document.content;
+  const candidateRoute = publicRouteCandidate(document);
+  const configurationSettled = !document.contentConfiguration?.isLoading
+    && !document.contentConfiguration?.isFetching
+    && !document.contentConfiguration?.isError;
+  const configurationData = configurationSettled ? document.contentConfiguration?.data : undefined;
+  const configuredPagePaths = configurationData?.configuredPagePaths
+    ?? metadata.configuredPagePaths;
+  const routeConfigured = candidateRoute && configuredPagePaths
+    ? configuredPagePaths.includes(candidateRoute)
+    : undefined;
+  const kindConfigured = configurationData?.isConfigured;
+  const landingRouteConfigurationReported = document.kind === "landing-page"
+    && configurationData?.configuredPagePaths !== undefined;
+  const requestedRoute = metadata.routeReported ? metadata.route ?? null : candidateRoute;
+  const isRetiredLanding = document.kind === "landing-page"
+    && typeof content.pagePath === "string"
+    && isCmsRetiredLandingPagePath(content.pagePath);
+  const route = isRetiredLanding && !metadata.routeReported ? null : requestedRoute;
+  const contextual = CONTEXTUAL_DOCUMENT_KINDS.has(document.kind);
+  const cogniOsRoute = document.kind === "platform" && document.slug === "cognios";
+  const ownership = isRetiredLanding
+    ? "retired"
+    : metadata.ownership
+      ?? (metadata.delivery === "retired" ? "retired" : metadata.delivery === "unsupported" ? "unsupported" : undefined)
+      ?? (metadata.delivery === "compiled-fallback" ? "code" : undefined)
+      ?? (metadata.delivery === "cms" ? "cms" : undefined)
+      ?? (metadata.delivery === "intentional-empty" ? "cms" : undefined)
+      ?? (cogniOsRoute ? "code" : undefined)
+      ?? (metadata.configured === true || routeConfigured === true ? "cms" : undefined)
+      ?? (landingRouteConfigurationReported && route ? routeConfigured ? "cms" : "code" : undefined)
+      ?? (route && CODE_OWNED_PUBLIC_ROUTES.has(route) ? "code" : undefined)
+      ?? (contextual || !route ? "contextual" : "unknown");
+  const configured = metadata.configured
+    ?? (document.kind === "landing-page" ? routeConfigured : kindConfigured)
+    ?? (route && configuredPagePaths ? configuredPagePaths.includes(route) : undefined);
+  const configurationSource = metadata.configured !== undefined
+    ? "kind"
+    : document.kind === "landing-page" && configuredPagePaths
+      ? "route"
+      : kindConfigured !== undefined ? "kind" : undefined;
+  const context = contextual
+    ? document.kind === "site-configuration" ? "Global settings" : "Card / list / section"
+    : route ? "Detail page" : "No standalone route";
+  const purpose = contextual
+    ? document.kind === "site-configuration"
+      ? "This record supplies global website settings; it is not a standalone public page."
+      : "This record supplies reusable public context in cards, lists, and sections; it is not a standalone public page."
+    : ownership === "retired"
+      ? "This route is retained as editorial history but is retired from public delivery."
+      : ownership === "unsupported"
+        ? "The configured route is not supported by the current public renderer."
+        : route
+          ? "This record supplies the public detail presentation for the route shown below."
+          : "The current revision has no standalone public route.";
+  return {
+    context,
+    route,
+    ownership,
+    delivery: metadata.delivery
+      ?? ((document.contentConfiguration?.isLoading || document.contentConfiguration?.isFetching) && candidateRoute ? "loading" : undefined)
+      ?? (document.contentConfiguration?.isError && candidateRoute ? "api-error" : undefined)
+      ?? (ownership === "code" ? "compiled-fallback" : undefined)
+      ?? (content.visibility && content.visibility !== "public" && candidateRoute ? "visibility-blocked" : undefined),
+    configured,
+    configurationSource,
+    purpose,
+  };
+}
+
+function publicOwnershipLabel(ownership: PublicRouteOwnership): string {
+  switch (ownership) {
+    case "cms": return "CMS-owned route";
+    case "code": return "Code-owned route";
+    case "contextual": return "No standalone route";
+    case "retired": return "Retired route";
+    case "unsupported": return "Unsupported route";
+    default: return "Ownership not reported by document API";
+  }
+}
+
+function publicDeliveryLabel(delivery: PublicDeliveryState): string {
+  switch (delivery) {
+    case "cms": return "CMS delivery";
+    case "compiled-fallback": return "Compiled fallback";
+    case "intentional-empty": return "Configured, but intentionally empty";
+    case "loading": return "API delivery loading";
+    case "api-error": return "API delivery error";
+    case "contract-error": return "API contract error";
+    case "retired": return "Retired route";
+    case "unsupported": return "Unsupported route";
+    case "visibility-blocked": return "Blocked by revision visibility";
+  }
+}
+
+export function PublicContextDisclosure({ document }: { document: PublicDisclosureDocument }) {
+  const disclosure = publicDisclosureFor(document);
+  return (
+    <section
+      className="space-y-3 rounded border bg-muted/10 p-3"
+      aria-label="Public context and route ownership"
+      data-testid="public-context-disclosure"
+    >
+      <div>
+        <h3 className="text-sm font-semibold">Public context and route ownership</h3>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Purpose: show where this record is delivered and which presentation owns its public route. This is read-only delivery context, not a cutover control.
+        </p>
+      </div>
+      <dl className="grid gap-x-3 gap-y-2 text-xs sm:grid-cols-[max-content_1fr]">
+        <dt className="font-medium text-muted-foreground">Public context</dt>
+        <dd>{disclosure.context}</dd>
+        <dt className="font-medium text-muted-foreground">Route</dt>
+        <dd className="break-all font-mono">{disclosure.route ?? "No standalone route"}</dd>
+        <dt className="font-medium text-muted-foreground">Route ownership</dt>
+        <dd>{publicOwnershipLabel(disclosure.ownership)}</dd>
+        <dt className="font-medium text-muted-foreground">Public delivery</dt>
+        <dd>{disclosure.delivery ? publicDeliveryLabel(disclosure.delivery) : "Not reported by document API"}</dd>
+        {disclosure.configured !== undefined && (
+          <>
+            <dt className="font-medium text-muted-foreground">
+              {disclosure.configurationSource === "route" ? "API route configuration" : "API content configuration"}
+            </dt>
+            <dd>
+              {disclosure.configured ? "Configured" : "Not configured"}
+              {disclosure.configurationSource === "route" ? " for this route" : " for this content kind"}
+            </dd>
+          </>
+        )}
+      </dl>
+      <p className="text-[11px] text-muted-foreground">{disclosure.purpose}</p>
+    </section>
+  );
+}
+
+type ContentNavigatorEntry = { label: string; path: string };
+
+function contentNavigatorEntries(kind: CmsDocumentKind, value: Record<string, unknown>): ContentNavigatorEntry[] {
+  const collection = Array.isArray(value.sections) ? ["sections", value.sections]
+    : Array.isArray(value.body) ? ["body", value.body]
+      : Array.isArray(value.methodology) ? ["methodology", value.methodology]
+        : null;
+  if (collection) {
+    const [key, items] = collection as [string, unknown[]];
+    return items.slice(0, 12).map((item, index) => {
+      const record = item && typeof item === "object" ? item as Record<string, unknown> : {};
+      const label = [record.heading, record.title, record.label, record.type]
+        .find((candidate): candidate is string => typeof candidate === "string" && candidate.trim().length > 0);
+      return { label: label ?? `${key} ${index + 1}`, path: `content.${key}.${index}` };
+    });
+  }
+  const label = kind === "office" ? "Contact card"
+    : kind === "person" || kind === "partner" ? "Profile card"
+      : kind === "industry" ? "Industry page" : "Page content";
+  return [{ label, path: "document-title" }];
+}
 
 type PreviewOperation = {
   sequence: number;
@@ -259,7 +568,9 @@ export default function DocumentDetail() {
 
   const { data: session, isLoading: isSessionLoading, isError: isSessionError } = useGetSession();
   const isAdministrator = session?.user?.role === "administrator";
-  const canPublish = isAdministrator || session?.user?.role === "publisher";
+  const capabilityMatrixConfigured = Boolean(session?.user?.capabilityMatrixConfigured || (session?.user?.capabilityGrants ?? []).length);
+  const legacyAdministratorContentAuthority = isAdministrator && !capabilityMatrixConfigured;
+  const legacyAdministratorMarketCodes = session?.user?.legacyAdministratorMarketCodes ?? [];
   const [selectedMarket, setSelectedMarket] = useState("");
   const [selectedLocale, setSelectedLocale] = useState("");
   const [pendingOverridePaths, setPendingOverridePaths] = useState<string[]>([]);
@@ -286,8 +597,14 @@ export default function DocumentDetail() {
     data: sharedMatrix,
     isLoading: isSharedMatrixLoading,
     isError: isSharedMatrixError,
+    isFetching: isSharedMatrixFetching,
+    isStale: isSharedMatrixStale,
   } = useGetSharedMarketEditionMatrix(id!, {
-    query: { enabled: Boolean(id && session), queryKey: getGetSharedMarketEditionMatrixQueryKey(id!) },
+    query: {
+      enabled: Boolean(id && session),
+      queryKey: getGetSharedMarketEditionMatrixQueryKey(id!),
+      staleTime: 15_000,
+    },
   });
   const establishSharedBaseline = useEstablishSharedMarketBaseline();
   const bindSharedEdition = useBindSharedMarketEdition();
@@ -304,6 +621,153 @@ export default function DocumentDetail() {
       queryKey: getGetDocumentQueryKey(id!, documentParams),
     },
   });
+  const publicContentParams = {
+    market: selectedMarket,
+    locale: selectedLocale,
+    kind: (doc?.kind ?? "person") as DocumentKind,
+    pageSize: 100,
+  };
+  const {
+    data: publicContent,
+    isLoading: isPublicContentLoading,
+    isFetching: isPublicContentFetching,
+    isError: isPublicContentError,
+  } = useListPublishedContent(publicContentParams, {
+    query: {
+      enabled: Boolean(id && doc && selectedMarket && selectedLocale),
+      queryKey: getListPublishedContentQueryKey(publicContentParams),
+    },
+  });
+  const allowsCapability = (capability: "view" | "edit" | "review" | "publish", market = selectedMarket) => {
+    const topic = doc?.kind;
+    if (!topic || market === "shared-source") return false;
+    const grants = session?.user?.capabilityGrants ?? [];
+    // Legacy administrators retain their historical full authority only until
+    // the capability matrix is explicitly configured. An empty configured
+    // matrix is an intentional deny, not a reason to project administrator
+    // rights back into every market.
+    if (legacyAdministratorContentAuthority) {
+      return legacyAdministratorMarketCodes.includes(market);
+    }
+    // Once the server marks a capability matrix configured, including an
+    // intentionally empty one, never fall back to legacy role projection.
+    if (session?.user?.capabilityMatrixConfigured || grants.length) {
+      return grants.some((grant) => grant.topic === topic
+        && grant.capability === capability
+        && grant.scope === "regional"
+        && grant.marketCode === market);
+    }
+    const legacy = session?.user?.role;
+    return Boolean(session?.user?.marketCodes?.includes(market))
+      && (capability === "view"
+        || ((capability === "edit" || capability === "review") && ["editor", "publisher"].includes(legacy ?? ""))
+        || (capability === "publish" && legacy === "publisher"));
+  };
+  const canViewMarket = (market: string) => {
+    const grants = session?.user?.capabilityGrants ?? [];
+    if (legacyAdministratorContentAuthority) {
+      return legacyAdministratorMarketCodes.includes(market);
+    }
+    if (!doc?.kind && capabilityMatrixConfigured) {
+      return grants.some((grant) =>
+        grant.marketCode === market
+        && grant.scope === "regional"
+        && ["view", "edit", "review", "publish"].includes(grant.capability)
+      );
+    }
+    if (!doc?.kind) return Boolean(session?.user?.marketCodes?.includes(market));
+    return allowsCapability("view", market);
+  };
+  const reuseSourceCandidates = useMemo<ReuseSourceCandidate[]>(
+    () => [
+      ...(sharedMatrix?.baselines ?? [])
+        // The API redacts an unresolved baseline snapshot. Do not present
+        // that recovery row as reusable saved content.
+        .filter((baseline) => (
+          baseline.authorityKind !== "unresolved"
+          && baseline.snapshot !== null
+          && Boolean(localeLanguage(baseline.locale))
+        ))
+        .map((baseline): ReuseSourceCandidate => ({
+          market: "shared-source",
+          locale: baseline.locale,
+          revisionId: baseline.revisionId,
+          revisionNumber: baseline.revisionNumber,
+          sourceKind: "shared",
+          baselineId: baseline.id,
+        })),
+      ...(editionMatrix?.items ?? []).flatMap((edition) => {
+        if (!edition.exact || !edition.revisionId || !canViewMarket(edition.market)) return [];
+        const candidates: ReuseSourceCandidate[] = [{
+          market: edition.market,
+          locale: edition.locale,
+          revisionId: edition.revisionId,
+          revisionNumber: edition.revisionNumber,
+          sourceKind: "saved-draft",
+        }];
+        if (
+          edition.hasEffectivePublishedRevision
+          && edition.effectiveRevisionId
+          && edition.effectiveRevisionNumber !== null
+          && edition.effectiveMarket === edition.market
+          && edition.effectiveLocale === edition.locale
+          && edition.effectiveRevisionId !== edition.revisionId
+        ) {
+          candidates.push({
+            market: edition.market,
+            locale: edition.locale,
+            revisionId: edition.effectiveRevisionId,
+            revisionNumber: edition.effectiveRevisionNumber,
+            sourceKind: "published",
+          });
+        }
+        return candidates;
+      }),
+    ],
+    [
+      editionMatrix?.items,
+      sharedMatrix?.baselines,
+      session?.user?.capabilityGrants,
+      session?.user?.capabilityMatrixConfigured,
+      session?.user?.legacyAdministratorMarketCodes,
+      session?.user?.marketCodes,
+      doc?.kind,
+    ],
+  );
+  const canReadReuseSource = useCallback(
+    (market: string, locale: string) => reuseSourceCandidates.some((candidate) =>
+      candidate.market === market
+      && candidate.locale === locale
+      && (candidate.sourceKind === "shared" || canViewMarket(market)),
+    ),
+    [
+      canViewMarket,
+      reuseSourceCandidates,
+      session?.user?.capabilityGrants,
+      session?.user?.capabilityMatrixConfigured,
+      session?.user?.legacyAdministratorMarketCodes,
+      session?.user?.marketCodes,
+      doc?.kind,
+    ],
+  );
+  const canPublish = allowsCapability("publish");
+  const canSaveReusableSource = (sourceMarket: string, affectedDestinationMarkets: string[]) => {
+    const reusableSourceAuthority = legacyAdministratorContentAuthority && session?.user
+      ? {
+          ...session.user,
+          // The generated user contract keeps this frozen compatibility scope
+          // separate from assigned marketCodes. EditionReuseFlow predates that
+          // field, so normalize only this legacy, unconfigured call site.
+          marketCodes: legacyAdministratorMarketCodes,
+        }
+      : session?.user;
+    return canSaveReusableSourceFromAuthority(
+      reusableSourceAuthority,
+      doc?.kind,
+      sourceMarket,
+      affectedDestinationMarkets,
+    );
+  };
 
   const updateDoc = useUpdateDocument();
   const submitDoc = useSubmitDocument();
@@ -326,16 +790,15 @@ export default function DocumentDetail() {
   const [seo, setSeo] = useState<DraftSeo>({});
   const [seoOriginallyPresent, setSeoOriginallyPresent] = useState(false);
   const [activeSideTab, setActiveSideTab] = useState("metadata");
+  const [industryFocusPath, setIndustryFocusPath] = useState<string | undefined>();
   const [saveIssues, setSaveIssues] = useState<DraftSaveIssue[]>([]);
   const [conflictOpen, setConflictOpen] = useState(false);
   const [saveRecovery, setSaveRecovery] = useState<"uncertain" | "committed" | null>(null);
   const [saveBlocked, setSaveBlocked] = useState(false);
   const [blockedRecovery, setBlockedRecovery] = useState<"conflict" | "uncertain" | "committed" | null>(null);
   const [previewingRevisionId, setPreviewingRevisionId] = useState<string | null>(null);
-  const hasAuthorRole = ["editor", "publisher", "administrator"].includes(session?.user?.role ?? "");
-  const canEditSelectedMarket = hasAuthorRole && (
-    isAdministrator || Boolean(session?.user?.marketCodes?.includes(selectedMarket))
-  );
+  const hasAuthorRole = allowsCapability("edit") || allowsCapability("review");
+  const canEditSelectedMarket = allowsCapability("edit");
   const [previewRevisionId, setPreviewRevisionId] = useState<string | undefined>();
   const [previewFallback, setPreviewFallback] = useState<PreviewFallback | null>(null);
   const [previewFailure, setPreviewFailure] = useState<PreviewFailure | null>(null);
@@ -345,7 +808,6 @@ export default function DocumentDetail() {
     query: { enabled: Boolean(previewRevisionId), queryKey: getListDocumentReviewCommentsQueryKey(id!, reviewCommentsParams) },
   });
   const addReviewComment = useAddDocumentReviewComment();
-  const rejectRevision = useRejectDocumentRevision();
 
   const hydratedEditionKey = useRef("");
   const hydratedRevision = useRef<number | undefined>(undefined);
@@ -458,6 +920,7 @@ export default function DocumentDetail() {
   const [publishRevisionId, setPublishRevisionId] = useState<string | null>(null);
   const [publishAvailabilityVersion, setPublishAvailabilityVersion] = useState<number | null>(null);
   const [submittingSharedReview, setSubmittingSharedReview] = useState(false);
+  const [routingReviewRequest, setRoutingReviewRequest] = useState(false);
   const [legacySourceRevisionId, setLegacySourceRevisionId] = useState("");
 
   // Comparison states
@@ -546,8 +1009,12 @@ export default function DocumentDetail() {
     data: availabilityForReview,
     isLoading: isAvailabilityLoading,
     isError: isAvailabilityError,
+    isFetching: isAvailabilityFetching,
   } = useGetDocumentAvailability(id!, {
-    query: { enabled: Boolean(id && session), queryKey: getGetDocumentAvailabilityQueryKey(id!) },
+    query: {
+      enabled: Boolean(id && session),
+      queryKey: getGetDocumentAvailabilityQueryKey(id!),
+    },
   });
   const sortedRevisions = [...(revisionsData?.items ?? [])].sort((a, b) => b.number - a.number || String(b.createdAt).localeCompare(String(a.createdAt)));
   const editionRevisions = sortedRevisions.filter((revision) => revision.market === selectedMarket && revision.locale === selectedLocale);
@@ -571,7 +1038,7 @@ export default function DocumentDetail() {
   );
   const comparedMarket = marketData?.items.find((market) => market.id === comparedSharedBinding?.marketEditionId);
   const canResolveComparedBinding = Boolean(comparedSharedBinding && hasAuthorRole && (
-    isAdministrator || Boolean(comparedMarket && session?.user?.marketCodes?.includes(comparedMarket.code))
+    Boolean(comparedMarket && canViewMarket(comparedMarket.code))
   ));
   const selectedIsManagedMaterializedEdition = Boolean(selectedSharedBinding?.materializedRevisionId);
   const selectedBindingMode = selectedSharedBinding?.mode ?? "unbound";
@@ -633,16 +1100,32 @@ export default function DocumentDetail() {
     requestedUrlTarget && !urlTargetAwaitingCatalogues && !requestedExactEdition,
   );
   const sharedContextActive = Boolean(requestedSharedContext);
-  const neutralBaselines = (sharedMatrix?.baselines ?? []).filter((baseline) => baseline.sourceRevisionId === null);
+  // Only server-proven neutral rows are eligible for the shared context.
+  // Unresolved legacy rows stay in the regional lineage controls so their
+  // explicit-source recovery path remains available, but redacted snapshots
+  // must never be opened as neutral content.
+  const neutralBaselines = (sharedMatrix?.baselines ?? []).filter((baseline) => (
+    baseline.sourceRevisionId === null && baseline.authorityKind !== "unresolved"
+  ));
   const defaultNeutralContextLocale = useMemo(() => {
-    if (!isAdministrator || requestedSharedContext || requestedUrlTarget || selectedMarket || isSharedMatrixLoading || isSharedMatrixError) return undefined;
+    if (
+      (!legacyAdministratorContentAuthority && !session?.user?.capabilityGrants?.some((grant) =>
+        grant.scope === "shared" && grant.capability === "edit"
+      ))
+      || requestedSharedContext
+      || requestedUrlTarget
+      || selectedMarket
+      || isSharedMatrixLoading
+      || isSharedMatrixError
+    ) return undefined;
     const sourceLocale = sharedSource?.locale;
     if (sourceLocale && neutralBaselines.some((baseline) => baseline.locale === sourceLocale)) return sourceLocale;
     return neutralBaselines.length === 1 ? neutralBaselines[0]?.locale : undefined;
   }, [
     isSharedMatrixError,
     isSharedMatrixLoading,
-    isAdministrator,
+    legacyAdministratorContentAuthority,
+    session?.user?.capabilityGrants,
     neutralBaselines,
     requestedSharedContext,
     requestedUrlTarget,
@@ -659,7 +1142,7 @@ export default function DocumentDetail() {
     const canOpenEdition = (edition: { exact?: boolean; revisionId?: string | null; market: string }) => (
       edition.exact
       && edition.revisionId
-      && (isAdministrator || session?.user?.marketCodes?.includes(edition.market))
+      && allowsCapability("view", edition.market)
     );
     return editionMatrix?.items.find((edition) => (
       canOpenEdition(edition)
@@ -879,6 +1362,22 @@ export default function DocumentDetail() {
     && selectedEdition.exact
     && (selectedBindingMode === "adapted" || (!selectedSharedBinding && !selectedIsSharedSource)),
   );
+  const accuracyConfirmationQueryKey = getGetDocumentRevisionAccuracyConfirmationQueryKey(
+    id ?? "",
+    selectedEdition?.revisionId ?? "",
+  );
+  const accuracyConfirmation = useGetDocumentRevisionAccuracyConfirmation(
+    id ?? "",
+    selectedEdition?.revisionId ?? "",
+    {
+      query: {
+        queryKey: accuracyConfirmationQueryKey,
+        enabled: Boolean(id && selectedEdition?.revisionId),
+        retry: false,
+      },
+    },
+  );
+  const [confirmingAccuracy, setConfirmingAccuracy] = useState(false);
   const pendingDestinationChanges = useMemo(
     () => (availabilityForReview?.items ?? []).filter((item) => item.pending),
     [availabilityForReview?.items],
@@ -907,19 +1406,17 @@ export default function DocumentDetail() {
     [availabilityForReview?.items, editionMatrix?.items],
   );
   const accessibleLegacyCustomizations = useMemo(
-    () => isAdministrator
-      ? legacyCustomizations
-      : legacyCustomizations.filter((edition) => session?.user?.marketCodes?.includes(edition.market)),
-    [isAdministrator, legacyCustomizations, session?.user?.marketCodes],
+    () => legacyCustomizations.filter((edition) => canViewMarket(edition.market)),
+    [legacyCustomizations, session?.user?.capabilityGrants, session?.user?.capabilityMatrixConfigured, session?.user?.legacyAdministratorMarketCodes, session?.user?.marketCodes, doc?.kind],
   );
   const accessibleRegionalEditions = useMemo(
     () => (editionMatrix?.items ?? []).filter((edition) => (
       edition.exact
       && edition.revisionId
       && edition.market !== "shared-source"
-      && (isAdministrator || session?.user?.marketCodes?.includes(edition.market))
+      && canViewMarket(edition.market)
     )),
-    [editionMatrix?.items, isAdministrator, session?.user?.marketCodes],
+    [editionMatrix?.items, session?.user?.capabilityGrants, session?.user?.capabilityMatrixConfigured, session?.user?.legacyAdministratorMarketCodes, session?.user?.marketCodes, doc?.kind],
   );
   const regionalFallbackEdition = useMemo(() => {
     const adapted = accessibleRegionalEditions.find((edition) => (
@@ -936,11 +1433,74 @@ export default function DocumentDetail() {
     )),
     [editionMatrix?.items, sortedRevisions],
   );
-  const canManageSharedDestinations = hasAuthorRole && (
-    isAdministrator
-    || Boolean(destinations.length)
-      && destinations.every((destination) => session?.user?.marketCodes?.includes(destination.market))
+  const legacyAdministratorAuthority = legacyAdministratorContentAuthority;
+  const sharedCapabilitySourceMarket = sharedSource?.market;
+  const hasSharedCapability = (capability: "edit" | "review" | "publish") => (
+    Boolean(
+      sharedCapabilitySourceMarket
+      && sharedCapabilitySourceMarket !== "shared-source"
+      && (
+        (legacyAdministratorAuthority && legacyAdministratorMarketCodes.includes(sharedCapabilitySourceMarket))
+        || (session?.user?.capabilityGrants ?? []).some((grant) =>
+          grant.topic === doc?.kind
+          && grant.scope === "shared"
+          && grant.capability === capability
+          && grant.marketCode === sharedCapabilitySourceMarket,
+        )
+      ),
+    )
   );
+  const allDestinationCapabilities = (capability: "edit" | "review" | "publish") => (
+    Boolean(destinations.length)
+    && destinations.every((destination) => allowsCapability(capability, destination.market))
+  );
+  // Availability is the server's exact, document-wide authority projection.
+  // Do not reconstruct shared rights from assigned marketCodes, capability
+  // grants, or the (possibly stale) editorial team projection here. Until
+  // this response settles, shared controls stay closed rather than guessing.
+  const availabilityAuthoritySettled = Boolean(
+    availabilityForReview
+      && !isAvailabilityLoading
+      && !isAvailabilityError
+      && !isAvailabilityFetching,
+  );
+  const canManageSharedDestinations = availabilityAuthoritySettled
+    && Boolean(availabilityForReview?.canEditShared);
+  const canReviewSharedDestinations = availabilityAuthoritySettled
+    && Boolean(availabilityForReview?.canReviewShared);
+  const canPublishSharedDestinations = availabilityAuthoritySettled
+    && Boolean(availabilityForReview?.canPublishShared);
+  const availabilityAuthorityMessage = isAvailabilityLoading
+    ? "Destination review authority is still loading."
+    : isAvailabilityError
+      ? "Destination review authority could not be loaded. Reload before approving visibility."
+      : isAvailabilityFetching
+        ? "Destination review authority is refreshing. Wait before approving visibility."
+      : !availabilityForReview
+        ? "Destination review authority is unavailable. Reload before approving visibility."
+      : availabilityForReview?.reviewBlockedReason === "self-review"
+        ? "You staged this destination snapshot and cannot approve your own changes."
+        : availabilityForReview?.reviewBlockedReason === "missing-regional-grant"
+          ? "Your exact Regional review grants do not cover every selected destination."
+          : availabilityForReview?.reviewBlockedReason === "missing-shared-grant"
+            ? "Your exact Shared review grant does not cover this source selection."
+            : availabilityForReview && !availabilityForReview.canReviewShared
+              ? "The availability authority did not return an actionable review capability."
+            : undefined;
+  const selectedBaselineForEditor = (sharedMatrix?.baselines ?? []).find((baseline) => (
+    baseline.revisionId === selectedSharedBinding?.baselineRevisionId
+  )) ?? (sharedMatrix?.baselines ?? []).find((baseline) => (
+    localeLanguage(baseline.locale) === localeLanguage(selectedLocale)
+  ));
+  const canEditSelectedBaseline = selectedBaselineForEditor
+    ? selectedBaselineForEditor.canEdit ?? (selectedBaselineForEditor.authorityKind === undefined ? canManageSharedDestinations : false)
+    : canManageSharedDestinations;
+  const canEditSharedContextBaseline = sharedContextBaseline
+    ? sharedContextBaseline.canEdit ?? (sharedContextBaseline.authorityKind === undefined ? canManageSharedDestinations : false)
+    : canManageSharedDestinations;
+  const canEditBaselineBeingEdited = baselineBeingEdited
+    ? baselineBeingEdited.canEdit ?? (baselineBeingEdited.authorityKind === undefined ? canManageSharedDestinations : false)
+    : false;
   useEffect(() => {
     if (selectedMarket) return;
     // A valid explicit deep link always wins over default/shared-source
@@ -974,7 +1534,7 @@ export default function DocumentDetail() {
     // Full-destination authority opens the canonical shared content before
     // any customization. Restricted editors retain their accessible target
     // customization-first path because they cannot open shared content.
-    if (isAdministrator) {
+    if (legacyAdministratorContentAuthority || canManageSharedDestinations) {
       setSelectedMarket(sharedSource.market);
       setSelectedLocale(sharedSource.locale);
       return;
@@ -984,16 +1544,114 @@ export default function DocumentDetail() {
       setSelectedMarket(existingCustomization.market);
       setSelectedLocale(existingCustomization.locale);
     }
-  }, [accessibleRegionalEditions, defaultNeutralContextLocale, isAdministrator, isSharedMatrixError, isSharedMatrixLoading, regionalFallbackEdition, requestedExactEdition, requestedSharedContext, requestedUrlTargetInvalid, selectedMarket, sharedMatrix, sharedSource, urlTargetAwaitingCatalogues]);
+  }, [accessibleRegionalEditions, canManageSharedDestinations, defaultNeutralContextLocale, legacyAdministratorContentAuthority, isSharedMatrixError, isSharedMatrixLoading, regionalFallbackEdition, requestedExactEdition, requestedSharedContext, requestedUrlTargetInvalid, selectedMarket, sharedMatrix, sharedSource, urlTargetAwaitingCatalogues]);
   // An internal shared-source edition deliberately has no assignable market
   // code. Its authority is the complete set of destinations it controls, not
   // the synthetic `shared-source` market identity.
   const canEditSelectedEdition = selectedIsSharedSource
     ? canManageSharedDestinations
     : canEditSelectedMarket;
-  const canPublishSelectedEdition = canPublish && (
-    !selectedIsSharedSource || canManageSharedDestinations
+  const canReviewSelectedEdition = selectedIsSharedSource
+    ? canReviewSharedDestinations
+    : allowsCapability("review");
+  // Review decisions are bound to a durable request, rather than merely an
+  // edition. Administrators and publishers can resolve that exact request
+  // from the team projection; other users are never sent to a made-up route.
+  const reviewRequestLookup = useQuery({
+    queryKey: ["editorial-work", "team", "review-request", selectedEdition?.revisionId],
+    queryFn: () => getTeamEditorialWork({ includeUnassigned: true }),
+    enabled: Boolean(
+      ["draft", "rejected", "in-review", "approved"].includes(selectedEdition?.workflowState ?? "")
+      && selectedEdition?.revisionId
+      && (canReviewSelectedEdition || (canPublish && (
+        !selectedIsSharedSource || canPublishSharedDestinations
+      ))),
+    ),
+    staleTime: 15_000,
+  });
+  const exactReviewLookupReady = Boolean(
+    selectedEdition?.revisionId
+      && reviewRequestLookup.data !== undefined
+      && !reviewRequestLookup.isLoading
+      && !reviewRequestLookup.isError
+      && !reviewRequestLookup.isFetching
+      && !reviewRequestLookup.isStale,
   );
+  const bindingLookupReady = Boolean(
+    sharedMatrix !== undefined
+      && !isSharedMatrixLoading
+      && !isSharedMatrixError
+      && !isSharedMatrixFetching
+      && !isSharedMatrixStale,
+  );
+  const exactReviewRequest = reviewRequestLookup.data?.items.find((item) => {
+    const revisionId = selectedEdition?.revisionId;
+    if (!revisionId || item.reviewRevisionId !== revisionId || item.reviewRequest?.revisionId !== revisionId) {
+      return false;
+    }
+    // Revision IDs are immutable, and the edition identity must also be
+    // explicit. Never infer approval from the current workflow label when the
+    // team projection does not identify this exact request and edition.
+    return Boolean(
+      selectedEditionId
+      && item.editionId
+      && String(item.editionId) === String(selectedEditionId),
+    );
+  });
+  const assignedReviewRequest = exactReviewRequest?.reviewRequest?.status === "requested"
+    ? exactReviewRequest
+    : undefined;
+  const approvedReviewRequest = exactReviewRequest?.reviewRequest?.status === "approved"
+    ? exactReviewRequest
+    : undefined;
+  const canPublishSelectedEdition = canPublish && (
+    !selectedIsSharedSource || canPublishSharedDestinations
+  );
+  const selectedPublicationState = selectedEdition?.publicationState
+    ?? (doc?.status === "published" ? "published" : "draft");
+  // The server still owns the authoritative capability decision. This flag
+  // only opts the UI into the established administrator saved-draft exception;
+  // managed materializations and any exact review request stay on review.
+  const directAdministratorPublishCandidate = Boolean(
+    isAdministrator
+      && canPublishSelectedEdition
+      && selectedEdition?.exact
+      && selectedEdition.revisionId
+      && !selectedSharedBinding
+      && !selectedIsManagedMaterializedEdition
+      && ["draft", "rejected"].includes(selectedEdition.workflowState ?? "")
+      && ["draft", "published"].includes(String(selectedPublicationState))
+  );
+  const directAdministratorPublishAllowed = Boolean(
+    directAdministratorPublishCandidate
+      && exactReviewLookupReady
+      && bindingLookupReady
+      && !exactReviewRequest,
+  );
+  const directAdministratorPublishLookupBlocked = directAdministratorPublishCandidate
+    && (!exactReviewLookupReady || !bindingLookupReady);
+  const exactReviewApproved = Boolean(
+    selectedEdition?.revisionId
+      && selectedEdition.workflowState === "approved"
+      && approvedReviewRequest?.reviewRequest?.revisionId === selectedEdition.revisionId,
+  );
+  const publishDisabledReason = !selectedEdition?.revisionId
+    ? "Select an exact saved edition before publishing."
+    : hasUnsaved
+      ? "Save this exact revision before publishing."
+      : directAdministratorPublishAllowed
+        ? null
+        : directAdministratorPublishLookupBlocked
+          ? "The current exact review and binding state is still loading or unavailable. Retry before publishing."
+        : selectedEdition.workflowState !== "approved"
+        ? selectedEdition.workflowState === "in-review"
+          ? "This exact saved revision is still in review. Publication is available after the reviewer approves it."
+          : "Submit this exact saved revision for independent review before publishing."
+        : !approvedReviewRequest
+          ? "An approved review request matching this exact saved revision is required before publishing."
+          : !exactReviewApproved
+            ? "The approved review request does not match this exact saved revision."
+            : null;
   const selectedEditionIsPublished = selectedEdition?.publicationState === "published"
     || selectedEdition?.effectivePublicationState === "published";
   const selectedEditionIsApprovedPublished = selectedEditionIsPublished
@@ -1001,20 +1659,77 @@ export default function DocumentDetail() {
       selectedEdition?.workflowState === "approved"
       || selectedEdition?.effectiveWorkflowState === "approved"
     );
+  // A reviewed availability release candidate requires a settled authoritative
+  // response, a reviewed version ahead of the live receipt, and at least one
+  // changed reviewed destination. A newer draft version is surfaced as a
+  // disabled candidate below so the user can see why approval is required
+  // again, rather than losing the release control entirely.
+  // Availability publication is a visibility receipt, not content publication,
+  // so this applies to already-published independent/custom editions as well
+  // as managed materializations.
+  const hasValidReviewedDestinationSnapshot = Boolean(
+    availabilityAuthoritySettled
+      && availabilityForReview?.reviewedVersion !== null
+      && availabilityForReview?.reviewedVersion !== undefined
+      && availabilityForReview.reviewedVersion > availabilityForReview.publishedVersion
+      && reviewedDestinationReleaseItems.length > 0,
+  );
+  const selectedIsIndependentOrCustom = Boolean(
+    !selectedIsSharedSource
+      && (
+        selectedSharedBinding?.mode === "independent"
+        // An unbound exact edition is a custom/independent edition. Adapted
+        // bindings are managed materializations and retain their destination
+        // release wording.
+        || !selectedSharedBinding
+      ),
+  );
   const reviewedDestinationReleaseCandidate = Boolean(
-    selectedIsManagedMaterializedEdition
-    && !selectedIsSharedSource
-    && availabilityForReview?.reviewedVersion !== null
-    && availabilityForReview?.reviewedVersion !== undefined
-    && availabilityForReview.reviewedVersion !== availabilityForReview.publishedVersion,
+    hasValidReviewedDestinationSnapshot
+      && (
+        selectedIsManagedMaterializedEdition
+        || selectedIsIndependentOrCustom
+      ),
+  );
+  const hasPendingDestinationReview = Boolean(
+    availabilityForReview
+      && (
+        availabilityForReview.reviewedVersion !== availabilityForReview.draftVersion
+        || availabilityForReview.items.some((item) =>
+          item.stagedDecision !== item.publishedDecision
+          && item.reviewedDecision !== item.stagedDecision,
+        )
+      ),
   );
   const canPublishReviewedDestinations = reviewedDestinationReleaseCandidate
     && canPublish
-    && canManageSharedDestinations
+    && canPublishSharedDestinations
     && selectedEditionIsApprovedPublished
     && availabilityForReview?.reviewedVersion === availabilityForReview?.draftVersion
     && reviewedDestinationReleaseItems.length > 0
     && !availabilitySelectionActive;
+  const canEditDestinationMarket = (market: string) => {
+    if (doc?.kind) {
+      return allowsCapability("edit", market);
+    }
+    // Restricted shared-source views intentionally do not hydrate document
+    // content. Their target action still has to honor the destination grant;
+    // do not turn the absence of a source document into administrator-like
+    // authority.
+    const grants = session?.user?.capabilityGrants ?? [];
+    if (session?.user?.capabilityMatrixConfigured || grants.length) {
+      return grants.some((grant) =>
+        grant.scope === "regional"
+        && grant.marketCode === market
+        && ["edit", "review"].includes(grant.capability)
+      );
+    }
+    const assignedMarkets = session?.user?.role === "administrator"
+      ? session?.user?.legacyAdministratorMarketCodes
+      : session?.user?.marketCodes;
+    return Boolean(assignedMarkets?.includes(market))
+      && ["administrator", "editor", "publisher"].includes(session?.user?.role ?? "");
+  };
   useEffect(() => {
     // A matrix refresh caused by another editor must not silently exchange a
     // capability the reviewer already has open. A local save/action explicitly
@@ -1034,7 +1749,7 @@ export default function DocumentDetail() {
     canEditSelectedEdition && !editionIsArchived,
     canPublishSelectedEdition && !editionIsArchived,
     hasUnsaved,
-    isAdministrator,
+    directAdministratorPublishAllowed,
   );
   const selectedAvailability = availabilityForReview?.items.find((item) => (
     item.market === selectedMarket && item.locale === selectedLocale
@@ -1053,11 +1768,12 @@ export default function DocumentDetail() {
       hasUnsaved,
       canEdit: canEditSelectedEdition && !editionIsArchived,
       canPublish: canPublishSelectedEdition && !editionIsArchived,
+       allowDirectPublish: directAdministratorPublishAllowed && !editionIsArchived,
       canRestore: canPublishSelectedEdition,
       availabilityPending: Boolean(selectedAvailability?.pending),
       availableInMarket: selectedAvailability?.publishedEffectiveAvailable,
     }) : [],
-    [canEditSelectedEdition, canPublishSelectedEdition, content, doc, editionIsArchived, hasUnsaved, mediaIds, selectedAvailability?.pending, selectedAvailability?.publishedEffectiveAvailable, selectedEdition?.exact, selectedEdition?.readinessErrors, selectedEdition?.readinessIssues, selectedEdition?.revisionId, selectedEdition?.workflowState, selectedEdition?.publicationState, selectedEdition?.effectivePublicationState, title],
+    [canEditSelectedEdition, canPublishSelectedEdition, content, directAdministratorPublishAllowed, doc, editionIsArchived, hasUnsaved, mediaIds, selectedAvailability?.pending, selectedAvailability?.publishedEffectiveAvailable, selectedEdition?.exact, selectedEdition?.readinessErrors, selectedEdition?.readinessIssues, selectedEdition?.revisionId, selectedEdition?.workflowState, selectedEdition?.publicationState, selectedEdition?.effectivePublicationState, title],
   );
   const { blockers: readinessBlockers, warnings: readinessWarnings } = readinessCounts(readiness);
   const isCompactMarketEditor = COMPACT_MARKET_EDITOR_KINDS.has(doc?.kind as CmsDocumentKind);
@@ -1100,7 +1816,18 @@ export default function DocumentDetail() {
         focusReadinessTarget("document-title");
         return;
       case "focus-content-field":
-        focusReadinessTarget(contentFieldId(issue.path), `${readinessPanelId}-${issue.id}`);
+        if (issue.path === "settings.accuracyConfirmation") {
+          setActiveSideTab("settings");
+          focusReadinessTarget("accuracy-confirmation");
+          return;
+        }
+        // Industry's grouped workspace opens its owning section from the
+        // canonical server path before the browser attempts to focus it.
+        if (doc?.kind === "industry") setIndustryFocusPath(issue.path);
+        focusReadinessTarget(
+          issue.path === "summary" ? "document-summary" : contentFieldId(issue.path),
+          `${readinessPanelId}-${issue.id}`,
+        );
         return;
       case "focus-seo":
         setActiveSideTab("seo");
@@ -1131,7 +1858,7 @@ export default function DocumentDetail() {
         focusReadinessTarget(`${readinessPanelId}-${issue.id}`);
         return;
     }
-  }, [focusReadinessTarget]);
+  }, [doc?.kind, focusReadinessTarget]);
   const fieldIssue = (path: string) => saveIssues.find((issue) => issue.path === path)?.message;
   const editorHydrated = hydratedEditionKey.current === currentEditorKey.current && hydratedRevision.current !== undefined;
   useEffect(() => {
@@ -1443,13 +2170,14 @@ export default function DocumentDetail() {
         }
         : null,
     );
-    if (sharedContextActive) {
-      const query = new URLSearchParams(search);
-      query.delete("context");
-      query.set("market", market);
-      query.set("locale", locale);
-      setLocation(`${location.split("?")[0]}?${query.toString()}`);
-    }
+    // Wouter supplies pathname separately from useSearch(). Persist every
+    // deliberate regional switch, not only transitions out of shared context,
+    // so reload/back navigation cannot silently return to a default market.
+    const query = new URLSearchParams(search);
+    query.delete("context");
+    query.set("market", market);
+    query.set("locale", locale);
+    setLocation(`${location}?${query.toString()}`);
     setPreviewingRevisionId(null);
     setPreviewFallback(null);
     setPreviewFailure(null);
@@ -1542,9 +2270,9 @@ export default function DocumentDetail() {
   const canEditMissingDestination = Boolean(
     missingDestinationPreview
     && hasAuthorRole
-    && (isAdministrator || session?.user?.marketCodes?.includes(missingDestinationPreview.market)),
+    && canEditDestinationMarket(missingDestinationPreview.market),
   );
-  const sharedContextReadOnly = sharedContextActive && !isAdministrator;
+  const sharedContextReadOnly = sharedContextActive && !canEditSharedContextBaseline;
   const closeMissingDestinationPreview = () => {
     if (!missingDestinationPreview) return;
     const previousMarket = missingDestinationPreview.previousMarket;
@@ -1727,9 +2455,10 @@ export default function DocumentDetail() {
           && edition.exact
         ));
         const destinationBinding = bindingForDestination(destination.market, destination.locale);
-        const canCustomizeDestination = hasAuthorRole && (
-          isAdministrator || Boolean(session?.user?.marketCodes?.includes(destination.market))
-        );
+        // This action targets the destination, not the currently selected
+        // neutral source. Check authority for that exact market instead of
+        // inheriting the source selection's (often shared-source) authority.
+        const canCustomizeDestination = canEditDestinationMarket(destination.market);
         if (!destinationEdition || !destinationBinding || destinationBinding.mode === "independent") return null;
         if (destinationAvailability?.customized) {
           return (
@@ -1860,12 +2589,12 @@ export default function DocumentDetail() {
     );
   }
   if (!doc) {
-    if (!sharedSource && (isAdministrator || legacyCustomizations.length)) {
+    if (!sharedSource && (legacyAdministratorContentAuthority || accessibleLegacyCustomizations.length)) {
       return navigationOnlyState(
         "No explicit shared source is configured. This does not make independent market editions legacy: existing exact editions remain valid and editable. An administrator may select a historical source only when shared content or shared destinations are needed.",
         false,
         <div className="mt-6 space-y-2 border-t pt-4 text-left">
-          {isAdministrator && (
+          {legacyAdministratorContentAuthority && (
             <div className="space-y-2 rounded-md border border-amber-300 bg-amber-50 p-3">
               <Label htmlFor="legacy-shared-source" className="text-xs font-semibold">Explicitly select a shared source from a historical revision</Label>
               <p className="text-[10px] text-amber-900">This is source selection, not neutral-baseline setup. Open any exact edition and use Shared edition → Save neutral baseline when a baseline is deliberately required.</p>
@@ -1927,9 +2656,7 @@ export default function DocumentDetail() {
             documentId={id}
             destinations={destinations}
             isAdministrator={isAdministrator}
-            canManageMarket={(market) => hasAuthorRole && (
-              isAdministrator || Boolean(session?.user?.marketCodes?.includes(market))
-            )}
+            canManageMarket={(market) => hasAuthorRole && canEditDestinationMarket(market)}
           />
            {destinationCustomizationActions("ml-7 mt-2 h-auto px-0 text-xs")}
         </div>,
@@ -1948,11 +2675,58 @@ export default function DocumentDetail() {
     }
   };
 
+  // Submission and routing use separate durable commands so a committed
+  // transition remains recoverable if reviewer resolution is temporarily
+  // unavailable. Repeating this command is idempotent for the same reviewer.
+  const routeReviewRequest = (revisionId: string) => {
+    if (routingReviewRequest) return;
+    setRoutingReviewRequest(true);
+    void requestRevisionReview(revisionId, {}).then(() => {
+      toast({
+        title: "Review request routed",
+        description: "This exact revision is now in the eligible reviewer's queue.",
+      });
+      queryClient.invalidateQueries({ predicate: (query) => String(query.queryKey[0]).includes("editorial-work") });
+    }).catch((error: unknown) => {
+      const failure = describeActionError(error);
+      setActionError(failure);
+      toast({
+        title: "Review routing needs attention",
+        description: failure.message,
+        variant: "destructive",
+      });
+    }).finally(() => setRoutingReviewRequest(false));
+  };
+
   const handleAction = (action: "submit" | "publish" | "archive" | "restore") => {
-    if (updateDoc.isPending || previewingRevisionId !== null || reviewAvailability.isPending || submittingSharedReview || availabilitySelectionActive) return;
+    if (updateDoc.isPending || previewingRevisionId !== null || reviewAvailability.isPending || submittingSharedReview || routingReviewRequest || availabilitySelectionActive) return;
     setPreviewFallback(null);
     setPreviewFailure(null);
     setActionError(null);
+    if (action === "publish" && (
+      (!exactReviewApproved && !directAdministratorPublishAllowed)
+      || !selectedEdition?.revisionId
+      || publishRevisionId !== selectedEdition.revisionId
+    )) {
+      setActionError({
+        message: publishDisabledReason ?? (
+          directAdministratorPublishAllowed
+            ? "This saved revision is eligible for direct administrator publication."
+            : "An approved review request for this exact saved revision is required before publishing."
+        ),
+        issues: [],
+        mediaBlocked: false,
+      });
+      return;
+    }
+    if (action === "submit" && selectedIsSharedSource && !canReviewSharedDestinations) {
+      setActionError({
+        message: "Approving destination visibility requires review authority for this exact shared source and every selected destination.",
+        issues: [],
+        mediaBlocked: false,
+      });
+      return;
+    }
     const targetParams = { market: selectedMarket, locale: selectedLocale };
     const opts = {
       onSuccess: (updated: any) => {
@@ -1980,7 +2754,7 @@ export default function DocumentDetail() {
                : action === "publish"
                  ? "Selected customization published"
               : action === "submit"
-                ? "Latest edition revisions submitted for review"
+                 ? "Revision submitted and routed for independent review"
                 : action === "restore"
                   ? "Document restored as a draft"
                   : "Document archived",
@@ -2043,7 +2817,14 @@ export default function DocumentDetail() {
           });
           return;
         }
-        if (currentAvailability.reviewedVersion === currentAvailability.draftVersion) {
+        const hasUnreviewedCurrentDestination = currentAvailability.items.some((item) =>
+          item.stagedDecision !== item.publishedDecision
+          && item.reviewedDecision !== item.stagedDecision,
+        );
+        if (
+          currentAvailability.reviewedVersion === currentAvailability.draftVersion
+          && !hasUnreviewedCurrentDestination
+        ) {
           setSubmittingSharedReview(false);
           submitCurrentRevision();
           return;
@@ -2059,7 +2840,7 @@ export default function DocumentDetail() {
             const failure = describeActionError(error);
             setActionError(failure);
             toast({
-              title: "Destinations could not be sent for review",
+              title: "Destination visibility could not be approved",
               description: failure.message,
               variant: "destructive",
             });
@@ -2213,7 +2994,23 @@ export default function DocumentDetail() {
   sharedTargetActionExecutor.current = {
     preview: openPreview,
     review: () => handleAction("submit"),
-    publish: () => handleAction("publish"),
+    publish: () => {
+      if (!selectedEdition?.revisionId || (!exactReviewApproved && !directAdministratorPublishAllowed)) {
+        setActionError({
+          message: publishDisabledReason ?? (
+            directAdministratorPublishAllowed
+              ? "This saved revision is eligible for direct administrator publication."
+              : "An approved review request for this exact saved revision is required before publishing."
+          ),
+          issues: [],
+          mediaBlocked: false,
+        });
+        return;
+      }
+      setPublishRevisionId(selectedEdition.revisionId);
+      setPublishAvailabilityVersion(selectedIsSharedSource ? availabilityForReview?.draftVersion ?? null : null);
+      setPublishOpen(true);
+    },
   };
 
   type SharedTargetAction = "preview" | "review" | "publish";
@@ -2232,6 +3029,35 @@ export default function DocumentDetail() {
     sharedBaselineSaveRef.current = null;
     pendingSharedTargetAction.current = action;
     selectEdition(target.market, target.locale);
+  };
+  const openRegionalReuseFromSharedContext = () => {
+    const openReuse = () => {
+      const reuse = document.getElementById("regional-reuse") as HTMLDetailsElement | null;
+      if (reuse) {
+        reuse.open = true;
+        reuse.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    };
+    if (!sharedContextActive) {
+      openReuse();
+      return;
+    }
+    if (sharedBaselineDirtyRef.current && !window.confirm("Discard unsaved shared content edits and open regional reuse?")) return;
+    const target = editionMatrix?.items.find((edition) => (
+      edition.exact
+      && edition.revisionId
+      && localeLanguage(edition.locale) === localeLanguage(selectedLocale)
+    ));
+    if (!target) {
+      toast({ title: "Reuse unavailable", description: "Choose an exact regional edition before copying the saved shared baseline.", variant: "destructive" });
+      return;
+    }
+    sharedBaselineDirtyRef.current = false;
+    setSharedBaselineDirty(false);
+    sharedBaselineSaveRef.current = null;
+    setActiveSideTab("editions");
+    selectEdition(target.market, target.locale);
+    requestAnimationFrame(openReuse);
   };
 
   // Data for comparison
@@ -2273,11 +3099,11 @@ export default function DocumentDetail() {
              {readinessLabel}
             </button>
                  {sharedContextActive ? (
-                 <Button variant="outline" size="sm" onClick={() => leaveSharedContextForTarget("preview")} disabled={sharedContextReadOnly || previewingRevisionId !== null} className="h-auto min-h-8 w-full min-w-0 max-w-full whitespace-normal px-2 py-1 text-center font-mono text-[11px] uppercase leading-tight tracking-wider sm:w-auto sm:flex-none sm:whitespace-nowrap sm:px-3 sm:text-xs">
+                  <Button variant="outline" size="sm" title="Preview the selected exact regional edition; neutral baseline snapshots do not have a protected preview target." onClick={() => leaveSharedContextForTarget("preview")} disabled={sharedContextReadOnly || previewingRevisionId !== null} className="h-auto min-h-8 w-full min-w-0 max-w-full whitespace-normal px-2 py-1 text-center font-mono text-[11px] uppercase leading-tight tracking-wider sm:w-auto sm:flex-none sm:whitespace-nowrap sm:px-3 sm:text-xs">
                   <Eye className="w-3.5 h-3.5 mr-2" /> Preview target
                 </Button>
               ) : <Button variant="outline" size="sm" onClick={openPreview} disabled={hasUnsaved || previewingRevisionId !== null} className="h-auto min-h-8 w-full min-w-0 max-w-full whitespace-normal px-2 py-1 text-center font-mono text-[11px] uppercase leading-tight tracking-wider sm:w-auto sm:flex-none sm:whitespace-nowrap sm:px-3 sm:text-xs">
-             {previewingRevisionId ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Eye className="w-3.5 h-3.5 mr-2" />} {doc.kind === "framework" ? "Preview buyer view" : doc.kind === "office" ? "Preview contact card" : "Preview"}
+              {previewingRevisionId ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Eye className="w-3.5 h-3.5 mr-2" />} {doc.kind === "framework" ? "Preview buyer view" : doc.kind === "office" ? "Preview contact card" : doc.kind === "person" || doc.kind === "partner" ? "Preview card" : "Preview saved page"}
               </Button>}
 
            {sharedContextActive ? <Button
@@ -2322,20 +3148,49 @@ export default function DocumentDetail() {
              Save and preview
             </Button>}
 
-            {!sharedContextActive && authoringActions.canSubmit && (
-                <Button id="submit-review" variant="outline" size="sm" onClick={() => handleAction("submit")} disabled={updateDoc.isPending || previewingRevisionId !== null || submitDoc.isPending || reviewAvailability.isPending || submittingSharedReview || !contentValidation.success} className="h-auto min-h-8 w-full min-w-0 max-w-full whitespace-normal px-2 py-1 text-center font-mono text-[11px] uppercase leading-tight tracking-wider sm:w-auto sm:flex-none sm:whitespace-nowrap sm:px-3 sm:text-xs">
-              <Send className="w-3.5 h-3.5 mr-2" /> Submit Review
+             {!sharedContextActive && (authoringActions.canSubmit || (selectedEdition?.workflowState === "in-review" && canEditSelectedEdition && !editionIsArchived)) && (
+                <Button id="submit-review" variant="outline" size="sm" onClick={() => selectedEdition?.workflowState === "in-review" && selectedEdition.revisionId ? routeReviewRequest(selectedEdition.revisionId) : handleAction("submit")} disabled={updateDoc.isPending || previewingRevisionId !== null || submitDoc.isPending || reviewAvailability.isPending || submittingSharedReview || routingReviewRequest || (!authoringActions.canSubmit && selectedEdition?.workflowState !== "in-review") || !contentValidation.success} className="h-auto min-h-8 w-full min-w-0 max-w-full whitespace-normal px-2 py-1 text-center font-mono text-[11px] uppercase leading-tight tracking-wider sm:w-auto sm:flex-none sm:whitespace-nowrap sm:px-3 sm:text-xs">
+               {routingReviewRequest ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <Send className="w-3.5 h-3.5 mr-2" />} {selectedEdition?.workflowState === "in-review" ? "Route review" : "Submit for review"}
             </Button>
           )}
-           {!sharedContextActive && authoringActions.canPublish && (
-               <Button size="sm" onClick={() => {
-                setPublishRevisionId(selectedEdition?.revisionId ?? null);
-                setPublishAvailabilityVersion(selectedIsSharedSource ? availabilityForReview?.draftVersion ?? null : null);
-                setPublishOpen(true);
-                 }} disabled={updateDoc.isPending || previewingRevisionId !== null || reviewAvailability.isPending || submittingSharedReview || !contentValidation.success} className="h-auto min-h-8 w-full min-w-0 max-w-full whitespace-normal bg-emerald-600 px-2 py-1 text-center font-mono text-[11px] uppercase leading-tight tracking-wider text-white hover:bg-emerald-700 sm:w-auto sm:flex-none sm:whitespace-nowrap sm:px-3 sm:text-xs">
-              <Globe className="w-3.5 h-3.5 mr-2" /> Publish...
-            </Button>
-          )}
+            {!sharedContextActive && canPublishSelectedEdition && selectedEdition?.exact && selectedEdition.revisionId && !editionIsArchived && (
+              <div className="contents">
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    setPublishRevisionId(selectedEdition.revisionId);
+                    setPublishAvailabilityVersion(selectedIsSharedSource ? availabilityForReview?.draftVersion ?? null : null);
+                    setPublishOpen(true);
+                  }}
+                  disabled={
+                    updateDoc.isPending
+                    || previewingRevisionId !== null
+                    || reviewAvailability.isPending
+                    || submittingSharedReview
+                    || !contentValidation.success
+                    || (!exactReviewApproved && !directAdministratorPublishAllowed)
+                  }
+                  aria-describedby={publishDisabledReason ? "publish-disabled-reason" : undefined}
+                  title={publishDisabledReason ?? (
+                    directAdministratorPublishAllowed
+                      ? "Publish this exact saved revision directly as an administrator"
+                      : "Publish this exact approved revision"
+                  )}
+                  className="h-auto min-h-8 w-full min-w-0 max-w-full whitespace-normal bg-emerald-600 px-2 py-1 text-center font-mono text-[11px] uppercase leading-tight tracking-wider text-white hover:bg-emerald-700 sm:w-auto sm:flex-none sm:whitespace-nowrap sm:px-3 sm:text-xs"
+                >
+                  <Globe className="mr-2 h-3.5 w-3.5" /> Publish...
+                </Button>
+                {publishDisabledReason && (
+                  <span
+                    id="publish-disabled-reason"
+                    data-testid="publish-disabled-reason"
+                    className="col-span-2 self-center text-[10px] leading-tight text-amber-700 sm:col-span-1 sm:max-w-56"
+                  >
+                    {publishDisabledReason}
+                  </span>
+                )}
+              </div>
+            )}
            {isAdministrator && doc.kind === "office" && doc.status !== "archived" && (
             <Button
               variant="outline"
@@ -2449,7 +3304,32 @@ export default function DocumentDetail() {
                 {!!actionError.issues.length && (
                   <ul className="mt-2 list-disc space-y-1 pl-5 text-xs">
                     {actionError.issues.map((issue, index) => (
-                      <li key={`${issue.path}-${index}`}><strong>{issue.path}</strong>: {issue.message}</li>
+                      <li key={`${issue.path}-${index}`}>
+                        <button
+                          type="button"
+                          className="text-left underline underline-offset-2"
+                          onClick={() => {
+                            if (issue.path === "title") {
+                              focusReadinessTarget("document-title");
+                            } else if (issue.path === "seo" || issue.path.startsWith("seo.")) {
+                              setActiveSideTab("seo");
+                              focusReadinessTarget(issue.path === "seo.description"
+                                ? "seo-description"
+                                : issue.path === "seo.canonicalUrl" ? "seo-canonical-url" : "seo-title");
+                            } else {
+                              if (issue.path === "settings.accuracyConfirmation") {
+                                setActiveSideTab("settings");
+                                focusReadinessTarget("accuracy-confirmation");
+                                return;
+                              }
+                              focusReadinessTarget(
+                                issue.path === "summary" ? "document-summary" : contentFieldId(issue.path),
+                                "document-content",
+                              );
+                            }
+                          }}
+                        ><strong>{issue.path}</strong>: {issue.message}</button>
+                      </li>
                     ))}
                   </ul>
                 )}
@@ -2499,8 +3379,40 @@ export default function DocumentDetail() {
               </p>
               {authoringActions.immutable && <p className="mt-2 text-xs text-amber-600">This edition is in review and cannot be edited until it is approved or rejected.</p>}
               {doc.status === "draft" && doc.publishedRevisionId && (
-                 <p className="mt-2 text-xs text-amber-600">This draft is not publicly visible. An administrator can publish this saved revision directly, or submit it for optional review first.</p>
+                  <p className="mt-2 text-xs text-amber-600">This draft is not publicly visible. Save its exact revision, confirm accuracy, and obtain independent approval before publishing.</p>
               )}
+               <div className="mt-3 rounded border bg-muted/10 p-2.5">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                   <div>
+                     <p className="text-xs font-medium">Saved preview and section navigator</p>
+                      <p className="mt-0.5 text-[11px] text-muted-foreground">
+                        {sharedContextActive
+                          ? "The neutral baseline snapshot has no protected preview target here. Preview target opens the selected exact regional edition, never unsaved typing."
+                          : `Preview always opens the selected saved ${doc.kind === "office" ? "contact card" : doc.kind === "person" || doc.kind === "partner" ? "card" : "page"}, never unsaved typing.`}
+                      </p>
+                   </div>
+                   <Button type="button" size="sm" variant="outline" disabled={hasUnsaved || previewingRevisionId !== null} onClick={openPreview}>
+                     <Eye className="mr-1 h-3.5 w-3.5" /> Preview saved
+                   </Button>
+                 </div>
+                 <div className="mt-2 flex flex-wrap gap-1.5" aria-label="Content sections">
+                   {contentNavigatorEntries(doc.kind as CmsDocumentKind, content).map((entry) => (
+                     <Button
+                       key={entry.path}
+                       type="button"
+                       size="sm"
+                       variant="ghost"
+                       className="h-7 px-2 text-[11px]"
+                       onClick={() => focusReadinessTarget(
+                         entry.path === "document-title" ? entry.path : contentFieldId(entry.path),
+                         entry.path === "document-title" ? undefined : contentFieldId(`content.${entry.path.split(".")[1]}`),
+                       )}
+                     >
+                       {entry.label}
+                     </Button>
+                   ))}
+                 </div>
+               </div>
               {saveBlocked && (
                 <div className="mt-2 flex items-center justify-between gap-3 rounded border border-destructive/30 p-2">
                   <p className="text-xs text-destructive">Saving is paused until you deliberately reload the latest revision. Your local inputs remain available to review or copy.</p>
@@ -2554,71 +3466,6 @@ export default function DocumentDetail() {
                  selectSharedContext(locale || requestedSharedContext || sharedSource?.locale || selectedLocale);
                }}
              />
-             <MarketAvailabilityChecklist
-               documentId={id!}
-               destinations={destinations}
-               canManageMarket={(market) => hasAuthorRole && (
-                 isAdministrator || Boolean(session?.user?.marketCodes?.includes(market))
-               )}
-               isAdministrator={isAdministrator}
-               selectionDraft={availabilitySelectionDraft}
-               onSelectionDraftChange={setAvailabilitySelectionDraft}
-               compact={isCompactMarketEditor}
-             />
-             <PublicationImpactSummary
-               sourceLabel={selectedIsSharedSource ? "shared content and its reviewed destinations" : "this selected market"}
-               destinations={(availabilityForReview?.items ?? []).map((item) => ({
-                 market: item.market,
-                 locale: item.locale,
-                 displayName: item.displayName,
-                 pending: item.pending,
-                 stagedDecision: item.stagedDecision,
-                 publishedEffectiveAvailable: item.publishedEffectiveAvailable,
-               }))}
-               compact={isCompactMarketEditor}
-             />
-         <SharedEditionPanel
-               documentId={id!}
-               matrix={sharedMatrix}
-               markets={(marketData?.items ?? []).map((market) => ({
-                 id: market.id,
-                 code: market.code,
-                 displayName: market.displayName,
-                 defaultLocale: market.defaultLocale,
-                 fallbackLocale: market.fallbackLocale,
-               }))}
-               exactEditions={(editionMatrix?.items ?? []).filter((edition) => edition.exact).map((edition) => ({
-                 market: edition.market,
-                 locale: edition.locale,
-                 revisionId: edition.revisionId,
-                 revisionNumber: edition.revisionNumber,
-               }))}
-               selectedMarket={selectedMarket}
-               selectedLocale={selectedLocale}
-               currentRevisionId={doc.currentRevisionId}
-               currentRevisionNumber={doc.revisionNumber}
-               canEdit={canEditSelectedEdition}
-               canManageBaselines={isAdministrator && !sharedContextActive}
-               hasUnsaved={hasUnsaved}
-               busy={establishSharedBaseline.isPending || bindSharedEdition.isPending || saveSharedOverrides.isPending || resolveSharedBaseline.isPending}
-               onSelectEdition={selectEdition}
-               onEstablishBaseline={() => {}}
-               onEditBaseline={(baseline) => {
-                 setBaselineBeingEdited(baseline);
-                 setBaselineEditorOpen(true);
-               }}
-               onBind={() => {}}
-               onCompare={(binding) => {
-                 setSharedCompareBinding(binding);
-                 setSharedCompareOpen(true);
-               }}
-               onResetOverride={resetSharedField}
-               compact
-               isSharedSource={selectedIsSharedSource || sharedContextActive}
-                onCustomize={selectedMarket && selectedLocale && selectedSharedBinding?.mode !== "independent"
-                  ? () => createCustomization(selectedMarket, selectedLocale)
-                  : undefined}
-             />
             <div>
                 {sharedContextActive && sharedContextBaseline && (
                  <SharedBaselineEditor
@@ -2630,12 +3477,12 @@ export default function DocumentDetail() {
                    busy={establishSharedBaseline.isPending}
                     resetToken={sharedBaselineResetToken}
                     onDirtyChange={(dirty) => {
-                       const effectiveDirty = isAdministrator && dirty;
+                        const effectiveDirty = canEditSharedContextBaseline && dirty;
                        sharedBaselineDirtyRef.current = effectiveDirty;
                        setSharedBaselineDirty(effectiveDirty);
                     }}
                     onRegisterSave={(save) => {
-                       sharedBaselineSaveRef.current = isAdministrator ? save : null;
+                        sharedBaselineSaveRef.current = canEditSharedContextBaseline ? save : null;
                     }}
                    onOpenChange={(open) => {
                      if (!open) {
@@ -2647,7 +3494,7 @@ export default function DocumentDetail() {
                      }
                    }}
                    onSave={(baseline, snapshot) => {
-                      if (!isAdministrator) return;
+                        if (!canEditSharedContextBaseline) return;
                      establishSharedBaseline.mutate({
                        documentId: id!,
                        data: {
@@ -2745,12 +3592,13 @@ export default function DocumentDetail() {
                 locale={selectedLocale}
                 hasUnsaved={hasUnsaved}
                 requestPreview={requestIndustryPreview}
+                 focusPath={industryFocusPath}
               />}
               </div>
             ) : (
                       <div className={sharedContextActive ? "hidden" : "space-y-4"}>
-         <details className="rounded-lg border bg-muted/10 p-3">
-           <summary className="cursor-pointer text-xs font-semibold uppercase tracking-wider">Advanced edition operations</summary>
+          <details id="regional-reuse" className={activeSideTab === "editions" ? "rounded-lg border bg-muted/10 p-3" : "hidden"}>
+            <summary className="cursor-pointer text-xs font-semibold uppercase tracking-wider">Detailed regional reuse and lineage</summary>
          <div className="mt-3 space-y-4">
         <SharedEditionPanel
           documentId={id!}
@@ -2768,19 +3616,37 @@ export default function DocumentDetail() {
             revisionId: edition.revisionId,
             revisionNumber: edition.revisionNumber,
           }))}
+           reuseSourceCandidates={reuseSourceCandidates}
+           canReadReuseSource={canReadReuseSource}
           selectedMarket={selectedMarket}
           selectedLocale={selectedLocale}
           currentRevisionId={doc.currentRevisionId}
           currentRevisionNumber={doc.revisionNumber}
           canEdit={canEditSelectedEdition}
-          canManageBaselines={isAdministrator}
+           canManageBaselines={canEditSelectedBaseline}
+          canSaveReusableSource={canSaveReusableSource}
           hasUnsaved={hasUnsaved}
           busy={establishSharedBaseline.isPending || bindSharedEdition.isPending || saveSharedOverrides.isPending || resolveSharedBaseline.isPending}
           onSelectEdition={selectEdition}
           onEstablishBaseline={(sourceRevisionId, locale, expectedRevisionNumber) => {
-            const snapshot = snapshotForSharedBaseline();
-            if (!snapshot) return;
-             establishSharedBaseline.mutate({ documentId: id!, data: { locale, snapshot, expectedRevisionNumber } }, {
+             const sourceData = sourceRevisionId
+               ? {
+                   locale,
+                   sourceRevisionId,
+                   ...(expectedRevisionNumber === undefined ? {} : { expectedRevisionNumber }),
+                 }
+               : (() => {
+                   const snapshot = snapshotForSharedBaseline();
+                   return snapshot
+                     ? {
+                         locale,
+                         snapshot,
+                         ...(expectedRevisionNumber === undefined ? {} : { expectedRevisionNumber }),
+                       }
+                     : null;
+                 })();
+             if (!sourceData) return;
+             establishSharedBaseline.mutate({ documentId: id!, data: sourceData }, {
                onSuccess: () => { invalidateSharedEdition(); toast({ title: "Neutral baseline saved", description: "Regional bindings remain unchanged until an explicit adoption decision." }); },
               onError: (error: any) => toast({ title: "Baseline was not saved", description: error?.data?.error || error?.error || error?.message, variant: "destructive" }),
             });
@@ -2810,9 +3676,7 @@ export default function DocumentDetail() {
           }}
           onResetOverride={resetSharedField}
            isSharedSource={selectedIsSharedSource || sharedContextActive}
-          canEditDestination={(market) => hasAuthorRole && (
-            isAdministrator || Boolean(session?.user?.marketCodes?.includes(market))
-          )}
+           canEditDestination={(market) => hasAuthorRole && canEditDestinationMarket(market)}
           onApplyReuse={async (baseline, requests) => {
             const outcomes = await Promise.all(requests.map(async (request) => {
               try {
@@ -2850,17 +3714,6 @@ export default function DocumentDetail() {
             return outcomes;
           }}
         />
-         <EditionAssignmentControl
-          editionId={selectedEditionId}
-          documentId={id!}
-          market={selectedMarket}
-          locale={selectedLocale}
-          currentRevisionId={doc.currentRevisionId}
-          currentRevisionNumber={doc.revisionNumber}
-          canRequestReview={doc.status === "in-review"}
-          canManage={hasAuthorRole && canEditSelectedEdition}
-          currentUser={session?.user ? { id: session.user.id, name: session.user.name } : undefined}
-         />
          </div>
          </details>
  <div id="document-content" tabIndex={-1} className={sharedContextActive ? "hidden" : "outline-none"}><OverridesContext.Provider value={{
@@ -2874,8 +3727,8 @@ export default function DocumentDetail() {
                 value={content}
                 onChange={editorLocked ? () => {} : handleContentChange}
                 errors={contentValidation.success ? [] : contentValidation.errors}
-                readinessPaths={readiness.filter((issue) => issue.path.startsWith("content.")).map((issue) => issue.path)}
                  publicationErrors={publicationErrors}
+                  presentation="content"
               /></fieldset></OverridesContext.Provider></div></div>
             )}
             {!sharedContextActive && doc.kind !== "industry" && <details className="rounded-md border bg-muted/20 p-4">
@@ -2892,7 +3745,8 @@ export default function DocumentDetail() {
                <TabsTrigger value="metadata" disabled={updateDoc.isPending} className="shrink-0 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary h-full font-mono text-[10px] uppercase tracking-wider px-3">Metadata</TabsTrigger>
                <TabsTrigger value="seo" disabled={updateDoc.isPending} className="shrink-0 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary h-full font-mono text-[10px] uppercase tracking-wider px-3">SEO{saveIssues.some((issue) => issue.path.startsWith("seo")) ? " !" : ""}</TabsTrigger>
                <TabsTrigger value="revisions" disabled={updateDoc.isPending} className="shrink-0 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary h-full font-mono text-[10px] uppercase tracking-wider px-3">Revisions</TabsTrigger>
-               <TabsTrigger value="editions" disabled={updateDoc.isPending} className="shrink-0 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary h-full font-mono text-[10px] uppercase tracking-wider px-3">Editions</TabsTrigger>
+                <TabsTrigger value="editions" disabled={updateDoc.isPending} className="shrink-0 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary h-full font-mono text-[10px] uppercase tracking-wider px-3">Regions</TabsTrigger>
+                <TabsTrigger value="settings" disabled={updateDoc.isPending} className="shrink-0 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary h-full font-mono text-[10px] uppercase tracking-wider px-3">Settings</TabsTrigger>
             </TabsList>
 
              <TabsContent value="metadata" className="mt-0 flex-1 space-y-6 overflow-visible p-4 md:overflow-y-auto">
@@ -2964,39 +3818,81 @@ export default function DocumentDetail() {
                       },
                     });
                   }} data-testid="button-add-review-comment">Add comment</Button>
-                  {selectedEdition?.workflowState === "in-review" && canPublish && <Button type="button" size="sm" variant="destructive" disabled={!reviewComment.trim() || rejectRevision.isPending || !selectedEdition.revisionId} onClick={() => {
-                    const targetParams = { market: selectedMarket, locale: selectedLocale };
-                    const revisionId = selectedEdition.revisionId!;
-                    const body = reviewComment.trim();
-                    setActionError(null);
-                    rejectRevision.mutate({ documentId: id!, data: { revisionId, body } }, {
-                      onSuccess: (updated) => {
-                        setReviewComment("");
-                        setActionError(null);
-                        queryClient.setQueryData(getGetDocumentQueryKey(id!, targetParams), updated);
-                        queryClient.invalidateQueries({
-                          queryKey: getListDocumentReviewCommentsQueryKey(id!, { revisionId }),
-                        });
-                        queryClient.invalidateQueries({ queryKey: getListDocumentRevisionsQueryKey(id!) });
-                        queryClient.invalidateQueries({ queryKey: getListDocumentEditionsQueryKey(id!) });
-                        toast({ title: "Revision rejected", description: "The revision was returned to draft with your review comment." });
-                      },
-                      onError: (error: unknown) => {
-                        const failure = describeActionError(error);
-                        setActionError(failure);
-                        toast({ title: "Revision could not be rejected", description: failure.message, variant: "destructive" });
-                      },
-                    });
-                  }} data-testid="button-reject-revision">Reject revision</Button>}
+                  {selectedEdition?.workflowState === "in-review" && canReviewSelectedEdition && assignedReviewRequest?.reviewRequest && (
+                    <div className="flex flex-wrap items-center gap-2">
+                      {assignedReviewRequest.reviewRequest.reviewerId === session?.user?.id ? (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setLocation(`/editorial-work?view=my&request=${encodeURIComponent(assignedReviewRequest.reviewRequest!.id)}`)}
+                        >
+                          Open assigned review
+                        </Button>
+                      ) : (
+                        <p className="text-xs text-muted-foreground">
+                          This exact review is assigned to {assignedReviewRequest.reviewer?.name ?? "another reviewer"}. Only that reviewer can decide it.
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </TabsContent>
 
              <TabsContent value="editions" id="edition-controls" tabIndex={-1} className="mt-0 flex-1 space-y-4 overflow-visible p-4 md:overflow-y-auto">
               <div id="editions-readiness-anchor" tabIndex={-1}>
-                <h3 className="text-sm font-semibold">Show this content in</h3>
-                <p className="mt-1 text-xs text-muted-foreground">Destination changes are saved for review. They do not change the live website until the reviewed snapshot is published.</p>
-                {!canManageSharedDestinations && <p className="mt-2 text-xs text-amber-700">Shared destinations affect every selected market. Your assigned markets do not cover this shared selection.</p>}
+                <h3 className="text-sm font-semibold">Regions</h3>
+                <p className="mt-1 text-xs text-muted-foreground">Content source and visibility stay separate. Changes below retain an exact saved version and never change the live website on their own.</p>
+              </div>
+              <SharedEditionPanel
+                documentId={id!}
+                matrix={sharedMatrix}
+                markets={(marketData?.items ?? []).map((market) => ({
+                  id: market.id,
+                  code: market.code,
+                  displayName: market.displayName,
+                  defaultLocale: market.defaultLocale,
+                  fallbackLocale: market.fallbackLocale,
+                }))}
+                exactEditions={(editionMatrix?.items ?? []).filter((edition) => edition.exact).map((edition) => ({
+                  market: edition.market,
+                  locale: edition.locale,
+                  revisionId: edition.revisionId,
+                  revisionNumber: edition.revisionNumber,
+                }))}
+                 reuseSourceCandidates={reuseSourceCandidates}
+                 canReadReuseSource={canReadReuseSource}
+                selectedMarket={selectedMarket}
+                selectedLocale={selectedLocale}
+                currentRevisionId={doc.currentRevisionId}
+                currentRevisionNumber={doc.revisionNumber}
+                canEdit={canEditSelectedEdition}
+                canManageBaselines={canEditSelectedBaseline && !sharedContextActive}
+                hasUnsaved={hasUnsaved}
+                busy={establishSharedBaseline.isPending || bindSharedEdition.isPending || saveSharedOverrides.isPending || resolveSharedBaseline.isPending}
+                onSelectEdition={selectEdition}
+                onEstablishBaseline={() => {}}
+                onEditBaseline={(baseline) => {
+                  setBaselineBeingEdited(baseline);
+                  setBaselineEditorOpen(true);
+                }}
+                onBind={() => {}}
+                onCompare={(binding) => {
+                  setSharedCompareBinding(binding);
+                  setSharedCompareOpen(true);
+                }}
+                onResetOverride={resetSharedField}
+                compact
+                isSharedSource={selectedIsSharedSource || sharedContextActive}
+                onCustomize={selectedMarket && selectedLocale && selectedSharedBinding?.mode !== "independent"
+                  ? () => createCustomization(selectedMarket, selectedLocale)
+                  : undefined}
+                 onOpenReuse={openRegionalReuseFromSharedContext}
+              />
+              <div>
+                <h4 className="text-sm font-semibold">Show in</h4>
+                <p className="mt-1 text-xs text-muted-foreground">Stage live visibility separately from content. The compact labels always show both live and pending state.</p>
               </div>
               <MarketAvailabilityChecklist
                 documentId={id!}
@@ -3007,40 +3903,52 @@ export default function DocumentDetail() {
                 onSelectionDraftChange={setAvailabilitySelectionDraft}
               />
               {destinationCustomizationActions("ml-7 mt-2 h-auto px-0 text-xs")}
-              {availabilityForReview && availabilityForReview.reviewedVersion !== availabilityForReview.draftVersion && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="w-full"
-                  disabled={!canManageSharedDestinations || reviewAvailability.isPending || availabilitySelectionActive}
-                  onClick={() => {
-                    if (!availabilityForReview) return;
-                    reviewAvailability.mutate({ documentId: id!, data: { version: availabilityForReview.draftVersion } }, {
-                      onSuccess: (reviewed) => {
-                        queryClient.setQueryData(getGetDocumentAvailabilityQueryKey(id!), reviewed);
-                        toast({ title: "Destinations sent for review", description: "The selected destination snapshot is now frozen for publication." });
-                      },
-                      onError: (error: any) => toast({
-                        title: "Destination review was not started",
-                        description: error?.data?.error || error?.error || error?.message || "Your local editor inputs are unchanged. Reload destinations before trying again.",
-                        variant: "destructive",
-                      }),
-                    });
-                  }}
-                >
-                  {reviewAvailability.isPending && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
-                  Send destinations for review
-                </Button>
+              {hasPendingDestinationReview && (
+                <>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    disabled={!canReviewSharedDestinations || reviewAvailability.isPending || availabilitySelectionActive}
+                    onClick={() => {
+                      if (!availabilityForReview) return;
+                      reviewAvailability.mutate({ documentId: id!, data: { version: availabilityForReview.draftVersion } }, {
+                        onSuccess: (reviewed) => {
+                          queryClient.setQueryData(getGetDocumentAvailabilityQueryKey(id!), reviewed);
+                          toast({ title: "Destination visibility approved", description: "The selected destination snapshot is now frozen for publication." });
+                        },
+                        onError: (error: any) => toast({
+                          title: "Destination visibility could not be approved",
+                          description: error?.data?.error || error?.error || error?.message || "Your local editor inputs are unchanged. Reload destinations before trying again.",
+                          variant: "destructive",
+                        }),
+                      });
+                    }}
+                  >
+                    {reviewAvailability.isPending && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
+                    Approve destination visibility
+                  </Button>
+                   <p
+                     className={`mt-1 text-xs ${canReviewSharedDestinations ? "text-muted-foreground" : "text-amber-700"}`}
+                     data-testid="destination-review-authority"
+                   >
+                     {availabilityAuthorityMessage ?? "An independent reviewer must approve this snapshot."}
+                  </p>
+                </>
               )}
               {reviewedDestinationReleaseCandidate && (
                 <div className="space-y-3 rounded-md border border-emerald-300 bg-emerald-50/60 p-3" data-testid="reviewed-destination-release">
                   <div>
-                    <p className="text-xs font-semibold">Reviewed destination release</p>
+                    <p className="text-xs font-semibold">
+                      {selectedIsIndependentOrCustom ? "Reviewed visibility release" : "Reviewed destination release"}
+                    </p>
                     <p className="mt-1 text-xs text-muted-foreground">
                       Version {availabilityForReview?.reviewedVersion} is reviewed and targets the already-published exact edition
                       {" "}{selectedMarket.toUpperCase()} · {selectedLocale} (revision {selectedEdition?.revisionNumber ?? "current"}).
-                      This release changes destination availability only; it does not publish or replace content.
+                      {selectedIsIndependentOrCustom
+                        ? " This releases this independent edition's public visibility only; it does not publish or replace content."
+                        : " This release changes destination availability only; it does not publish or replace content."}
                     </p>
                   </div>
                   <ul className="space-y-1 text-xs text-muted-foreground">
@@ -3056,7 +3964,7 @@ export default function DocumentDetail() {
                     ))}
                   </ul>
                   {availabilityForReview?.reviewedVersion !== availabilityForReview?.draftVersion && (
-                    <p className="text-xs text-amber-700">A newer destination draft exists. Send that current version for review before publishing destinations.</p>
+                    <p className="text-xs text-amber-700">A newer destination draft exists. Approve that current version before publishing destinations.</p>
                   )}
                   {!selectedEditionIsApprovedPublished && (
                     <p className="text-xs text-amber-700">
@@ -3076,7 +3984,7 @@ export default function DocumentDetail() {
                     data-testid="button-publish-reviewed-destinations"
                   >
                     {publishAvailability.isPending && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
-                    Publish reviewed destinations
+                    {selectedIsIndependentOrCustom ? "Publish reviewed visibility" : "Publish reviewed destinations"}
                   </Button>
                 </div>
               )}
@@ -3152,6 +4060,96 @@ export default function DocumentDetail() {
                 <Label htmlFor="noIndex" className="font-mono text-xs uppercase tracking-wider text-muted-foreground">No Index (Hide from Search)</Label>
               </div>
             </TabsContent>
+
+             <TabsContent value="settings" className="mt-0 flex-1 space-y-4 overflow-visible p-4 md:overflow-y-auto">
+                <PublicContextDisclosure
+                  document={{
+                    kind: doc.kind as CmsDocumentKind,
+                    slug: doc.slug,
+                    content: content as Record<string, unknown>,
+                    contentConfiguration: {
+                      data: publicContent,
+                      isLoading: isPublicContentLoading,
+                      isFetching: isPublicContentFetching,
+                      isError: isPublicContentError,
+                    },
+                  }}
+                />
+               <div>
+                 <h3 className="text-sm font-semibold">Field ownership</h3>
+                 <p className="mt-1 text-xs text-muted-foreground">
+                   These are the stored fields for this content family. Ordinary page copy is edited in Content; internal, derived, and unsupported fields stay here with their real ownership.
+                 </p>
+               </div>
+               <div id="accuracy-confirmation" tabIndex={-1} className="rounded border p-3">
+                 <p className="text-xs font-semibold">Accuracy confirmation</p>
+                 <p className="mt-1 text-xs text-muted-foreground">
+                   Confirming records that you checked this exact saved revision. It does not save content, change its review state, publish it, or certify any later revision.
+                 </p>
+                 {accuracyConfirmation.data?.confirmation ? (
+                   <p className="mt-2 text-xs text-muted-foreground">
+                     Last explicitly confirmed {format(new Date(accuracyConfirmation.data.confirmation.confirmedAt), "dd MMM yyyy HH:mm")} for revision {selectedEdition?.revisionNumber ?? "current"}.
+                   </p>
+                 ) : accuracyConfirmation.isSuccess ? (
+                   <p className="mt-2 text-xs text-muted-foreground">No explicit accuracy confirmation has been recorded for this revision.</p>
+                 ) : null}
+                 <Button
+                   type="button"
+                   size="sm"
+                   variant="outline"
+                   className="mt-3"
+                   disabled={editorLocked || !selectedEdition?.revisionId || confirmingAccuracy}
+                   onClick={() => {
+                     if (!id || !selectedEdition?.revisionId || confirmingAccuracy) return;
+                     setConfirmingAccuracy(true);
+                     void confirmDocumentRevisionAccuracy(id, selectedEdition.revisionId).then((confirmation) => {
+                       queryClient.setQueryData(accuracyConfirmationQueryKey, { confirmation });
+                       toast({
+                         title: "Accuracy confirmed",
+                         description: `Recorded against revision ${selectedEdition.revisionNumber ?? "current"} without changing its content or publication state.`,
+                       });
+                     }).catch((error: unknown) => {
+                       const failure = describeActionError(error);
+                       setActionError(failure);
+                       toast({ title: "Accuracy confirmation could not be recorded", description: failure.message, variant: "destructive" });
+                     }).finally(() => setConfirmingAccuracy(false));
+                   }}
+                 >
+                   {confirmingAccuracy && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
+                   Confirm accuracy for this saved revision
+                 </Button>
+               </div>
+                 <div className="border-t pt-4">
+                   <h3 className="text-sm font-semibold">Governance and relationships</h3>
+                   <p className="mt-1 text-xs text-muted-foreground">Keep governance, source trail, and schema-only relationships separate from ordinary page writing. Historical verification dates are context; the credited evidence is the exact confirmation above.</p>
+                   <div className="mt-3">
+                     <ContentEditor
+                       kind={doc.kind as CmsDocumentKind}
+                       value={content}
+                       onChange={editorLocked ? () => {} : handleContentChange}
+                       errors={contentValidation.success ? [] : contentValidation.errors}
+                       publicationErrors={publicationErrors}
+                       industrySection={doc.kind === "industry" ? "governance" : undefined}
+                       presentation="settings"
+                     />
+                   </div>
+                 </div>
+               <div className="space-y-2">
+                 {CMS_FIELD_COVERAGE[doc.kind as CmsDocumentKind].map((field) => (
+                   <div key={field.path} className="rounded border bg-muted/10 p-2">
+                     <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-1">
+                       <span className="font-mono text-[11px] font-medium">{field.path}</span>
+                       <span className="text-[10px] uppercase text-muted-foreground">{field.consumer.replaceAll("-", " ")}</span>
+                     </div>
+                     <p className="mt-1 text-xs">{field.editor}</p>
+                     <p className="mt-1 text-[11px] text-muted-foreground">
+                       Draft: {field.draft} · publish: {field.publish}
+                       {field.note ? ` · ${field.note}` : ""}
+                     </p>
+                   </div>
+                 ))}
+               </div>
+             </TabsContent>
 
              <TabsContent value="revisions" className="mt-0 flex flex-1 flex-col overflow-visible p-0 md:overflow-y-auto">
                 <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-2 border-b border-border bg-muted/20 p-3">
@@ -3274,21 +4272,21 @@ export default function DocumentDetail() {
       <SharedBaselineEditor
         baseline={baselineBeingEdited}
         kind={doc.kind as CmsDocumentKind}
-        open={baselineEditorOpen && isAdministrator}
-        readOnly={!isAdministrator}
+        open={baselineEditorOpen && canEditBaselineBeingEdited}
+        readOnly={!canEditBaselineBeingEdited}
         busy={establishSharedBaseline.isPending}
          resetToken={sharedBaselineResetToken}
          onDirtyChange={(dirty) => {
-            const effectiveDirty = isAdministrator && dirty;
+            const effectiveDirty = canEditBaselineBeingEdited && dirty;
             sharedBaselineDirtyRef.current = effectiveDirty;
             setSharedBaselineDirty(effectiveDirty);
          }}
          onRegisterSave={(save) => {
-           sharedBaselineSaveRef.current = isAdministrator ? save : null;
+            sharedBaselineSaveRef.current = canEditBaselineBeingEdited ? save : null;
          }}
         onOpenChange={setBaselineEditorOpen}
         onSave={(baseline, snapshot) => {
-           if (!isAdministrator) return;
+            if (!canEditBaselineBeingEdited) return;
           establishSharedBaseline.mutate({
             documentId: id!,
             data: {
@@ -3360,9 +4358,13 @@ export default function DocumentDetail() {
       <AlertDialog open={publishAvailabilityOpen} onOpenChange={setPublishAvailabilityOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Publish reviewed destinations?</AlertDialogTitle>
+            <AlertDialogTitle>
+              {selectedIsIndependentOrCustom ? "Publish reviewed visibility?" : "Publish reviewed destinations?"}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              This releases only the reviewed destination snapshot. It does not publish content, change the shared-source pointer, or alter the selected exact revision.
+              {selectedIsIndependentOrCustom
+                ? "This releases only the reviewed visibility snapshot for the independent edition. It does not publish content, change the shared-source pointer, or alter the selected exact revision."
+                : "This releases only the reviewed destination snapshot. It does not publish content, change the shared-source pointer, or alter the selected exact revision."}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="space-y-3 rounded-md border bg-muted/20 p-3 text-xs">
@@ -3388,7 +4390,7 @@ export default function DocumentDetail() {
               data-testid="button-confirm-publish-reviewed-destinations"
             >
               {publishAvailability.isPending && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
-              Confirm destination release
+              {selectedIsIndependentOrCustom ? "Confirm visibility release" : "Confirm destination release"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -3398,16 +4400,16 @@ export default function DocumentDetail() {
         <DialogContent className="w-[calc(100%-1rem)] p-4 sm:p-6">
           <DialogHeader>
              <DialogTitle>
-               {!["in-review", "approved"].includes(selectedEdition?.workflowState ?? "")
-                 ? "Publish Saved Draft"
-                 : selectedIsSharedSource ? "Publish Shared Content" : "Publish Customization"}
+                {selectedIsSharedSource ? "Publish Shared Content" : "Publish Customization"}
              </DialogTitle>
             <DialogDescription className="font-mono text-xs mt-2">
-                 {!["in-review", "approved"].includes(selectedEdition?.workflowState ?? "")
-                   ? "Confirm direct administrator publication of this exact saved revision. The server will recheck content, media clearance, immutable version pins, and destination governance before releasing it."
-                   : selectedIsSharedSource
-                  ? "Confirm the reviewed snapshot. The selected content and destination choices below are released together; saving or review alone never changes the live website."
-                   : "Confirm this selected customization revision. Destination choices are not released by customization publication; release a reviewed destination snapshot separately from the Editions tab."}
+                    {directAdministratorPublishAllowed
+                  ? selectedIsSharedSource
+                    ? "Confirm direct publication of this exact saved source revision. The current saved destination selection is released together; no independent review request is bypassed or created."
+                    : "Confirm direct publication of this exact saved revision. No independent review request is bypassed or created, and destination choices are not released by customization publication."
+                  : selectedIsSharedSource
+                    ? "Confirm the reviewed snapshot. The selected content and destination choices below are released together; saving or review alone never changes the live website."
+                    : "Confirm publication of this exact saved revision after its matching independent review request was approved. Destination choices are not released by customization publication; release a reviewed destination snapshot separately from the Regions tab."}
             </DialogDescription>
           </DialogHeader>
           <div className="py-4 space-y-4">
@@ -3443,9 +4445,9 @@ export default function DocumentDetail() {
                   ) : (
                     <p className="mt-1 text-xs text-muted-foreground">
                        {!hasPublishedAvailability
-                         ? !["in-review", "approved"].includes(selectedEdition?.workflowState ?? "") && isAdministrator
-                           ? "Not published yet. This saved source and current destination snapshot will establish the first live content."
-                           : "Not published yet. This reviewed source and destination snapshot will establish the first live content."
+                         ? directAdministratorPublishAllowed
+                           ? "Not published yet. This saved source and current destination selection will establish the first live content."
+                           : "Not published yet. This approved source and reviewed destination snapshot will establish the first live content."
                         : "No pending destination changes. Only the selected content revision is affected."}
                     </p>
                   )}
@@ -3460,9 +4462,9 @@ export default function DocumentDetail() {
               )}
               {selectedIsSharedSource && (
                 <p className="rounded-md border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
-                   {!["in-review", "approved"].includes(selectedEdition?.workflowState ?? "") && isAdministrator
-                     ? "Direct administrator publishing captures this exact saved source revision and the current saved destination choices atomically. No separate destination-review action is required."
-                     : "Shared publishing requires this exact saved source revision and its reviewed destination selection. Send destinations for review again whenever the source or a destination changes."}
+                   {directAdministratorPublishAllowed
+                     ? "Direct shared publishing uses this exact saved source revision, the current destination selection, and the locked availability version. Save or destination changes invalidate this confirmation."
+                     : "Shared publishing requires this exact saved source revision, its matching approved review request, and its reviewed destination selection. Submit content or approve destination visibility again whenever either changes."}
                 </p>
               )}
           </div>
@@ -3475,11 +4477,14 @@ export default function DocumentDetail() {
                 publishDoc.isPending
                 || availabilitySelectionActive
                 || !publishRevisionId
+                 || publishRevisionId !== selectedEdition?.revisionId
+                 || (!exactReviewApproved && !directAdministratorPublishAllowed)
                 || (selectedIsSharedSource && (
                    availabilityForReview?.sharedSource?.revisionId !== publishRevisionId
                    || (publishAvailabilityVersion === null
                      || publishAvailabilityVersion !== availabilityForReview?.draftVersion)
-                   || (["in-review", "approved"].includes(selectedEdition?.workflowState ?? "")
+                    || (!directAdministratorPublishAllowed && hasPendingDestinationReview)
+                   || (!directAdministratorPublishAllowed && ["in-review", "approved"].includes(selectedEdition?.workflowState ?? "")
                      && availabilityForReview?.reviewedVersion !== availabilityForReview?.draftVersion)
                 ))
               }

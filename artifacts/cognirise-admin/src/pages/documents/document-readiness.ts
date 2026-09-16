@@ -37,12 +37,17 @@ export type DocumentReadinessInput = {
     category: "missing" | "validation" | "workflow";
     action: "create" | "edit" | "review";
     message: string;
+    /** Canonical server target; legacy records may omit this. */
+    path?: string;
+    code?: string;
   }>;
   workflowState?: string | null;
   publicationState?: string | null;
   hasUnsaved?: boolean;
   canEdit?: boolean;
   canPublish?: boolean;
+  /** The exact legacy administrator exception may replace review submission. */
+  allowDirectPublish?: boolean;
   canRestore?: boolean;
   availabilityPending?: boolean;
   availableInMarket?: boolean | null;
@@ -57,7 +62,29 @@ function splitValidationError(error: string): { path: string; message: string } 
   };
 }
 
-function normalizePath(path: string): string {
+type MediaReadinessTarget = { path: string; label: string };
+
+/** A legacy document-level media issue must still lead to a real picker.
+ * `mediaIds` is storage lineage, not an editor control. */
+export const MEDIA_READINESS_TARGETS: Partial<Record<CmsDocumentKind, MediaReadinessTarget>> = {
+  person: { path: "content.identityMedia", label: "Identity image" },
+  partner: { path: "content.logoMedia", label: "Partner logo" },
+  platform: { path: "content.heroMedia", label: "Hero image" },
+  publication: { path: "content.heroMedia", label: "Hero image" },
+  "case-study": { path: "content.heroMedia", label: "Case-study hero image" },
+  industry: { path: "content.heroMedia", label: "Industry hero image" },
+  framework: { path: "content.heroMedia", label: "Framework hero image" },
+  "site-configuration": { path: "content.hero.posterMediaId", label: "Hero film poster" },
+};
+
+function normalizePath(path: string, kind?: CmsDocumentKind): string {
+  if (path === "mediaIds" || path.startsWith("mediaIds.") || path === "content.media") {
+    return kind && MEDIA_READINESS_TARGETS[kind] ? MEDIA_READINESS_TARGETS[kind]!.path : "content";
+  }
+  // Draft validation may report a document snapshot path as `content.content.*`
+  // while publish validation reports the editor path as `content.*`. Treat
+  // those validator representations as the same concrete control.
+  if (path.startsWith("content.content.")) return path.slice("content.".length);
   if (
     path === "title"
     || path.startsWith("seo.")
@@ -86,20 +113,24 @@ function actionForPath(path: string): Pick<ReadinessIssue, "action" | "actionLab
 
 function validationIssues(
   scope: "draft" | "publish" | "edition",
-  errors: string[],
+  errors: Array<string | { path: string; message: string; code?: string }>,
+  kind?: CmsDocumentKind,
 ): ReadinessIssue[] {
   return errors.map((error) => {
-    const parsed = splitValidationError(error);
-    const path = normalizePath(parsed.path);
+    const parsed = typeof error === "string"
+      ? splitValidationError(error)
+      : { path: error.path, message: error.message };
+    const path = normalizePath(parsed.path, kind);
+    const mediaTarget = kind ? MEDIA_READINESS_TARGETS[kind] : undefined;
     const { message } = parsed;
     const action = actionForPath(path);
     return {
-      id: `${scope}:blocker:${path}:${message}`,
+      id: typeof error === "string" ? `${scope}:blocker:${path}:${message}` : `${scope}:blocker:${error.code ?? path}`,
       scope,
       scopes: [scope],
       severity: "blocker",
       path,
-      label: `${pathLabel(path)} needs correction`,
+      label: `${path === mediaTarget?.path ? mediaTarget.label : pathLabel(path)} needs correction`,
       detail: message,
       ...action,
     };
@@ -108,7 +139,11 @@ function validationIssues(
 
 function structuredEditionIssues(input: DocumentReadinessInput): ReadinessIssue[] {
   return (input.readinessIssues ?? []).flatMap((issue, index) => {
-    if (issue.category === "validation") return validationIssues("edition", [issue.message]);
+    if (issue.category === "validation") return validationIssues("edition", [{
+      path: issue.path ?? "content",
+      message: issue.message,
+      code: issue.code,
+    }], input.kind);
     if (issue.action === "create") {
       const permitted = Boolean(input.canEdit);
       return [{
@@ -124,6 +159,12 @@ function structuredEditionIssues(input: DocumentReadinessInput): ReadinessIssue[
       }];
     }
 
+    if (
+      input.allowDirectPublish
+      && ["draft", "rejected"].includes(input.workflowState ?? "")
+    ) {
+      return [];
+    }
     const awaitingDecision = input.workflowState === "in-review";
     const permitted = awaitingDecision ? Boolean(input.canPublish) : Boolean(input.canEdit);
     return [{
@@ -191,16 +232,16 @@ export function buildDocumentReadiness(input: DocumentReadinessInput): Readiness
       action: "focus-title" as const,
       actionLabel: "Focus display title",
     }]),
-    ...(draft.success ? [] : validationIssues("draft", draft.errors)),
-    ...(publish.success ? [] : validationIssues("publish", publish.errors)),
+    ...(draft.success ? [] : validationIssues("draft", draft.issues, input.kind)),
+    ...(publish.success ? [] : validationIssues("publish", publish.issues, input.kind)),
     ...(!referencesMedia || input.mediaIds.length > 0 ? [] : [{
-      id: "publish:warning:content.media",
+       id: `publish:warning:${MEDIA_READINESS_TARGETS[input.kind]?.path ?? "content"}`,
       scope: "publish" as const,
       scopes: ["publish"] as ReadinessScope[],
       severity: "warning" as const,
-      path: "content.media",
-      label: "Approved media needs attention",
-      detail: "Choose approved media where this public presentation requires it.",
+       path: MEDIA_READINESS_TARGETS[input.kind]?.path ?? "content",
+       label: `${MEDIA_READINESS_TARGETS[input.kind]?.label ?? "Approved media"} needs attention`,
+       detail: "Choose an approved immutable media version in this presentation's media section.",
        action: "focus-content-field" as const,
        actionLabel: "Focus content field",
     }]),
@@ -215,7 +256,7 @@ export function buildDocumentReadiness(input: DocumentReadinessInput): Readiness
       action: "open-editions" as const,
       actionLabel: "Open editions",
     }] : []),
-    ...(input.readinessIssues?.length ? structuredIssues : validationIssues("edition", input.readinessErrors ?? [])),
+    ...(input.readinessIssues?.length ? structuredIssues : validationIssues("edition", input.readinessErrors ?? [], input.kind)),
     ...(input.hasUnsaved ? [{
       id: "workflow:warning:unsaved",
       scope: "workflow" as const,

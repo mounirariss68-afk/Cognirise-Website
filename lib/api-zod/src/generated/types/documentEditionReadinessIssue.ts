@@ -11,5 +11,9 @@ import type { DocumentEditionReadinessIssueCategory } from './documentEditionRea
 export interface DocumentEditionReadinessIssue {
   category: DocumentEditionReadinessIssueCategory;
   message: string;
+  /** Stable validation-rule identifier. Present for structured contract validation. */
+  code?: string;
+  /** Canonical document target such as content.heroMedia or seo.title. */
+  path?: string;
   action: DocumentEditionReadinessIssueAction;
 }

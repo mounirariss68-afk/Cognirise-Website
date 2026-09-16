@@ -10,6 +10,7 @@ type Props = {
   person: Document;
   markets: MarketEdition[];
   canManage: boolean;
+  canManageMarket?: (market: string) => boolean;
   isAdministrator: boolean;
   onOpenSharedContent: () => void;
 };
@@ -51,13 +52,16 @@ export function PeopleTableRow({
   person,
   markets,
   canManage,
+  canManageMarket: canManageMarketOverride,
   isAdministrator,
   onOpenSharedContent,
 }: Props) {
   const { data: session } = useGetSession({ query: { queryKey: getGetSessionQueryKey() } });
-  const canManageMarket = (market: string) => canManage && Boolean(
-    session?.user?.role === "administrator" || session?.user?.marketCodes?.includes(market),
-  );
+  const canManageMarket = (market: string) => canManageMarketOverride
+    ? canManageMarketOverride(market)
+    : canManage && Boolean(
+      session?.user?.role === "administrator" || session?.user?.marketCodes?.includes(market),
+    );
   const contentHref = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/content/${person.id}`;
   return (
     <TableRow className="border-border/50 align-top hover:bg-muted/20">

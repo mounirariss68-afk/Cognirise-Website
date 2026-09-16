@@ -70,12 +70,42 @@ const publicationContent = {
 
 test("platform rendering preserves rich list styles and quote attribution", () => {
   const html = renderToStaticMarkup(
-    <PlatformPresentation title="Platform title" content={platformContent} />,
+    <PlatformPresentation title="Platform title" content={platformContent} summary={platformContent.summary} />,
   );
   assert.match(html, /<ol[^>]*list-decimal/);
   assert.match(html, /<li>One<\/li><li>Two<\/li>/);
   assert.match(html, /<blockquote[^>]*>.*A precise customer quote\..*<cite[^>]*>Named customer<\/cite>/);
   assert.doesNotMatch(html, /<ul[^>]*>.*One/);
+});
+
+test("platform presentation renders the exact saved detail summary instead of card copy", () => {
+  const exactPreviewSummary = "TASK345-KSA-MARKER-1";
+  const staleContent = {
+    ...platformContent,
+    summary: exactPreviewSummary,
+  };
+  const html = renderToStaticMarkup(
+    <PlatformPresentation
+      title="Platform title"
+      content={staleContent}
+      summary="Stale platform card summary."
+      preview
+    />,
+  );
+  assert.match(html, new RegExp(exactPreviewSummary));
+  assert.doesNotMatch(html, /Stale platform card summary\./);
+});
+
+test("platform preview does not resurrect card summary when exact detail copy is empty", () => {
+  const html = renderToStaticMarkup(
+    <PlatformPresentation
+      title="Platform title"
+      content={{ ...platformContent, summary: "" }}
+      summary="Stale platform card summary."
+      preview
+    />,
+  );
+  assert.doesNotMatch(html, /Stale platform card summary\./);
 });
 
 test("publication rendering shares the lossless rich renderer and keeps the lead treatment", () => {

@@ -29,7 +29,8 @@ test("navigation patch rejects grandchild outcomes before writing", { concurrenc
   };
   t.mock.method(pool, "connect", async () => client as never);
   t.mock.method(pool, "query", async (sql: unknown) => {
-    if (String(sql).includes("FROM cms_sessions s")) {
+    const statement = String(sql);
+    if (statement.includes("FROM cms_sessions s")) {
       return {
         rowCount: 1,
         rows: [{
@@ -51,6 +52,12 @@ test("navigation patch rejects grandchild outcomes before writing", { concurrenc
           market_codes: [],
         }],
       };
+    }
+    if (statement.includes("cms_user_capability_configurations") || statement.includes("FROM cms_user_capability_grants")) {
+      return { rowCount: 0, rows: [] };
+    }
+    if (statement.includes("FROM cms_legacy_administrator_market_snapshots")) {
+      return { rowCount: 1, rows: [{ market_codes: ["uae"] }] };
     }
     return { rowCount: 0, rows: [] };
   });
@@ -210,6 +217,12 @@ test("explicit null promotion survives save, reload, review, and publish", { con
         user_created_at: now, user_updated_at: now, must_rotate: false,
         mfa_enabled: true, market_codes: [],
       }] };
+    }
+    if (statement.includes("cms_user_capability_configurations") || statement.includes("FROM cms_user_capability_grants")) {
+      return { rowCount: 0, rows: [] };
+    }
+    if (statement.includes("FROM cms_legacy_administrator_market_snapshots")) {
+      return { rowCount: 1, rows: [{ market_codes: ["uae"] }] };
     }
     if (statement.includes("FROM market_editions")) {
       return { rowCount: 1, rows: [{

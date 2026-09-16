@@ -9,10 +9,12 @@ import {
   useInviteUser,
   useListMarketEditions,
   useListUsers,
+  useDryRunUserCapabilityMigration,
   useResetUserPassword,
   useRetryAccessDelivery,
   useUpdateUser,
   type AccessDeliveryStatus,
+  type CapabilityMigrationDryRunReceipt,
   type PasswordReset,
   type User,
   type UserInvitation,
@@ -51,6 +53,68 @@ type DeliveryReceipt = {
   deliveryState?: string | null;
   status?: string | null;
 };
+
+type Capability = "view" | "edit" | "review" | "publish";
+type CapabilityScope = "regional" | "shared";
+type CapabilityGrant = {
+  topic: "person" | "partner" | "platform" | "publication" | "case-study" | "industry" | "framework" | "office" | "landing-page" | "site-configuration";
+  capability: Capability;
+  scope: CapabilityScope;
+  marketCode: string;
+};
+
+const CAPABILITIES: Capability[] = ["view", "edit", "review", "publish"];
+const TOPICS = [
+  ["person", "People"],
+  ["partner", "Partners"],
+  ["platform", "Platforms"],
+  ["publication", "Publications"],
+  ["case-study", "Case studies"],
+  ["industry", "Industries"],
+  ["framework", "Frameworks"],
+  ["office", "Offices"],
+  ["landing-page", "Landing pages"],
+  ["site-configuration", "Site configuration"],
+] as const;
+
+function grantId(grant: CapabilityGrant) {
+  return `${grant.topic}/${grant.capability}/${grant.scope}/${grant.marketCode}`;
+}
+
+function grantPrerequisites(capability: Capability): Capability[] {
+  if (capability === "edit" || capability === "review") return ["view"];
+  if (capability === "publish") return ["view", "review"];
+  return [];
+}
+
+function grantDependents(capability: Capability): Capability[] {
+  if (capability === "view") return ["edit", "review", "publish"];
+  if (capability === "review") return ["publish"];
+  return [];
+}
+
+function legacyProjection(user: User, marketCodes: readonly string[]): CapabilityGrant[] {
+  const capabilities: Capability[] = user.role === "viewer"
+    ? ["view"]
+    : user.role === "editor"
+      ? ["view", "edit", "review"]
+      : CAPABILITIES;
+  return TOPICS.flatMap(([topic]) =>
+    capabilities.flatMap((capability) =>
+      (["regional", "shared"] as const).flatMap((scope) =>
+        marketCodes.map((marketCode) => ({ topic, capability, scope, marketCode }))),
+    ),
+  );
+}
+
+function legacyEffectiveMarkets(user: User): string[] {
+  // Administrator role is not content authority. Before an administrator is
+  // explicitly configured, only this durable 0040 snapshot describes its
+  // compatibility geography; assigned markets remain a separate admin field.
+  return user.role === "administrator"
+    ? user.legacyAdministratorMarketCodes
+    : user.marketCodes;
+}
 
 /**
  * The current API exposes the delivery channel and newer API responses may
@@ -139,6 +203,11 @@ export default function UserAdmin() {
   const [resetError, setResetError] = useState<string | null>(null);
   const [accessUser, setAccessUser] = useState<User | null>(null);
   const [accessMarkets, setAccessMarkets] = useState<string[]>([]);
+  const [accessGrants, setAccessGrants] = useState<CapabilityGrant[]>([]);
+  const [matrixTouched, setMatrixTouched] = useState(false);
+  const [dryRunReceipt, setDryRunReceipt] = useState<CapabilityMigrationDryRunReceipt | null>(null);
+  const [matrixCapability, setMatrixCapability] = useState<Capability>("view");
+  const [matrixScope, setMatrixScope] = useState<CapabilityScope>("regional");
   const [marketSearch, setMarketSearch] = useState("");
   const [userSearch, setUserSearch] = useState("");
   const [userRole, setUserRole] = useState<UserRole | undefined>();
@@ -189,6 +258,7 @@ export default function UserAdmin() {
     },
   });
   const updateUser = useUpdateUser();
+  const dryRunCapabilityMigration = useDryRunUserCapabilityMigration();
 
   const form = useForm<z.infer<typeof inviteSchema>>({
     resolver: zodResolver(inviteSchema),
@@ -382,8 +452,16 @@ export default function UserAdmin() {
     const userId = accessUser.id;
     setUserLock(userId, true);
     try {
-      await updateUser.mutateAsync({ userId: accessUser.id, data: { marketCodes: accessMarkets } });
-      toast({ title: "Market access updated" });
+      await updateUser.mutateAsync({
+        userId: accessUser.id,
+        data: {
+          marketCodes: accessMarkets,
+          ...(accessUser.capabilityMatrixConfigured || matrixTouched
+            ? { capabilityGrants: accessGrants }
+            : {}),
+        },
+      });
+      toast({ title: "Central access matrix updated" });
       setAccessUser(null);
       invalidateUsers();
     } catch (err) {
@@ -391,6 +469,59 @@ export default function UserAdmin() {
     } finally {
       setUserLock(userId, false);
     }
+  };
+
+  const recordCapabilityDryRun = async () => {
+    if (!accessUser || isUserLocked(accessUser.id)) return;
+    setUserLock(accessUser.id, true);
+    try {
+      const receipt = await dryRunCapabilityMigration.mutateAsync({
+        userId: accessUser.id,
+        data: { capabilityGrants: accessGrants },
+      });
+      setDryRunReceipt(receipt);
+      toast({
+        title: "Dry run recorded",
+        description: "No user access, market, workflow, or live content was changed.",
+      });
+    } catch (err) {
+      toast({ title: "Dry run failed", description: (err as any).error, variant: "destructive" });
+    } finally {
+      setUserLock(accessUser.id, false);
+    }
+  };
+
+  const hasAccessGrant = (topic: CapabilityGrant["topic"], capability: Capability, scope: CapabilityScope, marketCode: string) =>
+    accessGrants.some((grant) => grantId(grant) === grantId({ topic, capability, scope, marketCode }));
+
+  const setAccessGrant = (
+    topic: CapabilityGrant["topic"],
+    capability: Capability,
+    scope: CapabilityScope,
+    marketCode: string,
+    checked: boolean,
+  ) => {
+    setMatrixTouched(true);
+    const target = { topic, capability, scope, marketCode };
+    setAccessGrants((current) => {
+      if (checked) {
+        const additions = [target, ...grantPrerequisites(capability).map((required) => ({ ...target, capability: required }))];
+        return [...current, ...additions.filter((grant) => !current.some((existing) => grantId(existing) === grantId(grant)))];
+      }
+      const removed = new Set([
+        grantId(target),
+        ...grantDependents(capability).map((dependent) => grantId({ ...target, capability: dependent })),
+      ]);
+      return current.filter((grant) => !removed.has(grantId(grant)));
+    });
+  };
+
+  const setMatrixRow = (topic: CapabilityGrant["topic"], checked: boolean) => {
+    accessMarkets.forEach((marketCode) => setAccessGrant(topic, matrixCapability, matrixScope, marketCode, checked));
+  };
+
+  const setMatrixColumn = (marketCode: string, checked: boolean) => {
+    TOPICS.forEach(([topic]) => setAccessGrant(topic, matrixCapability, matrixScope, marketCode, checked));
   };
 
   const handleToggleStatus = async (userId: string, currentStatus: string) => {
@@ -514,9 +645,13 @@ export default function UserAdmin() {
                         </SelectContent>
                       </Select>
                       <div className="mt-1 text-[10px] text-muted-foreground font-mono">
-                        {user.marketCodes.length
+                        {user.role === "administrator" && !user.capabilityMatrixConfigured
+                          ? user.legacyAdministratorMarketCodes.length
+                            ? `LEGACY: ${user.legacyAdministratorMarketCodes.join(", ").toUpperCase()}`
+                            : "LEGACY: NO FROZEN MARKETS"
+                          : user.marketCodes.length
                           ? user.marketCodes.join(", ").toUpperCase()
-                          : user.role === "administrator" ? "ALL MARKETS" : "NO MARKETS"}
+                          : "NO MARKETS"}
                       </div>
                     </TableCell>
                     <TableCell>
@@ -549,8 +684,20 @@ export default function UserAdmin() {
                            <DropdownMenuItem onClick={() => openResetDialog(user.id)} disabled={isUserLocked(user.id)}>
                             <KeyRound className="w-3.5 h-3.5 mr-2" /> Reset Password
                           </DropdownMenuItem>
-                           <DropdownMenuItem onClick={() => { setAccessUser(user); setAccessMarkets(user.marketCodes); setMarketSearch(""); }} disabled={isUserLocked(user.id)}>
-                            <Settings2 className="w-3.5 h-3.5 mr-2" /> Edit Market Access
+                           <DropdownMenuItem onClick={() => {
+                              const compatibilityMarkets = legacyEffectiveMarkets(user);
+                             setAccessUser(user);
+                              setAccessMarkets(user.capabilityMatrixConfigured ? user.marketCodes : compatibilityMarkets);
+                              setAccessGrants(user.capabilityMatrixConfigured
+                                ? (user.capabilityGrants ?? []) as CapabilityGrant[]
+                                : legacyProjection(user, compatibilityMarkets));
+                             setMatrixTouched(false);
+                             setMatrixCapability("view");
+                             setMatrixScope("regional");
+                             setDryRunReceipt(null);
+                             setMarketSearch("");
+                           }} disabled={isUserLocked(user.id)}>
+                             <Settings2 className="w-3.5 h-3.5 mr-2" /> Edit Content Access
                           </DropdownMenuItem>
                            <DropdownMenuItem
                              onClick={() => handleToggleStatus(user.id, user.status)}
@@ -785,17 +932,28 @@ export default function UserAdmin() {
           setMarketSearch("");
         }
       }}>
-        <DialogContent>
+        <DialogContent className="max-w-5xl">
           <DialogHeader>
-            <DialogTitle>Edit Market Access</DialogTitle>
+            <DialogTitle>Central content access</DialogTitle>
             <DialogDescription>
-              Limit {accessUser?.name} to assigned markets.
-              {accessUser?.role === "administrator"
-                ? " Administrators have all-market access."
-                : " No selection grants no market access."}
+              Set topic × geography authority for {accessUser?.name}. The matrix is the sole content-access control.
+              {accessUser?.capabilityMatrixConfigured
+                ? " This configured matrix is deny-all outside checked cells, including when no cells are checked."
+                : accessUser?.role === "administrator"
+                  ? " This legacy administrator is limited to its read-only frozen market snapshot until you change and save the matrix; the role itself grants no blanket content access."
+                  : " This account is in legacy role and market compatibility mode until you change and save the matrix."}
             </DialogDescription>
           </DialogHeader>
-          <div className="py-4">
+          <div className="space-y-5 py-4">
+            <section aria-labelledby="assigned-geographies">
+              <h3 id="assigned-geographies" className="mb-2 text-sm font-medium">Matrix geographies</h3>
+              {accessUser?.role === "administrator" && !accessUser.capabilityMatrixConfigured && (
+                <p className="mb-2 rounded-md border border-amber-500/30 bg-amber-500/5 p-2 text-xs text-muted-foreground">
+                  Frozen legacy scope: {accessUser.legacyAdministratorMarketCodes.length
+                    ? accessUser.legacyAdministratorMarketCodes.map((code) => code.toUpperCase()).join(", ")
+                    : "none"}. This read-only snapshot is the current compatibility boundary; newly enabled markets are not included. Saving a matrix makes only checked cells authoritative.
+                </p>
+              )}
             <Input
               aria-label="Search market access"
               placeholder="Filter markets…"
@@ -808,15 +966,112 @@ export default function UserAdmin() {
             {enabledMarkets.map((market) => (
               <label key={market.code} className="flex items-center gap-2 rounded-md border p-3 text-sm">
                 <input type="checkbox" checked={accessMarkets.includes(market.code)}
-                  onChange={(event) => setAccessMarkets(event.target.checked ? [...accessMarkets, market.code] : accessMarkets.filter((code) => code !== market.code))} />
+                  onChange={(event) => {
+                    // A legacy geography edit is an explicit migration: retain
+                    // the frozen projection and persist the revised allow-list.
+                    if (!accessUser?.capabilityMatrixConfigured) setMatrixTouched(true);
+                    setAccessMarkets(event.target.checked
+                      ? [...accessMarkets, market.code]
+                      : accessMarkets.filter((code) => code !== market.code));
+                  }} />
                 {market.displayName}
               </label>
             ))}
             {enabledMarkets.length === 0 && <p className="col-span-2 text-xs text-muted-foreground">No enabled markets match this search.</p>}
             </div>
+            <p className="mt-2 text-xs text-muted-foreground">Changing matrix geographies does not enable a market or change live content. A checked capability must belong to a selected geography.</p>
+            </section>
+            <section aria-labelledby="capability-matrix">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h3 id="capability-matrix" className="text-sm font-medium">Capability matrix</h3>
+                  <p className="text-xs text-muted-foreground">View is required for Edit and Review; Publish also requires Review. Removing a prerequisite clears dependent rights.</p>
+                </div>
+                <div className="flex gap-2" role="group" aria-label="Capability">
+                  {CAPABILITIES.map((capability) => (
+                    <Button key={capability} type="button" size="sm" variant={matrixCapability === capability ? "default" : "outline"}
+                      onClick={() => setMatrixCapability(capability)}>
+                      {capability}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+              <div className="mt-3 flex gap-2" role="group" aria-label="Authority scope">
+                <Button type="button" size="sm" variant={matrixScope === "regional" ? "secondary" : "outline"} onClick={() => setMatrixScope("regional")}>Regional versions</Button>
+                <Button type="button" size="sm" variant={matrixScope === "shared" ? "secondary" : "outline"} onClick={() => setMatrixScope("shared")}>Shared sources</Button>
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground">
+                {matrixScope === "shared"
+                  ? "Shared authority is separate from regional authority. A shared operation also requires the same right in every affected regional destination."
+                  : "Regional authority applies only to the selected geography and never broadens shared-source authority."}
+              </p>
+              <div className="mt-3 max-h-[340px] overflow-auto rounded-md border">
+                <Table>
+                  <TableHeader className="sticky top-0 bg-muted">
+                    <TableRow>
+                      <TableHead className="min-w-48">Topic</TableHead>
+                      {accessMarkets.map((marketCode) => (
+                        <TableHead key={marketCode} className="min-w-28 text-center">
+                          <label className="flex cursor-pointer flex-col items-center gap-1 text-[10px] font-mono uppercase">
+                            <span>{marketCode}</span>
+                            <input aria-label={`Select all ${matrixCapability} rights for ${marketCode}`}
+                              type="checkbox"
+                              checked={TOPICS.every(([topic]) => hasAccessGrant(topic, matrixCapability, matrixScope, marketCode))}
+                              onChange={(event) => setMatrixColumn(marketCode, event.target.checked)} />
+                            <span className="normal-case">all topics</span>
+                          </label>
+                        </TableHead>
+                      ))}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {TOPICS.map(([topic, label]) => (
+                      <TableRow key={topic}>
+                        <TableCell>
+                          <label className="flex cursor-pointer items-center gap-2 text-sm">
+                            <input aria-label={`Select ${matrixCapability} for all assigned geographies in ${label}`}
+                              type="checkbox"
+                              checked={accessMarkets.length > 0 && accessMarkets.every((marketCode) => hasAccessGrant(topic, matrixCapability, matrixScope, marketCode))}
+                              onChange={(event) => setMatrixRow(topic, event.target.checked)} />
+                            {label}
+                          </label>
+                        </TableCell>
+                        {accessMarkets.map((marketCode) => (
+                          <TableCell key={marketCode} className="text-center">
+                            <input type="checkbox" aria-label={`${matrixCapability} ${label} in ${marketCode}`}
+                              checked={hasAccessGrant(topic, matrixCapability, matrixScope, marketCode)}
+                              onChange={(event) => setAccessGrant(topic, matrixCapability, matrixScope, marketCode, event.target.checked)} />
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                    {!accessMarkets.length && (
+                      <TableRow><TableCell colSpan={1} className="py-6 text-center text-sm text-muted-foreground">Assign one or more enabled geographies before granting rights.</TableCell></TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground" role="status">
+                Effective rights: {accessUser?.capabilityMatrixConfigured || matrixTouched
+                  ? accessGrants.length
+                    ? `${accessGrants.length} explicit grant${accessGrants.length === 1 ? "" : "s"}; all unlisted rights are denied.`
+                    : "Configured deny-all: no content topic, capability, or geography is allowed."
+                  : accessUser?.role === "administrator"
+                    ? `Legacy administrator compatibility rights across ${accessMarkets.length || "no"} frozen geograph${accessMarkets.length === 1 ? "y" : "ies"}; no role-wide or newly enabled-market authority is advertised.`
+                    : `Legacy ${accessUser?.role ?? "user"} rights across ${accessMarkets.length || "no"} assigned geograph${accessMarkets.length === 1 ? "y" : "ies"}.`}
+              </p>
+              {dryRunReceipt && (
+                <p className="mt-2 rounded border border-emerald-500/30 bg-emerald-500/5 p-2 text-xs text-emerald-700" role="status">
+                  Dry-run receipt {dryRunReceipt.id} recorded {format(new Date(dryRunReceipt.createdAt), "MMM d, yyyy HH:mm")}. It captured before/after effective-rights snapshots and made no persistent access change.
+                </p>
+              )}
+            </section>
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setAccessUser(null)} disabled={Boolean(accessUser && isUserLocked(accessUser.id))}>Cancel</Button>
+            <Button variant="outline" onClick={recordCapabilityDryRun} disabled={Boolean(accessUser && isUserLocked(accessUser.id)) || dryRunCapabilityMigration.isPending}>
+              {dryRunCapabilityMigration.isPending ? "Recording dry run…" : "Record dry run"}
+            </Button>
             <Button onClick={saveMarketAccess} disabled={Boolean(accessUser && isUserLocked(accessUser.id))}>Save Access</Button>
           </DialogFooter>
         </DialogContent>

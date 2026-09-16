@@ -48,6 +48,7 @@ test("Task 322 editorial routes enforce reassignment, SoD, approval publishing, 
     media: randomUUID(), mediaVersion: randomUUID(),
     legacySharedDocument: randomUUID(), legacySharedEdition: randomUUID(), legacySharedRevisionFour: randomUUID(),
     historicalSourceEdition: randomUUID(), historicalSourceRevision: randomUUID(),
+    autoDocument: randomUUID(), autoEdition: randomUUID(), autoRevision: randomUUID(),
   };
   const tokens = Object.fromEntries(
     ["administrator", "editor", "reviewerOne", "reviewerTwo", "reviewerThree"].map((key) => [key, randomUUID()]),
@@ -79,9 +80,29 @@ test("Task 322 editorial routes enforce reassignment, SoD, approval publishing, 
     const migration0032 = await readFile(resolve(process.cwd(), "../../lib/db/migrations/0032_cms_editorial_work.sql"), "utf8");
     const migration0033 = await readFile(resolve(process.cwd(), "../../lib/db/migrations/0033_cms_editorial_review_hardening.sql"), "utf8");
     const migration0034 = await readFile(resolve(process.cwd(), "../../lib/db/migrations/0034_cms_editorial_digest_delivery_identity.sql"), "utf8");
+    const migration0035 = await readFile(resolve(process.cwd(), "../../lib/db/migrations/0035_cms_revision_accuracy_confirmations.sql"), "utf8");
+    const migration0036 = await readFile(resolve(process.cwd(), "../../lib/db/migrations/0036_cms_review_request_accountability_snapshot.sql"), "utf8");
+    const migration0037 = await readFile(resolve(process.cwd(), "../../lib/db/migrations/0037_cms_capability_matrix_access_projection.sql"), "utf8");
+    const migration0038 = await readFile(resolve(process.cwd(), "../../lib/db/migrations/0038_cms_review_capability_reviewers.sql"), "utf8");
+    const migration0039 = await readFile(resolve(process.cwd(), "../../lib/db/migrations/0039_cms_capability_matrix_configuration.sql"), "utf8");
+    const migration0040 = await readFile(resolve(process.cwd(), "../../lib/db/migrations/0040_cms_legacy_administrator_market_snapshots.sql"), "utf8");
+    const migration0041 = await readFile(resolve(process.cwd(), "../../lib/db/migrations/0041_cms_shared_baseline_governing_source.sql"), "utf8");
     await admin.query(migration0032);
     await admin.query(migration0033);
     await admin.query(migration0034);
+    await admin.query(migration0035);
+    await admin.query(migration0036);
+    await admin.query(migration0037);
+    await admin.query(migration0038);
+    await admin.query(migration0039);
+    await admin.query(migration0040);
+    await admin.query(migration0041);
+    await admin.query(
+      `INSERT INTO market_editions(id,code,display_name,default_locale,enabled,is_canonical)
+       VALUES ($1,'uae','United Arab Emirates','en',true,true),
+              ($2,'ksa','Kingdom of Saudi Arabia','en',true,false)`,
+      [ids.uae, ids.ksa],
+    );
 
     const security = await import("../src/lib/security.ts");
     for (const [key, role] of [
@@ -105,14 +126,8 @@ test("Task 322 editorial routes enforce reassignment, SoD, approval publishing, 
       );
     }
     await admin.query(
-      "INSERT INTO cms_user_market_assignments(user_id,market_code) VALUES ($1,'uae'),($1,'qatar'),($2,'uae'),($2,'ksa')",
+      "INSERT INTO cms_user_market_assignments(user_id,market_code) VALUES ($1,'uae'),($1,'qatar'),($1,'ksa'),($2,'uae'),($2,'ksa')",
       [ids.editor, ids.reviewerThree],
-    );
-    await admin.query(
-      `INSERT INTO market_editions(id,code,display_name,default_locale,enabled,is_canonical)
-       VALUES ($1,'uae','United Arab Emirates','en',true,true),
-              ($2,'ksa','Kingdom of Saudi Arabia','en',true,false)`,
-      [ids.uae, ids.ksa],
     );
     await admin.query(
       `INSERT INTO cms_media_assets(id,storage_key,filename,original_filename,media_type,byte_size,checksum,alt_text,collection,status,uploaded_by_user_id)
@@ -193,14 +208,20 @@ test("Task 322 editorial routes enforce reassignment, SoD, approval publishing, 
       await request(`/api/editorial-work/revisions/${ids.revisionOne}/request-review`, "POST", undefined, tokens.editor),
       201, "an omitted request body falls back to the assigned reviewer",
     );
-    const second = await json<{ reviewRequest: { id: string; reviewerId: string } }>(
+    assert.equal(
+      (await admin.query<{ accountable_editor_user_id: string }>(
+        "SELECT accountable_editor_user_id::text FROM cms_review_requests WHERE id=$1",
+        [first.reviewRequest.id],
+      )).rows[0]?.accountable_editor_user_id,
+      ids.editor,
+      "the exact assignment is frozen with the review request",
+    );
+    await json(
       await request(`/api/editorial-work/revisions/${ids.revisionOne}/request-review`, "POST", {
         reviewerId: ids.reviewerTwo,
       }, tokens.editor),
-      201, "replace review request with a different reviewer",
+      409, "a routing retry cannot replace its frozen reviewer",
     );
-    assert.notEqual(first.reviewRequest.id, second.reviewRequest.id);
-    assert.equal(second.reviewRequest.reviewerId, ids.reviewerTwo);
     await json(
       await request(`/api/documents/${ids.document}/publish`, "POST", { revisionId: ids.revisionOne }, tokens.administrator),
       409, "generic publish cannot auto-approve an exact pending review",
@@ -218,9 +239,14 @@ test("Task 322 editorial routes enforce reassignment, SoD, approval publishing, 
        VALUES ($1,$2,1,$3,'task322-legacy-publish','draft',$4,'Legacy publish fixture')`,
       [legacyPublishRevision, ids.unassignedEdition, snapshot, ids.editor],
     );
-    await json(
+    const unreviewedDraftPublish = await json<{ error: string }>(
       await request(`/api/documents/${ids.unassignedDocument}/publish`, "POST", { revisionId: legacyPublishRevision }, tokens.administrator),
-      200, "legacy content without an exact review request retains direct administrator publication",
+      409, "a draft cannot bypass an exact independent approved review request",
+    );
+    assert.match(
+      unreviewedDraftPublish.error,
+      /approved by its matching exact-edition review request/i,
+      "normal release reports the missing exact approval rather than treating an administrator as an approver",
     );
     await admin.query(
       `INSERT INTO cms_revisions(id,edition_id,revision_number,payload,content_digest,workflow_state,created_by_user_id,reason)
@@ -231,33 +257,31 @@ test("Task 322 editorial routes enforce reassignment, SoD, approval publishing, 
       await request(`/api/documents/${ids.unassignedDocument}/reject`, "POST", {
         revisionId: legacyRejectRevision, body: "Legacy rejection remains available.",
       }, tokens.administrator),
-      200, "legacy content without an exact review request retains generic rejection",
-    );
-    assert.equal(
-      (await admin.query<{ status: string }>("SELECT status FROM cms_review_requests WHERE id=$1", [first.reviewRequest.id])).rows[0]?.status,
-      "superseded",
+      403, "generic rejection cannot bypass routed editorial decisions",
     );
     await json(
       await request(`/api/editorial-work/review-requests/${first.reviewRequest.id}/decision`, "POST", {
         decision: "approved",
       }, tokens.reviewerOne),
-      409, "a superseded reviewer cannot decide",
+      200, "the originally routed reviewer approves",
     );
     await json(
-      await request(`/api/editorial-work/review-requests/${second.reviewRequest.id}/decision`, "POST", {
+      await request(`/api/editorial-work/review-requests/${first.reviewRequest.id}/decision`, "POST", {
         decision: "approved",
-      }, tokens.reviewerTwo),
-      200, "the replacement reviewer approves",
-    );
-    await json(
-      await request(`/api/editorial-work/review-requests/${second.reviewRequest.id}/decision`, "POST", {
-        decision: "approved",
-      }, tokens.reviewerTwo),
+      }, tokens.reviewerOne),
       200, "an exact decision retry is idempotent",
     );
     assert.equal(
       (await admin.query<{ workflow_state: string }>("SELECT workflow_state FROM cms_revisions WHERE id=$1", [ids.revisionOne])).rows[0]?.workflow_state,
       "approved",
+    );
+    await json(
+      await request(`/api/documents/${ids.document}/publish`, "POST", { revisionId: ids.revisionOne }, tokens.reviewerOne),
+      422, "a historical verification date cannot replace explicit accuracy evidence",
+    );
+    await json(
+      await request(`/api/documents/${ids.document}/revisions/${ids.revisionOne}/accuracy-confirmation`, "POST", {}, tokens.editor),
+      200, "approval alone does not replace explicit accuracy evidence",
     );
     await json(
       await request(`/api/documents/${ids.document}/publish`, "POST", { revisionId: ids.revisionOne }, tokens.reviewerTwo),
@@ -327,6 +351,120 @@ test("Task 322 editorial routes enforce reassignment, SoD, approval publishing, 
        VALUES ($1,$2,$3)`,
       [ids.legacySharedDocument, ids.legacySharedEdition, ids.legacySharedRevisionFour],
     );
+    // 0040 intentionally freezes this administrator to enabled UAE/KSA. The
+    // historical Qatar source is disabled, so exercise it through an explicit,
+    // auditable matrix rather than recreating a role-wide administrator bypass.
+    await admin.query(
+      "INSERT INTO cms_user_capability_configurations(user_id) VALUES ($1)",
+      [ids.administrator],
+    );
+    await admin.query(
+      `INSERT INTO cms_user_capability_grants(user_id,topic,capability,scope,market_code)
+       SELECT $1,'publication',capability,scope,market_code
+         FROM unnest(ARRAY['view','edit','publish']::text[]) capability
+         CROSS JOIN unnest(ARRAY['regional','shared']::text[]) scope
+         CROSS JOIN unnest(ARRAY['uae','ksa','qatar']::text[]) market_code`,
+      [ids.administrator],
+    );
+    await admin.query(
+      "INSERT INTO cms_user_capability_configurations(user_id) VALUES ($1)",
+      [ids.editor],
+    );
+    await admin.query(
+      `INSERT INTO cms_user_capability_grants(user_id,topic,capability,scope,market_code)
+       SELECT $1,'publication',capability,scope,market_code
+         FROM unnest(ARRAY['view','edit','review']::text[]) capability
+         CROSS JOIN unnest(ARRAY['regional','shared']::text[]) scope
+         CROSS JOIN unnest(ARRAY['uae','ksa','qatar']::text[]) market_code`,
+      [ids.editor],
+    );
+    await admin.query(
+      "INSERT INTO cms_user_capability_configurations(user_id) VALUES ($1)",
+      [ids.reviewerTwo],
+    );
+    await admin.query(
+      `INSERT INTO cms_user_capability_grants(user_id,topic,capability,scope,market_code)
+       SELECT $1,'publication',capability,'regional','ksa'
+         FROM unnest(ARRAY['view','review']::text[]) capability
+       ON CONFLICT DO NOTHING`,
+      [ids.administrator],
+    );
+    await admin.query(
+      "INSERT INTO cms_user_market_assignments(user_id,market_code) VALUES ($1,'ksa') ON CONFLICT DO NOTHING",
+      [ids.reviewerThree],
+    );
+    await admin.query(
+      `INSERT INTO cms_documents(id,kind,canonical_slug,title,owner_id,status)
+       VALUES ($1,'publication',$2,'Atomic submit reviewer routing',$3,'active')`,
+      [ids.autoDocument, `auto-submit-${ids.autoDocument.slice(0, 8)}`, ids.editor],
+    );
+    await admin.query(
+      `INSERT INTO cms_market_editions
+         (id,document_id,market,locale,localized_slug,publication_state,content_mode)
+       VALUES ($1,$2,'ksa','en',$3,'draft','custom')`,
+      [ids.autoEdition, ids.autoDocument, `auto-submit-${ids.autoDocument.slice(0, 8)}`],
+    );
+    await admin.query(
+      `INSERT INTO cms_revisions
+         (id,edition_id,revision_number,payload,content_digest,workflow_state,created_by_user_id,reason)
+       VALUES ($1,$2,1,$3,'task322-auto-submit','draft',$4,'Atomic submit reviewer routing')`,
+      [ids.autoRevision, ids.autoEdition, snapshot, ids.editor],
+    );
+    await admin.query(
+      `INSERT INTO cms_revision_accuracy_confirmations(revision_id,content_digest,confirmed_by_user_id)
+       VALUES ($1,'task322-auto-submit',$2)`,
+      [ids.autoRevision, ids.editor],
+    );
+    await admin.query(
+      `INSERT INTO cms_user_capability_grants(user_id,topic,capability,scope,market_code)
+       SELECT $1,'publication',capability,scope,market_code
+         FROM unnest(ARRAY['view','edit','review','publish']::text[]) capability
+         CROSS JOIN unnest(ARRAY['regional','shared']::text[]) scope
+         CROSS JOIN unnest(ARRAY['uae','ksa','qatar']::text[]) market_code`,
+      [ids.reviewerTwo],
+    );
+    await json(
+      await request(`/api/documents/${ids.autoDocument}/submit`, "POST", {
+        revisionId: ids.autoRevision,
+      }, tokens.editor),
+      200,
+      "atomic submit resolves an eligible central reviewer without an assignment",
+    );
+    const autoReview = (await admin.query<{ id: string; reviewer_user_id: string }>(
+      `SELECT id,reviewer_user_id FROM cms_review_requests
+        WHERE revision_id=$1 AND status='requested'`,
+      [ids.autoRevision],
+    )).rows[0];
+    assert.ok(autoReview, "atomic submit creates an exact review request");
+    assert.equal(autoReview?.reviewer_user_id, ids.reviewerThree,
+      "a dedicated publisher reviewer is preferred over an equally eligible administrator");
+    await json(
+      await request(`/api/editorial-work/review-requests/${autoReview?.id}/decision`, "POST", {
+        decision: "rejected", note: "Please correct the KSA revision before resubmitting.",
+      }, tokens.reviewerThree),
+      200,
+      "the centrally assigned reviewer can request correction",
+    );
+    await admin.query(
+      `DELETE FROM cms_editorial_notifications
+        WHERE user_id=$1 AND revision_id=$2 AND type='review-requested'`,
+      [ids.reviewerThree, ids.autoRevision],
+    );
+    const explicitAdministrator = await auth.getUser(ids.administrator);
+    const { canAccessContent } = await import("../src/lib/policy.ts");
+    assert.equal(await canAccessContent(explicitAdministrator, {
+      topic: "publication", capability: "edit", marketCode: "qatar",
+    }), true, "the explicit historical-source regional grant is present");
+    assert.equal(await canAccessContent(explicitAdministrator, {
+      topic: "publication", capability: "edit", marketCode: "qatar",
+      scope: "shared", sourceMarketCode: "qatar", destinationMarketCodes: ["uae"],
+    }), true, "the explicit historical-source shared grant covers the bound UAE destination");
+    const { canAccessEditionTarget } = await import("../src/routes/documents.ts");
+    const explicitAuth = { user: explicitAdministrator } as any;
+    assert.equal(await canAccessEditionTarget(admin, explicitAuth, ids.legacySharedDocument, "qatar", "en", "edit"),
+      true, "the explicit grant may edit the exact disabled historical source");
+    assert.equal(await canAccessEditionTarget(admin, explicitAuth, ids.legacySharedDocument, "uae", "en", "edit"),
+      true, "the explicit grant may edit the exact affected UAE binding");
     const baseline = await json<{ id: string; revisionId: string; revisionNumber: number }>(
       await request(`/api/documents/${ids.legacySharedDocument}/shared-market`, "POST", {
         locale: "en", sourceRevisionId: ids.historicalSourceRevision, snapshot: historicalSnapshot,
@@ -337,13 +475,18 @@ test("Task 322 editorial routes enforce reassignment, SoD, approval publishing, 
       await request(`/api/documents/${ids.legacySharedDocument}/shared-market/bindings`, "PUT", {
         marketEditionId: ids.uae, locale: "en", mode: "adapted",
         baselineId: baseline.id, baselineRevisionId: baseline.revisionId,
+        version: 0,
         expectedDestinationRevisionId: ids.legacySharedRevisionFour,
         expectedActiveBaselineRevisionId: baseline.revisionId,
-        version: 0,
       }, tokens.editor),
       200, "the legacy source can materialize an adapted UAE exact revision",
     );
     assert.ok(adapted.materializedRevisionId);
+    const adaptedEditionId = (await admin.query<{ edition_id: string }>(
+      "SELECT edition_id FROM cms_revisions WHERE id=$1",
+      [adapted.materializedRevisionId],
+    )).rows[0]?.edition_id;
+    assert.ok(adaptedEditionId);
     const legacyAvailability = await json<{ sharedSource: { editionId: string; revisionId: string | null } | null }>(
       await request(`/api/documents/${ids.legacySharedDocument}/availability`, "GET", undefined, tokens.editor),
       200, "GET preserves the legacy source pointer independently from managed materialization",
@@ -365,18 +508,32 @@ test("Task 322 editorial routes enforce reassignment, SoD, approval publishing, 
       await request(`/api/documents/${ids.legacySharedDocument}/submit`, "POST", {
         revisionId: adapted.materializedRevisionId,
       }, tokens.editor),
-      200, "ordinary submit accepts the current exact managed materialization with only its UAE source/destination authority",
+      422, "an unconfirmed exact revision cannot enter review",
     );
     await json(
-      await request(`/api/editorial-work/editions/${ids.legacySharedEdition}/assignment`, "PUT", {
+      await request(`/api/documents/${ids.legacySharedDocument}/revisions/${adapted.materializedRevisionId}/accuracy-confirmation`, "POST", {}, tokens.editor),
+      200, "the current exact revision receives explicit accuracy evidence",
+    );
+    await json(
+      await request(`/api/editorial-work/editions/${adaptedEditionId}/assignment`, "PUT", {
         editorId: ids.editor, reviewerId: ids.reviewerTwo, dueAt: null,
       }),
-      200, "the adapted exact edition remains assignable",
+      200, "the adapted exact edition remains assignable before review routing",
     );
-    const legacyReview = await json<{ reviewRequest: { id: string } }>(
-      await request(`/api/editorial-work/revisions/${adapted.materializedRevisionId}/request-review`, "POST", undefined, tokens.editor),
-      201, "the submitted adapted exact revision enters the ordinary assigned review flow",
+    await json(
+      await request(`/api/documents/${ids.legacySharedDocument}/submit`, "POST", {
+        revisionId: adapted.materializedRevisionId,
+      }, tokens.editor),
+      200, "atomic submit creates its exact review routing after confirmation",
     );
+    const legacyReview = await admin.query<{ id: string; reviewer_user_id: string }>(
+      `SELECT id,reviewer_user_id FROM cms_review_requests
+        WHERE revision_id=$1 AND status='requested'
+        ORDER BY requested_at DESC LIMIT 1`,
+      [adapted.materializedRevisionId],
+    );
+    assert.equal(legacyReview.rows[0]?.reviewer_user_id, ids.reviewerTwo,
+      "atomic submit routes the exact review request to the frozen eligible reviewer");
     assert.equal(
       (await admin.query<{ count: string }>(
         `SELECT count(*)::text count FROM cms_editorial_notifications
@@ -387,7 +544,7 @@ test("Task 322 editorial routes enforce reassignment, SoD, approval publishing, 
       "assigned reviewer receives the normal exact-revision notification",
     );
     await json(
-      await request(`/api/editorial-work/review-requests/${legacyReview.reviewRequest.id}/decision`, "POST", {
+      await request(`/api/editorial-work/review-requests/${legacyReview.rows[0]?.id}/decision`, "POST", {
         decision: "approved",
       }, tokens.reviewerTwo),
       200, "the adapted exact revision can be approved",
@@ -395,7 +552,7 @@ test("Task 322 editorial routes enforce reassignment, SoD, approval publishing, 
     await json(
       await request(`/api/documents/${ids.legacySharedDocument}/publish`, "POST", {
         revisionId: adapted.materializedRevisionId,
-      }, tokens.reviewerTwo),
+      }, tokens.administrator),
       200, "the approved current managed materialization can publish without a stale-source guard",
     );
     const baselineB = await json<{ revisionId: string }>(
@@ -465,8 +622,8 @@ test("Task 322 editorial routes enforce reassignment, SoD, approval publishing, 
     const reviewedAvailability = await json<{ reviewedVersion: number | null }>(
       await request(`/api/documents/${ids.legacySharedDocument}/availability/review`, "POST", {
         version: stagedAvailability.draftVersion,
-      }),
-      200, "the complete destination matrix is reviewed against its retained source identity",
+      }, tokens.reviewerThree),
+      200, "an authorized nonstaging reviewer reviews the complete destination matrix against its retained source identity",
     );
     assert.equal(reviewedAvailability.reviewedVersion, stagedAvailability.draftVersion);
     const availabilityReceiptsBefore = await admin.query<{ count: string }>(
@@ -605,24 +762,37 @@ test("Task 322 editorial routes enforce reassignment, SoD, approval publishing, 
     // it has no inherited baseline, but its ordinary managed publication receipt
     // immutably records independent mode. It must remain releasable.
     await json(
+      await request(`/api/documents/${ids.legacySharedDocument}/revisions/${detachedBinding.materializedRevisionId}/accuracy-confirmation`, "POST", {}, tokens.editor),
+      200, "the current independent B receives exact accuracy evidence",
+    );
+    await json(
       await request(`/api/documents/${ids.legacySharedDocument}/submit`, "POST", {
         revisionId: detachedBinding.materializedRevisionId,
       }, tokens.editor),
       200, "the current independent B can enter ordinary exact review",
     );
-    const independentReview = await json<{ reviewRequest: { id: string } }>(
+    const independentReview = await json<{ reviewRequest: { id: string; reviewerId: string } }>(
       await request(
         `/api/editorial-work/revisions/${detachedBinding.materializedRevisionId}/request-review`,
         "POST",
         undefined,
         tokens.editor,
       ),
-      201, "independent B creates an ordinary review request",
+      200, "independent B recovers its atomic ordinary review request",
     );
+    const reviewerTokenById: Record<string, string> = {
+      [ids.administrator]: tokens.administrator,
+      [ids.reviewerOne]: tokens.reviewerOne,
+      [ids.reviewerTwo]: tokens.reviewerTwo,
+      [ids.reviewerThree]: tokens.reviewerThree,
+    };
+    const independentReviewerToken = reviewerTokenById[independentReview.reviewRequest.reviewerId];
+    assert.ok(independentReviewerToken, "atomic routing selected a known active independent reviewer");
+    assert.notEqual(independentReview.reviewRequest.reviewerId, ids.editor, "atomic routing never selects the submitting editor");
     await json(
       await request(`/api/editorial-work/review-requests/${independentReview.reviewRequest.id}/decision`, "POST", {
         decision: "approved",
-      }, tokens.reviewerTwo),
+      }, independentReviewerToken),
       200, "independent B is approved by its assigned reviewer",
     );
     await json(
@@ -656,8 +826,8 @@ test("Task 322 editorial routes enforce reassignment, SoD, approval publishing, 
     await json(
       await request(`/api/documents/${ids.legacySharedDocument}/availability/review`, "POST", {
         version: independentStage.draftVersion,
-      }),
-      200, "the independent B destination matrix is reviewed",
+      }, tokens.reviewerThree),
+      200, "an authorized nonstaging reviewer reviews the independent B destination matrix",
     );
     await json(
       await request(`/api/documents/${ids.legacySharedDocument}/availability/publish`, "POST", {
@@ -690,8 +860,8 @@ test("Task 322 editorial routes enforce reassignment, SoD, approval publishing, 
     await json(
       await request(`/api/documents/${ids.unassignedDocument}/availability/review`, "POST", {
         version: standaloneStage.draftVersion,
-      }),
-      200, "the standalone source matrix can be reviewed without publishing its draft source",
+      }, tokens.reviewerThree),
+      200, "an authorized nonstaging reviewer can review the standalone source matrix without publishing its draft source",
     );
     await json(
       await request(`/api/documents/${ids.unassignedDocument}/availability/publish`, "POST", {
@@ -751,7 +921,7 @@ test("Task 322 editorial routes enforce reassignment, SoD, approval publishing, 
     );
     await admin.query(
       "UPDATE cms_review_requests SET status='rejected',blocked_reason='Editorial changes required.' WHERE id=$1",
-      [second.reviewRequest.id],
+      [first.reviewRequest.id],
     );
     const blockedQueue = await json<{ items: Array<{ editionId: string; status: string; blockedReason: string | null }> }>(
       await request("/api/editorial-work/team", "GET", undefined, tokens.reviewerTwo),
@@ -765,6 +935,10 @@ test("Task 322 editorial routes enforce reassignment, SoD, approval publishing, 
       `INSERT INTO cms_revisions(id,edition_id,revision_number,payload,content_digest,workflow_state,created_by_user_id,reason)
        VALUES ($1,$2,2,$3,'task322-two','in-review',$4,'Task 322 permission fixture')`,
       [ids.revisionTwo, ids.edition, snapshot, ids.editor],
+    );
+    await json(
+      await request(`/api/documents/${ids.document}/revisions/${ids.revisionOne}/accuracy-confirmation`, "POST", {}, tokens.editor),
+      409, "a confirmation cannot be applied to a superseded revision",
     );
     const revoked = await json<{ reviewRequest: { id: string } }>(
       await request(`/api/editorial-work/revisions/${ids.revisionTwo}/request-review`, "POST", {
@@ -836,7 +1010,7 @@ test("Task 322 editorial routes enforce reassignment, SoD, approval publishing, 
       await request(`/api/editorial-work/review-requests/${beforeClear.reviewRequest.id}/decision`, "POST", {
         decision: "approved",
       }, tokens.reviewerTwo),
-      409, "a reviewer cannot decide a request superseded by assignment clearance",
+      409, "clearing the accountable reviewer assignment supersedes its outstanding request",
     );
   } finally {
     if (server) await new Promise<void>((resolve, reject) => server!.close((error) => error ? reject(error) : resolve()));

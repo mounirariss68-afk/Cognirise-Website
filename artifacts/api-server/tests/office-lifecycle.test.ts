@@ -69,8 +69,18 @@ test("published offices with later drafts archive, restore, and never use perman
           user_updated_at: now,
           must_rotate: false,
           mfa_enabled: true,
+           market_codes: ["uae"],
+           legacy_administrator_market_codes: ["uae"],
+           capability_matrix_configured: false,
+           capability_grants: [],
         }],
       };
+    }
+    if (statement.includes("cms_user_capability_configurations") || statement.includes("FROM cms_user_capability_grants")) {
+      return { rowCount: 0, rows: [] };
+    }
+    if (statement.includes("FROM cms_legacy_administrator_market_snapshots")) {
+      return { rowCount: 1, rows: [{ market_codes: ["uae"] }] };
     }
     if (statement.includes("DELETE FROM cms_documents d")) {
       deleteGuardChecked = statement.includes("publication_event.action='document.published'");
@@ -148,9 +158,25 @@ test("published offices with later drafts archive, restore, and never use perman
       if (statement.includes("LOCK TABLE cms_user_market_assignments IN SHARE MODE")) {
         return { rowCount: 0, rows: [] };
       }
+      if (statement.includes("cms_user_capability_configurations") || statement.includes("FROM cms_user_capability_grants")) {
+        return { rowCount: 0, rows: [] };
+      }
+      if (statement.includes("FROM cms_legacy_administrator_market_snapshots")) {
+        return { rowCount: 1, rows: [{ market_codes: ["uae"] }] };
+      }
       if (statement.includes("SELECT role,status") && statement.includes("FROM cms_users")) {
         return { rowCount: 1, rows: [{ role: "administrator", status: "active" }] };
       }
+      if (statement.includes("SELECT e.id edition_id,e.content_mode,d.kind FROM cms_documents")) {
+         return { rowCount: 1, rows: [{ edition_id: "edition-id", content_mode: "custom", kind: "office" }] };
+       }
+       if (statement.includes("SELECT market,locale FROM cms_market_editions")) {
+         return { rowCount: 1, rows: [{ market: "uae", locale: "en" }] };
+      }
+       if (statement.includes("DELETE FROM cms_documents d")) {
+         deleteGuardChecked = statement.includes("publication_event.action='document.published'");
+         return { rowCount: 0, rows: [] };
+       }
       if (statement.includes("SELECT market_code") && statement.includes("FROM cms_user_market_assignments")) {
         return { rowCount: 1, rows: [{ market_code: "uae" }] };
       }
@@ -205,7 +231,20 @@ test("published offices with later drafts archive, restore, and never use perman
         latestRevisionId = "restored-revision-id";
         latestRevisionNumber = 3;
         latestPayload = structuredClone(approvedPayload);
-        return { rowCount: 1, rows: [{ id: latestRevisionId, payload: latestPayload }] };
+        return {
+          rowCount: 1,
+          rows: [{
+            id: latestRevisionId,
+            payload: latestPayload,
+            content_digest: "approved-office-digest",
+          }],
+        };
+      }
+      if (statement.includes("INSERT INTO cms_restore_release_receipts")) {
+        return { rowCount: 1, rows: [{ id: "office-restore-release-receipt" }] };
+      }
+      if (statement.includes("INSERT INTO cms_revision_accuracy_confirmations")) {
+        return { rowCount: 1, rows: [] };
       }
       if (statement.includes("SET publication_state='draft'")) {
         publicationState = "draft";

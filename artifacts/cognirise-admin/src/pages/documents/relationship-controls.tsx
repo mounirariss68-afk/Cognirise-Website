@@ -46,12 +46,18 @@ function listDocumentsUrl(params: ListDocumentsParams): string {
   return encoded ? `/api/documents?${encoded}` : "/api/documents";
 }
 
-export function RecordPicker({ label, value, onChange, kind, maximum = 50 }: {
+function targetId(path?: string) {
+  return path ? `content-${path.replace(/^content\./, "").replace(/[^a-zA-Z0-9_-]/g, "-")}` : undefined;
+}
+
+export function RecordPicker({ label, value, onChange, kind, maximum = 50, path }: {
   label: string;
   value: unknown;
   onChange: (value: string[]) => void;
   kind?: DocumentKind;
   maximum?: number;
+  /** Exact stored string-array path for focus and field registry consumers. */
+  path?: string;
 }) {
   const [search, setSearch] = useState("");
   const [knownRecords, setKnownRecords] = useState<Record<string, RelationshipRecord>>({});
@@ -164,7 +170,7 @@ export function RecordPicker({ label, value, onChange, kind, maximum = 50 }: {
   const remove = (id: string) => onChange(selected.filter((selectedId) => selectedId !== id));
 
   return (
-    <section className="space-y-3">
+    <section id={targetId(path)} data-field-path={path} tabIndex={path ? -1 : undefined} className="space-y-3">
       <div>
         <Label>{label}</Label>
         <p className="text-xs text-muted-foreground">
@@ -263,12 +269,13 @@ export function RecordPicker({ label, value, onChange, kind, maximum = 50 }: {
   );
 }
 
-export function EnumMultiSelect({ label, value, options, labels, onChange }: {
+export function EnumMultiSelect({ label, value, options, labels, onChange, path }: {
   label: string;
   value: unknown;
   options: readonly string[];
   labels?: Record<string, string>;
   onChange: (value: string[]) => void;
+  path?: string;
 }) {
   const selected = Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
   const unknown = selected.filter((item) => !options.includes(item));
@@ -278,7 +285,7 @@ export function EnumMultiSelect({ label, value, options, labels, onChange }: {
       : [...selected, option],
   );
   return (
-    <fieldset className="space-y-3">
+    <fieldset id={targetId(path)} data-field-path={path} tabIndex={path ? -1 : undefined} className="space-y-3">
       <legend className="font-medium">{label}</legend>
       <div className="grid gap-2 sm:grid-cols-2">
         {options.map((option) => (
@@ -299,12 +306,13 @@ export function EnumMultiSelect({ label, value, options, labels, onChange }: {
   );
 }
 
-export function SafeDestinationField({ label, value, onChange, required, error }: {
+export function SafeDestinationField({ label, value, onChange, required, error, path }: {
   label: string;
   value: unknown;
   onChange: (value: string) => void;
   required?: boolean;
   error?: string;
+  path?: string;
 }) {
   const destination = typeof value === "string" ? value : "";
   const valid = !destination || /^https?:\/\/[^/].*/i.test(destination) || /^\/(?!\/)[a-z0-9/_-]*(?:\?[a-z0-9&=_-]+)?(?:#[a-z0-9_-]+)?$/i.test(destination);
@@ -315,6 +323,8 @@ export function SafeDestinationField({ label, value, onChange, required, error }
     <div className="space-y-2">
       <Label>{label} {required && <span className="text-destructive">(required)</span>}</Label>
       <Input
+        id={targetId(path)}
+        data-field-path={path}
         aria-label={label}
         aria-invalid={Boolean(error) || !valid}
         list={`${label.replaceAll(/[^a-z0-9]/gi, "-")}-destinations`}

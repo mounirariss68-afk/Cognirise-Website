@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { DocumentPreview } from "@workspace/api-client-react";
 import { belongsToIndustrySection, INDUSTRY_SECTION_OUTLINE, isIndustryPreviewStatusMessage, type IndustryPreviewStatus, type IndustrySectionId } from "@workspace/api-zod";
-import { AlertTriangle, ChevronDown, ChevronUp, ExternalLink, Laptop, Monitor, ShieldCheck, Smartphone, Tablet, RefreshCw } from "lucide-react";
+import { AlertTriangle, ChevronDown, ChevronUp, ExternalLink, Laptop, Monitor, Smartphone, Tablet, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ContentEditor } from "./ContentEditor";
@@ -63,7 +63,7 @@ function PreviewState({ preview, currentRevisionId, hasUnsaved, failed, frameSta
 }
 
 export function IndustryVisualWorkspace({
-  content, onChange, errors, disabled, revisionId, currentRevisionId, revisionNumber, market, locale, hasUnsaved, requestPreview,
+  content, onChange, errors, disabled, revisionId, currentRevisionId, revisionNumber, market, locale, hasUnsaved, requestPreview, focusPath,
 }: {
   content: Record<string, any>;
   onChange: (content: Record<string, any>) => void;
@@ -77,9 +77,10 @@ export function IndustryVisualWorkspace({
   locale: string;
   hasUnsaved: boolean;
   requestPreview: () => Promise<DocumentPreview | undefined>;
+  /** Canonical readiness target. The parent supplies this instead of a label. */
+  focusPath?: string;
 }) {
   const [selected, setSelected] = useState<IndustrySectionId>("hero");
-  const [governance, setGovernance] = useState(false);
   const [disclosure, setDisclosure] = useState<"expanded" | "collapsed" | undefined>(undefined);
   const [viewport, setViewport] = useState<Viewport>("desktop");
   const [reviewMode, setReviewMode] = useState(false);
@@ -175,12 +176,18 @@ export function IndustryVisualWorkspace({
 
   useEffect(() => { focusPreview(); }, [focusPreview]);
   useEffect(() => {
+    if (!focusPath) return;
+    const targetSection = sections.find((section) => belongsToIndustrySection(focusPath, section.id));
+    if (!targetSection) return;
+    setSelected(targetSection.id);
+    setDisclosure(targetSection.expandable ? "expanded" : undefined);
+  }, [focusPath]);
+  useEffect(() => {
     const interval = window.setInterval(() => setPreviewClock((value) => value + 1), 30_000);
     return () => window.clearInterval(interval);
   }, []);
 
   const selectSection = (section: Section) => {
-    setGovernance(false);
     setSelected(section.id);
     setDisclosure(section.expandable ? "expanded" : undefined);
   };
@@ -215,23 +222,21 @@ export function IndustryVisualWorkspace({
           <p className="mb-2 px-2 font-mono text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Section outline</p>
           <div className="space-y-1">
             {sections.map((section) => {
-              const active = !governance && selected === section.id;
+              const active = selected === section.id;
               const issues = issueCount(section.id);
               return <button key={section.id} type="button" onClick={() => selectSection(section)} aria-current={active ? "step" : undefined} className={`w-full rounded-md border px-2.5 py-2 text-left transition-colors ${active ? "border-primary bg-primary/5" : "border-transparent hover:bg-muted/60"}`} data-testid={`industry-outline-${section.id}`}>
                 <span className="flex items-start justify-between gap-2"><span><span className="mr-2 font-mono text-[10px] text-muted-foreground">{section.number}</span><span className="text-xs font-medium">{section.title}</span></span>{issues > 0 && <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-amber-600" aria-label={`${issues} validation issues`} />}</span>
                 <span className="mt-1 block pl-5 font-mono text-[9px] uppercase tracking-wide text-muted-foreground">{section.component}</span>
               </button>;
             })}
-            <div className="my-3 border-t" />
-            <button type="button" onClick={() => setGovernance(true)} className={`w-full rounded-md border px-2.5 py-2 text-left ${governance ? "border-primary bg-primary/5" : "border-transparent hover:bg-muted/60"}`}><span className="flex items-center gap-2 text-xs font-medium"><ShieldCheck className="h-3.5 w-3.5" /> Governance</span><span className="mt-1 block pl-5 text-[10px] text-muted-foreground">Visibility, ordering and review dates</span></button>
           </div>
         </nav>}
         <div className={reviewMode ? "p-4" : `min-w-[350px] border-b p-4 ${workspaceLayout === "three-column" ? "border-r border-b-0" : ""}`} data-testid="industry-inspector">
           {!reviewMode && <div className="mb-4 flex items-start justify-between gap-3">
-            <div><p className="font-mono text-[10px] uppercase tracking-wider text-primary">{governance ? "Separate controls" : selectedDefinition.component}</p><h3 className="mt-1 font-semibold">{governance ? "Governance" : selectedDefinition.title}</h3><p className="mt-1 text-xs text-muted-foreground">{governance ? "These controls do not change template order or section identities." : selectedDefinition.description}</p></div>
-            {!governance && selectedDefinition.expandable && <Button type="button" variant="outline" size="sm" onClick={() => setDisclosure(nextIndustryDisclosureState)}><>{disclosure === "expanded" ? <ChevronUp className="mr-1 h-3.5 w-3.5" /> : <ChevronDown className="mr-1 h-3.5 w-3.5" />}{disclosure === "expanded" ? "Expanded" : "Collapsed"}</></Button>}
+             <div><p className="font-mono text-[10px] uppercase tracking-wider text-primary">{selectedDefinition.component}</p><h3 className="mt-1 font-semibold">{selectedDefinition.title}</h3><p className="mt-1 text-xs text-muted-foreground">{selectedDefinition.description}</p></div>
+             {selectedDefinition.expandable && <Button type="button" variant="outline" size="sm" onClick={() => setDisclosure(nextIndustryDisclosureState)}><>{disclosure === "expanded" ? <ChevronUp className="mr-1 h-3.5 w-3.5" /> : <ChevronDown className="mr-1 h-3.5 w-3.5" />}{disclosure === "expanded" ? "Expanded" : "Collapsed"}</></Button>}
           </div>}
-          {!reviewMode && <fieldset disabled={disabled} className="contents"><ContentEditor kind="industry" value={content} onChange={onChange} errors={errors} industrySection={governance ? "governance" : selected} /></fieldset>}
+           {!reviewMode && <fieldset disabled={disabled} className="contents"><ContentEditor kind="industry" value={content} onChange={onChange} errors={errors} industrySection={selected} presentation="content" /></fieldset>}
           {reviewMode && <PreviewPane preview={preview} previewUrl={previewUrl} frameRef={frameRef} viewport={viewport} setViewport={setViewport} revisionId={currentRevisionId} revisionNumber={revisionNumber} market={market} locale={locale} expires={expires} expired={previewExpired} failed={previewUnavailable} refresh={refreshPreview} onLoad={focusPreview} />}
         </div>
         {!reviewMode && <PreviewPane className={workspaceLayout === "three-column" ? "" : workspaceLayout === "preview-row" ? "col-span-2" : ""} preview={preview} previewUrl={previewUrl} frameRef={frameRef} viewport={viewport} setViewport={setViewport} revisionId={currentRevisionId} revisionNumber={revisionNumber} market={market} locale={locale} expires={expires} expired={previewExpired} failed={previewUnavailable} refresh={refreshPreview} onLoad={focusPreview} />}

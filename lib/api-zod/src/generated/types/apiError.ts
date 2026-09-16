@@ -6,11 +6,15 @@
  * OpenAPI spec version: 0.2.0
  */
 import type { ApiErrorDetails } from './apiErrorDetails';
+import type { CmsValidationIssue } from './cmsValidationIssue';
 
 export interface ApiError {
   error: string;
   code?: string;
   /** The state transition committed even though the confirmation response failed; reload before retrying. */
   committed?: boolean;
+  /** Legacy validation details. Validation responses retain these strings for compatibility. */
   details?: ApiErrorDetails;
+  /** Structured canonical validation targets, supplied alongside legacy details. */
+  issues?: CmsValidationIssue[];
 }

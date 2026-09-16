@@ -19,7 +19,8 @@ export interface SharedMarketBaselineInput {
      * @nullable
      */
   sourceRevisionId?: string | null;
-  snapshot: SharedMarketBaselineInputSnapshot;
+  /** Required when sourceRevisionId is omitted. When sourceRevisionId is supplied */
+  snapshot?: SharedMarketBaselineInputSnapshot;
   /** @minimum 1 */
   expectedRevisionNumber?: number;
 }

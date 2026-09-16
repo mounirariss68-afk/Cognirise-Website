@@ -412,6 +412,10 @@ export const getAuthBootstrapResponseSessionOneUserEmailRegExp = new RegExp('^[^
 export const getAuthBootstrapResponseSessionOneUserMarketCodesItemMin = 2;
 export const getAuthBootstrapResponseSessionOneUserMarketCodesItemMax = 24;
 
+export const getAuthBootstrapResponseSessionOneUserLegacyAdministratorMarketCodesItemMin = 2;
+export const getAuthBootstrapResponseSessionOneUserLegacyAdministratorMarketCodesItemMax = 24;
+
+export const getAuthBootstrapResponseSessionOneUserCapabilityGrantsItemOneMarketCodeRegExp = new RegExp('^[a-z][a-z0-9-]{1,15}$');
 
 
 export const GetAuthBootstrapResponse = zod.object({
@@ -426,6 +430,14 @@ export const GetAuthBootstrapResponse = zod.object({
   "role": zod.enum(['administrator', 'publisher', 'editor', 'viewer']),
   "status": zod.enum(['invited', 'active', 'suspended']),
   "marketCodes": zod.array(zod.string().min(getAuthBootstrapResponseSessionOneUserMarketCodesItemMin).max(getAuthBootstrapResponseSessionOneUserMarketCodesItemMax)),
+  "legacyAdministratorMarketCodes": zod.array(zod.string().min(getAuthBootstrapResponseSessionOneUserLegacyAdministratorMarketCodesItemMin).max(getAuthBootstrapResponseSessionOneUserLegacyAdministratorMarketCodesItemMax)).describe('Frozen enabled-market compatibility scope for an unconfigured legacy administrator. Read-only and distinct from marketCodes.'),
+  "capabilityMatrixConfigured": zod.boolean().describe('True after the access matrix has been explicitly saved, including an intentionally empty deny-all matrix.'),
+  "capabilityGrants": zod.array(zod.object({
+  "topic": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'landing-page', 'site-configuration']),
+  "capability": zod.enum(['view', 'edit', 'review', 'publish']),
+  "scope": zod.enum(['regional', 'shared']),
+  "marketCode": zod.string().regex(getAuthBootstrapResponseSessionOneUserCapabilityGrantsItemOneMarketCodeRegExp)
+})).describe('Explicit grants are an allow-list. When capabilityMatrixConfigured is true, an empty array is an intentional deny-all matrix.'),
   "mfaEnabled": zod.boolean(),
   "mustRotate": zod.boolean(),
   "lastLoginAt": zod.coerce.date().nullish(),
@@ -466,6 +478,10 @@ export const bootstrapAuthResponseSessionOneUserEmailRegExp = new RegExp('^[^@\\
 export const bootstrapAuthResponseSessionOneUserMarketCodesItemMin = 2;
 export const bootstrapAuthResponseSessionOneUserMarketCodesItemMax = 24;
 
+export const bootstrapAuthResponseSessionOneUserLegacyAdministratorMarketCodesItemMin = 2;
+export const bootstrapAuthResponseSessionOneUserLegacyAdministratorMarketCodesItemMax = 24;
+
+export const bootstrapAuthResponseSessionOneUserCapabilityGrantsItemOneMarketCodeRegExp = new RegExp('^[a-z][a-z0-9-]{1,15}$');
 
 
 export const BootstrapAuthResponse = zod.object({
@@ -479,6 +495,14 @@ export const BootstrapAuthResponse = zod.object({
   "role": zod.enum(['administrator', 'publisher', 'editor', 'viewer']),
   "status": zod.enum(['invited', 'active', 'suspended']),
   "marketCodes": zod.array(zod.string().min(bootstrapAuthResponseSessionOneUserMarketCodesItemMin).max(bootstrapAuthResponseSessionOneUserMarketCodesItemMax)),
+  "legacyAdministratorMarketCodes": zod.array(zod.string().min(bootstrapAuthResponseSessionOneUserLegacyAdministratorMarketCodesItemMin).max(bootstrapAuthResponseSessionOneUserLegacyAdministratorMarketCodesItemMax)).describe('Frozen enabled-market compatibility scope for an unconfigured legacy administrator. Read-only and distinct from marketCodes.'),
+  "capabilityMatrixConfigured": zod.boolean().describe('True after the access matrix has been explicitly saved, including an intentionally empty deny-all matrix.'),
+  "capabilityGrants": zod.array(zod.object({
+  "topic": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'landing-page', 'site-configuration']),
+  "capability": zod.enum(['view', 'edit', 'review', 'publish']),
+  "scope": zod.enum(['regional', 'shared']),
+  "marketCode": zod.string().regex(bootstrapAuthResponseSessionOneUserCapabilityGrantsItemOneMarketCodeRegExp)
+})).describe('Explicit grants are an allow-list. When capabilityMatrixConfigured is true, an empty array is an intentional deny-all matrix.'),
   "mfaEnabled": zod.boolean(),
   "mustRotate": zod.boolean(),
   "lastLoginAt": zod.coerce.date().nullish(),
@@ -518,6 +542,10 @@ export const loginResponseSessionOneUserEmailRegExp = new RegExp('^[^@\\s]+@[^@\
 export const loginResponseSessionOneUserMarketCodesItemMin = 2;
 export const loginResponseSessionOneUserMarketCodesItemMax = 24;
 
+export const loginResponseSessionOneUserLegacyAdministratorMarketCodesItemMin = 2;
+export const loginResponseSessionOneUserLegacyAdministratorMarketCodesItemMax = 24;
+
+export const loginResponseSessionOneUserCapabilityGrantsItemOneMarketCodeRegExp = new RegExp('^[a-z][a-z0-9-]{1,15}$');
 
 
 export const LoginResponse = zod.object({
@@ -531,6 +559,14 @@ export const LoginResponse = zod.object({
   "role": zod.enum(['administrator', 'publisher', 'editor', 'viewer']),
   "status": zod.enum(['invited', 'active', 'suspended']),
   "marketCodes": zod.array(zod.string().min(loginResponseSessionOneUserMarketCodesItemMin).max(loginResponseSessionOneUserMarketCodesItemMax)),
+  "legacyAdministratorMarketCodes": zod.array(zod.string().min(loginResponseSessionOneUserLegacyAdministratorMarketCodesItemMin).max(loginResponseSessionOneUserLegacyAdministratorMarketCodesItemMax)).describe('Frozen enabled-market compatibility scope for an unconfigured legacy administrator. Read-only and distinct from marketCodes.'),
+  "capabilityMatrixConfigured": zod.boolean().describe('True after the access matrix has been explicitly saved, including an intentionally empty deny-all matrix.'),
+  "capabilityGrants": zod.array(zod.object({
+  "topic": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'landing-page', 'site-configuration']),
+  "capability": zod.enum(['view', 'edit', 'review', 'publish']),
+  "scope": zod.enum(['regional', 'shared']),
+  "marketCode": zod.string().regex(loginResponseSessionOneUserCapabilityGrantsItemOneMarketCodeRegExp)
+})).describe('Explicit grants are an allow-list. When capabilityMatrixConfigured is true, an empty array is an intentional deny-all matrix.'),
   "mfaEnabled": zod.boolean(),
   "mustRotate": zod.boolean(),
   "lastLoginAt": zod.coerce.date().nullish(),
@@ -565,6 +601,10 @@ export const verifyMfaResponseSessionOneUserEmailRegExp = new RegExp('^[^@\\s]+@
 export const verifyMfaResponseSessionOneUserMarketCodesItemMin = 2;
 export const verifyMfaResponseSessionOneUserMarketCodesItemMax = 24;
 
+export const verifyMfaResponseSessionOneUserLegacyAdministratorMarketCodesItemMin = 2;
+export const verifyMfaResponseSessionOneUserLegacyAdministratorMarketCodesItemMax = 24;
+
+export const verifyMfaResponseSessionOneUserCapabilityGrantsItemOneMarketCodeRegExp = new RegExp('^[a-z][a-z0-9-]{1,15}$');
 
 
 export const VerifyMfaResponse = zod.object({
@@ -578,6 +618,14 @@ export const VerifyMfaResponse = zod.object({
   "role": zod.enum(['administrator', 'publisher', 'editor', 'viewer']),
   "status": zod.enum(['invited', 'active', 'suspended']),
   "marketCodes": zod.array(zod.string().min(verifyMfaResponseSessionOneUserMarketCodesItemMin).max(verifyMfaResponseSessionOneUserMarketCodesItemMax)),
+  "legacyAdministratorMarketCodes": zod.array(zod.string().min(verifyMfaResponseSessionOneUserLegacyAdministratorMarketCodesItemMin).max(verifyMfaResponseSessionOneUserLegacyAdministratorMarketCodesItemMax)).describe('Frozen enabled-market compatibility scope for an unconfigured legacy administrator. Read-only and distinct from marketCodes.'),
+  "capabilityMatrixConfigured": zod.boolean().describe('True after the access matrix has been explicitly saved, including an intentionally empty deny-all matrix.'),
+  "capabilityGrants": zod.array(zod.object({
+  "topic": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'landing-page', 'site-configuration']),
+  "capability": zod.enum(['view', 'edit', 'review', 'publish']),
+  "scope": zod.enum(['regional', 'shared']),
+  "marketCode": zod.string().regex(verifyMfaResponseSessionOneUserCapabilityGrantsItemOneMarketCodeRegExp)
+})).describe('Explicit grants are an allow-list. When capabilityMatrixConfigured is true, an empty array is an intentional deny-all matrix.'),
   "mfaEnabled": zod.boolean(),
   "mustRotate": zod.boolean(),
   "lastLoginAt": zod.coerce.date().nullish(),
@@ -624,6 +672,10 @@ export const confirmMfaResponseOneSessionOneUserEmailRegExp = new RegExp('^[^@\\
 export const confirmMfaResponseOneSessionOneUserMarketCodesItemMin = 2;
 export const confirmMfaResponseOneSessionOneUserMarketCodesItemMax = 24;
 
+export const confirmMfaResponseOneSessionOneUserLegacyAdministratorMarketCodesItemMin = 2;
+export const confirmMfaResponseOneSessionOneUserLegacyAdministratorMarketCodesItemMax = 24;
+
+export const confirmMfaResponseOneSessionOneUserCapabilityGrantsItemOneMarketCodeRegExp = new RegExp('^[a-z][a-z0-9-]{1,15}$');
 export const confirmMfaResponseTwoRecoveryCodesItemRegExp = new RegExp('^[A-Z0-9]{4,}(?:-[A-Z0-9]{4,})*$');
 
 
@@ -639,6 +691,14 @@ export const ConfirmMfaResponse = zod.object({
   "role": zod.enum(['administrator', 'publisher', 'editor', 'viewer']),
   "status": zod.enum(['invited', 'active', 'suspended']),
   "marketCodes": zod.array(zod.string().min(confirmMfaResponseOneSessionOneUserMarketCodesItemMin).max(confirmMfaResponseOneSessionOneUserMarketCodesItemMax)),
+  "legacyAdministratorMarketCodes": zod.array(zod.string().min(confirmMfaResponseOneSessionOneUserLegacyAdministratorMarketCodesItemMin).max(confirmMfaResponseOneSessionOneUserLegacyAdministratorMarketCodesItemMax)).describe('Frozen enabled-market compatibility scope for an unconfigured legacy administrator. Read-only and distinct from marketCodes.'),
+  "capabilityMatrixConfigured": zod.boolean().describe('True after the access matrix has been explicitly saved, including an intentionally empty deny-all matrix.'),
+  "capabilityGrants": zod.array(zod.object({
+  "topic": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'landing-page', 'site-configuration']),
+  "capability": zod.enum(['view', 'edit', 'review', 'publish']),
+  "scope": zod.enum(['regional', 'shared']),
+  "marketCode": zod.string().regex(confirmMfaResponseOneSessionOneUserCapabilityGrantsItemOneMarketCodeRegExp)
+})).describe('Explicit grants are an allow-list. When capabilityMatrixConfigured is true, an empty array is an intentional deny-all matrix.'),
   "mfaEnabled": zod.boolean(),
   "mustRotate": zod.boolean(),
   "lastLoginAt": zod.coerce.date().nullish(),
@@ -681,6 +741,10 @@ export const recoverAuthResponseSessionOneUserEmailRegExp = new RegExp('^[^@\\s]
 export const recoverAuthResponseSessionOneUserMarketCodesItemMin = 2;
 export const recoverAuthResponseSessionOneUserMarketCodesItemMax = 24;
 
+export const recoverAuthResponseSessionOneUserLegacyAdministratorMarketCodesItemMin = 2;
+export const recoverAuthResponseSessionOneUserLegacyAdministratorMarketCodesItemMax = 24;
+
+export const recoverAuthResponseSessionOneUserCapabilityGrantsItemOneMarketCodeRegExp = new RegExp('^[a-z][a-z0-9-]{1,15}$');
 
 
 export const RecoverAuthResponse = zod.object({
@@ -694,6 +758,14 @@ export const RecoverAuthResponse = zod.object({
   "role": zod.enum(['administrator', 'publisher', 'editor', 'viewer']),
   "status": zod.enum(['invited', 'active', 'suspended']),
   "marketCodes": zod.array(zod.string().min(recoverAuthResponseSessionOneUserMarketCodesItemMin).max(recoverAuthResponseSessionOneUserMarketCodesItemMax)),
+  "legacyAdministratorMarketCodes": zod.array(zod.string().min(recoverAuthResponseSessionOneUserLegacyAdministratorMarketCodesItemMin).max(recoverAuthResponseSessionOneUserLegacyAdministratorMarketCodesItemMax)).describe('Frozen enabled-market compatibility scope for an unconfigured legacy administrator. Read-only and distinct from marketCodes.'),
+  "capabilityMatrixConfigured": zod.boolean().describe('True after the access matrix has been explicitly saved, including an intentionally empty deny-all matrix.'),
+  "capabilityGrants": zod.array(zod.object({
+  "topic": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'landing-page', 'site-configuration']),
+  "capability": zod.enum(['view', 'edit', 'review', 'publish']),
+  "scope": zod.enum(['regional', 'shared']),
+  "marketCode": zod.string().regex(recoverAuthResponseSessionOneUserCapabilityGrantsItemOneMarketCodeRegExp)
+})).describe('Explicit grants are an allow-list. When capabilityMatrixConfigured is true, an empty array is an intentional deny-all matrix.'),
   "mfaEnabled": zod.boolean(),
   "mustRotate": zod.boolean(),
   "lastLoginAt": zod.coerce.date().nullish(),
@@ -765,6 +837,10 @@ export const getSessionResponseUserEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\
 export const getSessionResponseUserMarketCodesItemMin = 2;
 export const getSessionResponseUserMarketCodesItemMax = 24;
 
+export const getSessionResponseUserLegacyAdministratorMarketCodesItemMin = 2;
+export const getSessionResponseUserLegacyAdministratorMarketCodesItemMax = 24;
+
+export const getSessionResponseUserCapabilityGrantsItemOneMarketCodeRegExp = new RegExp('^[a-z][a-z0-9-]{1,15}$');
 
 
 export const GetSessionResponse = zod.object({
@@ -776,6 +852,14 @@ export const GetSessionResponse = zod.object({
   "role": zod.enum(['administrator', 'publisher', 'editor', 'viewer']),
   "status": zod.enum(['invited', 'active', 'suspended']),
   "marketCodes": zod.array(zod.string().min(getSessionResponseUserMarketCodesItemMin).max(getSessionResponseUserMarketCodesItemMax)),
+  "legacyAdministratorMarketCodes": zod.array(zod.string().min(getSessionResponseUserLegacyAdministratorMarketCodesItemMin).max(getSessionResponseUserLegacyAdministratorMarketCodesItemMax)).describe('Frozen enabled-market compatibility scope for an unconfigured legacy administrator. Read-only and distinct from marketCodes.'),
+  "capabilityMatrixConfigured": zod.boolean().describe('True after the access matrix has been explicitly saved, including an intentionally empty deny-all matrix.'),
+  "capabilityGrants": zod.array(zod.object({
+  "topic": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'landing-page', 'site-configuration']),
+  "capability": zod.enum(['view', 'edit', 'review', 'publish']),
+  "scope": zod.enum(['regional', 'shared']),
+  "marketCode": zod.string().regex(getSessionResponseUserCapabilityGrantsItemOneMarketCodeRegExp)
+})).describe('Explicit grants are an allow-list. When capabilityMatrixConfigured is true, an empty array is an intentional deny-all matrix.'),
   "mfaEnabled": zod.boolean(),
   "mustRotate": zod.boolean(),
   "lastLoginAt": zod.coerce.date().nullish(),
@@ -7438,6 +7522,8 @@ export const ListDocumentEditionsResponse = zod.object({
   "readinessIssues": zod.array(zod.object({
   "category": zod.enum(['missing', 'validation', 'workflow']),
   "message": zod.string(),
+  "code": zod.string().optional().describe('Stable validation-rule identifier. Present for structured contract validation.'),
+  "path": zod.string().optional().describe('Canonical document target such as content.heroMedia or seo.title.'),
   "action": zod.enum(['create', 'edit', 'review'])
 }))
 }))
@@ -9257,8 +9343,13 @@ export const GetSharedMarketEditionMatrixResponse = zod.object({
   "revisionId": zod.string(),
   "revisionNumber": zod.number().multipleOf(getSharedMarketEditionMatrixResponseBaselinesItemRevisionNumberMultipleOf),
   "sourceRevisionId": zod.string().nullable(),
-  "snapshot": zod.record(zod.string(), zod.unknown()),
+  "governingSourceRevisionId": zod.string().nullish().describe('Durable authorization origin. It can remain set when sourceRevisionId is null for an independently edited neutral successor.'),
+  "authorityKind": zod.enum(['regional', 'neutral', 'unresolved']).describe('Authoritative classification for baseline access. Neutral denotes a server-proven intentionally countryless baseline; unresolved requires selecting an exact real-market source.'),
+  "snapshot": zod.record(zod.string(), zod.unknown()).nullable().describe('Raw baseline snapshot. Null when its governing source cannot be resolved; use the regional materialized revision and recovery guidance instead.'),
   "mediaReferences": zod.array(zod.record(zod.string(), zod.unknown())),
+  "affectedDestinationMarkets": zod.array(zod.string()).optional().describe('Server-authoritative markets affected by saving this baseline revision.'),
+  "canEdit": zod.boolean().optional().describe('Whether the current user satisfies exact source'),
+  "editReason": zod.string().nullish().describe('Recoverable reason editing is unavailable.'),
   "createdAt": zod.coerce.date()
 })),
   "bindings": zod.array(zod.object({
@@ -9321,7 +9412,7 @@ export const establishSharedMarketBaselineBodyExpectedRevisionNumberMultipleOf =
 export const EstablishSharedMarketBaselineBody = zod.object({
   "locale": zod.string().min(establishSharedMarketBaselineBodyLocaleMin).max(establishSharedMarketBaselineBodyLocaleMax).regex(establishSharedMarketBaselineBodyLocaleRegExp),
   "sourceRevisionId": zod.string().nullish().describe('Exact real-market source revision for legacy baseline establishment; omit for a successor of an existing neutral baseline.'),
-  "snapshot": zod.record(zod.string(), zod.unknown()),
+  "snapshot": zod.record(zod.string(), zod.unknown()).optional().describe('Required when sourceRevisionId is omitted. When sourceRevisionId is supplied'),
   "expectedRevisionNumber": zod.number().min(1).multipleOf(establishSharedMarketBaselineBodyExpectedRevisionNumberMultipleOf).optional()
 })
 
@@ -9336,8 +9427,13 @@ export const EstablishSharedMarketBaselineResponse = zod.object({
   "revisionId": zod.string(),
   "revisionNumber": zod.number().multipleOf(establishSharedMarketBaselineResponseRevisionNumberMultipleOf),
   "sourceRevisionId": zod.string().nullable(),
-  "snapshot": zod.record(zod.string(), zod.unknown()),
+  "governingSourceRevisionId": zod.string().nullish().describe('Durable authorization origin. It can remain set when sourceRevisionId is null for an independently edited neutral successor.'),
+  "authorityKind": zod.enum(['regional', 'neutral', 'unresolved']).describe('Authoritative classification for baseline access. Neutral denotes a server-proven intentionally countryless baseline; unresolved requires selecting an exact real-market source.'),
+  "snapshot": zod.record(zod.string(), zod.unknown()).nullable().describe('Raw baseline snapshot. Null when its governing source cannot be resolved; use the regional materialized revision and recovery guidance instead.'),
   "mediaReferences": zod.array(zod.record(zod.string(), zod.unknown())),
+  "affectedDestinationMarkets": zod.array(zod.string()).optional().describe('Server-authoritative markets affected by saving this baseline revision.'),
+  "canEdit": zod.boolean().optional().describe('Whether the current user satisfies exact source'),
+  "editReason": zod.string().nullish().describe('Recoverable reason editing is unavailable.'),
   "createdAt": zod.coerce.date()
 })
 
@@ -9717,6 +9813,8 @@ export const GetDocumentMarketCopyCandidatesResponse = zod.object({
   "readinessIssues": zod.array(zod.object({
   "category": zod.enum(['missing', 'validation', 'workflow']),
   "message": zod.string(),
+  "code": zod.string().optional().describe('Stable validation-rule identifier. Present for structured contract validation.'),
+  "path": zod.string().optional().describe('Canonical document target such as content.heroMedia or seo.title.'),
   "action": zod.enum(['create', 'edit', 'review'])
 }))
 }))
@@ -9818,6 +9916,9 @@ export const GetDocumentAvailabilityResponse = zod.object({
   "sourceRevisionId": zod.string().nullable()
 }),zod.null()]),
   "canEditShared": zod.boolean(),
+  "canReviewShared": zod.boolean(),
+  "reviewBlockedReason": zod.union([zod.literal('self-review'),zod.literal('missing-regional-grant'),zod.literal('missing-shared-grant'),zod.literal(null)]).nullable(),
+  "canPublishShared": zod.boolean(),
   "items": zod.array(zod.object({
   "marketEditionId": zod.string(),
   "market": zod.string(),
@@ -9881,6 +9982,9 @@ export const UpdateDocumentAvailabilityResponse = zod.object({
   "sourceRevisionId": zod.string().nullable()
 }),zod.null()]),
   "canEditShared": zod.boolean(),
+  "canReviewShared": zod.boolean(),
+  "reviewBlockedReason": zod.union([zod.literal('self-review'),zod.literal('missing-regional-grant'),zod.literal('missing-shared-grant'),zod.literal(null)]).nullable(),
+  "canPublishShared": zod.boolean(),
   "items": zod.array(zod.object({
   "marketEditionId": zod.string(),
   "market": zod.string(),
@@ -9938,6 +10042,9 @@ export const ReviewDocumentAvailabilityResponse = zod.object({
   "sourceRevisionId": zod.string().nullable()
 }),zod.null()]),
   "canEditShared": zod.boolean(),
+  "canReviewShared": zod.boolean(),
+  "reviewBlockedReason": zod.union([zod.literal('self-review'),zod.literal('missing-regional-grant'),zod.literal('missing-shared-grant'),zod.literal(null)]).nullable(),
+  "canPublishShared": zod.boolean(),
   "items": zod.array(zod.object({
   "marketEditionId": zod.string(),
   "market": zod.string(),
@@ -9996,6 +10103,9 @@ export const SelectDocumentAvailabilitySourceResponse = zod.object({
   "sourceRevisionId": zod.string().nullable()
 }),zod.null()]),
   "canEditShared": zod.boolean(),
+  "canReviewShared": zod.boolean(),
+  "reviewBlockedReason": zod.union([zod.literal('self-review'),zod.literal('missing-regional-grant'),zod.literal('missing-shared-grant'),zod.literal(null)]).nullable(),
+  "canPublishShared": zod.boolean(),
   "items": zod.array(zod.object({
   "marketEditionId": zod.string(),
   "market": zod.string(),
@@ -10053,6 +10163,9 @@ export const PublishDocumentAvailabilityResponse = zod.object({
   "sourceRevisionId": zod.string().nullable()
 }),zod.null()]),
   "canEditShared": zod.boolean(),
+  "canReviewShared": zod.boolean(),
+  "reviewBlockedReason": zod.union([zod.literal('self-review'),zod.literal('missing-regional-grant'),zod.literal('missing-shared-grant'),zod.literal(null)]).nullable(),
+  "canPublishShared": zod.boolean(),
   "items": zod.array(zod.object({
   "marketEditionId": zod.string(),
   "market": zod.string(),
@@ -11375,6 +11488,43 @@ export const GetDocumentRevisionResponse = zod.object({
   "note": zod.string().nullish(),
   "createdBy": zod.string(),
   "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Get the latest explicit accuracy confirmation for a revision
+ */
+export const GetDocumentRevisionAccuracyConfirmationParams = zod.object({
+  "documentId": zod.coerce.string(),
+  "revisionId": zod.coerce.string()
+})
+
+export const GetDocumentRevisionAccuracyConfirmationResponse = zod.object({
+  "confirmation": zod.union([zod.object({
+  "id": zod.string(),
+  "revisionId": zod.string(),
+  "contentDigest": zod.string(),
+  "confirmedByUserId": zod.string(),
+  "confirmedAt": zod.coerce.date()
+}),zod.null()])
+})
+
+
+/**
+ * Records actor, time, revision, and immutable content digest. This never changes document content, workflow, or publication state.
+ * @summary Explicitly confirm the accuracy of the current saved revision
+ */
+export const ConfirmDocumentRevisionAccuracyParams = zod.object({
+  "documentId": zod.coerce.string(),
+  "revisionId": zod.coerce.string()
+})
+
+export const ConfirmDocumentRevisionAccuracyResponse = zod.object({
+  "id": zod.string(),
+  "revisionId": zod.string(),
+  "contentDigest": zod.string(),
+  "confirmedByUserId": zod.string(),
+  "confirmedAt": zod.coerce.date()
 })
 
 
@@ -20625,6 +20775,9 @@ export const ListMediaResponse = zod.object({
   "y": zod.number().min(listMediaResponseTwoItemsItemFocalPointOneYMin).max(listMediaResponseTwoItemsItemFocalPointOneYMax)
 }),zod.null()]).optional(),
   "status": zod.enum(['pending', 'review', 'ready', 'rejected', 'failed']),
+  "canEdit": zod.boolean().optional().describe('True only when the caller may update this asset across every referencing edition.'),
+  "canReview": zod.boolean().optional().describe('True only when the caller may review this asset across every referencing edition.'),
+  "canInspect": zod.boolean().optional().describe('True when the caller may inspect the administrator-only media audit history.'),
   "createdBy": zod.string().optional(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
@@ -20829,6 +20982,9 @@ export const RequestMediaUploadResponse = zod.object({
   "y": zod.number().min(requestMediaUploadResponseMediaFocalPointOneYMin).max(requestMediaUploadResponseMediaFocalPointOneYMax)
 }),zod.null()]).optional(),
   "status": zod.enum(['pending', 'review', 'ready', 'rejected', 'failed']),
+  "canEdit": zod.boolean().optional().describe('True only when the caller may update this asset across every referencing edition.'),
+  "canReview": zod.boolean().optional().describe('True only when the caller may review this asset across every referencing edition.'),
+  "canInspect": zod.boolean().optional().describe('True when the caller may inspect the administrator-only media audit history.'),
   "createdBy": zod.string().optional(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
@@ -20949,6 +21105,9 @@ export const GetMediaResponse = zod.object({
   "y": zod.number().min(getMediaResponseFocalPointOneYMin).max(getMediaResponseFocalPointOneYMax)
 }),zod.null()]).optional(),
   "status": zod.enum(['pending', 'review', 'ready', 'rejected', 'failed']),
+  "canEdit": zod.boolean().optional().describe('True only when the caller may update this asset across every referencing edition.'),
+  "canReview": zod.boolean().optional().describe('True only when the caller may review this asset across every referencing edition.'),
+  "canInspect": zod.boolean().optional().describe('True when the caller may inspect the administrator-only media audit history.'),
   "createdBy": zod.string().optional(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
@@ -21156,6 +21315,9 @@ export const UpdateMediaResponse = zod.object({
   "y": zod.number().min(updateMediaResponseFocalPointOneYMin).max(updateMediaResponseFocalPointOneYMax)
 }),zod.null()]).optional(),
   "status": zod.enum(['pending', 'review', 'ready', 'rejected', 'failed']),
+  "canEdit": zod.boolean().optional().describe('True only when the caller may update this asset across every referencing edition.'),
+  "canReview": zod.boolean().optional().describe('True only when the caller may review this asset across every referencing edition.'),
+  "canInspect": zod.boolean().optional().describe('True when the caller may inspect the administrator-only media audit history.'),
   "createdBy": zod.string().optional(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
@@ -21330,6 +21492,9 @@ export const RenewMediaUploadResponse = zod.object({
   "y": zod.number().min(renewMediaUploadResponseMediaFocalPointOneYMin).max(renewMediaUploadResponseMediaFocalPointOneYMax)
 }),zod.null()]).optional(),
   "status": zod.enum(['pending', 'review', 'ready', 'rejected', 'failed']),
+  "canEdit": zod.boolean().optional().describe('True only when the caller may update this asset across every referencing edition.'),
+  "canReview": zod.boolean().optional().describe('True only when the caller may review this asset across every referencing edition.'),
+  "canInspect": zod.boolean().optional().describe('True when the caller may inspect the administrator-only media audit history.'),
   "createdBy": zod.string().optional(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
@@ -21456,6 +21621,9 @@ export const ReviewMediaResponse = zod.object({
   "y": zod.number().min(reviewMediaResponseFocalPointOneYMin).max(reviewMediaResponseFocalPointOneYMax)
 }),zod.null()]).optional(),
   "status": zod.enum(['pending', 'review', 'ready', 'rejected', 'failed']),
+  "canEdit": zod.boolean().optional().describe('True only when the caller may update this asset across every referencing edition.'),
+  "canReview": zod.boolean().optional().describe('True only when the caller may review this asset across every referencing edition.'),
+  "canInspect": zod.boolean().optional().describe('True when the caller may inspect the administrator-only media audit history.'),
   "createdBy": zod.string().optional(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
@@ -21653,6 +21821,9 @@ export const FinalizeMediaUploadResponse = zod.object({
   "y": zod.number().min(finalizeMediaUploadResponseFocalPointOneYMin).max(finalizeMediaUploadResponseFocalPointOneYMax)
 }),zod.null()]).optional(),
   "status": zod.enum(['pending', 'review', 'ready', 'rejected', 'failed']),
+  "canEdit": zod.boolean().optional().describe('True only when the caller may update this asset across every referencing edition.'),
+  "canReview": zod.boolean().optional().describe('True only when the caller may review this asset across every referencing edition.'),
+  "canInspect": zod.boolean().optional().describe('True when the caller may inspect the administrator-only media audit history.'),
   "createdBy": zod.string().optional(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
@@ -21835,6 +22006,10 @@ export const listUsersResponseTwoItemsItemEmailRegExp = new RegExp('^[^@\\s]+@[^
 export const listUsersResponseTwoItemsItemMarketCodesItemMin = 2;
 export const listUsersResponseTwoItemsItemMarketCodesItemMax = 24;
 
+export const listUsersResponseTwoItemsItemLegacyAdministratorMarketCodesItemMin = 2;
+export const listUsersResponseTwoItemsItemLegacyAdministratorMarketCodesItemMax = 24;
+
+export const listUsersResponseTwoItemsItemCapabilityGrantsItemOneMarketCodeRegExp = new RegExp('^[a-z][a-z0-9-]{1,15}$');
 
 
 export const ListUsersResponse = zod.object({
@@ -21850,6 +22025,14 @@ export const ListUsersResponse = zod.object({
   "role": zod.enum(['administrator', 'publisher', 'editor', 'viewer']),
   "status": zod.enum(['invited', 'active', 'suspended']),
   "marketCodes": zod.array(zod.string().min(listUsersResponseTwoItemsItemMarketCodesItemMin).max(listUsersResponseTwoItemsItemMarketCodesItemMax)),
+  "legacyAdministratorMarketCodes": zod.array(zod.string().min(listUsersResponseTwoItemsItemLegacyAdministratorMarketCodesItemMin).max(listUsersResponseTwoItemsItemLegacyAdministratorMarketCodesItemMax)).describe('Frozen enabled-market compatibility scope for an unconfigured legacy administrator. Read-only and distinct from marketCodes.'),
+  "capabilityMatrixConfigured": zod.boolean().describe('True after the access matrix has been explicitly saved, including an intentionally empty deny-all matrix.'),
+  "capabilityGrants": zod.array(zod.object({
+  "topic": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'landing-page', 'site-configuration']),
+  "capability": zod.enum(['view', 'edit', 'review', 'publish']),
+  "scope": zod.enum(['regional', 'shared']),
+  "marketCode": zod.string().regex(listUsersResponseTwoItemsItemCapabilityGrantsItemOneMarketCodeRegExp)
+})).describe('Explicit grants are an allow-list. When capabilityMatrixConfigured is true, an empty array is an intentional deny-all matrix.'),
   "mfaEnabled": zod.boolean(),
   "mustRotate": zod.boolean(),
   "lastLoginAt": zod.coerce.date().nullish(),
@@ -21882,19 +22065,30 @@ export const inviteUserBodyEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s
 export const inviteUserBodyMarketCodesItemMin = 2;
 export const inviteUserBodyMarketCodesItemMax = 24;
 
+export const inviteUserBodyCapabilityGrantsItemMarketCodeRegExp = new RegExp('^[a-z][a-z0-9-]{1,15}$');
 
 
 export const InviteUserBody = zod.object({
   "name": zod.string().min(inviteUserBodyNameMin).max(inviteUserBodyNameMax),
   "email": zod.string().max(inviteUserBodyEmailMax).regex(inviteUserBodyEmailRegExp),
   "role": zod.enum(['administrator', 'publisher', 'editor', 'viewer']),
-  "marketCodes": zod.array(zod.string().min(inviteUserBodyMarketCodesItemMin).max(inviteUserBodyMarketCodesItemMax)).optional()
+  "marketCodes": zod.array(zod.string().min(inviteUserBodyMarketCodesItemMin).max(inviteUserBodyMarketCodesItemMax)).optional(),
+  "capabilityGrants": zod.array(zod.object({
+  "topic": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'landing-page', 'site-configuration']),
+  "capability": zod.enum(['view', 'edit', 'review', 'publish']),
+  "scope": zod.enum(['regional', 'shared']),
+  "marketCode": zod.string().regex(inviteUserBodyCapabilityGrantsItemMarketCodeRegExp)
+})).optional()
 })
 
 export const inviteUserResponseUserEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
 export const inviteUserResponseUserMarketCodesItemMin = 2;
 export const inviteUserResponseUserMarketCodesItemMax = 24;
 
+export const inviteUserResponseUserLegacyAdministratorMarketCodesItemMin = 2;
+export const inviteUserResponseUserLegacyAdministratorMarketCodesItemMax = 24;
+
+export const inviteUserResponseUserCapabilityGrantsItemOneMarketCodeRegExp = new RegExp('^[a-z][a-z0-9-]{1,15}$');
 
 
 export const InviteUserResponse = zod.object({
@@ -21906,6 +22100,14 @@ export const InviteUserResponse = zod.object({
   "role": zod.enum(['administrator', 'publisher', 'editor', 'viewer']),
   "status": zod.enum(['invited', 'active', 'suspended']),
   "marketCodes": zod.array(zod.string().min(inviteUserResponseUserMarketCodesItemMin).max(inviteUserResponseUserMarketCodesItemMax)),
+  "legacyAdministratorMarketCodes": zod.array(zod.string().min(inviteUserResponseUserLegacyAdministratorMarketCodesItemMin).max(inviteUserResponseUserLegacyAdministratorMarketCodesItemMax)).describe('Frozen enabled-market compatibility scope for an unconfigured legacy administrator. Read-only and distinct from marketCodes.'),
+  "capabilityMatrixConfigured": zod.boolean().describe('True after the access matrix has been explicitly saved, including an intentionally empty deny-all matrix.'),
+  "capabilityGrants": zod.array(zod.object({
+  "topic": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'landing-page', 'site-configuration']),
+  "capability": zod.enum(['view', 'edit', 'review', 'publish']),
+  "scope": zod.enum(['regional', 'shared']),
+  "marketCode": zod.string().regex(inviteUserResponseUserCapabilityGrantsItemOneMarketCodeRegExp)
+})).describe('Explicit grants are an allow-list. When capabilityMatrixConfigured is true, an empty array is an intentional deny-all matrix.'),
   "mfaEnabled": zod.boolean(),
   "mustRotate": zod.boolean(),
   "lastLoginAt": zod.coerce.date().nullish(),
@@ -21933,19 +22135,30 @@ export const updateUserBodyNameMax = 120;
 export const updateUserBodyMarketCodesItemMin = 2;
 export const updateUserBodyMarketCodesItemMax = 24;
 
+export const updateUserBodyCapabilityGrantsItemMarketCodeRegExp = new RegExp('^[a-z][a-z0-9-]{1,15}$');
 
 
 export const UpdateUserBody = zod.object({
   "name": zod.string().min(updateUserBodyNameMin).max(updateUserBodyNameMax).optional(),
   "role": zod.enum(['administrator', 'publisher', 'editor', 'viewer']).optional(),
   "status": zod.enum(['invited', 'active', 'suspended']).optional(),
-  "marketCodes": zod.array(zod.string().min(updateUserBodyMarketCodesItemMin).max(updateUserBodyMarketCodesItemMax)).optional()
+  "marketCodes": zod.array(zod.string().min(updateUserBodyMarketCodesItemMin).max(updateUserBodyMarketCodesItemMax)).optional(),
+  "capabilityGrants": zod.array(zod.object({
+  "topic": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'landing-page', 'site-configuration']),
+  "capability": zod.enum(['view', 'edit', 'review', 'publish']),
+  "scope": zod.enum(['regional', 'shared']),
+  "marketCode": zod.string().regex(updateUserBodyCapabilityGrantsItemMarketCodeRegExp)
+})).optional().describe('Replaces all explicit content grants and configures matrix mode. Supply [] for an intentional deny-all matrix; legacy compatibility cannot be restored once configured.')
 })
 
 export const updateUserResponseEmailRegExp = new RegExp('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$');
 export const updateUserResponseMarketCodesItemMin = 2;
 export const updateUserResponseMarketCodesItemMax = 24;
 
+export const updateUserResponseLegacyAdministratorMarketCodesItemMin = 2;
+export const updateUserResponseLegacyAdministratorMarketCodesItemMax = 24;
+
+export const updateUserResponseCapabilityGrantsItemOneMarketCodeRegExp = new RegExp('^[a-z][a-z0-9-]{1,15}$');
 
 
 export const UpdateUserResponse = zod.object({
@@ -21955,11 +22168,49 @@ export const UpdateUserResponse = zod.object({
   "role": zod.enum(['administrator', 'publisher', 'editor', 'viewer']),
   "status": zod.enum(['invited', 'active', 'suspended']),
   "marketCodes": zod.array(zod.string().min(updateUserResponseMarketCodesItemMin).max(updateUserResponseMarketCodesItemMax)),
+  "legacyAdministratorMarketCodes": zod.array(zod.string().min(updateUserResponseLegacyAdministratorMarketCodesItemMin).max(updateUserResponseLegacyAdministratorMarketCodesItemMax)).describe('Frozen enabled-market compatibility scope for an unconfigured legacy administrator. Read-only and distinct from marketCodes.'),
+  "capabilityMatrixConfigured": zod.boolean().describe('True after the access matrix has been explicitly saved, including an intentionally empty deny-all matrix.'),
+  "capabilityGrants": zod.array(zod.object({
+  "topic": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'landing-page', 'site-configuration']),
+  "capability": zod.enum(['view', 'edit', 'review', 'publish']),
+  "scope": zod.enum(['regional', 'shared']),
+  "marketCode": zod.string().regex(updateUserResponseCapabilityGrantsItemOneMarketCodeRegExp)
+})).describe('Explicit grants are an allow-list. When capabilityMatrixConfigured is true, an empty array is an intentional deny-all matrix.'),
   "mfaEnabled": zod.boolean(),
   "mustRotate": zod.boolean(),
   "lastLoginAt": zod.coerce.date().nullish(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * Produces a durable receipt with before and proposed effective-rights snapshots. It never writes grants, roles, markets, editorial work, or publication state.
+ * @summary Record a no-change capability compatibility dry run
+ */
+export const DryRunUserCapabilityMigrationParams = zod.object({
+  "userId": zod.coerce.string()
+})
+
+export const dryRunUserCapabilityMigrationBodyCapabilityGrantsItemMarketCodeRegExp = new RegExp('^[a-z][a-z0-9-]{1,15}$');
+
+
+export const DryRunUserCapabilityMigrationBody = zod.object({
+  "capabilityGrants": zod.array(zod.object({
+  "topic": zod.enum(['person', 'partner', 'platform', 'publication', 'case-study', 'industry', 'framework', 'office', 'landing-page', 'site-configuration']),
+  "capability": zod.enum(['view', 'edit', 'review', 'publish']),
+  "scope": zod.enum(['regional', 'shared']),
+  "marketCode": zod.string().regex(dryRunUserCapabilityMigrationBodyCapabilityGrantsItemMarketCodeRegExp)
+}))
+})
+
+export const DryRunUserCapabilityMigrationResponse = zod.object({
+  "id": zod.string(),
+  "mode": zod.enum(['dry-run']),
+  "disposition": zod.enum(['no-persistent-access-change']),
+  "beforeSnapshot": zod.record(zod.string(), zod.unknown()),
+  "afterSnapshot": zod.record(zod.string(), zod.unknown()),
+  "createdAt": zod.coerce.date()
 })
 
 

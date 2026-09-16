@@ -47,3 +47,8 @@
 - [Matrix browser fixture safety](matrix-browser-fixtures.md) — Never substitute another document’s controls when a fixture row is missing; refresh and search before mutation.
 - [Navigation provenance](navigation-provenance.md) — Observe history traversal before dirty-work guards; physical offsets must stay aligned through cancellation and native anchors.
 - [Native keyboard verification](native-keyboard-verification.md) — CDP key codes alone can produce false failures for native button activation; preserve character semantics.
+- [Isolated database import order](isolated-database-import-order.md) — Set schema isolation before guards import the database singleton; verify the running API uses it.
+- [Legacy administrator scope](legacy-administrator-scope.md) — Freeze compatibility geography separately from explicit matrices; newly enabled markets must not silently expand access.
+- [Immutable migration evidence](immutable-migration-evidence.md) — Test populated append-only history and compare effective authority before and after adding metadata.
+- [Fixture relationship evidence](fixture-relationship-evidence.md) — Valid rows and stable hashes do not prove the application can join fixture identities correctly.
+- [Disposable fixture cleanup receipts](disposable-fixture-cleanup-receipts.md) — Keep teardown identity outside restart-ephemeral storage or isolated schemas and objects can be stranded.

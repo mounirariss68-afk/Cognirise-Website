@@ -61,6 +61,15 @@ const expectedMigrations = [
   { idx: 32, when: 1788998400009, tag: "0032_cms_editorial_work" },
   { idx: 33, when: 1788998400010, tag: "0033_cms_editorial_review_hardening" },
   { idx: 34, when: 1788998400011, tag: "0034_cms_editorial_digest_delivery_identity" },
+  { idx: 35, when: 1788998400012, tag: "0035_cms_revision_accuracy_confirmations" },
+  { idx: 36, when: 1788998400013, tag: "0036_cms_review_request_accountability_snapshot" },
+  { idx: 37, when: 1788998400014, tag: "0037_cms_capability_matrix_access_projection" },
+  { idx: 38, when: 1788998400015, tag: "0038_cms_review_capability_reviewers" },
+  { idx: 39, when: 1788998400017, tag: "0039_cms_capability_matrix_configuration" },
+  { idx: 40, when: 1788998400018, tag: "0040_cms_legacy_administrator_market_snapshots" },
+  { idx: 41, when: 1788998400019, tag: "0041_cms_shared_baseline_governing_source" },
+  { idx: 42, when: 1788998400020, tag: "0042_cms_availability_destination_pins" },
+  { idx: 43, when: 1788998400021, tag: "0043_cms_restore_release_receipts" },
 ];
 
 test("registers migrations in ordered Drizzle history", async () => {
@@ -99,6 +108,17 @@ test("applies the complete schema chain to a fresh database and replays safely",
     migrationsSchema: schema,
     migrationsTable: "__drizzle_migrations",
   });
+  const journal = JSON.parse(await readFile(journalPath, "utf8")) as {
+    entries: Array<{ when: number }>;
+  };
+  const applied = await migrationPool.query<{ created_at: string }>(
+    `SELECT created_at FROM "${schema}"."__drizzle_migrations" ORDER BY created_at`,
+  );
+  assert.deepEqual(
+    applied.rows.map((row) => Number(row.created_at)),
+    journal.entries.map((entry) => entry.when),
+    "a fresh database must apply every migration in journal order",
+  );
   const required = await migrationPool.query<{ table_name: string; column_name: string }>(
     `SELECT table_name,column_name
        FROM information_schema.columns
@@ -112,11 +132,25 @@ test("applies the complete schema chain to a fresh database and replays safely",
            OR (table_name='cms_review_requests' AND column_name IN ('edition_id','revision_id','reviewer_user_id','status'))
            OR (table_name='cms_editorial_notifications' AND column_name IN ('user_id','event_key','read_at'))
            OR (table_name='cms_editorial_digest_jobs' AND column_name IN ('user_id','digest_date','processing_lease'))
+           OR (table_name='cms_user_capability_grants' AND column_name IN ('topic','capability','scope','market_code'))
+           OR (table_name='cms_user_capability_configurations' AND column_name IN ('user_id','configured_at'))
+           OR (table_name='cms_capability_migration_receipts' AND column_name IN ('before_snapshot','after_snapshot','disposition'))
+           OR (table_name='cms_shared_baseline_revisions' AND column_name='governing_source_revision_id')
+           OR (table_name='cms_document_availability_states' AND column_name='reviewed_destination_pins')
         )
       ORDER BY table_name,column_name`,
     [schema],
   );
-  assert.ok(required.rows.length >= 22, "fresh migration must expose readiness-critical columns");
+  assert.ok(required.rows.length >= 26, "fresh migration must expose readiness-critical columns");
+  for (const requiredColumn of [
+    "cms_shared_baseline_revisions.governing_source_revision_id",
+    "cms_document_availability_states.reviewed_destination_pins",
+  ]) {
+    assert.ok(
+      required.rows.some((row) => `${row.table_name}.${row.column_name}` === requiredColumn),
+      `fresh migration must expose ${requiredColumn}`,
+    );
+  }
   const editorialTriggers = await migrationPool.query<{ tgname: string }>(
     `SELECT tgname FROM pg_trigger
       WHERE tgrelid IN ('cms_editorial_assignments'::regclass,'cms_review_requests'::regclass,'cms_revisions'::regclass)
@@ -149,6 +183,49 @@ test("applies the complete schema chain to a fresh database and replays safely",
       ($2,'reviewer@example.test','Reviewer','publisher','active')`,
     [writer, reviewer],
   );
+  // Capability authority is scoped at the database boundary. In particular,
+  // duplicate grants and invalid scope/capability values cannot turn a
+  // narrowly granted geography into an accidental broad right.
+  await migrationPool.query(
+    `INSERT INTO cms_user_capability_grants(
+      user_id,topic,capability,scope,market_code,created_by_user_id
+    ) VALUES ($1,'platform','view','regional','uae',$1)`,
+    [writer],
+  );
+  await assert.rejects(
+    migrationPool.query(
+      `INSERT INTO cms_user_capability_grants(
+        user_id,topic,capability,scope,market_code,created_by_user_id
+      ) VALUES ($1,'platform','view','regional','uae',$1)`,
+      [writer],
+    ),
+    /duplicate key/,
+  );
+  await assert.rejects(
+    migrationPool.query(
+      `INSERT INTO cms_user_capability_grants(
+        user_id,topic,capability,scope,market_code,created_by_user_id
+      ) VALUES ($1,'platform','publish','global','ksa',$1)`,
+      [writer],
+    ),
+    /cms_user_capability_grants_scope_check/,
+  );
+  // Explicit matrix mode is durable even when every grant is deliberately
+  // deleted; policy must not infer compatibility mode from an empty row set.
+  await migrationPool.query(
+    "INSERT INTO cms_user_capability_configurations(user_id,configured_by_user_id) VALUES ($1,$1)",
+    [writer],
+  );
+  await migrationPool.query("DELETE FROM cms_user_capability_grants WHERE user_id=$1", [writer]);
+  const configuredEmpty = await migrationPool.query(
+    `SELECT EXISTS(
+       SELECT 1 FROM cms_user_capability_configurations WHERE user_id=$1
+     ) configured, EXISTS(
+       SELECT 1 FROM cms_user_capability_grants WHERE user_id=$1
+     ) has_grants`,
+    [writer],
+  );
+  assert.deepEqual(configuredEmpty.rows[0], { configured: true, has_grants: false });
   await migrationPool.query(
     "INSERT INTO cms_documents(id,kind,title,owner_id) VALUES ($1,'article','Editorial fixture',$2)",
     [documentId, writer],

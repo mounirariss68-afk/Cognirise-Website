@@ -17,14 +17,55 @@ export interface PublicConfiguration {
   markets: PublicConfigurationMarketsItem[];
 }
 
-export type ApiErrorDetails = { [key: string]: unknown };
+/**
+ * Legacy validation details. Validation responses retain these strings for compatibility.
+ */
+export type ApiErrorDetails = { [key: string]: unknown } | string[];
+
+export type CmsValidationIssueScope = typeof CmsValidationIssueScope[keyof typeof CmsValidationIssueScope];
+
+
+export const CmsValidationIssueScope = {
+  draft: 'draft',
+  publish: 'publish',
+} as const;
+
+export type CmsValidationIssueAction = typeof CmsValidationIssueAction[keyof typeof CmsValidationIssueAction];
+
+
+export const CmsValidationIssueAction = {
+  'focus-title': 'focus-title',
+  'focus-content-field': 'focus-content-field',
+  'focus-seo': 'focus-seo',
+} as const;
+
+export interface CmsValidationIssue {
+  /** Stable validation-rule identifier. */
+  code: string;
+  /** Canonical action target such as content.heroMedia. */
+  path: string;
+  message: string;
+  scope: CmsValidationIssueScope;
+  action: CmsValidationIssueAction;
+}
 
 export interface ApiError {
   error: string;
   code?: string;
   /** The state transition committed even though the confirmation response failed; reload before retrying. */
   committed?: boolean;
+  /** Legacy validation details. Validation responses retain these strings for compatibility. */
   details?: ApiErrorDetails;
+  /** Structured canonical validation targets, supplied alongside legacy details. */
+  issues?: CmsValidationIssue[];
+}
+
+export interface DocumentRevisionAccuracyConfirmation {
+  id: string;
+  revisionId: string;
+  contentDigest: string;
+  confirmedByUserId: string;
+  confirmedAt: string;
 }
 
 export interface NavigationSetting {
@@ -231,6 +272,50 @@ export const UserStatus = {
   suspended: 'suspended',
 } as const;
 
+export type CmsDocumentTopic = typeof CmsDocumentTopic[keyof typeof CmsDocumentTopic];
+
+
+export const CmsDocumentTopic = {
+  person: 'person',
+  partner: 'partner',
+  platform: 'platform',
+  publication: 'publication',
+  'case-study': 'case-study',
+  industry: 'industry',
+  framework: 'framework',
+  office: 'office',
+  'landing-page': 'landing-page',
+  'site-configuration': 'site-configuration',
+} as const;
+
+export type CmsCapability = typeof CmsCapability[keyof typeof CmsCapability];
+
+
+export const CmsCapability = {
+  view: 'view',
+  edit: 'edit',
+  review: 'review',
+  publish: 'publish',
+} as const;
+
+export type CapabilityScope = typeof CapabilityScope[keyof typeof CapabilityScope];
+
+
+export const CapabilityScope = {
+  regional: 'regional',
+  shared: 'shared',
+} as const;
+
+export interface CapabilityGrantInput {
+  topic: CmsDocumentTopic;
+  capability: CmsCapability;
+  scope: CapabilityScope;
+  /** @pattern ^[a-z][a-z0-9-]{1,15}$ */
+  marketCode: string;
+}
+
+export type CapabilityGrant = CapabilityGrantInput;
+
 export interface User {
   id: string;
   name: string;
@@ -243,6 +328,16 @@ export interface User {
      * @items.maxLength 24
      */
   marketCodes: string[];
+  /**
+     * Frozen enabled-market compatibility scope for an unconfigured legacy administrator. Read-only and distinct from marketCodes.
+     * @items.minLength 2
+     * @items.maxLength 24
+     */
+  legacyAdministratorMarketCodes: string[];
+  /** True after the access matrix has been explicitly saved, including an intentionally empty deny-all matrix. */
+  capabilityMatrixConfigured: boolean;
+  /** Explicit grants are an allow-list. When capabilityMatrixConfigured is true, an empty array is an intentional deny-all matrix. */
+  capabilityGrants: CapabilityGrant[];
   mfaEnabled: boolean;
   mustRotate: boolean;
   /** @nullable */
@@ -897,6 +992,9 @@ export type SharedMarketConflictDecision = (unknown & {
   choice: SharedMarketConflictDecisionChoice;
 });
 
+/**
+ * Required when sourceRevisionId is omitted. When sourceRevisionId is supplied
+ */
 export type SharedMarketBaselineInputSnapshot = { [key: string]: unknown };
 
 export interface SharedMarketBaselineInput {
@@ -911,12 +1009,29 @@ export interface SharedMarketBaselineInput {
      * @nullable
      */
   sourceRevisionId?: string | null;
-  snapshot: SharedMarketBaselineInputSnapshot;
+  /** Required when sourceRevisionId is omitted. When sourceRevisionId is supplied */
+  snapshot?: SharedMarketBaselineInputSnapshot;
   /** @minimum 1 */
   expectedRevisionNumber?: number;
 }
 
-export type SharedMarketBaselineSnapshot = { [key: string]: unknown };
+/**
+ * Authoritative classification for baseline access. Neutral denotes a server-proven intentionally countryless baseline; unresolved requires selecting an exact real-market source.
+ */
+export type SharedMarketBaselineAuthorityKind = typeof SharedMarketBaselineAuthorityKind[keyof typeof SharedMarketBaselineAuthorityKind];
+
+
+export const SharedMarketBaselineAuthorityKind = {
+  regional: 'regional',
+  neutral: 'neutral',
+  unresolved: 'unresolved',
+} as const;
+
+/**
+ * Raw baseline snapshot. Null when its governing source cannot be resolved; use the regional materialized revision and recovery guidance instead.
+ * @nullable
+ */
+export type SharedMarketBaselineSnapshot = { [key: string]: unknown } | null;
 
 export type SharedMarketBaselineMediaReferencesItem = { [key: string]: unknown };
 
@@ -928,8 +1043,28 @@ export interface SharedMarketBaseline {
   revisionNumber: number;
   /** @nullable */
   sourceRevisionId: string | null;
+  /**
+     * Durable authorization origin. It can remain set when sourceRevisionId is null for an independently edited neutral successor.
+     * @nullable
+     */
+  governingSourceRevisionId?: string | null;
+  /** Authoritative classification for baseline access. Neutral denotes a server-proven intentionally countryless baseline; unresolved requires selecting an exact real-market source. */
+  authorityKind: SharedMarketBaselineAuthorityKind;
+  /**
+     * Raw baseline snapshot. Null when its governing source cannot be resolved; use the regional materialized revision and recovery guidance instead.
+     * @nullable
+     */
   snapshot: SharedMarketBaselineSnapshot;
   mediaReferences: SharedMarketBaselineMediaReferencesItem[];
+  /** Server-authoritative markets affected by saving this baseline revision. */
+  affectedDestinationMarkets?: string[];
+  /** Whether the current user satisfies exact source */
+  canEdit?: boolean;
+  /**
+     * Recoverable reason editing is unavailable.
+     * @nullable
+     */
+  editReason?: string | null;
   createdAt: string;
 }
 
@@ -1086,6 +1221,10 @@ export const DocumentEditionReadinessIssueAction = {
 export interface DocumentEditionReadinessIssue {
   category: DocumentEditionReadinessIssueCategory;
   message: string;
+  /** Stable validation-rule identifier. Present for structured contract validation. */
+  code?: string;
+  /** Canonical document target such as content.heroMedia or seo.title. */
+  path?: string;
   action: DocumentEditionReadinessIssueAction;
 }
 
@@ -3012,6 +3151,18 @@ export type DocumentAvailabilitySharedSource = {
   sourceRevisionId: string | null;
 } | null;
 
+/**
+ * @nullable
+ */
+export type DocumentAvailabilityReviewBlockedReason = typeof DocumentAvailabilityReviewBlockedReason[keyof typeof DocumentAvailabilityReviewBlockedReason] | null;
+
+
+export const DocumentAvailabilityReviewBlockedReason = {
+  'self-review': 'self-review',
+  'missing-regional-grant': 'missing-regional-grant',
+  'missing-shared-grant': 'missing-shared-grant',
+} as const;
+
 export interface DocumentAvailability {
   documentId: string;
   /** @minimum 0 */
@@ -3025,6 +3176,10 @@ export interface DocumentAvailability {
   publishedVersion: number;
   sharedSource: DocumentAvailabilitySharedSource;
   canEditShared: boolean;
+  canReviewShared: boolean;
+  /** @nullable */
+  reviewBlockedReason: DocumentAvailabilityReviewBlockedReason;
+  canPublishShared: boolean;
   items: DocumentAvailabilityDestination[];
   /** Market/locale destination labels affected by the returned reviewed or published snapshot. */
   affectedEditions: string[];
@@ -3533,6 +3688,12 @@ export interface MediaAsset {
   motionMetadata?: MotionMetadata | null;
   focalPoint?: FocalPoint | null;
   status: MediaStatus;
+  /** True only when the caller may update this asset across every referencing edition. */
+  canEdit?: boolean;
+  /** True only when the caller may review this asset across every referencing edition. */
+  canReview?: boolean;
+  /** True when the caller may inspect the administrator-only media audit history. */
+  canInspect?: boolean;
   createdBy?: string;
   createdAt: string;
   updatedAt: string;
@@ -3779,6 +3940,7 @@ export interface UserInvitationInput {
      * @items.maxLength 24
      */
   marketCodes?: string[];
+  capabilityGrants?: CapabilityGrantInput[];
 }
 
 export type UserInvitationDelivery = typeof UserInvitationDelivery[keyof typeof UserInvitationDelivery];
@@ -3821,6 +3983,39 @@ export interface UserUpdate {
      * @items.maxLength 24
      */
   marketCodes?: string[];
+  /** Replaces all explicit content grants and configures matrix mode. Supply [] for an intentional deny-all matrix; legacy compatibility cannot be restored once configured. */
+  capabilityGrants?: CapabilityGrantInput[];
+}
+
+export interface CapabilityMigrationDryRunInput {
+  capabilityGrants: CapabilityGrantInput[];
+}
+
+export type CapabilityMigrationDryRunReceiptMode = typeof CapabilityMigrationDryRunReceiptMode[keyof typeof CapabilityMigrationDryRunReceiptMode];
+
+
+export const CapabilityMigrationDryRunReceiptMode = {
+  'dry-run': 'dry-run',
+} as const;
+
+export type CapabilityMigrationDryRunReceiptDisposition = typeof CapabilityMigrationDryRunReceiptDisposition[keyof typeof CapabilityMigrationDryRunReceiptDisposition];
+
+
+export const CapabilityMigrationDryRunReceiptDisposition = {
+  'no-persistent-access-change': 'no-persistent-access-change',
+} as const;
+
+export type CapabilityMigrationDryRunReceiptBeforeSnapshot = { [key: string]: unknown };
+
+export type CapabilityMigrationDryRunReceiptAfterSnapshot = { [key: string]: unknown };
+
+export interface CapabilityMigrationDryRunReceipt {
+  id: string;
+  mode: CapabilityMigrationDryRunReceiptMode;
+  disposition: CapabilityMigrationDryRunReceiptDisposition;
+  beforeSnapshot: CapabilityMigrationDryRunReceiptBeforeSnapshot;
+  afterSnapshot: CapabilityMigrationDryRunReceiptAfterSnapshot;
+  createdAt: string;
 }
 
 export interface AccessTokenConsumption {
@@ -4277,6 +4472,10 @@ limit?: number;
  * @minimum 0
  */
 offset?: number;
+};
+
+export type GetDocumentRevisionAccuracyConfirmation200 = {
+  confirmation: DocumentRevisionAccuracyConfirmation | null;
 };
 
 export type ListDocumentReviewCommentsParams = {

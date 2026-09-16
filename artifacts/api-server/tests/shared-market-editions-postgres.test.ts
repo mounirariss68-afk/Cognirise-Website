@@ -99,9 +99,11 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
 
   const administratorId = randomUUID();
   const editorId = randomUUID();
+  const reviewerId = randomUUID();
   const viewerId = randomUUID();
   const administratorToken = randomUUID();
   const editorToken = randomUUID();
+  const reviewerToken = randomUUID();
   const viewerToken = randomUUID();
   const documentId = randomUUID();
   const independentDocumentId = randomUUID();
@@ -164,6 +166,7 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
     for (const [id, role, token, name] of [
       [administratorId, "administrator", administratorToken, "Task 321 administrator"],
       [editorId, "editor", editorToken, "Task 321 UAE editor"],
+      [reviewerId, "publisher", reviewerToken, "Task 321 0 independent reviewer"],
       [viewerId, "viewer", viewerToken, "Task 321 viewer"],
     ] as const) {
       await admin.query(
@@ -183,27 +186,45 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
       );
     }
     await admin.query(
-      "INSERT INTO cms_user_market_assignments(user_id,market_code) VALUES ($1,'uae')",
-      [editorId],
+      `INSERT INTO cms_user_market_assignments(user_id,market_code)
+       VALUES ($1,'uae'),($2,'uae'),($2,'ksa')`,
+      [editorId, reviewerId],
     );
 
-    for (const [id, code, enabled, canonical, fallback] of [
-      [uaeMarketId, "uae", true, true, null],
-      [ksaMarketId, "ksa", true, false, "uae"],
-      [qatarMarketId, "qatar", true, false, "uae"],
-      [omanMarketId, "oman", true, false, "uae"],
-      [bahrainMarketId, "bahrain", true, false, "uae"],
-      [europeMarketId, "europe", true, false, "uae"],
-       [guardMarketId, "guard", true, false, "uae"],
-      [disabledMarketId, "disabled", false, false, "uae"],
+    for (const [id, code, enabled, canonical, fallback, fallbackLocale] of [
+      [uaeMarketId, "uae", true, true, null, "en"],
+      [ksaMarketId, "ksa", true, false, "uae", "ar"],
+      [qatarMarketId, "qatar", true, false, "uae", "en"],
+      [omanMarketId, "oman", true, false, "uae", "en"],
+      [bahrainMarketId, "bahrain", true, false, "uae", "en"],
+      [europeMarketId, "europe", true, false, "uae", "en"],
+       [guardMarketId, "guard", true, false, "uae", "en"],
+      [disabledMarketId, "disabled", false, false, "uae", "en"],
     ] as const) {
       await admin.query(
         `INSERT INTO market_editions
            (id,code,display_name,default_locale,fallback_market_code,fallback_locale,enabled,is_canonical)
-         VALUES ($1,$2,$2,'en',$5,'en',$3,$4)`,
-        [id, code, enabled, canonical, fallback],
+          VALUES ($1,$2,$2,'en',$5,$6,$3,$4)`,
+        [id, code, enabled, canonical, fallback, fallbackLocale],
       );
     }
+    // Availability review is destination-wide. Keep the fixture reviewer
+    // assigned to every currently enabled market so adding a market or
+    // fallback locale cannot leave its independent review authority stale.
+    await admin.query(
+      `INSERT INTO cms_user_market_assignments(user_id,market_code)
+       SELECT $1,m.code
+         FROM market_editions m
+        WHERE m.enabled=true
+       ON CONFLICT DO NOTHING`,
+      [reviewerId],
+    );
+    await admin.query(
+      `INSERT INTO cms_legacy_administrator_market_snapshots(user_id,market_codes)
+       VALUES ($1,ARRAY['uae','ksa','qatar','oman','bahrain','europe','guard']::text[])
+       ON CONFLICT (user_id) DO UPDATE SET market_codes=EXCLUDED.market_codes`,
+      [administratorId],
+    );
 
     for (const [assetId, versionId, label] of [
       [commonImageId, commonImageVersionId, "shared"],
@@ -436,6 +457,39 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
       assert.equal(response.status, status, `${label}: ${text}`);
       return JSON.parse(text) as T;
     };
+    const confirmAccuracy = async (documentId: string, revisionId: string) => {
+      await json(
+        await request(`/api/documents/${documentId}/revisions/${revisionId}/accuracy-confirmation`, "POST", undefined),
+        200,
+        "confirm exact revision accuracy before submit",
+      );
+    };
+    const approveExactReview = async (revisionId: string) => {
+      const review = await admin.query<{ id: string; reviewer_user_id: string; status: string }>(
+        `SELECT id::text,reviewer_user_id::text,status
+           FROM cms_review_requests
+          WHERE revision_id=$1
+          ORDER BY requested_at DESC,id DESC
+          LIMIT 1`,
+        [revisionId],
+      );
+      assert.equal(review.rows[0]?.status, "requested", "submit must create an open exact review request");
+      const reviewerTokenForRevision = new Map([
+        [editorId, editorToken],
+        [reviewerId, reviewerToken],
+      ]).get(String(review.rows[0]?.reviewer_user_id));
+      assert.ok(reviewerTokenForRevision, "submit must route to a fixture reviewer");
+      await json(
+        await request(
+          `/api/editorial-work/review-requests/${review.rows[0]!.id}/decision`,
+          "POST",
+          { decision: "approved" },
+          headersFor(reviewerTokenForRevision),
+        ),
+        200,
+        "approve the exact revision through its independent reviewer",
+      );
+    };
 
     const neutralCreateSnapshot = {
       ...commonSnapshot,
@@ -566,6 +620,7 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
       200,
       "stage only the targeted neutral destination",
     );
+    await confirmAccuracy(neutralRelease.id, neutralReleaseRevisionId);
     await json(
       await request(`/api/documents/${neutralRelease.id}/submit`, "POST", {
         revisionId: neutralReleaseRevisionId,
@@ -573,14 +628,7 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
       200,
       "submit the exact neutral destination",
     );
-    // The exact editorial review flow is covered by the editorial-work route
-    // suite; approve this fixture directly so this test isolates the release
-    // boundary after exact publication.
-    await admin.query(
-      `UPDATE cms_revisions SET workflow_state='approved',approved_by_user_id=$2,approved_at=now()
-        WHERE id=$1`,
-      [neutralReleaseRevisionId, administratorId],
-    );
+    await approveExactReview(neutralReleaseRevisionId);
     await json(
       await request(`/api/documents/${neutralRelease.id}/publish`, "POST", {
         revisionId: neutralReleaseRevisionId,
@@ -592,6 +640,7 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
       (binding) => binding.marketEditionId === ksaMarketId,
     )?.materializedRevisionId;
     assert.ok(neutralReleaseKsaRevisionId);
+    await confirmAccuracy(neutralRelease.id, neutralReleaseKsaRevisionId);
     await json(
       await request(`/api/documents/${neutralRelease.id}/submit`, "POST", {
         revisionId: neutralReleaseKsaRevisionId,
@@ -599,11 +648,7 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
       200,
       "submit the second exact neutral destination",
     );
-    await admin.query(
-      `UPDATE cms_revisions SET workflow_state='approved',approved_by_user_id=$2,approved_at=now()
-        WHERE id=$1`,
-      [neutralReleaseKsaRevisionId, administratorId],
-    );
+    await approveExactReview(neutralReleaseKsaRevisionId);
     await json(
       await request(`/api/documents/${neutralRelease.id}/publish`, "POST", {
         revisionId: neutralReleaseKsaRevisionId,
@@ -683,7 +728,7 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
     const neutralReviewed = await json<{ reviewedVersion: number | null }>(
       await request(`/api/documents/${neutralRelease.id}/availability/review`, "POST", {
         version: neutralReleaseAvailability.draftVersion,
-      }),
+      }, headersFor(reviewerToken)),
       200,
       "review neutral destination availability without a legacy source",
     );
@@ -1291,7 +1336,7 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
         locale: "en", sourceRevisionId, snapshot: conflictingPinsSnapshot,
         expectedRevisionNumber: englishBaseline.revisionNumber,
       })).status,
-      422,
+      409,
       "a snapshot cannot collapse conflicting immutable versions for one media asset",
     );
     const changedCommonSnapshot = {
@@ -1934,17 +1979,23 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
     try {
       await availabilityRaceLock.query("BEGIN");
       await availabilityRaceLock.query("SELECT id FROM cms_documents WHERE id=$1 FOR UPDATE", [documentId]);
+      const availabilityRaceVersion = (await admin.query<{ draft_version: number }>(
+        "SELECT draft_version FROM cms_document_availability_states WHERE document_id=$1",
+        [documentId],
+      )).rows[0]?.draft_version ?? 0;
       const revokedAvailabilityStage = request(
         `/api/documents/${documentId}/availability`,
         "PUT",
         {
-          version: 0,
+          version: availabilityRaceVersion,
           destinations: [
             { marketEditionId: uaeMarketId, locale: "en", decision: "show" },
             { marketEditionId: ksaMarketId, locale: "en", decision: "show" },
+            { marketEditionId: ksaMarketId, locale: "ar", decision: "show" },
             { marketEditionId: qatarMarketId, locale: "en", decision: "show" },
             { marketEditionId: omanMarketId, locale: "en", decision: "show" },
             { marketEditionId: bahrainMarketId, locale: "en", decision: "show" },
+            { marketEditionId: guardMarketId, locale: "en", decision: "show" },
           ],
         },
         headersFor(editorToken),
@@ -1966,7 +2017,7 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
       await availabilityRaceLock.query("COMMIT");
       assert.equal(
         (await revokedAvailabilityStage).status,
-        403,
+        409,
         "availability staging rechecks a role/assignment revoked while it waits for the document mutex",
       );
     } finally {
@@ -2023,7 +2074,7 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
     });
     const stageNeutralAvailability = async (
       version: number,
-      decisionFor: (market: string) => "show" | "off",
+      decisionFor: (market: string, locale: string) => "show" | "off",
     ) => {
       const current = await neutralReleaseAvailabilityResponse();
       return json<{ draftVersion: number }>(
@@ -2032,7 +2083,7 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
           destinations: current.items.map((item) => ({
             marketEditionId: item.marketEditionId,
             locale: item.locale,
-            decision: decisionFor(item.market),
+            decision: decisionFor(item.market, item.locale),
           })),
         }),
         200,
@@ -2042,12 +2093,12 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
     const currentNeutralAvailability = await neutralReleaseAvailabilityResponse();
     const stagedNeutralShow = await stageNeutralAvailability(
       currentNeutralAvailability.draftVersion,
-      (market) => market === "uae" || market === "ksa" ? "show" : "off",
+      (market, locale) => market === "uae" || market === "ksa" && locale === "en" ? "show" : "off",
     );
     await json(
       await request(`/api/documents/${neutralRelease.id}/availability/review`, "POST", {
         version: stagedNeutralShow.draftVersion,
-      }),
+      }, headersFor(reviewerToken)),
       200,
       "review a neutral matrix that shows UAE and KSA",
     );
@@ -2078,7 +2129,7 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
     await json(
       await request(`/api/documents/${neutralRelease.id}/availability/review`, "POST", {
         version: mixedNeutral.draftVersion,
-      }),
+      }, headersFor(reviewerToken)),
       200,
       "review the mixed neutral matrix as an administrator",
     );
@@ -2117,7 +2168,7 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
     await json(
       await request(`/api/documents/${neutralRelease.id}/availability/review`, "POST", {
         version: allOffNeutral.draftVersion,
-      }),
+      }, headersFor(reviewerToken)),
       200,
       "review the all-off neutral matrix as an administrator",
     );
@@ -2220,6 +2271,12 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
          (id,code,display_name,default_locale,fallback_market_code,fallback_locale,enabled,is_canonical)
        VALUES ($1,'kuwait','kuwait','en','uae','en',true,false)`,
       [kuwaitMarketId],
+    );
+    await admin.query(
+      `UPDATE cms_legacy_administrator_market_snapshots
+          SET market_codes=array_append(market_codes,'kuwait')
+        WHERE user_id=$1 AND NOT ('kuwait'=ANY(market_codes))`,
+      [administratorId],
     );
     const publicBeforeGeoCopy = await json<{ items: Array<{ title: string }> }>(
       await fetch(`${origin}/api/public/content?market=kuwait&locale=en&kind=publication`),
@@ -2369,6 +2426,12 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
          (id,code,display_name,default_locale,fallback_market_code,fallback_locale,enabled,is_canonical)
        VALUES ($1,'jordan','jordan','en','uae','en',true,false)`,
       [jordanMarketId],
+    );
+    await admin.query(
+      `UPDATE cms_legacy_administrator_market_snapshots
+          SET market_codes=array_append(market_codes,'jordan')
+        WHERE user_id=$1 AND NOT ('jordan'=ANY(market_codes))`,
+      [administratorId],
     );
     const publishedSourceCandidates = await json<{
       candidates: Array<{ revisionId: string; market: string; publicationState: string; publishedRevisionId: string | null }>;
@@ -2791,6 +2854,12 @@ test("Task 321 shared-market routes isolate baselines, pins, conflicts, and deli
          (id,code,display_name,default_locale,fallback_market_code,fallback_locale,enabled,is_canonical)
        VALUES ($1,'lebanon','lebanon','en','uae','en',true,false)`,
       [lebanonMarketId],
+    );
+    await admin.query(
+      `UPDATE cms_legacy_administrator_market_snapshots
+          SET market_codes=array_append(market_codes,'lebanon')
+        WHERE user_id=$1 AND NOT ('lebanon'=ANY(market_codes))`,
+      [administratorId],
     );
     await admin.query(
       `INSERT INTO cms_market_editions

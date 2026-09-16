@@ -38,6 +38,10 @@ import { initialCmsContent, validateCmsContent } from "@workspace/api-zod";
 import { CONTENT_GUIDANCE, collectContentMediaIds } from "./authoring";
 import { ContentEditor } from "./ContentEditor";
 import { normalizeCmsDraftContent } from "./draft-save";
+import {
+  canAccessContent,
+  marketsForContentCapability,
+} from "@/lib/content-capability";
 
 const createDocSchema = z.object({
   title: z.string().trim().min(1, "Title is required"),
@@ -71,11 +75,8 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
     () => normalizeCmsDraftContent(kind, initialCmsContent(kind) as Record<string, unknown>),
   );
 
-  const canCreate = ["editor", "publisher", "administrator"].includes(session?.user?.role ?? "");
   const isAdministrator = session?.user?.role === "administrator";
-  const canManageAvailability = session?.user?.role === "editor"
-    || session?.user?.role === "publisher"
-    || session?.user?.role === "administrator";
+  const isCompactKind = COMPACT_KINDS.includes(kind);
 
   const { data: pageData, isLoading, isError: listFailed, refetch: reloadList } = useListDocuments({
     kind,
@@ -94,7 +95,9 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
     () => (marketData?.items ?? []).filter((market) => market.enabled),
     [marketData?.items],
   );
-  const permittedMarkets = enabledMarkets.filter((market) => session?.user?.role === "administrator" || session?.user?.marketCodes?.includes(market.code));
+  const permittedMarketCodes = marketsForContentCapability(session?.user, kind, "edit", enabledMarkets.map((market) => market.code));
+  const permittedMarkets = enabledMarkets.filter((market) => permittedMarketCodes.includes(market.code));
+  const canManageAvailability = permittedMarkets.length > 0;
   const primaryMarket = permittedMarkets.find((market) => market.isCanonical) ?? permittedMarkets[0];
   const createContentValidation = useMemo(
     () => validateCmsContent(kind, createContent, "draft"),
@@ -116,6 +119,18 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
   });
 
   const selectedCreationMarkets = form.watch("markets");
+  const canCreate = enabledMarkets.length > 0
+    && (isCompactKind
+      ? selectedCreationMarkets.length > 0
+        && canAccessContent(session?.user, {
+          topic: kind,
+          capability: "edit",
+          marketCode: selectedCreationMarkets[0] ?? "",
+          scope: "shared",
+          sourceMarketCode: selectedCreationMarkets[0] ?? "",
+          destinationMarketCodes: selectedCreationMarkets,
+        })
+      : permittedMarkets.length === enabledMarkets.length);
   const creationLocales = [...new Set(enabledMarkets
     .filter((market) => selectedCreationMarkets.includes(market.code))
     .flatMap((market) => [market.defaultLocale, market.fallbackLocale])
@@ -154,6 +169,24 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
 
   const onSubmitCreate = (values: z.infer<typeof createDocSchema>) => {
     if (!canCreate || createDocument.isPending) return;
+    const destinationMarkets = isCompactKind
+      ? values.markets
+      : enabledMarkets.map((market) => market.code);
+    if (!canAccessContent(session?.user, {
+      topic: kind,
+      capability: "edit",
+      marketCode: destinationMarkets[0] ?? "",
+      scope: "shared",
+      sourceMarketCode: destinationMarkets[0] ?? "",
+      destinationMarketCodes: destinationMarkets,
+    })) {
+      toast({
+        title: "Creation not permitted",
+        description: "You need edit authority for the shared source and every selected destination market.",
+        variant: "destructive",
+      });
+      return;
+    }
     if (COMPACT_KINDS.includes(kind) && enabledMarkets.some((market) => values.markets.includes(market.code) && ![market.defaultLocale, market.fallbackLocale].includes(values.locale))) {
       form.setError("locale", { message: "Choose a language configured for every selected market, or change the market selection." });
       return;
@@ -301,6 +334,7 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
            people={pageData?.items ?? []}
            markets={enabledMarkets}
            canManage={canManageAvailability}
+          canManageMarket={(market) => permittedMarketCodes.includes(market)}
            isAdministrator={session?.user?.role === "administrator"}
            isLoading={isLoading}
            page={page}
@@ -332,7 +366,8 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
            markets={enabledMarkets}
            canManage={canManageAvailability}
            isAdministrator={session?.user?.role === "administrator"}
-            assignedMarketCodes={session?.user?.marketCodes}
+            assignedMarketCodes={permittedMarketCodes}
+            canManageMarket={(market) => permittedMarketCodes.includes(market)}
            isLoading={isLoading}
            page={page}
            pageSize={20}
@@ -629,7 +664,7 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
 
               <DialogFooter className="pt-4">
                 <Button type="button" variant="ghost" onClick={() => setIsCreateOpen(false)}>Cancel</Button>
-                <Button type="submit" disabled={createDocument.isPending || areMarketsLoading || enabledMarkets.length === 0}>
+                <Button type="submit" disabled={!canCreate || createDocument.isPending || areMarketsLoading || enabledMarkets.length === 0}>
                   {createDocument.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
                   Create & Edit
                 </Button>

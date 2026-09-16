@@ -16,7 +16,10 @@ test("Shell defers protected, governed, and route-owned methodology metadata eff
   }
   assert.match(shell, /ROUTE_OWNED_METADATA_PATHS\.has\(currentPath\)/);
   assert.match(shell, /useEffect\(\(\) => \{[\s\S]*?ROUTE_OWNED_METADATA_PATHS\.has\(currentPath\)[\s\S]*?\}, \[currentPath\]\)/);
-  assert.match(preview, /title: "Draft preview \| Cognirise"[\s\S]*canonicalUrl: null, noIndex: true/);
+  assert.match(
+    preview,
+    /applyMetadata\(\{\s*title: "Protected preview \| Cognirise",\s*description: "Protected CMS saved-version preview\.",\s*canonicalUrl: null,\s*noIndex: true\s*\}\)/,
+  );
 });
 
 test("shared methodology SEO restores Shell's exact original baselines", async () => {

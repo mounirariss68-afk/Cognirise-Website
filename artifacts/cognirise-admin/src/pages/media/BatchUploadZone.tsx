@@ -10,6 +10,7 @@ import { useBatchUpload } from "./upload-queue";
 import { QueuedMetadataFields } from "./QueuedMetadataFields";
 import { droppedFiles, validateIntake } from "./upload-intake";
 import { IMAGE_ACCEPT, VIDEO_ACCEPT, type MediaCollection, type LinkedInAssetKind } from "./MediaLibrary";
+import { canAccessAnyContentCapability } from "@/lib/content-capability";
 
 export function BatchUploadZone() {
   const {
@@ -25,7 +26,7 @@ export function BatchUploadZone() {
     persistenceError,
   } = useBatchUpload();
   const { data: session } = useGetSession();
-  const canUpload = ["editor", "publisher", "administrator"].includes(session?.user?.role ?? "");
+  const canUpload = canAccessAnyContentCapability(session?.user, "edit");
   const [collection, setCollection] = useState<MediaCollection>("website");
   const [linkedinKind, setLinkedinKind] = useState<LinkedInAssetKind>("post");
   const [dragging, setDragging] = useState(false);

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Loader2, LayoutDashboard, Users, UserSquare2, Component, Newspaper, Briefcase, Factory, PanelsTopLeft, Image as ImageIcon, Globe, Inbox, ShieldAlert, LogOut, ChevronUp, Lock, ListTree, MapPin, Mail, UserRoundCheck } from "lucide-react";
 import { CogniriseBrand } from "@/components/brand/CogniriseBrand";
+import { canAccessAnyTopic, type ContentTopic } from "@/lib/content-capability";
 
 function AppSidebar() {
   const [location, setLocation] = useLocation();
@@ -26,6 +27,7 @@ function AppSidebar() {
   };
 
   const isAdministrator = session?.user?.role === "administrator";
+  const canViewTopic = (topic: ContentTopic) => canAccessAnyTopic(session?.user, topic, "view");
 
   const navGroups = [
     {
@@ -39,14 +41,14 @@ function AppSidebar() {
     {
       title: "Content",
       items: [
-        { title: "Publications", url: "/publications", icon: Newspaper },
-        { title: "Case Studies", url: "/case-studies", icon: Briefcase },
-        { title: "People", url: "/people", icon: UserSquare2 },
-        { title: "Partners", url: "/partners", icon: Users },
-        { title: "Platforms", url: "/platforms", icon: Component },
-        { title: "Industries", url: "/industries", icon: Factory },
-        { title: "Frameworks", url: "/frameworks", icon: PanelsTopLeft },
-        { title: "Offices", url: "/offices", icon: MapPin },
+        ...(canViewTopic("publication") ? [{ title: "Publications", url: "/publications", icon: Newspaper }] : []),
+        ...(canViewTopic("case-study") ? [{ title: "Case Studies", url: "/case-studies", icon: Briefcase }] : []),
+        ...(canViewTopic("person") ? [{ title: "People", url: "/people", icon: UserSquare2 }] : []),
+        ...(canViewTopic("partner") ? [{ title: "Partners", url: "/partners", icon: Users }] : []),
+        ...(canViewTopic("platform") ? [{ title: "Platforms", url: "/platforms", icon: Component }] : []),
+        ...(canViewTopic("industry") ? [{ title: "Industries", url: "/industries", icon: Factory }] : []),
+        ...(canViewTopic("framework") ? [{ title: "Frameworks", url: "/frameworks", icon: PanelsTopLeft }] : []),
+        ...(canViewTopic("office") ? [{ title: "Offices", url: "/offices", icon: MapPin }] : []),
       ]
     },
     {
@@ -129,7 +131,15 @@ function AppSidebar() {
   );
 }
 
-export function AppLayout({ children, administratorOnly = false }: { children: ReactNode, administratorOnly?: boolean }) {
+export function AppLayout({
+  children,
+  administratorOnly = false,
+  contentTopic,
+}: {
+  children: ReactNode;
+  administratorOnly?: boolean;
+  contentTopic?: ContentTopic;
+}) {
   const { data: session, isLoading, isError } = useGetSession({
     query: { queryKey: getGetSessionQueryKey(), retry: false },
   });
@@ -176,6 +186,21 @@ export function AppLayout({ children, administratorOnly = false }: { children: R
             <Lock className="w-12 h-12 text-muted-foreground mb-4 opacity-50 mx-auto" />
             <h1 className="text-2xl font-bold tracking-tight mb-2 text-foreground">Access Denied</h1>
             <p className="text-sm text-muted-foreground font-mono">You do not have the required administrator privileges to view this section.</p>
+          </div>
+        </SidebarInset>
+      </SidebarProvider>
+    );
+  }
+
+  if (contentTopic && !canAccessAnyTopic(session.user, contentTopic, "view")) {
+    return (
+      <SidebarProvider defaultOpen>
+        <AppSidebar />
+        <SidebarInset className="min-w-0 overflow-hidden bg-background">
+          <div id="main-content" tabIndex={-1} className="flex-1 min-w-0 flex flex-col items-center justify-center relative z-10 p-8 w-full h-full focus:outline-none">
+            <Lock className="w-12 h-12 text-muted-foreground mb-4 opacity-50 mx-auto" />
+            <h1 className="text-2xl font-bold tracking-tight mb-2 text-foreground">Access Denied</h1>
+            <p className="text-sm text-muted-foreground font-mono">You do not have view capability for this content family.</p>
           </div>
         </SidebarInset>
       </SidebarProvider>

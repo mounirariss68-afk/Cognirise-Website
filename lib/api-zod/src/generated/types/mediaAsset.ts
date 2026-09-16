@@ -52,6 +52,12 @@ export interface MediaAsset {
   motionMetadata?: MotionMetadata | null;
   focalPoint?: FocalPoint | null;
   status: MediaStatus;
+  /** True only when the caller may update this asset across every referencing edition. */
+  canEdit?: boolean;
+  /** True only when the caller may review this asset across every referencing edition. */
+  canReview?: boolean;
+  /** True when the caller may inspect the administrator-only media audit history. */
+  canInspect?: boolean;
   createdBy?: string;
   createdAt: Date;
   updatedAt: Date;

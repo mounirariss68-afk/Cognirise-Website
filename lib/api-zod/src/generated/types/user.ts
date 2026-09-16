@@ -5,6 +5,7 @@
  * First-party Cognirise website and mini CMS API.
  * OpenAPI spec version: 0.2.0
  */
+import type { CapabilityGrant } from './capabilityGrant';
 import type { UserRole } from './userRole';
 import type { UserStatus } from './userStatus';
 
@@ -20,6 +21,16 @@ export interface User {
      * @items.maxLength 24
      */
   marketCodes: string[];
+  /**
+     * Frozen enabled-market compatibility scope for an unconfigured legacy administrator. Read-only and distinct from marketCodes.
+     * @items.minLength 2
+     * @items.maxLength 24
+     */
+  legacyAdministratorMarketCodes: string[];
+  /** True after the access matrix has been explicitly saved, including an intentionally empty deny-all matrix. */
+  capabilityMatrixConfigured: boolean;
+  /** Explicit grants are an allow-list. When capabilityMatrixConfigured is true, an empty array is an intentional deny-all matrix. */
+  capabilityGrants: CapabilityGrant[];
   mfaEnabled: boolean;
   mustRotate: boolean;
   /** @nullable */

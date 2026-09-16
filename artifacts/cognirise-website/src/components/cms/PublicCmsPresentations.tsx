@@ -129,12 +129,17 @@ export function PartnerProfilePresentation({
 export type PlatformPresentationProps = {
   title: string;
   content: PlatformContent;
+  /** Card/collection summary selected by the public delivery boundary. */
   summary?: string | null;
   heroMedia?: DeliveredCmsMedia;
   preview?: boolean;
 };
 
 export function PlatformPresentation({ title, content, summary, heroMedia, preview = false }: PlatformPresentationProps) {
+  // The platform editor labels content.summary as the detail-page hero copy.
+  // Protected previews must therefore render that exact saved field. Public
+  // collection/detail delivery retains its existing top-level summary fallback.
+  const heroSummary = preview ? content.summary : summary ?? content.summary;
   return (
     <main className="overflow-hidden" data-preview={preview ? "draft" : undefined}>
       <section className="relative bg-[hsl(var(--brand-deep))] px-6 py-24 text-white md:px-12 md:py-32">
@@ -142,7 +147,7 @@ export function PlatformPresentation({ title, content, summary, heroMedia, previ
         <div className="relative mx-auto max-w-[1200px]">
           <p className="text-xs font-bold uppercase tracking-[.2em] text-white/60">{content.category}</p>
           <h1 className="mt-7 max-w-[900px] text-5xl font-semibold leading-[.94] md:text-7xl">{title}</h1>
-          <p className="mt-8 max-w-[680px] text-lg leading-8 text-white/75">{summary ?? content.summary}</p>
+          <p className="mt-8 max-w-[680px] text-lg leading-8 text-white/75">{heroSummary}</p>
         </div>
       </section>
       <section className="mx-auto max-w-[1200px] space-y-20 px-6 py-20 md:px-12 md:py-28">

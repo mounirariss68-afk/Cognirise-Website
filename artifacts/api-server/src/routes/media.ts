@@ -12,13 +12,13 @@ import {
 import {
   authenticate,
   requireCsrf,
-  requireEditor,
   requireMfa,
-  requirePublisher,
   type AuthContext,
 } from "../lib/auth";
 import { audit, pageOf } from "../lib/cms";
 import { asyncRoute } from "../lib/http";
+import { canAccessAnyContentCapability, type CmsCapability } from "../lib/policy";
+import { canAccessEditionTarget } from "./documents";
 import { mediaVersionReviewStatus } from "../lib/media-version-governance";
 import {
   createMediaUpload,
@@ -44,6 +44,146 @@ export const mediaStorage = {
 };
 
 const IDEMPOTENCY_KEY_PATTERN = /^[\x21-\x7e]{1,200}$/;
+
+type MediaReferenceTarget = {
+  document_id: string;
+  market: string;
+  locale: string;
+};
+
+/**
+ * Media is not a global content back door. A referenced asset is inspectable
+ * only through an exact document edition the caller can access. Altering
+ * metadata/review state requires the capability across every referencing
+ * document because one asset version is shared. Unbound pending uploads stay
+ * visible only to their uploader (or an administrator).
+ */
+async function mediaReferenceTargets(mediaId: string): Promise<{
+  exists: boolean;
+  uploadedByUserId: string | null;
+  targets: MediaReferenceTarget[];
+  unresolvedReferenceCount: number;
+  referenceCount: number;
+}> {
+  const result = await pool.query(
+    `SELECT a.uploaded_by_user_id,r.id reference_id,r.document_id,
+            revision.id revision_id,e.market,e.locale
+       FROM cms_media_assets a
+       LEFT JOIN cms_media_references r ON r.asset_id=a.id
+       LEFT JOIN cms_revisions revision
+         ON r.field_path='revision:'||revision.id::text
+       LEFT JOIN cms_market_editions e ON e.id=revision.edition_id
+      WHERE a.id=$1`,
+    [mediaId],
+  );
+  return {
+    exists: Boolean(result.rowCount),
+    uploadedByUserId: result.rows[0]?.uploaded_by_user_id
+      ? String(result.rows[0].uploaded_by_user_id)
+      : null,
+    targets: result.rows
+      .filter((row) => row.reference_id && row.document_id && row.revision_id && row.market && row.locale)
+      .map((row) => ({
+        document_id: String(row.document_id),
+        market: String(row.market),
+        locale: String(row.locale),
+      })),
+    referenceCount: result.rows.filter((row) => row.reference_id).length,
+    unresolvedReferenceCount: result.rows.filter((row) =>
+      row.reference_id && (!row.document_id || !row.revision_id || !row.market || !row.locale),
+    ).length,
+  };
+}
+
+async function canAccessMedia(
+  auth: AuthContext,
+  mediaId: string,
+  capability: CmsCapability,
+  requireEveryReference = false,
+): Promise<{ exists: boolean; allowed: boolean }> {
+  // Global media administration is a distinct pre-matrix administrator
+  // privilege. Referenced assets for configured accounts still flow through
+  // the exact source/destination content policy below.
+  if (auth.user.role === "administrator" && !auth.user.capabilityMatrixConfigured) {
+    return { exists: true, allowed: true };
+  }
+  const target = await mediaReferenceTargets(mediaId);
+  if (!target.exists) return { exists: false, allowed: false };
+  if (!target.referenceCount) {
+    return {
+      exists: true,
+      allowed: target.uploadedByUserId === auth.user.id
+        && await canAccessAnyContentCapability(auth.user, capability === "view" ? "edit" : capability),
+    };
+  }
+  // A reference without a resolvable `revision:<id>` → edition binding has no
+  // safe geography. It never authorizes a read and blocks a shared mutation.
+  if (!target.targets.length) return { exists: true, allowed: false };
+  const distinct = [...new Map(target.targets.map((entry) => [
+    `${entry.document_id}/${entry.market}/${entry.locale}`, entry,
+  ])).values()];
+  const decisions = await Promise.all(distinct.map((entry) =>
+    canAccessEditionTarget(pool, auth, entry.document_id, entry.market, entry.locale, capability),
+  ));
+  return {
+    exists: true,
+    allowed: requireEveryReference
+      ? target.unresolvedReferenceCount === 0 && decisions.every(Boolean)
+      : decisions.some(Boolean),
+  };
+}
+
+type MediaPermissions = {
+  canEdit: boolean;
+  canReview: boolean;
+  /** Audit history is a separate administrator-only privilege. */
+  canInspect: boolean;
+};
+
+async function mediaWithPermissions(
+  auth: AuthContext,
+  row: Record<string, any>,
+): Promise<ReturnType<typeof media> & MediaPermissions> {
+  const mediaId = String(row.id);
+  const [edit, review] = await Promise.all([
+    canAccessMedia(auth, mediaId, "edit", true),
+    canAccessMedia(auth, mediaId, "review", true),
+  ]);
+  return {
+    ...media(row),
+    canEdit: edit.allowed,
+    canReview: review.allowed,
+    canInspect: auth.user.role === "administrator",
+  };
+}
+
+async function requireMediaAccess(
+  res: Response,
+  mediaId: string,
+  capability: CmsCapability,
+  options: { all?: boolean; conceal?: boolean } = {},
+): Promise<boolean> {
+  const result = await canAccessMedia(
+    res.locals.auth as AuthContext,
+    mediaId,
+    capability,
+    options.all,
+  );
+  if (result.allowed) return true;
+  if (!result.exists || options.conceal) {
+    res.status(404).json({ error: "Media asset not found." });
+  } else {
+    res.status(403).json({ error: "You do not have the required content capability for this media asset." });
+  }
+  return false;
+}
+
+async function requireUnboundMediaCreate(res: Response): Promise<boolean> {
+  const auth = res.locals.auth as AuthContext;
+  if (await canAccessAnyContentCapability(auth.user, "edit")) return true;
+  res.status(403).json({ error: "Edit capability for at least one assigned content geography is required to upload media." });
+  return false;
+}
 
 function canonicalJson(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
@@ -224,7 +364,13 @@ router.get(
         ORDER BY a.created_at DESC`,
       [q.search ?? null, q.mimeType ?? null, q.collection ?? null, q.linkedinAssetKind ?? null],
     );
-    const all = result.rows.map(media);
+    const auth = res.locals.auth as AuthContext;
+    const visible = await Promise.all(result.rows.map(async (row) =>
+      (await canAccessMedia(auth, String(row.id), "view")).allowed
+        ? mediaWithPermissions(auth, row)
+        : null,
+    ));
+    const all = visible.filter((item): item is ReturnType<typeof media> & MediaPermissions => item !== null);
     res.json(
       pageOf(
         all.slice((q.page - 1) * q.pageSize, q.page * q.pageSize),
@@ -236,7 +382,8 @@ router.get(
   }),
 );
 
-router.post("/media/upload-requests", requireCsrf, requireEditor, asyncRoute(async (req, res) => {
+router.post("/media/upload-requests", requireCsrf, asyncRoute(async (req, res) => {
+  if (!await requireUnboundMediaCreate(res)) return;
   const parsed = RequestMediaUploadBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: "Invalid upload request." });
@@ -322,15 +469,17 @@ router.post("/media/upload-requests", requireCsrf, requireEditor, asyncRoute(asy
   }
 }));
 
-router.post("/media/:mediaId/renew-upload", requireCsrf, requireEditor, asyncRoute(async (req, res) => {
+router.post("/media/:mediaId/renew-upload", requireCsrf, asyncRoute(async (req, res) => {
   const auth = res.locals.auth as AuthContext;
+  if (!await requireMediaAccess(res, String(req.params.mediaId), "edit", { all: true })) return;
   const result = await pool.query("SELECT * FROM cms_media_assets WHERE id=$1", [req.params.mediaId]);
   if (!result.rowCount) {
     res.status(404).json({ error: "Media asset not found." });
     return;
   }
   const row = result.rows[0];
-  if (row.uploaded_by_user_id !== auth.user.id && auth.user.role !== "administrator") {
+  if (row.uploaded_by_user_id !== auth.user.id
+    && !(auth.user.role === "administrator" && !auth.user.capabilityMatrixConfigured)) {
     res.status(403).json({ error: "Only the original uploader or an administrator can renew this upload." });
     return;
   }
@@ -353,6 +502,7 @@ router.post("/media/:mediaId/renew-upload", requireCsrf, requireEditor, asyncRou
 }));
 
 async function deliverProtectedMedia(req: Request, res: Response, attachment: boolean) {
+  if (!await requireMediaAccess(res, String(req.params.mediaId), "view", { conceal: true })) return;
   const result = await pool.query(
     attachment ? protectedMediaDownloadSql : protectedMediaFileSql,
     [req.params.mediaId],
@@ -415,8 +565,8 @@ router.get("/media/:mediaId/download", asyncRoute(async (req, res) => {
 router.post(
   "/media/:mediaId/review",
   requireCsrf,
-  requirePublisher,
   asyncRoute(async (req, res) => {
+    if (!await requireMediaAccess(res, String(req.params.mediaId), "review", { all: true })) return;
     const parsed = ReviewMediaBody.safeParse(req.body);
     if (!parsed.success) {
       res.status(400).json({ error: "Choose approve or reject." });
@@ -526,7 +676,7 @@ router.post(
         ],
       );
       await client.query("COMMIT");
-      res.json(reviewedAsset);
+      res.json(await mediaWithPermissions(auth, reviewed.rows[0]));
     } catch (error) {
       await client.query("ROLLBACK");
       throw error;
@@ -539,6 +689,7 @@ router.post(
 router.get(
   "/media/:mediaId",
   asyncRoute(async (req, res) => {
+    if (!await requireMediaAccess(res, String(req.params.mediaId), "view", { conceal: true })) return;
     const result = await pool.query(`${selectMedia} WHERE a.id=$1`, [
       req.params.mediaId,
     ]);
@@ -546,18 +697,23 @@ router.get(
       res.status(404).json({ error: "Media asset not found." });
       return;
     }
-    res.json(media(result.rows[0]));
+    res.json(await mediaWithPermissions(res.locals.auth as AuthContext, result.rows[0]));
   }),
 );
 
 router.get(
   "/media/:mediaId/reference-impact",
   asyncRoute(async (req, res) => {
+    if (!await requireMediaAccess(res, String(req.params.mediaId), "view", { conceal: true })) return;
     const result = await pool.query(
       `SELECT r.id reference_id,r.document_id,r.media_version_id,r.field_path,r.created_at,
-              d.kind document_kind,d.title document_title,d.canonical_slug,d.status document_status
+              d.kind document_kind,d.title document_title,d.canonical_slug,d.status document_status,
+              e.market,e.locale
          FROM cms_media_references r
          JOIN cms_documents d ON d.id=r.document_id
+          JOIN cms_revisions revision
+            ON r.field_path='revision:'||revision.id::text
+          JOIN cms_market_editions e ON e.id=revision.edition_id
         WHERE r.asset_id=$1
         ORDER BY d.title,r.field_path,r.id`,
       [req.params.mediaId],
@@ -569,7 +725,18 @@ router.get(
         return;
       }
     }
-    const references = result.rows.map((row) => ({
+    const auth = res.locals.auth as AuthContext;
+    const visibleRows = (await Promise.all(result.rows.map(async (row) =>
+      (await canAccessEditionTarget(
+        pool,
+        auth,
+        String(row.document_id),
+        String(row.market),
+        String(row.locale),
+        "view",
+      )) ? row : null,
+    ))).filter((row): row is Record<string, any> => row !== null);
+    const references = visibleRows.map((row) => ({
       referenceId: String(row.reference_id),
       documentId: String(row.document_id),
       mediaVersionId: row.media_version_id ? String(row.media_version_id) : null,
@@ -591,8 +758,8 @@ router.get(
 router.patch(
   "/media/:mediaId",
   requireCsrf,
-  requireEditor,
   asyncRoute(async (req, res) => {
+    if (!await requireMediaAccess(res, String(req.params.mediaId), "edit", { all: true })) return;
     const parsed = UpdateMediaBody.safeParse(req.body);
     if (!parsed.success) {
       res.status(400).json({ error: "Invalid media update." });
@@ -699,15 +866,19 @@ router.patch(
     } finally {
       client.release();
     }
-    res.json(response);
+    const permissioned = await pool.query(`${selectMedia} WHERE a.id=$1`, [req.params.mediaId]);
+    res.json(await mediaWithPermissions(
+      res.locals.auth as AuthContext,
+      permissioned.rows[0] ?? response,
+    ));
   }),
 );
 
 router.delete(
   "/media/:mediaId",
   requireCsrf,
-  requirePublisher,
   asyncRoute(async (req, res) => {
+    if (!await requireMediaAccess(res, String(req.params.mediaId), "publish", { all: true })) return;
     const client = await pool.connect();
     try {
       await client.query("BEGIN");
@@ -733,7 +904,7 @@ router.delete(
   }),
 );
 
-router.post("/media/:mediaId/finalize", requireCsrf, requireEditor, asyncRoute(async (req, res) => {
+router.post("/media/:mediaId/finalize", requireCsrf, asyncRoute(async (req, res) => {
   const parsed = FinalizeMediaUploadBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: "Invalid media finalization." });
@@ -741,6 +912,7 @@ router.post("/media/:mediaId/finalize", requireCsrf, requireEditor, asyncRoute(a
   }
   const input = parsed.data as typeof parsed.data & MediaClassification;
   const auth = res.locals.auth as AuthContext;
+  if (!await requireMediaAccess(res, String(req.params.mediaId), "edit", { all: true })) return;
   const receipt = createHash("sha256")
     .update(canonicalJson(input))
     .digest("hex");
@@ -765,7 +937,8 @@ router.post("/media/:mediaId/finalize", requireCsrf, requireEditor, asyncRoute(a
       return;
     }
     const row = current.rows[0];
-    if (row.uploaded_by_user_id !== auth.user.id && auth.user.role !== "administrator") {
+    if (row.uploaded_by_user_id !== auth.user.id
+      && !(auth.user.role === "administrator" && !auth.user.capabilityMatrixConfigured)) {
       await client.query("ROLLBACK");
       res.status(403).json({ error: "Only the original uploader or an administrator can finalize this upload." });
       return;
@@ -776,8 +949,9 @@ router.post("/media/:mediaId/finalize", requireCsrf, requireEditor, asyncRoute(a
         row.latest_metadata?.uploadObjectPath === input.objectPath
       ) {
         const finalized = await client.query(`${selectMedia} WHERE a.id=$1`, [req.params.mediaId]);
+        const finalizedAsset = finalized.rows[0] ?? row;
         await client.query("COMMIT");
-        res.json(media(finalized.rows[0] ?? row));
+        res.json(await mediaWithPermissions(auth, finalizedAsset));
         return;
       }
       await client.query("ROLLBACK");
@@ -883,7 +1057,11 @@ router.post("/media/:mediaId/finalize", requireCsrf, requireEditor, asyncRoute(a
   await mediaStorage.deleteStaging(cleanupPath!).catch((error) => {
     req.log.warn({ err: error }, "Finalized media staging cleanup failed");
   });
-  res.json(response);
+  const permissioned = await pool.query(`${selectMedia} WHERE a.id=$1`, [req.params.mediaId]);
+  res.json(await mediaWithPermissions(
+    res.locals.auth as AuthContext,
+    permissioned.rows[0] ?? response,
+  ));
 }));
 
 export default router;

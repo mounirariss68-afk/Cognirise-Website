@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.2.0
  */
 import type { DocumentAvailabilityDestination } from './documentAvailabilityDestination';
+import type { DocumentAvailabilityReviewBlockedReason } from './documentAvailabilityReviewBlockedReason';
 import type { DocumentAvailabilitySharedSource } from './documentAvailabilitySharedSource';
 
 export interface DocumentAvailability {
@@ -21,6 +22,10 @@ export interface DocumentAvailability {
   publishedVersion: number;
   sharedSource: DocumentAvailabilitySharedSource;
   canEditShared: boolean;
+  canReviewShared: boolean;
+  /** @nullable */
+  reviewBlockedReason: DocumentAvailabilityReviewBlockedReason;
+  canPublishShared: boolean;
   items: DocumentAvailabilityDestination[];
   /** Market/locale destination labels affected by the returned reviewed or published snapshot. */
   affectedEditions: string[];

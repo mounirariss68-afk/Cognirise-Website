@@ -16,6 +16,11 @@ test("an editor authorized for every destination can read shared-source/und whil
     import("../src/lib/security.ts"),
   ]);
   let marketCodes = ["ksa", "uae"];
+  let configured = true;
+  let grants = ["ksa", "uae"].flatMap((market_code) => [
+    { topic: "publication", capability: "view", scope: "regional", market_code },
+    { topic: "publication", capability: "view", scope: "shared", market_code },
+  ]);
   const now = new Date("2026-10-01T12:00:00Z");
   const documentId = "00000000-0000-4000-8000-000000000701";
   const query = async (sql: unknown, values: unknown[] = []) => {
@@ -41,6 +46,14 @@ test("an editor authorized for every destination can read shared-source/und whil
           mfa_enabled: true,
           market_codes: marketCodes,
         }],
+      };
+    }
+    if (statement.includes("cms_user_capability_configurations")) return { rowCount: configured ? 1 : 0, rows: [] };
+    if (statement.includes("FROM cms_user_capability_grants")) return { rowCount: grants.length, rows: grants };
+    if (statement.includes("SELECT e.id edition_id,e.content_mode,d.kind FROM cms_documents")) {
+      return {
+        rowCount: 1,
+        rows: [{ edition_id: "00000000-0000-4000-8000-000000000702", content_mode: "shared", kind: "publication" }],
       };
     }
     if (statement.includes("SELECT content_mode FROM cms_market_editions")) {
@@ -123,10 +136,18 @@ test("an editor authorized for every destination can read shared-source/und whil
   assert.equal((await authorized.json() as { currentRevisionId: string }).currentRevisionId,
     "00000000-0000-4000-8000-000000000703");
 
-  marketCodes = ["ksa"];
-  const restricted = await fetch(endpoint, { headers });
-  assert.equal(restricted.status, 403);
+  grants = grants.filter((grant) => !(grant.scope === "regional" && grant.market_code === "uae"));
+  assert.equal((await fetch(endpoint, { headers })).status, 403, "one missing regional destination denies internal shared access");
 
+  grants = ["ksa", "uae"].flatMap((market_code) => [
+    { topic: "publication", capability: "view", scope: "regional", market_code },
+    { topic: "publication", capability: "view", scope: "shared", market_code },
+  ]).filter((grant) => !(grant.scope === "shared" && grant.market_code === "ksa"));
+  assert.equal((await fetch(endpoint, { headers })).status, 403, "one missing Shared destination denies internal shared access");
+
+  grants = [];
+  assert.equal((await fetch(endpoint, { headers })).status, 403, "configured-empty authority denies internal shared access");
+  configured = false;
   marketCodes = ["uae"];
   const localeSplit = await fetch(
     `http://127.0.0.1:${address.port}/api/documents/${documentId}?market=uae&locale=ar`,

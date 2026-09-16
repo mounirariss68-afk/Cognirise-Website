@@ -15,6 +15,7 @@ type Props = {
   canManage: boolean;
   isAdministrator: boolean;
   assignedMarketCodes?: string[];
+  canManageMarket?: (market: string) => boolean;
   isLoading?: boolean;
   page?: number;
   pageSize?: number;
@@ -30,6 +31,7 @@ export function DocumentMarketMatrix({
   canManage,
   isAdministrator,
   assignedMarketCodes,
+  canManageMarket: canManageMarketOverride,
   isLoading = false,
   page = 1,
   pageSize = 20,
@@ -100,7 +102,9 @@ export function DocumentMarketMatrix({
             ) : (
               documents.map((doc) => (
                 <DocumentMarketRow key={doc.id} document={doc} markets={markets} locale={locale}
-                  canManageMarket={(market) => canManage && (isAdministrator || Boolean(assignedMarketCodes?.includes(market)))}
+                  canManageMarket={(market) => canManageMarketOverride
+                    ? canManageMarketOverride(market)
+                    : canManage && (isAdministrator || Boolean(assignedMarketCodes?.includes(market)))}
                   isAdministrator={isAdministrator} draft={drafts[doc.id]}
                   onDraftChange={(draft) => setDrafts((previous) => ({ ...previous, [doc.id]: draft }))}
                   onOpen={(market, language, focus) => open(doc.id, market, language, focus)} />

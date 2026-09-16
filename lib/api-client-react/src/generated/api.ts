@@ -31,6 +31,8 @@ import type {
   AuthBootstrapInput,
   AuthResult,
   BadRequestResponse,
+  CapabilityMigrationDryRunInput,
+  CapabilityMigrationDryRunReceipt,
   ConflictResponse,
   ConsentInput,
   ConsentRecord,
@@ -52,6 +54,7 @@ import type {
   DocumentPage,
   DocumentPreview,
   DocumentRevision,
+  DocumentRevisionAccuracyConfirmation,
   DocumentRevisionPage,
   DocumentUpdate,
   EditionOverrideInput,
@@ -73,6 +76,7 @@ import type {
   ForbiddenResponse,
   GetDashboardKpisParams,
   GetDocumentParams,
+  GetDocumentRevisionAccuracyConfirmation200,
   GetEditorialTeamWorkParams,
   GetMyEditorialWorkParams,
   GetNavigationSettingsParams,
@@ -5068,6 +5072,162 @@ export function useGetDocumentRevision<TData = Awaited<ReturnType<typeof getDocu
 
 
 
+export const getGetDocumentRevisionAccuracyConfirmationUrl = (documentId: string,
+    revisionId: string,) => {
+
+
+
+
+  return `/api/documents/${documentId}/revisions/${revisionId}/accuracy-confirmation`
+}
+
+/**
+ * @summary Get the latest explicit accuracy confirmation for a revision
+ */
+export const getDocumentRevisionAccuracyConfirmation = async (documentId: string,
+    revisionId: string, options?: Parameters<typeof customFetch>[1]): Promise<GetDocumentRevisionAccuracyConfirmation200> => {
+
+  return customFetch<GetDocumentRevisionAccuracyConfirmation200>(getGetDocumentRevisionAccuracyConfirmationUrl(documentId,revisionId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetDocumentRevisionAccuracyConfirmationQueryKey = (documentId: string,
+    revisionId: string,) => {
+    return [
+    `/api/documents/${documentId}/revisions/${revisionId}/accuracy-confirmation`
+    ] as const;
+    }
+
+
+export const getGetDocumentRevisionAccuracyConfirmationQueryOptions = <TData = Awaited<ReturnType<typeof getDocumentRevisionAccuracyConfirmation>>, TError = ErrorType<NotFoundResponse>>(documentId: string,
+    revisionId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDocumentRevisionAccuracyConfirmation>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetDocumentRevisionAccuracyConfirmationQueryKey(documentId,revisionId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getDocumentRevisionAccuracyConfirmation>>> = ({ signal }) => getDocumentRevisionAccuracyConfirmation(documentId,revisionId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: documentId !== null && documentId !== undefined && revisionId !== null && revisionId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getDocumentRevisionAccuracyConfirmation>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetDocumentRevisionAccuracyConfirmationQueryResult = NonNullable<Awaited<ReturnType<typeof getDocumentRevisionAccuracyConfirmation>>>
+export type GetDocumentRevisionAccuracyConfirmationQueryError = ErrorType<NotFoundResponse>
+
+
+/**
+ * @summary Get the latest explicit accuracy confirmation for a revision
+ */
+
+export function useGetDocumentRevisionAccuracyConfirmation<TData = Awaited<ReturnType<typeof getDocumentRevisionAccuracyConfirmation>>, TError = ErrorType<NotFoundResponse>>(
+ documentId: string,
+    revisionId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDocumentRevisionAccuracyConfirmation>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetDocumentRevisionAccuracyConfirmationQueryOptions(documentId,revisionId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getConfirmDocumentRevisionAccuracyUrl = (documentId: string,
+    revisionId: string,) => {
+
+
+
+
+  return `/api/documents/${documentId}/revisions/${revisionId}/accuracy-confirmation`
+}
+
+/**
+ * Records actor, time, revision, and immutable content digest. This never changes document content, workflow, or publication state.
+ * @summary Explicitly confirm the accuracy of the current saved revision
+ */
+export const confirmDocumentRevisionAccuracy = async (documentId: string,
+    revisionId: string, options?: Parameters<typeof customFetch>[1]): Promise<DocumentRevisionAccuracyConfirmation> => {
+
+  return customFetch<DocumentRevisionAccuracyConfirmation>(getConfirmDocumentRevisionAccuracyUrl(documentId,revisionId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getConfirmDocumentRevisionAccuracyMutationOptions = <TError = ErrorType<ConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof confirmDocumentRevisionAccuracy>>, TError,{documentId: string;revisionId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof confirmDocumentRevisionAccuracy>>, TError,{documentId: string;revisionId: string}, TContext> => {
+
+const mutationKey = ['confirmDocumentRevisionAccuracy'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof confirmDocumentRevisionAccuracy>>, {documentId: string;revisionId: string}> = (props) => {
+          const {documentId,revisionId} = props ?? {};
+
+          return  confirmDocumentRevisionAccuracy(documentId,revisionId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ConfirmDocumentRevisionAccuracyMutationResult = NonNullable<Awaited<ReturnType<typeof confirmDocumentRevisionAccuracy>>>
+
+    export type ConfirmDocumentRevisionAccuracyMutationError = ErrorType<ConflictResponse>
+
+    /**
+ * @summary Explicitly confirm the accuracy of the current saved revision
+ */
+export const useConfirmDocumentRevisionAccuracy = <TError = ErrorType<ConflictResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof confirmDocumentRevisionAccuracy>>, TError,{documentId: string;revisionId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof confirmDocumentRevisionAccuracy>>,
+        TError,
+        {documentId: string;revisionId: string},
+        TContext
+      > => {
+      return useMutation(getConfirmDocumentRevisionAccuracyMutationOptions(options));
+    }
+
 export const getSubmitDocumentUrl = (documentId: string,) => {
 
 
@@ -7400,6 +7560,79 @@ export const useUpdateUser = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getUpdateUserMutationOptions(options));
+    }
+
+export const getDryRunUserCapabilityMigrationUrl = (userId: string,) => {
+
+
+
+
+  return `/api/users/${userId}/capability-migration/dry-run`
+}
+
+/**
+ * Produces a durable receipt with before and proposed effective-rights snapshots. It never writes grants, roles, markets, editorial work, or publication state.
+ * @summary Record a no-change capability compatibility dry run
+ */
+export const dryRunUserCapabilityMigration = async (userId: string,
+    capabilityMigrationDryRunInput: CapabilityMigrationDryRunInput, options?: Parameters<typeof customFetch>[1]): Promise<CapabilityMigrationDryRunReceipt> => {
+
+  return customFetch<CapabilityMigrationDryRunReceipt>(getDryRunUserCapabilityMigrationUrl(userId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(capabilityMigrationDryRunInput)
+  }
+);}
+
+
+
+
+
+export const getDryRunUserCapabilityMigrationMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof dryRunUserCapabilityMigration>>, TError,{userId: string;data: BodyType<CapabilityMigrationDryRunInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof dryRunUserCapabilityMigration>>, TError,{userId: string;data: BodyType<CapabilityMigrationDryRunInput>}, TContext> => {
+
+const mutationKey = ['dryRunUserCapabilityMigration'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof dryRunUserCapabilityMigration>>, {userId: string;data: BodyType<CapabilityMigrationDryRunInput>}> = (props) => {
+          const {userId,data} = props ?? {};
+
+          return  dryRunUserCapabilityMigration(userId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DryRunUserCapabilityMigrationMutationResult = NonNullable<Awaited<ReturnType<typeof dryRunUserCapabilityMigration>>>
+    export type DryRunUserCapabilityMigrationMutationBody = BodyType<CapabilityMigrationDryRunInput>
+    export type DryRunUserCapabilityMigrationMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Record a no-change capability compatibility dry run
+ */
+export const useDryRunUserCapabilityMigration = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof dryRunUserCapabilityMigration>>, TError,{userId: string;data: BodyType<CapabilityMigrationDryRunInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof dryRunUserCapabilityMigration>>,
+        TError,
+        {userId: string;data: BodyType<CapabilityMigrationDryRunInput>},
+        TContext
+      > => {
+      return useMutation(getDryRunUserCapabilityMigrationMutationOptions(options));
     }
 
 export const getResetUserPasswordUrl = (userId: string,) => {

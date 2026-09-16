@@ -1,4 +1,4 @@
-import { Router, type IRouter } from "express";
+import { Router, type IRouter, type Response } from "express";
 import { pool } from "@workspace/db";
 import {
   NAVIGATION_ITEM_REGISTRY,
@@ -14,13 +14,13 @@ import {
 } from "@workspace/api-zod";
 import {
   authenticate,
-  requireAdministrator,
   requireCsrf,
   requireMfa,
   type AuthContext,
 } from "../lib/auth";
 import { audit } from "../lib/cms";
 import { asyncRoute } from "../lib/http";
+import { canAccessContent, type CmsCapability } from "../lib/policy";
 import {
   isNavigationDestinationAvailable,
   navigationCandidates,
@@ -30,6 +30,21 @@ import {
 
 const router: IRouter = Router();
 const defaultPages = [...new Set(NAVIGATION_ITEM_REGISTRY.map((item) => item.destination.split(/[?#]/)[0]))];
+
+async function requireNavigationCapability(
+  res: Response,
+  market: string,
+  capability: CmsCapability,
+): Promise<boolean> {
+  const auth = res.locals.auth as AuthContext;
+  if (await canAccessContent(auth.user, {
+    topic: "site-configuration",
+    capability,
+    marketCode: market,
+  })) return true;
+  res.status(403).json({ error: "You do not have the required site configuration capability for this geography." });
+  return false;
+}
 
 type StoredNavigationRow = {
   item_id: string;
@@ -214,20 +229,22 @@ router.get("/public/navigation", asyncRoute(async (req, res) => {
   res.set("Cache-Control", "public, max-age=0, must-revalidate").json(result);
 }));
 
-router.get("/navigation", authenticate, requireMfa, requireAdministrator, asyncRoute(async (req, res) => {
+router.get("/navigation", authenticate, requireMfa, asyncRoute(async (req, res) => {
   const market = typeof req.query.market === "string" ? req.query.market : "uae";
   const locale = typeof req.query.locale === "string" ? req.query.locale : "en";
+  if (!await requireNavigationCapability(res, market, "view")) return;
   const result = await settings(market, locale, false, true);
   if (!result) { res.status(404).json({ error: "Market or locale is unavailable." }); return; }
   res.set("Cache-Control", "no-store").json(result);
 }));
 
-router.put("/navigation", authenticate, requireMfa, requireCsrf, requireAdministrator, asyncRoute(async (req, res) => {
+router.put("/navigation", authenticate, requireMfa, requireCsrf, asyncRoute(async (req, res) => {
   const parsed = UpdateNavigationSettingsSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: "Invalid navigation settings.", details: parsed.error.issues });
     return;
   }
+  if (!await requireNavigationCapability(res, parsed.data.market, "edit")) return;
   const auth = res.locals.auth as AuthContext;
   const client = await pool.connect();
   let nextVersion = 1;
@@ -304,7 +321,7 @@ router.put("/navigation", authenticate, requireMfa, requireCsrf, requireAdminist
   res.json(await settings(parsed.data.market, parsed.data.locale, false, true));
 }));
 
-router.post("/navigation/publish", authenticate, requireMfa, requireCsrf, requireAdministrator, asyncRoute(async (req, res) => {
+router.post("/navigation/publish", authenticate, requireMfa, requireCsrf, asyncRoute(async (req, res) => {
   const parsedRequest = PublishNavigationSettingsBody.safeParse(req.body);
   if (!parsedRequest.success) {
     res.status(400).json({
@@ -314,6 +331,7 @@ router.post("/navigation/publish", authenticate, requireMfa, requireCsrf, requir
     return;
   }
   const { market, locale, version } = parsedRequest.data;
+  if (!await requireNavigationCapability(res, market, "publish")) return;
   const auth = res.locals.auth as AuthContext;
   const client = await pool.connect();
   try {
@@ -452,9 +470,10 @@ router.post("/navigation/publish", authenticate, requireMfa, requireCsrf, requir
   res.json(result);
 }));
 
-router.post("/navigation/review", authenticate, requireMfa, requireCsrf, requireAdministrator, asyncRoute(async (req, res) => {
+router.post("/navigation/review", authenticate, requireMfa, requireCsrf, asyncRoute(async (req, res) => {
   const market = typeof req.body?.market === "string" ? req.body.market : "uae";
   const locale = typeof req.body?.locale === "string" ? req.body.locale : "en";
+  if (!await requireNavigationCapability(res, market, "review")) return;
   const auth = res.locals.auth as AuthContext;
   const client = await pool.connect();
   try {

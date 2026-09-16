@@ -27,7 +27,7 @@ import { frameworkPreviewWarnings } from "@/lib/framework-preview";
 import { CmsPreviewFramework, normalizeCmsPreviewFramework } from "@/pages/CmsPreviewFramework";
 import { OfficeContactCard } from "@/components/OfficeContactCard";
 import { BankingEditorial } from "@/components/industries/BankingEditorial";
-import { Shell, type PreviewNavigationSnapshot } from "@/components/layout/Shell";
+import { Shell, type PreviewMarketContext, type PreviewNavigationSnapshot } from "@/components/layout/Shell";
 import { GovernedLandingRoute } from "@/components/GovernedLandingRoute";
 import AboutPeople from "@/pages/AboutPeople";
 import InsightsEditorial from "@/pages/InsightsEditorial";
@@ -74,6 +74,18 @@ const landingCompiledRoutes = {
   "/insights": InsightsEditorial,
   "/methodologies": MethodologiesPortfolio,
 } as const;
+
+function PreviewShell({ preview, children }: { preview: Preview; children: React.ReactNode }) {
+  const marketContext: PreviewMarketContext = {
+    market: preview.market,
+    locale: preview.locale,
+  };
+  return (
+    <Shell navigationOverride={preview.navigation} marketContext={marketContext}>
+      {children}
+    </Shell>
+  );
+}
 
 function isPreview(value: unknown): value is Preview {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
@@ -136,7 +148,7 @@ function PreviewBanner({ preview }: { preview: Preview }) {
   return (
     <header className="sticky top-0 z-[60] border-b border-amber-300 bg-amber-50 px-4 py-3 text-amber-950 sm:px-6 sm:py-4">
       <div className="mx-auto flex max-w-[1100px] flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-3">
-        <strong>Protected draft preview — not published</strong>
+        <strong>Protected saved-version preview</strong>
         <span className="font-mono text-[10px] uppercase sm:text-xs">{preview.requestedMarket} / {preview.requestedLocale} · revision {preview.revisionNumber}{preview.usedFallback ? " · fallback" : ""}</span>
       </div>
     </header>
@@ -421,6 +433,8 @@ function DraftPreviewContent({ preview, warnings }: { preview: Preview; warnings
         <PlatformPresentation
           title={typeof preview.document.title === "string" ? preview.document.title : "Untitled platform"}
           content={platform}
+           // Kept for public/card parity metadata; preview presentation uses
+           // content.summary, the field exposed as platform detail hero copy.
           summary={typeof preview.document.summary === "string" ? preview.document.summary : null}
           heroMedia={resolvePinnedCmsMedia(media, platform.heroMedia)}
           preview
@@ -509,21 +523,21 @@ export function CmsPreviewContent({
   if (preview.kind === "industry") {
     if (!validation.success) {
       return (
-        <Shell navigationOverride={preview.navigation}>
+        <PreviewShell preview={preview}>
           <PreviewBanner preview={preview} />
           <PreviewWarningPanel warnings={warnings} missingMedia={preview.missingMediaIds} />
           <ProtectedPreviewError error={{
             kind: "invalid-response",
             message: "This saved industry revision has validation errors and cannot be completed from public content.",
           }} />
-        </Shell>
+        </PreviewShell>
       );
     }
     return (
-      <Shell navigationOverride={preview.navigation}>
+      <PreviewShell preview={preview}>
         <PreviewBanner preview={preview} />
         <IndustryPreview preview={preview} content={validation.data.content as IndustryContent} />
-      </Shell>
+      </PreviewShell>
     );
   }
 
@@ -553,10 +567,10 @@ export function CmsPreviewContent({
   }
 
   return (
-    <Shell navigationOverride={preview.navigation}>
+    <PreviewShell preview={preview}>
       <PreviewBanner preview={preview} />
       <DraftPreviewContent preview={preview} warnings={warnings} />
-    </Shell>
+    </PreviewShell>
   );
 }
 
@@ -569,7 +583,7 @@ export default function CmsPreview() {
   const previewStatus = industryPreviewStatus(preview, error, loading);
 
   useEffect(() => {
-    applyMetadata({ title: "Draft preview | Cognirise", description: "Protected CMS draft preview.", canonicalUrl: null, noIndex: true });
+    applyMetadata({ title: "Protected preview | Cognirise", description: "Protected CMS saved-version preview.", canonicalUrl: null, noIndex: true });
     // Each capability gets an independent delivery lifecycle. In particular,
     // do not retain a prior ready state while its replacement is loading.
     lastPreviewStatus.current = undefined;
@@ -677,7 +691,7 @@ export default function CmsPreview() {
   const previewStatus = industryPreviewStatus(preview, error, loading);
 
   useEffect(() => {
-    applyMetadata({ title: "Draft preview | Cognirise", description: "Protected CMS draft preview.", canonicalUrl: null, noIndex: true });
+    applyMetadata({ title: "Protected preview | Cognirise", description: "Protected CMS saved-version preview.", canonicalUrl: null, noIndex: true });
     // Each capability gets an independent delivery lifecycle. In particular,
     // do not retain a prior ready state while its replacement is loading.
     lastPreviewStatus.current = undefined;
@@ -777,7 +791,7 @@ export default function CmsPreview() {
   const validation = validateCmsSnapshot(preview.kind, preview.document, "draft");
   const warnings = [...preview.validationWarnings, ...(validation.success ? [] : validation.errors)];
 
-  if (preview.kind === "industry") {
+   if (preview.kind === "industry") {
     if (!validation.success) {
       return (
         <Shell navigationOverride={preview.navigation}>

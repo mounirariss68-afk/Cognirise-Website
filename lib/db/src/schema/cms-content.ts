@@ -199,6 +199,24 @@ export const cmsDocumentAvailabilityStatesTable = pgTable(
       .$type<Array<{ marketEditionId: string; locale: string; decision: "inherit" | "show" | "off" }>>()
       .notNull()
       .default([]),
+    /**
+     * Immutable destination identities captured by availability review.  The
+     * compatibility projection above intentionally remains the client-facing
+     * matrix; this receipt is the authoritative stale-approval boundary.
+     */
+    reviewedDestinationPins: jsonb("reviewed_destination_pins")
+      .$type<Array<{
+        marketEditionId: string;
+        locale: string;
+        editionId: string | null;
+        revisionId: string | null;
+        contentDigest: string | null;
+        bindingId: string | null;
+        materializedRevisionId: string | null;
+        resolvedRevisionId: string | null;
+      }>>()
+      .notNull()
+      .default([]),
     updatedByUserId: uuid("updated_by_user_id").references(() => cmsUsersTable.id, {
       onDelete: "set null",
     }),
@@ -329,6 +347,84 @@ export const cmsRevisionsTable = pgTable(
 );
 
 /**
+ * An explicit accuracy confirmation is evidence about one immutable revision,
+ * never an inferred side effect of saving or copying content. Multiple people
+ * may attest to the same revision; the latest confirmation is the operational
+ * "last verified" value and the full history remains auditable.
+ */
+export const cmsRevisionAccuracyConfirmationsTable = pgTable(
+  "cms_revision_accuracy_confirmations",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    revisionId: uuid("revision_id")
+      .notNull()
+      .references(() => cmsRevisionsTable.id, { onDelete: "cascade" }),
+    contentDigest: text("content_digest").notNull(),
+    confirmedByUserId: uuid("confirmed_by_user_id")
+      .notNull()
+      .references(() => cmsUsersTable.id, { onDelete: "restrict" }),
+    confirmedAt: timestamp("confirmed_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("cms_revision_accuracy_confirmation_actor_uidx").on(
+      table.revisionId,
+      table.confirmedByUserId,
+      table.contentDigest,
+    ),
+    index("cms_revision_accuracy_confirmation_latest_idx").on(
+      table.revisionId,
+      table.confirmedAt,
+    ),
+  ],
+);
+
+/**
+ * A restore-release receipt is the durable authority for the exceptional
+ * restore-successor transition. It is deliberately bound to every immutable
+ * identity involved in the recovery and to the actor who performed it; the
+ * consuming publication transaction marks it spent.
+ */
+export const cmsRestoreReleaseReceiptsTable = pgTable(
+  "cms_restore_release_receipts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    documentId: uuid("document_id")
+      .notNull()
+      .references(() => cmsDocumentsTable.id, { onDelete: "cascade" }),
+    editionId: uuid("edition_id")
+      .notNull()
+      .references(() => cmsMarketEditionsTable.id, { onDelete: "cascade" }),
+    revisionId: uuid("revision_id")
+      .notNull()
+      .references(() => cmsRevisionsTable.id, { onDelete: "cascade" }),
+    contentDigest: text("content_digest").notNull(),
+    authorizedActorUserId: uuid("authorized_actor_user_id")
+      .notNull()
+      .references(() => cmsUsersTable.id, { onDelete: "restrict" }),
+    authorizedTransition: text("authorized_transition").notNull(),
+    issuedAt: timestamp("issued_at", { withTimezone: true }).notNull().defaultNow(),
+    consumedAt: timestamp("consumed_at", { withTimezone: true }),
+    consumedByUserId: uuid("consumed_by_user_id").references(() => cmsUsersTable.id, {
+      onDelete: "set null",
+    }),
+  },
+  (table) => [
+    uniqueIndex("cms_restore_release_receipts_revision_transition_uidx").on(
+      table.revisionId,
+      table.authorizedTransition,
+    ),
+    index("cms_restore_release_receipts_actor_pending_idx").on(
+      table.authorizedActorUserId,
+      table.consumedAt,
+    ),
+    check(
+      "cms_restore_release_receipts_transition_check",
+      sql`${table.authorizedTransition} = 'restore-successor-release'`,
+    ),
+  ],
+);
+
+/**
  * A neutral baseline is deliberately not a cms_market_editions row.  It never
  * participates in legacy delivery/source selection and therefore cannot turn a
  * regional historical edition into a newly public shared source.
@@ -369,6 +465,10 @@ export const cmsSharedBaselineRevisionsTable = pgTable(
     sourceRevisionId: uuid("source_revision_id").references(() => cmsRevisionsTable.id, {
       onDelete: "set null",
     }),
+    governingSourceRevisionId: uuid("governing_source_revision_id").references(
+      () => cmsRevisionsTable.id,
+      { onDelete: "set null" },
+    ),
     createdByUserId: uuid("created_by_user_id").notNull().references(() => cmsUsersTable.id, {
       onDelete: "restrict",
     }),
@@ -380,6 +480,9 @@ export const cmsSharedBaselineRevisionsTable = pgTable(
       table.revisionNumber,
     ),
     index("cms_shared_baseline_revisions_source_idx").on(table.sourceRevisionId),
+    index("cms_shared_baseline_revisions_governing_source_idx").on(
+      table.governingSourceRevisionId,
+    ),
   ],
 );
 
@@ -719,6 +822,8 @@ export type CmsDocumentMarketAvailability =
 export type CmsDocumentAvailabilityState =
   typeof cmsDocumentAvailabilityStatesTable.$inferSelect;
 export type CmsRevision = typeof cmsRevisionsTable.$inferSelect;
+export type CmsRevisionAccuracyConfirmation = typeof cmsRevisionAccuracyConfirmationsTable.$inferSelect;
+export type CmsRestoreReleaseReceipt = typeof cmsRestoreReleaseReceiptsTable.$inferSelect;
 export type CmsSharedBaseline = typeof cmsSharedBaselinesTable.$inferSelect;
 export type CmsSharedBaselineRevision = typeof cmsSharedBaselineRevisionsTable.$inferSelect;
 export type CmsMarketEditionBinding = typeof cmsMarketEditionBindingsTable.$inferSelect;
