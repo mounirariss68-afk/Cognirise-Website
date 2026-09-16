@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { createPublicationTransactionFixture } from "./publication-transaction-fixture.ts";
 
 test("published offices with later drafts archive, restore, and never use permanent deletion", { concurrency: false }, async (t) => {
   const priorDatabaseUrl = process.env.DATABASE_URL;
@@ -141,35 +142,23 @@ test("published offices with later drafts archive, restore, and never use perman
     }
     return { rowCount: 0, rows: [] };
   });
-  t.mock.method(pool, "connect", async () => ({
-    async query(sql: unknown, values: unknown[] = []) {
-      const statement = String(sql);
-      if (["BEGIN", "COMMIT", "ROLLBACK"].includes(statement)) {
-        return { rowCount: 0, rows: [] };
+  const transactions: ReturnType<typeof createPublicationTransactionFixture>[] = [];
+  const createTransaction = () => createPublicationTransactionFixture({
+    documentLocks: { "office-id": "office-id" },
+    editionAccess: (id) => id === "office-id"
+      ? { rowCount: 1, rows: [{ edition_id: "edition-id", content_mode: "custom", kind: "office" }] }
+      : undefined,
+    workflowReceipts: (statement) => {
+      if (statement.includes("INSERT INTO cms_restore_release_receipts")) {
+        return { rowCount: 1, rows: [{ id: "office-restore-release-receipt" }] };
       }
+      return undefined;
+    },
+    unexpectedSqlLabel: "office lifecycle",
+    query: async (statement, values) => {
       if (statement.includes("SELECT status FROM cms_documents")) {
         return { rowCount: 1, rows: [{ status: rootStatus }] };
       }
-      if (statement === "SELECT id FROM cms_documents WHERE id=$1 FOR UPDATE") {
-        return String(values[0]) === "office-id"
-          ? { rowCount: 1, rows: [{ id: "office-id" }] }
-          : { rowCount: 0, rows: [] };
-      }
-      if (statement.includes("LOCK TABLE cms_user_market_assignments IN SHARE MODE")) {
-        return { rowCount: 0, rows: [] };
-      }
-      if (statement.includes("cms_user_capability_configurations") || statement.includes("FROM cms_user_capability_grants")) {
-        return { rowCount: 0, rows: [] };
-      }
-      if (statement.includes("FROM cms_legacy_administrator_market_snapshots")) {
-        return { rowCount: 1, rows: [{ market_codes: ["uae"] }] };
-      }
-      if (statement.includes("SELECT role,status") && statement.includes("FROM cms_users")) {
-        return { rowCount: 1, rows: [{ role: "administrator", status: "active" }] };
-      }
-      if (statement.includes("SELECT e.id edition_id,e.content_mode,d.kind FROM cms_documents")) {
-         return { rowCount: 1, rows: [{ edition_id: "edition-id", content_mode: "custom", kind: "office" }] };
-       }
        if (statement.includes("SELECT market,locale FROM cms_market_editions")) {
          return { rowCount: 1, rows: [{ market: "uae", locale: "en" }] };
       }
@@ -177,9 +166,6 @@ test("published offices with later drafts archive, restore, and never use perman
          deleteGuardChecked = statement.includes("publication_event.action='document.published'");
          return { rowCount: 0, rows: [] };
        }
-      if (statement.includes("SELECT market_code") && statement.includes("FROM cms_user_market_assignments")) {
-        return { rowCount: 1, rows: [{ market_code: "uae" }] };
-      }
       if (statement.includes("cms_document_availability_states")) {
         availabilityMutationAttempted = true;
         return { rowCount: 0, rows: [] };
@@ -240,9 +226,6 @@ test("published offices with later drafts archive, restore, and never use perman
           }],
         };
       }
-      if (statement.includes("INSERT INTO cms_restore_release_receipts")) {
-        return { rowCount: 1, rows: [{ id: "office-restore-release-receipt" }] };
-      }
       if (statement.includes("INSERT INTO cms_revision_accuracy_confirmations")) {
         return { rowCount: 1, rows: [] };
       }
@@ -251,14 +234,25 @@ test("published offices with later drafts archive, restore, and never use perman
         restoreCount += 1;
         return { rowCount: 1, rows: [{ id: "edition-id" }] };
       }
-      return { rowCount: 0, rows: [] };
+      return undefined;
     },
-    release() {},
-  }) as never);
+  });
+  t.mock.method(pool, "connect", async () => {
+    const transaction = createTransaction();
+    transactions.push(transaction);
+    return transaction.client as never;
+  });
 
   const server = app.listen(0, "127.0.0.1");
   await new Promise<void>((resolve) => server.once("listening", resolve));
   t.after(async () => {
+    assert.deepEqual(
+      transactions.map((transaction) => transaction.phase),
+      ["rolled-back", "committed", "committed"],
+    );
+    transactions[0]?.assertRolledBack();
+    transactions[1]?.assertCommitted();
+    transactions[2]?.assertCommitted();
     await new Promise<void>((resolve, reject) =>
       server.close((error) => (error ? reject(error) : resolve())),
     );

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import test from "node:test";
+import { createPublicationTransactionFixture } from "./publication-transaction-fixture.ts";
 
 test("generic review and publication validate site configuration and pin requested versions", async () => {
   const source = await readFile(resolve(process.cwd(), "src/routes/documents.ts"), "utf8");
@@ -174,12 +175,21 @@ test("publishing both hero slots makes their canonical revision-pinned media pub
     }
     throw new Error(`unexpected hero publication pool SQL: ${statement}`);
   });
-  t.mock.method(pool, "connect", async () => ({
-    async query(sql: unknown, values?: unknown[]) {
-      const statement = String(sql);
-      if (statement === "BEGIN" || statement === "COMMIT" || statement === "ROLLBACK") {
-        return { rowCount: 0, rows: [] };
-      }
+  const heroTransactions: ReturnType<typeof createPublicationTransactionFixture>[] = [];
+  const createHeroTransaction = () => createPublicationTransactionFixture({
+    documentLocks: Object.fromEntries(
+      Object.values(fixtures).map((fixture) => [fixture.row.id, fixture.row.id]),
+    ),
+    editionAccess: (id) => {
+      const fixture = Object.values(fixtures).find(
+        (candidate) => candidate.row.id === id,
+      );
+      return fixture
+        ? { rowCount: 1, rows: [{ edition_id: fixture.editionId, content_mode: "custom", kind: "site-configuration" }] }
+        : undefined;
+    },
+    unexpectedSqlLabel: "hero publication",
+    query: async (statement, values) => {
       if (statement.includes("SELECT r.id,r.edition_id,r.payload")
         && statement.includes("FROM cms_revisions r")) {
         const fixture = Object.values(fixtures).find(
@@ -207,44 +217,6 @@ test("publishing both hero slots makes their canonical revision-pinned media pub
               }],
             }
           : { rowCount: 0, rows: [] };
-      }
-      if (statement === "SELECT id FROM cms_documents WHERE id=$1 FOR UPDATE") {
-        const fixture = Object.values(fixtures).find(
-          (candidate) => candidate.row.id === String(values?.[0]),
-        );
-        return fixture
-          ? { rowCount: 1, rows: [{ id: fixture.row.id }] }
-          : { rowCount: 0, rows: [] };
-      }
-      if (statement.includes("LOCK TABLE cms_user_market_assignments IN SHARE MODE")) {
-        return { rowCount: 0, rows: [] };
-      }
-      if (statement.includes("SELECT role,status") && statement.includes("FROM cms_users")) {
-        return { rowCount: 1, rows: [{ role: "administrator", status: "active" }] };
-      }
-      if (statement.includes("SELECT market_code") && statement.includes("FROM cms_user_market_assignments")) {
-        return { rowCount: 1, rows: [{ market_code: "uae" }] };
-      }
-      if (statement.includes("SELECT e.id edition_id,e.content_mode,d.kind")) {
-        const fixture = Object.values(fixtures).find(
-          (candidate) => candidate.row.id === String(values?.[0]),
-        );
-        return fixture
-          ? { rowCount: 1, rows: [{ edition_id: fixture.editionId, content_mode: "custom", kind: "site-configuration" }] }
-          : { rowCount: 0, rows: [] };
-      }
-      if (statement.includes("SELECT 1 FROM cms_user_capability_configurations")
-        || statement.includes("FROM cms_user_capability_grants")) {
-        return { rowCount: 0, rows: [] };
-      }
-      if (statement.includes("FROM cms_legacy_administrator_market_snapshots")) {
-        return { rowCount: 1, rows: [{ market_codes: ["uae"] }] };
-      }
-      if (statement.includes("SELECT binding.mode,adopted.id baseline_id")) {
-        return { rowCount: 0, rows: [] };
-      }
-      if (statement.includes("SELECT binding.id::text,binding.mode,binding.baseline_id")) {
-        return { rowCount: 0, rows: [] };
       }
       if (statement.includes("SELECT e.id") && statement.includes("FROM cms_revisions r")
         && statement.includes("FOR UPDATE OF e")) {
@@ -286,10 +258,14 @@ test("publishing both hero slots makes their canonical revision-pinned media pub
         if (fixture) publishedSlugs.add(fixture.slug);
         return { rowCount: 1, rows: [] };
       }
-      throw new Error(`unexpected hero publication SQL: ${statement}`);
+      return undefined;
     },
-    release() {},
-  }) as never);
+  });
+  t.mock.method(pool, "connect", async () => {
+    const transaction = createHeroTransaction();
+    heroTransactions.push(transaction);
+    return transaction.client as never;
+  });
 
   const server = app.listen(0, "127.0.0.1");
   await new Promise<void>((resolve) => server.once("listening", resolve));
@@ -343,6 +319,8 @@ test("publishing both hero slots makes their canonical revision-pinned media pub
       ),
     );
   }
+  assert.equal(heroTransactions.length, 2);
+  for (const transaction of heroTransactions) transaction.assertCommitted();
   assert.deepEqual(requestedSlugs, ["site-homepage-hero", "site-industries-hero"]);
 
   function heroFixture(slot: "homepage" | "industries", ordinal: number) {
@@ -486,48 +464,13 @@ test("hero publication rolls back without moving the pointer on a stored MIME mi
      }
      throw new Error(`unexpected hero MIME pool SQL: ${statement}`);
   });
-  const transactionClient = {
-    async query(sql: unknown, values?: unknown[]) {
-      const statement = String(sql);
-      if (statement === "BEGIN" || statement === "COMMIT") {
-        return { rowCount: 0, rows: [] };
-      }
-      if (statement === "ROLLBACK") {
-        rolledBack = true;
-        return { rowCount: 0, rows: [] };
-      }
-      if (statement === "SELECT id FROM cms_documents WHERE id=$1 FOR UPDATE") {
-        return String(values?.[0]) === documentId
-          ? { rowCount: 1, rows: [{ id: documentId }] }
-          : { rowCount: 0, rows: [] };
-      }
-      if (statement.includes("LOCK TABLE cms_user_market_assignments IN SHARE MODE")) {
-        return { rowCount: 0, rows: [] };
-      }
-      if (statement.includes("SELECT role,status") && statement.includes("FROM cms_users")) {
-        return { rowCount: 1, rows: [{ role: "administrator", status: "active" }] };
-      }
-      if (statement.includes("SELECT market_code") && statement.includes("FROM cms_user_market_assignments")) {
-        return { rowCount: 1, rows: [{ market_code: "uae" }] };
-      }
-      if (statement.includes("SELECT e.id edition_id,e.content_mode,d.kind")) {
-        return String(values?.[0]) === documentId
-          ? { rowCount: 1, rows: [{ edition_id: editionId, content_mode: "custom", kind: "site-configuration" }] }
-          : { rowCount: 0, rows: [] };
-      }
-      if (statement.includes("SELECT 1 FROM cms_user_capability_configurations")
-        || statement.includes("FROM cms_user_capability_grants")) {
-        return { rowCount: 0, rows: [] };
-      }
-      if (statement.includes("FROM cms_legacy_administrator_market_snapshots")) {
-        return { rowCount: 1, rows: [{ market_codes: ["uae"] }] };
-      }
-      if (statement.includes("SELECT binding.mode,adopted.id baseline_id")) {
-        return { rowCount: 0, rows: [] };
-      }
-      if (statement.includes("SELECT binding.id::text,binding.mode,binding.baseline_id")) {
-        return { rowCount: 0, rows: [] };
-      }
+  const transaction = createPublicationTransactionFixture({
+    documentLocks: { [documentId]: documentId },
+    editionAccess: (id) => id === documentId
+      ? { rowCount: 1, rows: [{ edition_id: editionId, content_mode: "custom", kind: "site-configuration" }] }
+      : undefined,
+    unexpectedSqlLabel: "hero MIME transaction",
+    query: async (statement, values) => {
       if (statement.includes("SELECT e.id") && statement.includes("FROM cms_revisions r")
         && statement.includes("FOR UPDATE OF e")) {
         return String(values?.[0]) === candidateRevisionId && String(values?.[1]) === documentId
@@ -581,11 +524,10 @@ test("hero publication rolls back without moving the pointer on a stored MIME mi
       if (statement.includes("INSERT INTO cms_audit_events")) {
         return { rowCount: 1, rows: [] };
       }
-      throw new Error(`unexpected hero MIME transaction SQL: ${statement}`);
+      return undefined;
     },
-    release() {},
-  };
-  t.mock.method(pool, "connect", async () => transactionClient as never);
+  });
+  t.mock.method(pool, "connect", async () => transaction.client as never);
 
   const server = app.listen(0, "127.0.0.1");
   await new Promise<void>((resolve) => server.once("listening", resolve));
@@ -612,6 +554,8 @@ test("hero publication rolls back without moving the pointer on a stored MIME mi
     },
     body: JSON.stringify({ revisionId: candidateRevisionId }),
   });
+  rolledBack = transaction.phase === "rolled-back";
+  transaction.assertRolledBack();
 
   assert.equal(response.status, 422);
   assert.equal(publishedRevisionId, oldRevisionId);

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { getEventListeners } from "node:events";
 import { Readable } from "node:stream";
 import test from "node:test";
+import { createPublicationTransactionFixture } from "./publication-transaction-fixture.ts";
 
 test("public media stays on the revision pin when a newer asset version appears", {
   concurrency: false,
@@ -283,44 +284,14 @@ test("public media stays on the revision pin when a newer asset version appears"
     }
      throw new Error(`unexpected published media SQL: ${statement}`);
   });
-  const transactionClient = {
-    async query(sql: unknown, values?: unknown[]) {
-      const statement = String(sql);
-      if (statement === "BEGIN" || statement === "COMMIT" || statement === "ROLLBACK") {
-        return { rowCount: 0, rows: [] };
-      }
-      if (statement === "SELECT id FROM cms_documents WHERE id=$1 FOR UPDATE") {
-        return String(values?.[0]) === documentId
-          ? { rowCount: 1, rows: [{ id: documentId }] }
-          : { rowCount: 0, rows: [] };
-      }
-      if (statement.includes("LOCK TABLE cms_user_market_assignments IN SHARE MODE")) {
-        return { rowCount: 0, rows: [] };
-      }
-      if (statement.includes("SELECT role,status") && statement.includes("FROM cms_users")) {
-        return { rowCount: 1, rows: [{ role: "administrator", status: "active" }] };
-      }
-      if (statement.includes("SELECT market_code") && statement.includes("FROM cms_user_market_assignments")) {
-        return { rowCount: 1, rows: [{ market_code: "uae" }] };
-      }
-       if (statement.includes("SELECT 1 FROM cms_user_capability_configurations")
-         || statement.includes("FROM cms_user_capability_grants")) {
-         return { rowCount: 0, rows: [] };
-       }
-       if (statement.includes("FROM cms_legacy_administrator_market_snapshots")) {
-         return { rowCount: 1, rows: [{ market_codes: ["uae"] }] };
-       }
-       if (statement.includes("SELECT e.id edition_id,e.content_mode,d.kind")) {
-         return String(values?.[0]) === documentId
-           ? { rowCount: 1, rows: [{ edition_id: "edition-id", content_mode: "custom", kind: "platform" }] }
-           : { rowCount: 0, rows: [] };
-       }
-       if (statement.includes("SELECT binding.mode,adopted.id baseline_id")) {
-         return { rowCount: 0, rows: [] };
-       }
-       if (statement.includes("SELECT binding.id::text,binding.mode,binding.baseline_id")) {
-         return { rowCount: 0, rows: [] };
-       }
+  const transactions: ReturnType<typeof createPublicationTransactionFixture>[] = [];
+  const createTransaction = () => createPublicationTransactionFixture({
+    documentLocks: { [documentId]: documentId },
+    editionAccess: (id) => id === documentId
+      ? { rowCount: 1, rows: [{ edition_id: "edition-id", content_mode: "custom", kind: "platform" }] }
+      : undefined,
+    unexpectedSqlLabel: "published media transaction",
+    query: async (statement, values) => {
       if (statement.includes("SELECT e.id") && statement.includes("FROM cms_revisions r")
         && statement.includes("FOR UPDATE OF e")) {
         return String(values?.[0]) === pendingRevisionId && String(values?.[1]) === documentId
@@ -435,11 +406,14 @@ test("public media stays on the revision pin when a newer asset version appears"
       if (statement.includes("INSERT INTO cms_audit_events")) {
         return { rowCount: 1, rows: [] };
       }
-      throw new Error(`unexpected published media transaction SQL: ${statement}`);
+      return undefined;
     },
-    release() {},
-  };
-  t.mock.method(pool, "connect", async () => transactionClient as never);
+  });
+  t.mock.method(pool, "connect", async () => {
+    const transaction = createTransaction();
+    transactions.push(transaction);
+    return transaction.client as never;
+  });
   t.mock.method(publicMediaDelivery, "download", async (
     storageKey: string,
     range?: { start: number; end: number },
@@ -470,6 +444,12 @@ test("public media stays on the revision pin when a newer asset version appears"
   const server = app.listen(0, "127.0.0.1");
   await new Promise<void>((resolve) => server.once("listening", resolve));
   t.after(async () => {
+    assert.deepEqual(
+      transactions.map((transaction) => transaction.phase),
+      ["committed", "rolled-back"],
+    );
+    transactions[0]?.assertCommitted();
+    transactions[1]?.assertRolledBack();
     await new Promise<void>((resolve, reject) =>
       server.close((error) => (error ? reject(error) : resolve()))
     );
