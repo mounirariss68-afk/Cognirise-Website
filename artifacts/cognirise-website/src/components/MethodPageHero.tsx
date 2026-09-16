@@ -5,6 +5,7 @@ import { PulseImage } from "@/components/ui/pulse-image";
 import { assetUrl } from "@/lib/assets";
 import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
 import { getMarketLocationLabel, useMarketStore } from "@/store/market";
+import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
 
 interface MethodPageHeroProps {
   breadcrumb: string;
@@ -40,17 +41,20 @@ export function MethodPageHero({
 
   return (
     <header className="public-hero-shell px-6 pb-16 pt-9 md:px-[4.8vw] lg:pb-24 border-b border-[#cbd3e1]">
-      <div data-hero-content-edge className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.13em] text-[#102957]">
-        <span className="h-[2px] w-[23px] bg-gradient-to-r from-[hsl(var(--brand-violet))] via-[hsl(var(--brand-pink))] to-[hsl(var(--brand-coral))]" />
-        {cleanHeroIdentifier(breadcrumb, { marketLocation })}
-      </div>
-
-      <div className={`mt-8 grid gap-10 ${imageSrc ? "lg:grid-cols-[0.9fr_1.1fr] lg:items-end" : "max-w-4xl"}`}>
+      <div className={`grid gap-10 ${imageSrc ? "lg:grid-cols-[0.9fr_1.1fr] lg:items-start" : "max-w-4xl"}`}>
         <motion.div 
+          className="flex flex-col"
           initial={reducedMotion ? false : { opacity: 0, x: -24 }} 
           animate={{ opacity: 1, x: 0 }} 
           transition={{ duration: reducedMotion ? 0 : 0.65 }}
         >
+          <div className="flex flex-col gap-7">
+            <NavigationBackControl embedded />
+            <div data-hero-content-edge className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.13em] text-[#102957]">
+              <span className="h-[2px] w-[23px] bg-gradient-to-r from-[hsl(var(--brand-violet))] via-[hsl(var(--brand-pink))] to-[hsl(var(--brand-coral))]" />
+              {cleanHeroIdentifier(breadcrumb, { marketLocation })}
+            </div>
+          </div>
           <h1 className={`mt-5 font-display ${imageSrc ? "text-[clamp(45px,7vw,100px)]" : "text-[clamp(45px,6vw,80px)]"} font-semibold leading-[0.88] tracking-[-0.08em]`}>
             {title}
           </h1>

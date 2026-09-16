@@ -7,6 +7,7 @@ import { cmsMediaObjectPosition, resolveCmsMedia, type CmsRecord } from "@/lib/c
 import { assetUrl } from "@/lib/assets";
 import type { BankingPov, CmsMediaReferenceContract, IndustryContent as CmsIndustryContent } from "@workspace/api-zod";
 import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
+import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
 import {
   SpatialDisclosure,
   SpatialDisclosureItem,
@@ -44,7 +45,7 @@ export function BankingEditorial({ view }: { view: BankingView }) {
         .banking-editorial :focus-visible { outline:3px solid var(--b-coral); outline-offset:4px; }
         .b-kicker { display:flex; align-items:center; gap:10px; font-size:10px; font-weight:700; letter-spacing:.13em; text-transform:uppercase; }
         .b-kicker::before { width:25px; height:2px; content:""; background:linear-gradient(90deg,var(--b-violet),var(--b-pink),var(--b-coral)); }
-        .b-hero { display:grid; grid-template-columns:.88fr 1.12fr; gap:5vw; align-items:end; min-height:690px; padding:34px 4.8vw 50px; }
+        .b-hero { display:grid; grid-template-columns:.88fr 1.12fr; gap:5vw; align-items:start; min-height:690px; padding:34px 4.8vw 50px; }
         .b-copy { padding-bottom:25px; } .b-copy h1 { max-width:740px; margin:32px 0 28px; font-size:clamp(40px,5.5vw,84px); line-height:1; letter-spacing:-.06em; }
         .b-copy p { max-width:570px; color:#405677; font-size:18px; line-height:1.65; } .b-hero-descriptor { display:block; max-width:570px; margin-top:-14px; color:#506583; font-size:13px; font-weight:700; line-height:1.45; } .b-hero-anchors { display:flex; flex-wrap:wrap; gap:20px; margin-top:40px; }
         .b-hero-anchors a { display:inline-flex; align-items:center; gap:8px; border-bottom:1px solid var(--b-pink); padding-bottom:4px; color:var(--b-ink); font-size:14px; font-weight:600; text-decoration:none; }
@@ -89,7 +90,10 @@ export function BankingEditorial({ view }: { view: BankingView }) {
 
       <section className="b-hero public-hero-shell" data-industry-section="hero" aria-labelledby="banking-hero-title">
         <div className="b-copy">
-          <div className="b-kicker">{heroKicker}</div>
+          <div className="flex flex-col gap-7">
+            <NavigationBackControl embedded />
+            <div className="b-kicker">{heroKicker}</div>
+          </div>
           <h1 id="banking-hero-title">{pov.hero.heading}</h1>
           <span className="b-hero-descriptor">{pov.descriptor}</span>
           <p>{pov.hero.body}</p>

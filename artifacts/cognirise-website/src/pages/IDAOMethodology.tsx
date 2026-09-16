@@ -7,6 +7,7 @@ import { IDAO_CANON_LAYERS, IDAO_STAGES } from "@/content/idao";
 import { assetUrl } from "@/lib/assets";
 import { idaoEditorial, idaoHeroSeed, methodologySeoSeed } from "@workspace/api-zod";
 import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
+import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
 import {
   MethodologyCmsDelivery,
   methodologyEditorial,
@@ -58,10 +59,13 @@ function IDAOMethodologyContent() {
   return (
     <article className="overflow-hidden bg-[#fdfcfb] font-sans text-[#102957] selection:bg-[hsl(var(--brand-pink))] selection:text-white">
       <header className="public-hero-shell px-6 pb-16 pt-9 md:px-[4.8vw] lg:pb-24">
-        <div data-hero-content-edge><Kicker>{cleanHeroIdentifier(hero.breadcrumb)}</Kicker></div>
-        <div className="mt-8 grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
-          <motion.div initial={reducedMotion ? false : { opacity: 0, x: -24 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: reducedMotion ? 0 : 0.65 }}>
-            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[hsl(var(--brand-pink))]">{hero.supportingText}</p>
+        <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+          <motion.div className="flex flex-col" initial={reducedMotion ? false : { opacity: 0, x: -24 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: reducedMotion ? 0 : 0.65 }}>
+            <div className="flex flex-col gap-7">
+              <NavigationBackControl embedded />
+              <div data-hero-content-edge><Kicker>{cleanHeroIdentifier(hero.breadcrumb)}</Kicker></div>
+            </div>
+            <p className="mt-8 text-[11px] font-bold uppercase tracking-[0.16em] text-[hsl(var(--brand-pink))]">{hero.supportingText}</p>
             <h1 className="mt-5 font-display text-[clamp(58px,9vw,138px)] font-semibold leading-[0.82] tracking-[-0.095em]">{hero.title}</h1>
             <p className="mt-8 max-w-[620px] text-[19px] leading-[1.58] text-[#405777]">
                {hero.description}

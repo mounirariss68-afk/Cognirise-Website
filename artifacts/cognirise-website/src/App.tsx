@@ -98,6 +98,20 @@ export function Router() {
   const [location] = useLocation();
   const { market, locale } = useMarketStore();
   const path = location.split(/[?#]/)[0];
+  const embedsBackInHero = path === "/"
+    || path === "/platforms"
+    || path === "/methodologies/ai-use-case-prioritization"
+    || path === "/methodologies/ai-value-to-scale"
+    || path === "/methodologies/agentic-operations-readiness"
+    || path === "/methodologies/idao"
+    || path === "/methodologies/guardrails-framework"
+    || path === "/methodologies/human-agent-operating-model"
+    || path === "/industries/financial-services"
+    || path === "/industries/telecoms"
+    || path === "/industries/travel-hospitality"
+    || path === "/industries/energy-resources"
+    || path === "/industries/public-sector"
+    || path === "/industries/education";
   const isPreview = path.startsWith("/preview/");
   const policy = useGetPublicNavigationSettings({ market, locale }, {
     query: { queryKey: ["public-navigation", market, locale], enabled: !isPreview },
@@ -130,7 +144,7 @@ export function Router() {
   if (policy.isError) return <Shell><NavigationBackControl /><NotFound /></Shell>;
   return (
     <Shell>
-      <NavigationBackControl />
+      {(!embedsBackInHero || unavailable) && <NavigationBackControl />}
       {unavailable ? <NotFound /> :
       <Switch>
         <Route path="/" component={Home} />

@@ -3,21 +3,23 @@ import { useNavigationStore } from "@/store/navigation";
 
 export type NavigationBackControlProps = {
   className?: string;
+  embedded?: boolean;
 };
 
 /**
  * A shared, same-tab Back action. It is a button rather than an anchor so a
  * stale or external referrer can never turn the control into an off-site link.
  */
-export function NavigationBackControl({ className = "" }: NavigationBackControlProps) {
+export function NavigationBackControl({ className = "", embedded = false }: NavigationBackControlProps) {
   const { canGoBack, goBack } = useNavigationStore();
   if (!canGoBack) return null;
 
   return (
     <div
-      className={`public-hero-shell pb-6 pt-6 md:pb-8 md:pt-8 ${className}`.trim()}
+      className={`${embedded ? "py-0" : "public-hero-shell pb-6 pt-6 md:pb-8 md:pt-8"} ${className}`.trim()}
       data-navigation-back-container
       data-navigation-back-row
+      data-navigation-back-embedded={embedded ? "true" : undefined}
     >
       <button
         type="button"

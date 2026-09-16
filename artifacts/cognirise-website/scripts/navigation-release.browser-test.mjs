@@ -86,6 +86,15 @@ try {
     assert.ok(Math.abs(geometry.rowLeft - geometry.heroLeft) <= 1, `Back and hero left edges differ: ${JSON.stringify(geometry)}`);
     assert.ok(geometry.heroTop - geometry.rowBottom >= 20, `Back row does not separate the hero: ${JSON.stringify(geometry)}`);
   };
+  const assertEmbeddedBackGeometry = async (imageSelector) => {
+    const geometry = await evaluate(`({
+      backTop:${back}.getBoundingClientRect().top,
+      imageTop:document.querySelector(${JSON.stringify(imageSelector)}).getBoundingClientRect().top,
+      embedded:${backRow}.dataset.navigationBackEmbedded
+    })`);
+    assert.equal(geometry.embedded, "true");
+    assert.ok(Math.abs(geometry.backTop - geometry.imageTop) <= 1, `Embedded Back and hero image tops differ: ${JSON.stringify(geometry)}`);
+  };
   await send("Page.enable");
   await send("Network.enable");
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
@@ -105,11 +114,27 @@ try {
   assert.equal(await evaluate(`${back}.className.includes('border')`), false);
   assert.equal(await evaluate(`${back}.getBoundingClientRect().height < 32`), true);
   assert.equal(await evaluate(`${back}.closest('[data-navigation-back-container]').nextElementSibling !== null`), true);
-  await assertBackRowGeometry();
+  await assertEmbeddedBackGeometry(".platforms-hero-cut");
   assert.equal(await evaluate(`document.querySelectorAll('[data-method-return]').length`), 0);
   await evaluate(`${back}.click()`);
   await wait(`location.pathname==='/' && location.hash==='#service-lines' && document.querySelector('h1')`);
   assert.equal(await evaluate(`Boolean(${back})`), false);
+  await evaluate(`{ const a=document.createElement('a'); a.href='/platforms?market=ksa'; a.textContent='Test home hero Back source'; document.body.append(a); a.click(); }`);
+  await wait(`location.pathname==='/platforms' && Boolean(${back}) && document.querySelector('h1')`);
+  await evaluate(`{ const a=document.createElement('a'); a.href='/?market=ksa'; a.textContent='Test home hero Back'; document.body.append(a); a.click(); }`);
+  await wait(`location.pathname==='/' && Boolean(${back}) && document.querySelector('.home-hero-copy')`);
+  const homeGeometry = await evaluate(`({
+    backTop:${back}.getBoundingClientRect().top,
+    imageTop:document.querySelector('.home-hero-copy').nextElementSibling.getBoundingClientRect().top,
+    embedded:${backRow}.dataset.navigationBackEmbedded
+  })`);
+  assert.equal(homeGeometry.embedded, "true");
+  assert.ok(Math.abs(homeGeometry.backTop - homeGeometry.imageTop) <= 1, `Home Back and hero image tops differ: ${JSON.stringify(homeGeometry)}`);
+  console.log("PASS homepage Back aligns with the hero image without a separate row");
+  await evaluate(`${back}.click()`);
+  await wait(`location.pathname==='/platforms' && Boolean(${back})`);
+  await evaluate(`${back}.click()`);
+  await wait(`location.pathname==='/' && location.hash==='#service-lines' && document.querySelector('h1')`);
   console.log("PASS laptop navigation, regional delivery, native hash and subtle full-document Back");
   // Navigate through Wouter to a real dirty assessment; dismiss then accept.
   await evaluate(`document.querySelector('a[href="/methodologies"]').click()`);
@@ -117,6 +142,7 @@ try {
   await assertBackRowGeometry();
   await evaluate(`document.querySelector('a[href="/methodologies/ai-value-to-scale"]').click()`);
   await wait(`document.querySelector('input[type="radio"]')`);
+  await assertEmbeddedBackGeometry("[data-methodology-hero-frame]");
   await delay(600);
   await evaluate(`window.__beforeDirtyPush=history.pushState; document.querySelector('#assessment input[type="radio"]').click(); window.confirm=()=>false`);
   await wait(`document.querySelector('#assessment input[type="radio"]:checked') && history.pushState!==window.__beforeDirtyPush`);
@@ -127,6 +153,13 @@ try {
   await evaluate(`window.confirm=()=>true; ${back}.click()`);
   await wait(`location.pathname==='/methodologies'`);
   console.log("PASS canceled dirty-assessment traversal followed by shared Back");
+  await evaluate(`{ const a=document.createElement('a'); a.href='/industries/financial-services?market=uae'; a.textContent='Test banking hero Back'; document.body.append(a); a.click(); }`);
+  await wait(`location.pathname==='/industries/financial-services' && Boolean(${back}) && document.querySelector('.b-hero-image')`);
+  await assertEmbeddedBackGeometry(".b-hero-image");
+  await evaluate(`{ const a=document.createElement('a'); a.href='/industries/telecoms?market=uae'; a.textContent='Test shared industry hero Back'; document.body.append(a); a.click(); }`);
+  await wait(`location.pathname==='/industries/telecoms' && Boolean(${back}) && document.querySelector('.ind-image')`);
+  await assertEmbeddedBackGeometry(".ind-image");
+  console.log("PASS embedded Back aligns with banking and shared industry hero images");
   await send("Emulation.setDeviceMetricsOverride", { width: 1680, height: 1000, deviceScaleFactor: 1, mobile: false });
   await evaluate(`{ const a=document.createElement('a'); a.href='/what-we-do/data-ai-foundations'; a.textContent='Test wide service'; document.body.append(a); a.click(); }`);
   await wait(`location.pathname==='/what-we-do/data-ai-foundations' && Boolean(${back}) && Boolean(${heroShell}) && document.querySelector('h1')`);

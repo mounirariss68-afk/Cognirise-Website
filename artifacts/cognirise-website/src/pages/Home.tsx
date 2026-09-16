@@ -11,6 +11,7 @@ import { PulseImage } from "@/components/ui/pulse-image";
 import { contentRecord, governedLandingDelivery, landingCta, landingMedia, landingNarrative, landingSections, landingText, landingVisualReferences, useCmsCollection } from "@/lib/cms";
 import { IndustryPicker } from "@/components/IndustryPicker";
 import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
+import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
 
 const Kicker = ({ children, className = "text-[#102957]" }: { children: React.ReactNode, className?: string }) => (
   <div className={`flex items-center gap-3 text-[10px] tracking-[0.12em] uppercase font-semibold ${className}`}>
@@ -98,19 +99,22 @@ export default function Home() {
       
       {/* HERO */}
       <section ref={heroRef} className="public-hero-shell px-6 md:px-[4.8vw] pt-8 md:pt-[22px] overflow-hidden">
-        <motion.div
-          data-hero-content-edge
-          initial={prefersReducedMotion ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: prefersReducedMotion ? 0 : 0.6, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <Kicker>{heroKicker}</Kicker>
-        </motion.div>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-[0.94fr_1.06fr] gap-10 lg:gap-[4vw] items-end min-h-[auto] lg:min-h-[680px] pb-10 lg:pb-[34px] mt-8 lg:mt-0">
-          <motion.div className="max-w-[600px] lg:max-w-none">
+        <div className="grid grid-cols-1 lg:grid-cols-[0.94fr_1.06fr] gap-10 lg:gap-[4vw] items-start pb-10 lg:pb-[34px]">
+          <motion.div className="home-hero-copy flex max-w-[600px] flex-col lg:min-h-[640px] lg:max-w-none">
+            <div className="flex flex-col gap-7">
+              <NavigationBackControl embedded />
+              <motion.div
+                data-hero-content-edge
+                initial={prefersReducedMotion ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: prefersReducedMotion ? 0 : 0.6, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <Kicker>{heroKicker}</Kicker>
+              </motion.div>
+            </div>
+            <div className="mt-10 lg:mt-auto">
             <motion.h1
-              className="font-display font-semibold text-[clamp(40px,4.8vw,76px)] leading-[0.94] tracking-[-0.08em] mt-8 mb-7 [overflow-wrap:anywhere]"
+              className="font-display font-semibold text-[clamp(40px,4.8vw,76px)] leading-[0.94] tracking-[-0.08em] mb-7 [overflow-wrap:anywhere]"
               initial={prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: prefersReducedMotion ? 0 : 0.8, delay: prefersReducedMotion ? 0 : 0.1, ease: [0.16, 1, 0.3, 1] }}
@@ -136,6 +140,7 @@ export default function Home() {
                 ? <BrandButton href={heroCta.href}>{heroCta.label}</BrandButton>
                 : <BrandButton href="/#service-lines">Explore our practice</BrandButton>}
             </motion.div>
+            </div>
           </motion.div>
           
           <motion.div 

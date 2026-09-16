@@ -8,6 +8,7 @@ import { projectIndustrySnapshotForMarket, type IndustrySectionId, type PublicSe
 import type { IndustryContent } from "@/content/industries";
 import { contentRecord, useCmsEntry } from "@/lib/cms";
 import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
+import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
 import {
   SpatialDisclosure,
   SpatialDisclosureItem,
@@ -89,9 +90,12 @@ export function IndustryEditorialView({ view: baseView, marketOverride }: { view
   return (
     <main className={`industry industry--${view.variant}`} data-education-editorial={pov ? "" : undefined}>
       <style>{industryStyles}</style>
-      <IndustrySection id="hero" className="ind-hero public-hero-shell" aria-labelledby="industry-title">
+      <IndustrySection id="hero" className="ind-hero public-hero-shell" style={{ alignItems: "start" }} aria-labelledby="industry-title">
         <div className="ind-copy">
-          <div className="ind-kicker">{heroKicker}</div>
+          <div className="flex flex-col gap-7">
+            <NavigationBackControl embedded />
+            <div className="ind-kicker">{heroKicker}</div>
+          </div>
           <h1 id="industry-title">{thesisParts.map((part, index) => <React.Fragment key={`${part}-${index}`}>{index > 0 && <> <span className="ind-thesis-dash">—</span> </>}{part}</React.Fragment>)}</h1>
           <p>{view.dek}</p>
         </div>

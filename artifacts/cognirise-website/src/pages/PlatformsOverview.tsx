@@ -11,6 +11,7 @@ import { PlatformsHeroMedia } from "@/components/platforms/platforms-hero-media"
 import { useGovernedLanding } from "@/components/GovernedLandingRoute";
 import { landingCta, landingMedia, landingNarrative, landingSeo, landingText } from "@/lib/cms";
 import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
+import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
 
 export default function PlatformsOverview() {
   const governedLanding = useGovernedLanding();
@@ -44,13 +45,15 @@ export default function PlatformsOverview() {
   return (
     <div className="flex flex-col" data-governed-landing={governedLanding?.pagePath}>
       <section className="public-hero-shell px-6 md:px-12 pt-8 md:pt-12 max-w-[1440px] mx-auto w-full">
-        <div data-hero-content-edge className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-8">
-          <div className="h-[1px] w-6 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))]" />
-          {heroEyebrow}
-        </div>
-        
-        <div className="grid grid-cols-1 items-end gap-12 pb-12 lg:grid-cols-[0.86fr_1.14fr] lg:gap-16">
+        <div className="grid grid-cols-1 items-start gap-12 pb-12 lg:grid-cols-[0.86fr_1.14fr] lg:gap-16">
           <div className="pb-4 relative z-10">
+            <div className="mb-8 flex flex-col gap-7">
+              <NavigationBackControl embedded />
+              <div data-hero-content-edge className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                <div className="h-[1px] w-6 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))]" />
+                {heroEyebrow}
+              </div>
+            </div>
             <h1 className="text-5xl md:text-6xl lg:text-[93px] leading-[0.94] font-semibold mb-8 max-w-[660px]">
               {landingText(governedLanding, "platforms-hero-heading", governedHero?.heading ?? "Ecosystem for execution.")}
             </h1>
