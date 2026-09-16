@@ -81,3 +81,9 @@ Do not install a draft-only one-shot reconciler as a permanent fail-fast merge h
 **Why:** Normal review, publication, or later editing can invalidate its draft-only replay preconditions and then break every unrelated merge.
 
 **How to apply:** Keep such operations explicit, or first implement terminal reviewed/published-state recognition and non-destructive handling of newer editorial work.
+
+When identical binary storage has multiple immutable metadata successors, pin the latest exact successor after validating checksum, storage key, dimensions, source path, slot, role, and alt text.
+
+**Why:** Rights and accessibility approval correctly creates a later immutable version with the same bytes. Treating both versions as an ambiguous binary conflict blocks unrelated post-merge setup.
+
+**How to apply:** Order exact binary matches by immutable version number, validate the selected version’s editorial identity, and let bootstrap reconciliation preserve an already validated draft rather than rewriting its historical pin.

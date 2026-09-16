@@ -499,11 +499,13 @@ async function ensureMedia(client: SqlClient, source: MediaSource): Promise<Pin>
     throw new Error(`${source.sourcePath}: existing media asset conflicts with the exact editorial source.`);
   }
   let version = await client.query(
-    `SELECT id::text,asset_id::text,storage_key,checksum,byte_size,width,height,metadata
-       FROM cms_media_versions WHERE asset_id=$1 AND checksum=$2 AND storage_key=$3`,
+    `SELECT id::text,asset_id::text,storage_key,checksum,byte_size,width,height,metadata,version_number
+       FROM cms_media_versions
+      WHERE asset_id=$1 AND checksum=$2 AND storage_key=$3
+      ORDER BY version_number DESC,id DESC
+      LIMIT 1`,
     [row.id, source.checksum, storageKey],
   );
-  if ((version.rowCount ?? 0) > 1) throw new Error(`${source.sourcePath}: multiple immutable versions match this pin.`);
   if (!version.rowCount) {
     const number = await client.query(
       "SELECT COALESCE(MAX(version_number),0)+1 next FROM cms_media_versions WHERE asset_id=$1",
@@ -513,7 +515,7 @@ async function ensureMedia(client: SqlClient, source: MediaSource): Promise<Pin>
       `INSERT INTO cms_media_versions
         (asset_id,version_number,storage_key,checksum,byte_size,width,height,metadata)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-       RETURNING id::text,asset_id::text,storage_key,checksum,byte_size,width,height,metadata`,
+        RETURNING id::text,asset_id::text,storage_key,checksum,byte_size,width,height,metadata,version_number`,
       [row.id, number.rows[0]?.next, storageKey, source.checksum, source.byteSize, source.width, source.height, {
         sourcePath: source.sourcePath,
         editorialSlot: source.path,
@@ -526,9 +528,16 @@ async function ensureMedia(client: SqlClient, source: MediaSource): Promise<Pin>
     );
   }
   const immutable = version.rows[0];
+  const immutableMetadata = immutable?.metadata && typeof immutable.metadata === "object"
+    ? immutable.metadata as Record<string, unknown>
+    : {};
   if (!immutable || immutable.asset_id !== row.id || immutable.storage_key !== storageKey
     || immutable.checksum !== source.checksum || Number(immutable.byte_size) !== source.byteSize
     || Number(immutable.width) !== source.width || Number(immutable.height) !== source.height
+    || immutableMetadata.sourcePath !== source.sourcePath
+    || immutableMetadata.editorialSlot !== source.path
+    || immutableMetadata.role !== source.role
+    || immutableMetadata.altText !== source.altText
     || hasPlaceholder(immutable.id)) {
     throw new Error(`${source.sourcePath}: immutable media version conflicts with task 241.`);
   }
@@ -650,6 +659,13 @@ async function preflightDraftState(
       || reference.asset_checksum !== reference.version_checksum
       || reference.storage_key !== `${expectedStoragePrefix}${reference.asset_checksum}`)) {
     return preserveOrThrow("latest revision has conflicting immutable media pins");
+  }
+  if (bootstrap) {
+    return {
+      slug,
+      action: "preserved",
+      reason: "an exact validated Task 241 draft already exists",
+    };
   }
   return { slug, action: "stage" };
 }
