@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   canAccessContent,
   canAccessAnyContentCapability,
+  canAccessAnyTopic,
   marketsForContentCapability,
 } from "./content-capability";
 
@@ -33,6 +34,29 @@ test("legacy administrator authority stays within the frozen geography", () => {
   assert.equal(canAccessContent(user, {
     topic: "platform", capability: "edit", marketCode: "ksa",
   }), false);
+  for (const topic of [
+    "publication",
+    "case-study",
+    "person",
+    "partner",
+    "platform",
+    "industry",
+    "framework",
+    "office",
+  ] as const) {
+    assert.equal(
+      canAccessAnyTopic(user, topic, "view"),
+      true,
+      `${topic} must remain visible in the Content sidebar for a snapshotted administrator`,
+    );
+  }
+  assert.equal(
+    canAccessContent(user, {
+      topic: "site-configuration", capability: "publish", marketCode: "uae",
+    }),
+    true,
+    "the same snapshot must restore Website Navigation authority",
+  );
 });
 
 test("shared authority requires the source and every destination", () => {

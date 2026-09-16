@@ -309,6 +309,13 @@
       "when": 1788998400021,
       "tag": "0043_cms_restore_release_receipts",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1788998400022,
+      "tag": "0044_cms_legacy_administrator_snapshot_repair",
+      "breakpoints": true
     }
   ]
 }

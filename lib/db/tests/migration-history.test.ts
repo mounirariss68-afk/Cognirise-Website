@@ -70,6 +70,7 @@ const expectedMigrations = [
   { idx: 41, when: 1788998400019, tag: "0041_cms_shared_baseline_governing_source" },
   { idx: 42, when: 1788998400020, tag: "0042_cms_availability_destination_pins" },
   { idx: 43, when: 1788998400021, tag: "0043_cms_restore_release_receipts" },
+  { idx: 44, when: 1788998400022, tag: "0044_cms_legacy_administrator_snapshot_repair" },
 ];
 
 test("registers migrations in ordered Drizzle history", async () => {
@@ -168,6 +169,49 @@ test("applies the complete schema chain to a fresh database and replays safely",
     "cms_editorial_revision_supersedes_review",
     "cms_review_request_target_integrity",
   ]);
+  const legacyAdmin = randomUUID();
+  const futureAdmin = randomUUID();
+  await migrationPool.query(
+    `INSERT INTO cms_users(id,email,display_name,role,status)
+     VALUES ($1,'legacy-admin@example.test','Legacy administrator','administrator','active')`,
+    [legacyAdmin],
+  );
+  await migrationPool.query("DROP TRIGGER cms_capture_legacy_administrator_market_snapshot ON cms_users");
+  await migrationPool.query(
+    "DELETE FROM cms_legacy_administrator_market_snapshots WHERE user_id=$1",
+    [legacyAdmin],
+  );
+  const repairMigration = await readFile(
+    join(testMigrationsFolder, "0044_cms_legacy_administrator_snapshot_repair.sql"),
+    "utf8",
+  );
+  await migrationPool.query(repairMigration);
+  const repairedSnapshot = await migrationPool.query<{ market_codes: string[] }>(
+    "SELECT market_codes FROM cms_legacy_administrator_market_snapshots WHERE user_id=$1",
+    [legacyAdmin],
+  );
+  const enabledMarkets = await migrationPool.query<{ code: string }>(
+    "SELECT code FROM market_editions WHERE enabled ORDER BY code",
+  );
+  assert.deepEqual(
+    repairedSnapshot.rows[0]?.market_codes,
+    enabledMarkets.rows.map((row) => row.code),
+    "repair migration must restore the frozen geography for an existing unconfigured administrator",
+  );
+  await migrationPool.query(
+    `INSERT INTO cms_users(id,email,display_name,role,status)
+     VALUES ($1,'future-admin@example.test','Future administrator','administrator','active')`,
+    [futureAdmin],
+  );
+  const futureSnapshot = await migrationPool.query<{ market_codes: string[] }>(
+    "SELECT market_codes FROM cms_legacy_administrator_market_snapshots WHERE user_id=$1",
+    [futureAdmin],
+  );
+  assert.deepEqual(
+    futureSnapshot.rows[0]?.market_codes,
+    enabledMarkets.rows.map((row) => row.code),
+    "the repaired trigger must freeze geography for future administrators",
+  );
   // Runtime proof for the non-Drizzle integrity: an open review is bound to
   // its immutable revision and a later save supersedes it in the same
   // transaction, rather than carrying review approval forward.
