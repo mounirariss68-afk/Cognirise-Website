@@ -35,13 +35,27 @@ test("BlueprintJourney makes the full image card a hover and click target", () =
   assert.match(source, /\.blueprint-panel\s*\{[\s\S]*pointer-events: none;/);
 });
 
-test("BlueprintJourney uses readable duration badges that wrap inside every card width", () => {
-  assert.match(source, /\.blueprint-meta \{[\s\S]*flex-wrap: wrap;[\s\S]*min-width: 0;/);
-  assert.match(source, /\.blueprint-time \{[\s\S]*min-height: 34px;[\s\S]*padding: 8px 12px;/);
-  assert.match(source, /\.blueprint-time \{[\s\S]*border: 2px solid rgba\(255,255,255,0\.9\);[\s\S]*background: #fdfcfb; color: #102957;/);
-  assert.match(source, /\.blueprint-time \{[\s\S]*font: 700 clamp\(20px,1\.8vw,26px\)\/1\.2 Inter, sans-serif;/);
-  assert.match(source, /\.blueprint-time \{[\s\S]*max-width: 100%;[\s\S]*white-space: normal;[\s\S]*overflow-wrap: anywhere;/);
+test("BlueprintJourney presents durations as compact stage metadata rather than pills", () => {
+  assert.match(source, /\.blueprint-meta \{[\s\S]*grid-template-columns: auto minmax\(0, 1fr\);[\s\S]*min-width: 0;/);
+  assert.match(source, /\.blueprint-time \{[\s\S]*font-size: 10px;[\s\S]*letter-spacing: 0\.1em;/);
+  assert.match(source, /\.blueprint-time:before \{[\s\S]*background: var\(--bp-accent/);
+  assert.doesNotMatch(source, /\.blueprint-time \{[\s\S]*border-radius: 999px/);
+  assert.doesNotMatch(source, /\.blueprint-time \{[\s\S]*background: #fdfcfb/);
+  assert.doesNotMatch(source, /\.blueprint-time \{[\s\S]*box-shadow:/);
   assert.match(source, /\.blueprint-title \{[\s\S]*min-width: 0;[\s\S]*overflow-wrap: anywhere;/);
+});
+
+test("BlueprintJourney gives only the 48-hour stage controlled accent emphasis", () => {
+  assert.match(source, /"highlight" in stage && stage\.highlight[\s\S]*\? "blueprint-time--highlight"/);
+  assert.match(source, /\.blueprint-time--highlight \{[\s\S]*color: white;[\s\S]*text-decoration-color: var\(--bp-accent/);
+  assert.equal((content.match(/highlight: true/g) ?? []).length, 1);
+  assert.match(content, /time: "48 hours"[\s\S]*highlight: true/);
+});
+
+test("BlueprintJourney keeps metadata aligned in expanded desktop and stacked layouts", () => {
+  assert.match(source, /\.blueprint-row:has\(\.blueprint-item\.active\) \.blueprint-item:not\(\.active\) \.blueprint-meta \{[\s\S]*grid-template-columns: 1fr/);
+  assert.match(source, /@media \(max-width: 1023px\)[\s\S]*\.blueprint-meta \{ grid-template-columns: auto minmax\(0, 1fr\); \}/);
+  assert.match(source, /\.blueprint-time \{[\s\S]*max-width: 100%;[\s\S]*white-space: normal;[\s\S]*text-wrap: balance;/);
 });
 
 test("BlueprintJourney keeps image crop and text measure stable while cards expand", () => {

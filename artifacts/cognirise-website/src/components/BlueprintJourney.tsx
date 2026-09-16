@@ -103,17 +103,27 @@ export function BlueprintJourney() {
           }
           .blueprint-trigger:focus-visible { outline: 3px solid hsl(var(--brand-coral)); outline-offset: -4px; }
 
-          .blueprint-meta { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 10px; min-width: 0; margin-bottom: 2px; }
-          .blueprint-num { flex: 0 0 auto; font: 700 12px/1 Inter, sans-serif; letter-spacing: 0.12em; text-shadow: 0 1px 4px rgba(0,0,0,0.5); }
+          .blueprint-meta {
+            display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center;
+            gap: 8px; min-width: 0; margin-bottom: 4px;
+            font-family: Inter, sans-serif; text-transform: uppercase;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.55);
+          }
+          .blueprint-num { font-size: 10px; font-weight: 700; line-height: 1; letter-spacing: 0.14em; }
           .blueprint-time {
-            display: inline-flex; flex: 0 1 auto; align-items: center; justify-content: center;
-            min-width: 0; max-width: 100%; min-height: 34px; padding: 8px 12px;
-            border: 2px solid rgba(255,255,255,0.9); border-radius: 999px;
-            background: #fdfcfb; color: #102957;
-            font: 700 clamp(20px,1.8vw,26px)/1.2 Inter, sans-serif; letter-spacing: 0.04em;
-            text-align: center; text-transform: uppercase; white-space: normal; text-wrap: balance;
-            overflow-wrap: anywhere; word-break: normal; text-shadow: none;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.28);
+            display: inline-flex; align-items: center; justify-self: start;
+            min-width: 0; max-width: 100%; color: rgba(255,255,255,0.78);
+            font-size: 10px; font-weight: 650; line-height: 1.25; letter-spacing: 0.1em;
+            white-space: normal; text-wrap: balance; overflow-wrap: normal;
+          }
+          .blueprint-time:before {
+            content: ""; width: 14px; height: 1px; margin-right: 8px; flex: 0 0 auto;
+            background: var(--bp-accent, #7659df); opacity: 0.9;
+          }
+          .blueprint-time--highlight {
+            color: white; font-weight: 750;
+            text-decoration: underline; text-decoration-color: var(--bp-accent, #db509e);
+            text-decoration-thickness: 2px; text-underline-offset: 4px;
           }
 
           .blueprint-title { min-width: 0; font: 600 clamp(24px, 2.5vw, 32px)/1.02 Comfortaa, sans-serif; letter-spacing: -0.05em; margin: 0; overflow-wrap: anywhere; text-shadow: 0 2px 12px rgba(0,0,0,0.6); transition: color 0.3s; }
@@ -147,11 +157,18 @@ export function BlueprintJourney() {
              .blueprint-trigger { padding: 30px 28px 24px; }
             .blueprint-trigger > * { width: 100%; }
             .blueprint-panel-content { width: calc(var(--blueprint-active-width) - 56px); padding: 0 28px 28px; }
+             .blueprint-row:has(.blueprint-item.active) .blueprint-item:not(.active) .blueprint-meta {
+               grid-template-columns: 1fr; gap: 7px;
+             }
+             .blueprint-row:has(.blueprint-item.active) .blueprint-item:not(.active) .blueprint-time:before {
+               width: 10px; margin-right: 6px;
+             }
           }
           @media (max-width: 1023px) {
             .blueprint-item { min-height: 220px; grid-template-rows: minmax(220px, 1fr) 0fr; }
             .blueprint-row:has(.blueprint-item.active) .blueprint-item { flex-grow: 1; min-height: 140px; }
             .blueprint-row:has(.blueprint-item.active) .blueprint-item.active { grid-template-rows: minmax(140px, 1fr) auto; }
+            .blueprint-meta { grid-template-columns: auto minmax(0, 1fr); }
           }
           @media (prefers-reduced-motion: reduce) {
             .blueprint-item, .blueprint-panel, .blueprint-visual img, .blueprint-visual:after, .blueprint-visual:before { transition: none !important; }
@@ -203,7 +220,15 @@ export function BlueprintJourney() {
                       >
                         {stage.num}
                       </span>
-                      <span className="blueprint-time">{stage.time}</span>
+                      <span
+                        className={`blueprint-time ${
+                          "highlight" in stage && stage.highlight
+                            ? "blueprint-time--highlight"
+                            : ""
+                        }`}
+                      >
+                        {stage.time}
+                      </span>
                     </div>
                     <h3 className="blueprint-title">{stage.title}</h3>
                     <p className="blueprint-subtitle">{stage.subtitle}</p>

@@ -660,6 +660,10 @@ async function readBlueprintLayout() {
         return {
           text: node.textContent?.replace(/\\s+/g, " ").trim(),
           fontSize: Number.parseFloat(styles.fontSize),
+          titleFontSize: Number.parseFloat(getComputedStyle(title).fontSize),
+          backgroundColor: styles.backgroundColor,
+          borderRadius: styles.borderRadius,
+          highlighted: node.classList.contains("blueprint-time--highlight"),
           contrast: foreground ? contrast(blend(foreground, background), background) : 0,
           rect: durationRect,
           cardRect,
@@ -695,11 +699,13 @@ async function readBlueprintLayout() {
 }
 
 function assertBlueprintLayout(layout, viewport) {
-  assert.equal(layout.times.length, EXPECTED_TIMINGS.length, `${viewport}px: expected four timing badges.`);
-  assert.deepEqual(layout.times.map((item) => item.text), EXPECTED_TIMINGS, `${viewport}px: timing badge copy changed.`);
-  assert.ok(layout.times.every((item) => item.fontSize >= 20), `${viewport}px: every timing badge must be at least 20px: ${JSON.stringify(layout.times)}`);
-  assert.ok(layout.times.every((item) => item.contrast > 4.5), `${viewport}px: timing badge contrast is below 4.5: ${JSON.stringify(layout.times)}`);
-  assert.ok(layout.times.every((item) => !item.clipped && !item.overlapsTitle && !item.overlapsSubtitle), `${viewport}px: a timing badge clips or overlaps stage copy: ${JSON.stringify(layout.times)}`);
+  assert.equal(layout.times.length, EXPECTED_TIMINGS.length, `${viewport}px: expected four stage durations.`);
+  assert.deepEqual(layout.times.map((item) => item.text), EXPECTED_TIMINGS, `${viewport}px: stage duration copy changed.`);
+  assert.ok(layout.times.every((item) => item.fontSize >= 10 && item.fontSize < item.titleFontSize), `${viewport}px: durations must remain legible and subordinate to stage titles: ${JSON.stringify(layout.times)}`);
+  assert.ok(layout.times.every((item) => item.backgroundColor === "rgba(0, 0, 0, 0)" && item.borderRadius === "0px"), `${viewport}px: a duration regained obsolete filled-pill styling: ${JSON.stringify(layout.times)}`);
+  assert.deepEqual(layout.times.filter((item) => item.highlighted).map((item) => item.text), ["48 hours"], `${viewport}px: only the 48-hour promise should receive timing emphasis.`);
+  assert.ok(layout.times.every((item) => item.contrast > 4.5), `${viewport}px: stage duration contrast is below 4.5: ${JSON.stringify(layout.times)}`);
+  assert.ok(layout.times.every((item) => !item.clipped && !item.overlapsTitle && !item.overlapsSubtitle), `${viewport}px: a stage duration clips or overlaps stage copy: ${JSON.stringify(layout.times)}`);
   assert.ok(layout.cards.every((item) => item.image && item.imageVisible), `${viewport}px: a blueprint image disappeared.`);
   assert.ok(layout.overflow <= 1, `${viewport}px: blueprint has horizontal overflow.`);
 }
