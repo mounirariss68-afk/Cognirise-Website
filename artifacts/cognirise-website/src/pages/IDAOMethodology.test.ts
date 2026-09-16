@@ -164,3 +164,19 @@ test("IDAO media slots retain the fixed canonical stage and layer identities", (
   assert.equal((definition.match(/canonMedia: fixedList/g) ?? []).length, 1);
   assert.equal((definition.match(/role: "supporting"/g) ?? []).length, 10);
 });
+
+test("IDAO canon uses the commissioned Pulse image family in compiled and governed delivery", () => {
+  const replacements = [
+    "idao-canon-governed-lifecycle-v2.jpg",
+    "idao-canon-reusable-intelligence-v2.jpg",
+    "idao-canon-traceable-execution-v2.jpg",
+    "idao-canon-human-decision-gates-v2.jpg",
+    "idao-canon-assurance-by-design-v2.jpg",
+  ];
+  for (const image of replacements) {
+    assert.match(content, new RegExp(image.replace(".", "\\.")));
+    assert.match(editorial, new RegExp(image.replace(".", "\\.")));
+  }
+  assert.doesNotMatch(idaoSurface, /\/images\/cognirise\/canon-[1-5]\.jpg/);
+  assert.equal((page.match(/data-idao-canon-image=/g) ?? []).length, 1);
+});

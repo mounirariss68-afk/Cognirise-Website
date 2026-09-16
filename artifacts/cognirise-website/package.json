@@ -24,7 +24,8 @@
     "test:architecture-browser": "node scripts/architecture-platforms.browser-test.mjs",
     "test:readiness-browser": "node scripts/readiness-decision.browser-test.mjs",
     "test:methodology-browser": "node scripts/methodology-relationships.browser-test.mjs",
-    "test:methodology-frames-browser": "node scripts/methodology-frames.browser-test.mjs"
+    "test:methodology-frames-browser": "node scripts/methodology-frames.browser-test.mjs",
+    "test:idao-canon-browser": "node scripts/idao-canon.browser-test.mjs"
   },
   "devDependencies": {
     "@hookform/resolvers": "^3.10.0",

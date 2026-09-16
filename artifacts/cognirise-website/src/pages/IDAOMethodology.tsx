@@ -329,6 +329,7 @@ function IDAOMethodologyContent() {
               <div
                 role="img"
                 aria-label={layerImage.altText}
+                data-idao-canon-image={layer.num}
                 className="aspect-[4/3] rounded-sm border border-[#cbd3e1] bg-white bg-cover bg-center"
                 style={{ backgroundImage: `url("${layerImage.src}")` }}
               />

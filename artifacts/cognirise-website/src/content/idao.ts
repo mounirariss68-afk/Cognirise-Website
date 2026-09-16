@@ -127,8 +127,8 @@ export const IDAO_CANON_LAYERS = [
       { stage: "Activate", text: "Release readiness is earned through accepted evaluation and control evidence." },
       { stage: "Operate", text: "Live signals reopen the route when an assumption needs to be reshaped." },
     ],
-    image: "/images/cognirise/canon-1.jpg",
-    imageAlt: "A delicate line-art path passing through sequential control gates.",
+    image: "/images/cognirise/idao-canon-governed-lifecycle-v2.jpg",
+    imageAlt: "A luminous delivery route passing through four deep-navy control gateways in a bright architectural environment.",
   },
   {
     num: "02",
@@ -142,8 +142,8 @@ export const IDAO_CANON_LAYERS = [
       { stage: "Activate", text: "Proven delivery patterns give engineers a controlled starting point for the MVP." },
       { stage: "Operate", text: "Reusable operating routines support monitoring, intervention and continuous improvement." },
     ],
-    image: "/images/cognirise/canon-2.jpg",
-    imageAlt: "Intricate array of modular, glowing geometric components assembling into a structure.",
+    image: "/images/cognirise/idao-canon-reusable-intelligence-v2.jpg",
+    imageAlt: "Reusable modules travelling from a deep-navy intelligence library into a tailored architectural capability.",
   },
   {
     num: "03",
@@ -157,8 +157,8 @@ export const IDAO_CANON_LAYERS = [
       { stage: "Activate", text: "Requirements link through implementation to evaluation results and accepted limitations." },
       { stage: "Operate", text: "A live issue can be followed back to its requirement, decision and original value case." },
     ],
-    image: "/images/cognirise/canon-3.jpg",
-    imageAlt: "A continuous thread connecting blueprints and data points across a multi-layered plane.",
+    image: "/images/cognirise/idao-canon-traceable-execution-v2.jpg",
+    imageAlt: "An unbroken violet-to-coral signal connecting an originating object, a built route and an evidence chamber.",
   },
   {
     num: "04",
@@ -172,8 +172,8 @@ export const IDAO_CANON_LAYERS = [
       { stage: "Activate", text: "Named owners approve scope changes, accepted limitations and release readiness." },
       { stage: "Operate", text: "Client operators retain authority over intervention, governance and the improvement backlog." },
     ],
-    image: "/images/cognirise/canon-4.jpg",
-    imageAlt: "An intersection where algorithmic streams meet a distinct manual activation node.",
+    image: "/images/cognirise/idao-canon-human-decision-gates-v2.jpg",
+    imageAlt: "A human hand operating a substantial lever that directs converging violet streams into one approved coral route.",
   },
   {
     num: "05",
@@ -187,7 +187,7 @@ export const IDAO_CANON_LAYERS = [
       { stage: "Activate", text: "Security, accessibility, behaviour and data handling are evaluated before release." },
       { stage: "Operate", text: "Observable performance, tested support routines and known limitations accompany handover." },
     ],
-    image: "/images/cognirise/canon-5.jpg",
-    imageAlt: "A shielded technical structure with embedded validation markers.",
+    image: "/images/cognirise/idao-canon-assurance-by-design-v2.jpg",
+    imageAlt: "A working signal moving through integrated protective arches and transparent inspection layers toward operation.",
   },
 ] as const;
