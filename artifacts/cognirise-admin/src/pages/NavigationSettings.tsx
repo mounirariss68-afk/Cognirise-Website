@@ -6,6 +6,7 @@ import {
   usePublishNavigationSettings,
   useReviewNavigationSettings,
   useUpdateNavigationSettings,
+  useListMarketEditions,
   type NavigationSettings,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -28,6 +29,8 @@ import {
   navigationSnapshot,
   navigationTree,
 } from "./navigation-authoring";
+import { useQuery } from "@tanstack/react-query";
+import { getReleaseRegistry } from "@/lib/releases";
 
 function actionErrorMessage(error: unknown, fallback: string) {
   if (!error || typeof error !== "object") return fallback;
@@ -44,13 +47,6 @@ function actionErrorMessage(error: unknown, fallback: string) {
   if (typeof candidate.data === "string" && candidate.data.trim()) return candidate.data;
   return typeof candidate.message === "string" && candidate.message.trim() ? candidate.message : fallback;
 }
-
-const markets = [
-  { value: "uae", label: "UAE" },
-  { value: "ksa", label: "KSA" },
-  { value: "turkiye", label: "Türkiye" },
-  { value: "europe", label: "Europe" },
-];
 
 export function normalizeNavigationLocale(value: string): string | null {
   const normalized = value.trim().toLowerCase().replaceAll("_", "-");
@@ -77,6 +73,11 @@ export default function NavigationSettings() {
   // editor has already cleared its draft.
   const [localeInput, setLocaleInput] = useState("en");
   const params = useMemo(() => ({ market, locale }), [locale, market]);
+  const marketEditions = useListMarketEditions({ page: 1, pageSize: 100 });
+  const registry = useQuery({ queryKey: ["release-registry"], queryFn: getReleaseRegistry, staleTime: 300_000 });
+  const markets = useMemo(() => (marketEditions.data?.items ?? [])
+    .filter((item) => item.enabled)
+    .map((item) => ({ value: item.code, label: item.displayName, defaultLocale: item.defaultLocale })), [marketEditions.data?.items]);
   const activeKey = `${market}:${locale}`;
   const activeKeyRef = useRef(activeKey);
   activeKeyRef.current = activeKey;
@@ -190,7 +191,8 @@ export default function NavigationSettings() {
       setActionError("Enter a recognized locale such as en, en-US, or zh-Hant before switching editions.");
       return;
     }
-    switchEdition(nextMarket, nextLocale);
+    const configured = markets.find((item) => item.value === nextMarket);
+    switchEdition(nextMarket, configured?.defaultLocale || nextLocale);
   };
 
   const updateItem = (id: string, change: Partial<NavigationSettings["items"][number]>) => {
@@ -446,8 +448,8 @@ export default function NavigationSettings() {
                       onChange={(event) => updateItem(group.id, { destination: event.target.value })}
                       disabled={actionPending}
                     >
-                      {navigationDestinationOptions({ pages: draft?.pages ?? [], items: draft?.items ?? [] }, group.destination).map((option) => (
-                        <option key={option.value} value={option.value}>{option.label}</option>
+                      {navigationDestinationOptions({ pages: draft?.pages ?? [], items: draft?.items ?? [] }, group.destination, registry.data?.routes ?? []).map((option) => (
+                        <option key={option.value} value={option.value} disabled={option.disabled}>{option.label}</option>
                       ))}
                     </select>
                   </label>
@@ -498,8 +500,8 @@ export default function NavigationSettings() {
                             onChange={(event) => updateItem(child.id, { destination: event.target.value })}
                             disabled={actionPending}
                           >
-                            {navigationDestinationOptions({ pages: draft?.pages ?? [], items: draft?.items ?? [] }, child.destination).map((option) => (
-                              <option key={option.value} value={option.value}>{option.label}</option>
+                            {navigationDestinationOptions({ pages: draft?.pages ?? [], items: draft?.items ?? [] }, child.destination, registry.data?.routes ?? []).map((option) => (
+                              <option key={option.value} value={option.value} disabled={option.disabled}>{option.label}</option>
                             ))}
                           </select>
                         </label>

@@ -7,6 +7,7 @@ export type NavigationTreeItem = NavigationSetting & {
 export type NavigationPickerOption = {
   value: string;
   label: string;
+  disabled?: boolean;
 };
 
 function byOrder(a: NavigationSetting, b: NavigationSetting) {
@@ -64,25 +65,37 @@ function destinationLabel(
 }
 
 /**
- * Destinations are selected from known governed pages instead of typed IDs.
- * Keep an existing destination as an explicit option even if a future
- * registry/page response no longer advertises it, so loading and saving an
- * older draft cannot erase a value.
+ * Destinations are selected from the release registry. An unresolved legacy
+ * path is shown as quarantined so an editor can repair it, but it is never
+ * offered as a valid destination for a new or changed item.
  */
 export function navigationDestinationOptions(
   settings: Pick<NavigationSettings, "pages" | "items">,
   current?: string,
+  registryDestinations: ReadonlyArray<{ destinationId: string; path: string }> = [],
 ): NavigationPickerOption[] {
-  const paths = new Set(settings.pages.map((page) => page.path));
-  for (const item of settings.items) paths.add(item.destination);
-  if (current) paths.add(current);
-
-  return [...paths]
-    .sort((a, b) => a.localeCompare(b))
-    .map((path) => ({
-      value: path,
-      label: destinationLabel(path, settings.items),
+  const registeredPaths = new Set(registryDestinations.map((entry) => entry.path));
+  const configuredPaths = new Set(settings.pages.map((page) => page.path));
+  const options = registryDestinations
+    .filter((entry) => entry.path && entry.path !== "/preview/:token")
+    .filter((entry, index, all) => all.findIndex((candidate) => candidate.path === entry.path) === index)
+    .sort((a, b) => a.path.localeCompare(b.path))
+    .map((entry) => ({
+      value: entry.path,
+      label: `${entry.destinationId} · ${entry.path}${configuredPaths.has(entry.path) ? "" : " · unavailable in this edition"}`,
+      disabled: !configuredPaths.has(entry.path),
     }));
+  if (current && !registeredPaths.has(current)) {
+    options.unshift({
+      value: current,
+      label: `Repair required · unresolved legacy path ${current}`,
+      disabled: true,
+    });
+  }
+  return options.length ? options : settings.pages.map((page) => ({
+    value: page.path,
+    label: destinationLabel(page.path, settings.items),
+  }));
 }
 
 export function navigationPositionOptions(itemCount: number, currentOrder?: number): NavigationPickerOption[] {

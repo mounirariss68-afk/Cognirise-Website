@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Loader2, History, Lock, Search, X } from "lucide-react";
+import { Download, Loader2, History, Lock, Search, X } from "lucide-react";
 import { format } from "date-fns";
 
 const PAGE_SIZE = 50;
@@ -84,6 +84,14 @@ export default function AuditLog() {
     setFilters({ actorId: undefined, entityType: undefined, entityId: undefined, action: undefined, from: undefined, to: undefined });
   };
 
+  const exportAudit = () => {
+    const query = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value) query.set(key, value);
+    });
+    window.location.assign(`/api/audit/export?${query.toString()}`);
+  };
+
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-full p-8 text-center bg-card rounded-xl border border-destructive/20 shadow-sm max-w-2xl mx-auto mt-8" role="alert">
@@ -96,13 +104,14 @@ export default function AuditLog() {
 
   return (
     <div className="p-8 max-w-7xl mx-auto h-full flex flex-col">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-8">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
             <History className="w-6 h-6 text-primary" /> Audit Log
           </h1>
           <p className="text-sm text-muted-foreground font-mono mt-1">Immutable history of system actions</p>
         </div>
+        <Button type="button" variant="outline" onClick={exportAudit}><Download className="mr-2 h-4 w-4" />Export complete filtered history</Button>
       </div>
 
       <div className="bg-card border border-border rounded-xl shadow-sm flex flex-col flex-1 overflow-hidden">

@@ -41,10 +41,16 @@ test("navigation tree and parent picker expose labels, not registry identifiers"
   assert.equal(options.some((option) => option.label.includes("about.contact")), false);
 });
 
-test("destination picker keeps a currently stored page while using governed paths", () => {
-  const options = navigationDestinationOptions(settings, "/legacy");
+test("destination picker quarantines a stored legacy path and uses release registry destinations", () => {
+  const options = navigationDestinationOptions(settings, "/legacy", [
+    { destinationId: "home", path: "/" },
+    { destinationId: "about", path: "/about" },
+    { destinationId: "contact", path: "/contact" },
+  ]);
   assert.equal(options.some((option) => option.value === "/legacy"), true);
-  assert.equal(options.find((option) => option.value === "/contact")?.label, "Contact · /contact");
+  assert.equal(options.find((option) => option.value === "/legacy")?.disabled, true);
+  assert.equal(options.find((option) => option.value === "/contact")?.label, "contact · /contact");
+  assert.equal(options.find((option) => option.value === "/contact")?.disabled, false);
   assert.equal(options.some((option) => option.label.includes("about.contact")), false);
 });
 

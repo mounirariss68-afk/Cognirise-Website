@@ -9,7 +9,14 @@ import {
 } from "@workspace/api-zod";
 import { authenticate, requireAdministrator, requireCsrf, requireMfa, type AuthContext } from "../lib/auth";
 import { asyncRoute } from "../lib/http";
-import { audit } from "../lib/cms";
+import {
+  audit,
+  existingOperationReceipt,
+  operationDigest,
+  requestDigest,
+  reserveOperationReceipt,
+  saveOperationReceipt,
+} from "../lib/cms";
 import {
   buildReleaseCandidate,
   publicReleaseManifest,
@@ -19,6 +26,15 @@ import {
 
 const router: IRouter = Router();
 router.use("/releases", authenticate, requireMfa);
+
+function releaseReceipt(row: Record<string, any>) {
+  return {
+    id: String(row.id),
+    releaseNumber: Number(row.release_number),
+    releasedAt: row.released_at,
+    integrityDigest: row.integrity_digest,
+  };
+}
 
 router.get("/releases/registry", (_req, res) => res.json(CMS_RELEASE_REGISTRY));
 router.get("/releases/inventory", requireAdministrator, asyncRoute(async (_req, res) => {
@@ -31,6 +47,37 @@ router.get("/releases/inventory", requireAdministrator, asyncRoute(async (_req, 
       GROUP BY record_type,status ORDER BY record_type,status`,
   );
   res.json({ ...releaseInventory(), enabledMarkets: markets.rows, migration: migration.rows });
+}));
+
+router.get("/releases/history", requireAdministrator, asyncRoute(async (req, res) => {
+  const parsed = releaseScopeSchema.safeParse(req.query);
+  if (!parsed.success) { res.status(400).json({ error: "Invalid release scope." }); return; }
+  const result = await pool.query(
+    `SELECT id::text,release_number,status,registry_version,validation_digest,
+            integrity_digest,released_at,previous_release_id::text,
+            publisher_user_id::text,
+            (SELECT release_id=receipt.id FROM cms_active_releases
+              WHERE market=receipt.market AND locale=receipt.locale) active
+       FROM cms_release_receipts receipt
+      WHERE market=$1 AND locale=$2
+      ORDER BY release_number DESC LIMIT 100`,
+    [parsed.data.market, parsed.data.locale],
+  );
+  res.json({
+    scope: parsed.data,
+    items: result.rows.map((row) => ({
+      id: row.id,
+      releaseNumber: Number(row.release_number),
+      status: row.status,
+      registryVersion: row.registry_version,
+      validationDigest: row.validation_digest,
+      integrityDigest: row.integrity_digest,
+      releasedAt: row.released_at,
+      previousReleaseId: row.previous_release_id,
+      publisherId: row.publisher_user_id,
+      active: Boolean(row.active),
+    })),
+  });
 }));
 
 router.post("/releases/candidates", requireCsrf, requireAdministrator, asyncRoute(async (req, res) => {
@@ -79,15 +126,53 @@ router.post("/releases/publish", requireCsrf, requireAdministrator, asyncRoute(a
   const parsed = publishReleaseBodySchema.safeParse(req.body);
   if (!parsed.success) { res.status(400).json({ error: "Invalid release publication." }); return; }
   const auth = res.locals.auth as AuthContext;
+  const operation = "release.published";
+  const subjectId = parsed.data.candidateId;
+  const bodyDigest = requestDigest({ candidateId: parsed.data.candidateId });
+  const operationKey = operationDigest(auth.user.id, operation, subjectId, parsed.data.idempotencyKey);
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
+    const prior = await existingOperationReceipt(client, operationKey, operation, subjectId, bodyDigest, auth.user.id);
+    if (prior?.response) {
+      await client.query("ROLLBACK");
+      res.status(prior.statusCode ?? 201).json(prior.response);
+      return;
+    }
+    const reserved = await reserveOperationReceipt(client, {
+      idempotencyKey: operationKey, operation, subjectId, requestDigest: bodyDigest, actorUserId: auth.user.id,
+    });
+    if (!reserved) {
+      const committed = await existingOperationReceipt(client, operationKey, operation, subjectId, bodyDigest, auth.user.id);
+      if (committed?.response) {
+        await client.query("ROLLBACK");
+        res.status(committed.statusCode ?? 201).json(committed.response);
+        return;
+      }
+      throw Object.assign(new Error("This release publication is already in progress."), { code: "IDEMPOTENCY_CONFLICT" });
+    }
     const candidate = await client.query(
       `SELECT * FROM cms_release_candidates WHERE id=$1 FOR UPDATE`,
       [parsed.data.candidateId],
     );
     if (!candidate.rowCount) { await client.query("ROLLBACK"); res.status(404).json({ error: "Release candidate not found." }); return; }
     const row = candidate.rows[0];
+    const alreadyPublished = await client.query(
+      `SELECT id::text,release_number,released_at,integrity_digest
+         FROM cms_release_receipts WHERE candidate_id=$1 AND status='released'
+         ORDER BY release_number LIMIT 1`,
+      [row.id],
+    );
+    if (alreadyPublished.rowCount) {
+      const response = releaseReceipt(alreadyPublished.rows[0]);
+      await saveOperationReceipt(client, {
+        idempotencyKey: operationKey, operation, subjectId, requestDigest: bodyDigest,
+        actorUserId: auth.user.id, statusCode: 200, response,
+      });
+      await client.query("COMMIT");
+      res.status(200).json(response);
+      return;
+    }
     if (!row.validation?.ready || !row.separation_of_duties_valid) {
       await client.query("ROLLBACK"); res.status(409).json({ error: "Only a ready candidate with valid actor separation can be released.", validation: row.validation }); return;
     }
@@ -125,8 +210,13 @@ router.post("/releases/publish", requireCsrf, requireAdministrator, asyncRoute(a
     await audit(auth, "release.published", "release", publishedReceipt.id, {
       market: row.market, locale: row.locale, candidateId: row.id,
     }, client);
+    const response = releaseReceipt(publishedReceipt);
+    await saveOperationReceipt(client, {
+      idempotencyKey: operationKey, operation, subjectId, requestDigest: bodyDigest,
+      actorUserId: auth.user.id, statusCode: 201, response,
+    });
     await client.query("COMMIT");
-    res.status(201).json(publishedReceipt);
+    res.status(201).json(response);
   } catch (error) {
     await client.query("ROLLBACK").catch(() => undefined);
     throw error;
@@ -137,9 +227,31 @@ router.post("/releases/rollback", requireCsrf, requireAdministrator, asyncRoute(
   const parsed = rollbackReleaseBodySchema.safeParse(req.body);
   if (!parsed.success) { res.status(400).json({ error: "Invalid rollback request." }); return; }
   const auth = res.locals.auth as AuthContext;
+  const operation = "release.rolled_back";
+  const subjectId = parsed.data.releaseId;
+  const bodyDigest = requestDigest({ releaseId: parsed.data.releaseId });
+  const operationKey = operationDigest(auth.user.id, operation, subjectId, parsed.data.idempotencyKey);
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
+    const prior = await existingOperationReceipt(client, operationKey, operation, subjectId, bodyDigest, auth.user.id);
+    if (prior?.response) {
+      await client.query("ROLLBACK");
+      res.status(prior.statusCode ?? 201).json(prior.response);
+      return;
+    }
+    const reserved = await reserveOperationReceipt(client, {
+      idempotencyKey: operationKey, operation, subjectId, requestDigest: bodyDigest, actorUserId: auth.user.id,
+    });
+    if (!reserved) {
+      const committed = await existingOperationReceipt(client, operationKey, operation, subjectId, bodyDigest, auth.user.id);
+      if (committed?.response) {
+        await client.query("ROLLBACK");
+        res.status(committed.statusCode ?? 201).json(committed.response);
+        return;
+      }
+      throw Object.assign(new Error("This rollback is already in progress."), { code: "IDEMPOTENCY_CONFLICT" });
+    }
     const target = await client.query(`SELECT * FROM cms_release_receipts WHERE id=$1 FOR UPDATE`, [parsed.data.releaseId]);
     if (!target.rowCount) { await client.query("ROLLBACK"); res.status(404).json({ error: "Release receipt not found." }); return; }
     const row = target.rows[0];
@@ -170,8 +282,13 @@ router.post("/releases/rollback", requireCsrf, requireAdministrator, asyncRoute(
       [row.market,row.locale,rollbackReceipt.id],
     );
     await audit(auth, "release.rolled_back", "release", rollbackReceipt.id, { targetReleaseId: row.id }, client);
+    const response = releaseReceipt(rollbackReceipt);
+    await saveOperationReceipt(client, {
+      idempotencyKey: operationKey, operation, subjectId, requestDigest: bodyDigest,
+      actorUserId: auth.user.id, statusCode: 201, response,
+    });
     await client.query("COMMIT");
-    res.status(201).json(rollbackReceipt);
+    res.status(201).json(response);
   } catch (error) { await client.query("ROLLBACK").catch(() => undefined); throw error; }
   finally { client.release(); }
 }));
@@ -184,7 +301,15 @@ router.get("/public/releases/:market/:locale/manifest", asyncRoute(async (req, r
       return;
     }
     res.setHeader("cache-control", "public, max-age=60, stale-while-revalidate=300");
-    res.json(manifest);
+    res.json({
+      id: String(manifest.id),
+      releaseNumber: Number(manifest.release_number),
+      registryVersion: manifest.registry_version,
+      manifest: manifest.manifest,
+      validationDigest: manifest.validation_digest,
+      integrityDigest: manifest.integrity_digest,
+      releasedAt: manifest.released_at,
+    });
   } catch (error) {
     req.log.error({ err: error }, "Release manifest service failed");
     res.status(503).json({ code: "RELEASE_SERVICE_FAILURE", error: "The release service is temporarily unavailable." });

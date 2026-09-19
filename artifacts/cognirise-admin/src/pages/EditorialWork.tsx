@@ -134,6 +134,7 @@ export default function EditorialWork() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: session } = useGetSession();
+  const isRepresentative = (session?.user as { accountType?: string } | undefined)?.accountType === "external-representative";
   const [location, setLocation] = useLocation();
   const search = useSearch();
   const view = new URLSearchParams(search).get("view");
@@ -272,8 +273,8 @@ export default function EditorialWork() {
       )}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight"><UserRoundCheck className="h-6 w-6 text-primary" />Editorial work</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Assignments, exact revision reviews, and delivery signals.</p>
+          <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight"><UserRoundCheck className="h-6 w-6 text-primary" />{isRepresentative ? "Submission status" : "Editorial work"}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{isRepresentative ? "Track assigned drafts, Cognirise review, requested changes, approval, and publication." : "Assignments, exact revision reviews, and delivery signals."}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button variant={panel === "my-work" ? "default" : "outline"} size="sm" onClick={() => setPanel("my-work")}>My work</Button>

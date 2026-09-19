@@ -32,6 +32,7 @@ import {
 import { asyncRoute } from "../lib/http";
 import { logger } from "../lib/logger";
 import { hashToken, randomToken } from "../lib/security";
+import { createHash } from "node:crypto";
 import {
   AccessDeliveryError,
   createAccessDeliveryJob,
@@ -59,6 +60,7 @@ function userFromRow(row: Record<string, any>) {
     name: row.display_name ?? row.name ?? row.email,
     email: row.email,
     role: row.role,
+    accountType: row.account_type ?? "internal",
     status: row.status,
     marketCodes: row.market_codes ?? [],
     legacyAdministratorMarketCodes: row.legacy_administrator_market_codes ?? [],
@@ -1111,6 +1113,55 @@ router.get(
       ipAddress: null,
       createdAt: row.occurred_at,
     })), Number(result.rows[0]?.total_count ?? 0), q.page, q.pageSize));
+  }),
+);
+
+router.get(
+  "/audit/export",
+  requireAdministrator,
+  asyncRoute(async (req, res) => {
+    const parsed = ListAuditEventsQueryParams.safeParse({ ...req.query, page: 1, pageSize: 100 });
+    if (!parsed.success) {
+      res.status(400).json({ error: "Invalid audit export filters." });
+      return;
+    }
+    const q = parsed.data;
+    const result = await pool.query(
+      `SELECT a.id::text,a.occurred_at,u.display_name actor_name,u.email actor_email,
+              a.action,a.target_type,a.target_id,a.metadata
+         FROM cms_audit_events a LEFT JOIN cms_users u ON u.id=a.actor_user_id
+        WHERE ($1::uuid IS NULL OR a.actor_user_id=$1) AND ($2::text IS NULL OR a.target_type=$2)
+          AND ($3::text IS NULL OR a.target_id=$3) AND ($4::text IS NULL OR a.action=$4)
+          AND ($5::timestamptz IS NULL OR a.occurred_at >= $5)
+          AND ($6::timestamptz IS NULL OR a.occurred_at <= $6)
+        ORDER BY a.occurred_at DESC,a.id DESC`,
+      [q.actorId ?? null, q.entityType ?? null, q.entityId ?? null, q.action ?? null, q.from ?? null, q.to ?? null],
+    );
+    const spreadsheetSafe = (value: unknown) => {
+      const text = String(value ?? "");
+      return /^[=+\-@\t\r]/.test(text) ? `'${text}` : text;
+    };
+    const escape = (value: unknown) => `"${spreadsheetSafe(value).replaceAll("\"", "\"\"")}"`;
+    const lines = [
+      ["id", "occurred_at", "actor_name", "actor_email", "action", "entity_type", "entity_id", "metadata"].map(escape).join(","),
+      ...result.rows.map((row) => [
+        row.id, row.occurred_at instanceof Date ? row.occurred_at.toISOString() : row.occurred_at,
+        row.actor_name, row.actor_email, row.action, row.target_type, row.target_id,
+        JSON.stringify(row.metadata ?? {}),
+      ].map(escape).join(",")),
+    ];
+    const csv = `${lines.join("\n")}\n`;
+    const digest = createHash("sha256").update(csv).digest("hex");
+    await audit(res.locals.auth as AuthContext, "audit.exported", "audit-export", digest, {
+      rowCount: result.rowCount,
+      filters: { actorId: q.actorId, entityType: q.entityType, entityId: q.entityId, action: q.action, from: q.from, to: q.to },
+      integrityDigest: digest,
+    });
+    res.setHeader("content-type", "text/csv; charset=utf-8");
+    res.setHeader("content-disposition", `attachment; filename="cms-audit-${digest.slice(0, 12)}.csv"`);
+    res.setHeader("x-content-sha256", digest);
+    res.setHeader("cache-control", "private, no-store");
+    res.send(csv);
   }),
 );
 

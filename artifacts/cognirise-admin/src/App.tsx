@@ -23,6 +23,7 @@ import AuditLog from '@/pages/audit/AuditLog';
 import NavigationSettings from '@/pages/NavigationSettings';
 import ContactSettings from '@/pages/ContactSettings';
 import EditorialWork from '@/pages/EditorialWork';
+import ReleaseCenter from '@/pages/releases/ReleaseCenter';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -44,6 +45,7 @@ function Router() {
       
       <Route path="/dashboard" component={() => <AppLayout><Dashboard /></AppLayout>} />
        <Route path="/editorial-work" component={() => <AppLayout><EditorialWork /></AppLayout>} />
+       <Route path="/releases" component={() => <AppLayout administratorOnly><ReleaseCenter /></AppLayout>} />
       
       {/* Content routes */}
       <Route path="/people" component={() => <AppLayout contentTopic="person"><DocumentList kind="person" /></AppLayout>} />

@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Sidebar, SidebarContent, SidebarHeader, SidebarFooter, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarGroup, SidebarGroupLabel, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { Loader2, LayoutDashboard, Users, UserSquare2, Component, Newspaper, Briefcase, Factory, PanelsTopLeft, Image as ImageIcon, Globe, Inbox, ShieldAlert, LogOut, ChevronUp, Lock, ListTree, MapPin, Mail, UserRoundCheck } from "lucide-react";
+import { Loader2, LayoutDashboard, Users, UserSquare2, Component, Newspaper, Briefcase, Factory, PanelsTopLeft, Image as ImageIcon, Globe, Inbox, ShieldAlert, LogOut, ChevronUp, Lock, ListTree, MapPin, Mail, UserRoundCheck, Rocket } from "lucide-react";
 import { CogniriseBrand } from "@/components/brand/CogniriseBrand";
 import { canAccessAnyTopic, type ContentTopic } from "@/lib/content-capability";
 
@@ -27,14 +27,26 @@ function AppSidebar() {
   };
 
   const isAdministrator = session?.user?.role === "administrator";
+  const isRepresentative = (session?.user as { accountType?: string } | undefined)?.accountType === "external-representative";
   const canViewTopic = (topic: ContentTopic) => canAccessAnyTopic(session?.user, topic, "view");
 
-  const navGroups = [
+  const navGroups = isRepresentative ? [
+    {
+      title: "My workspace",
+      items: [
+        { title: "My assigned content", url: "/dashboard", icon: LayoutDashboard },
+        { title: "Partner page", url: "/partners", icon: Users },
+        { title: "Case studies", url: "/case-studies", icon: Briefcase },
+        { title: "Submission status", url: "/editorial-work", icon: UserRoundCheck },
+      ],
+    },
+  ] : [
     {
       title: "Overview",
       items: [
         { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
         { title: "Editorial Work", url: "/editorial-work", icon: UserRoundCheck },
+        ...(isAdministrator ? [{ title: "Release Center", url: "/releases", icon: Rocket }] : []),
         ...(isAdministrator ? [{ title: "Submissions", url: "/submissions", icon: Inbox }] : []),
       ]
     },
