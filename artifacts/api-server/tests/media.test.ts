@@ -16,6 +16,7 @@ import {
   apiMediaStatus,
   appendMediaMetadataVersionSql,
   isPreviewableMediaStatus,
+  isRetiredMediaFilename,
   isUsableMediaStatus,
   isValidMediaClassification,
   media,
@@ -227,6 +228,14 @@ test("active and ready media are usable while pending and failed stay explicit",
   const rejected = media({ ...base, status: "rejected" });
   assert.equal(rejected.status, "rejected");
   assert.equal(rejected.publicUrl, null);
+});
+
+test("retired IDAO canon filenames cannot return to the media picker", () => {
+  for (let index = 1; index <= 5; index++) {
+    assert.equal(isRetiredMediaFilename(`canon-${index}.jpg`), true);
+    assert.equal(isRetiredMediaFilename(`CANON-${index}.JPG`), true);
+  }
+  assert.equal(isRetiredMediaFilename("idao-canon-governed-lifecycle-v2.jpg"), false);
 });
 
 test("published media URLs identify the immutable approved version", () => {

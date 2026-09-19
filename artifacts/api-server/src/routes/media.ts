@@ -264,6 +264,19 @@ export function isPreviewableMediaStatus(status: unknown): boolean {
   return isUsableMediaStatus(status) || status === "pending-review";
 }
 
+const RETIRED_MEDIA_FILENAMES = [
+  "canon-1.jpg",
+  "canon-2.jpg",
+  "canon-3.jpg",
+  "canon-4.jpg",
+  "canon-5.jpg",
+] as const;
+
+export function isRetiredMediaFilename(filename: unknown): boolean {
+  return typeof filename === "string"
+    && RETIRED_MEDIA_FILENAMES.includes(filename.toLowerCase() as (typeof RETIRED_MEDIA_FILENAMES)[number]);
+}
+
 export function apiMediaStatus(status: unknown): "pending" | "review" | "ready" | "rejected" | "failed" {
   if (isUsableMediaStatus(status)) return "ready";
   if (status === "pending-review") return "review";
@@ -356,13 +369,14 @@ router.get(
     }
     const q = parsed.data as typeof parsed.data & MediaClassification;
     const result = await pool.query(
-      `${selectMedia} WHERE ($1::text IS NULL OR a.filename ILIKE '%'||$1||'%'
+      `${selectMedia} WHERE lower(a.filename) <> ALL($5::text[])
+        AND ($1::text IS NULL OR a.filename ILIKE '%'||$1||'%'
         OR a.alt_text ILIKE '%'||$1||'%')
         AND ($2::text IS NULL OR a.media_type=$2)
         AND ($3::text IS NULL OR a.collection=$3)
         AND ($4::text IS NULL OR a.linkedin_asset_kind=$4)
         ORDER BY a.created_at DESC`,
-      [q.search ?? null, q.mimeType ?? null, q.collection ?? null, q.linkedinAssetKind ?? null],
+      [q.search ?? null, q.mimeType ?? null, q.collection ?? null, q.linkedinAssetKind ?? null, RETIRED_MEDIA_FILENAMES],
     );
     const auth = res.locals.auth as AuthContext;
     const visible = await Promise.all(result.rows.map(async (row) =>
@@ -387,6 +401,10 @@ router.post("/media/upload-requests", requireCsrf, asyncRoute(async (req, res) =
   const parsed = RequestMediaUploadBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: "Invalid upload request." });
+    return;
+  }
+  if (isRetiredMediaFilename(parsed.data.filename)) {
+    res.status(400).json({ error: "This retired media filename cannot be uploaded." });
     return;
   }
   const input = parsed.data as typeof parsed.data & MediaClassification;

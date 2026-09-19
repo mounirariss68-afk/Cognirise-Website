@@ -20,6 +20,13 @@ const retiredIndustryMedia = new Set([
   "pulse-industry-education-campus-v3.png",
   "pulse-industry-public-sector-services.png",
 ]);
+const retiredIdaoCanonMedia = new Set([
+  "canon-1.jpg",
+  "canon-2.jpg",
+  "canon-3.jpg",
+  "canon-4.jpg",
+  "canon-5.jpg",
+]);
 
 export type ReviewStatus = "needs-review" | "approved";
 export interface InventoryRecord {
@@ -77,6 +84,7 @@ export async function assetRecords(): Promise<InventoryRecord[]> {
     /\.(png|jpe?g)$/i.test(file)
     && path.basename(file) !== "blueprint-annotated.png"
      && !retiredIndustryMedia.has(path.basename(file))
+     && !retiredIdaoCanonMedia.has(path.basename(file))
     // The prior deterministic SVG-derived fixtures remain in the repository as
     // history, but the commissioned cinematic JPEGs are the CMS media source.
     && !/[\\/]cognirise[\\/]cases[\\/][^\\/]+\.png$/i.test(file)

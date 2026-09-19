@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-16T11:01:14.136Z",
-  "manifestDigest": "e40bba029e4e4d7d16f59ae0327daea35c1c54100ba8a38e41323aa2f12cd969",
-  "dryRun": false,
-  "mode": "development-db-apply",
-  "note": "Applied the governed UAE/English inventory excluding the five methodology-editorial routes, which have their own draft-only reconciler. Eligible case studies publish only after evidence, source review, rights, accessibility, durable-storage, and immutable-version gates pass; all other content retains its governed state.",
+  "generatedAt": "2026-09-19T09:10:07.423Z",
+  "manifestDigest": "c31533fdc9f983ba07af5f558b6e593f19ab80a4597b53dc8dd169ec5e169558",
+  "dryRun": true,
+  "mode": "payload-only",
+  "note": "No storage or database call was made. Use --apply-db --target=development to import governed drafts; use cms:reconcile-methodology-editorial for its five isolated methodology routes.",
   "operations": [
     {
       "externalId": "person:8a0e78e95b87db8e0acd",
@@ -4867,141 +4867,6 @@
       ]
     },
     {
-      "externalId": "asset:647067ba5384f4725e2d",
-      "idempotencyKey": "cms-media-binary-v1:asset:647067ba5384f4725e2d:4f134ce564e6459c894da3608100d8a602ad3426f17728d6e043b2e2871e6724",
-      "filename": "canon-1.jpg",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/canon-1.jpg",
-      "publicPath": "/images/cognirise/canon-1.jpg",
-      "checksum": "4f134ce564e6459c894da3608100d8a602ad3426f17728d6e043b2e2871e6724",
-      "mimeType": "image/jpeg",
-      "byteSize": 117062,
-      "width": 1024,
-      "height": 1024,
-      "cmsOwnership": "cms-candidate",
-      "usages": [
-        "artifacts/cognirise-website/src/content/idao.ts"
-      ],
-      "collection": "website",
-      "linkedinAssetKind": null,
-      "campaignMetadata": null,
-      "altText": "canon 1",
-      "credit": "Rights holder pending editorial review",
-      "rightsStatus": "needs-review",
-      "accessibilityStatus": "approved",
-      "sourceReviewApproved": false,
-      "requestDigest": "3066fbf6ff0bef3bb2b29a753fd1530ee991027f749254a734ff3e567a0be2bb",
-      "historicalReceipts": [],
-      "acceptedPriorRequestDigests": []
-    },
-    {
-      "externalId": "asset:9fed45a0a563fa629dee",
-      "idempotencyKey": "cms-media-binary-v1:asset:9fed45a0a563fa629dee:e4bac128199128d490baf88a12c47dcc1e33c85c6a22bae53953b4ede7db4c6f",
-      "filename": "canon-2.jpg",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/canon-2.jpg",
-      "publicPath": "/images/cognirise/canon-2.jpg",
-      "checksum": "e4bac128199128d490baf88a12c47dcc1e33c85c6a22bae53953b4ede7db4c6f",
-      "mimeType": "image/jpeg",
-      "byteSize": 136949,
-      "width": 1024,
-      "height": 1024,
-      "cmsOwnership": "cms-candidate",
-      "usages": [
-        "artifacts/cognirise-website/src/content/idao.ts"
-      ],
-      "collection": "website",
-      "linkedinAssetKind": null,
-      "campaignMetadata": null,
-      "altText": "canon 2",
-      "credit": "Rights holder pending editorial review",
-      "rightsStatus": "needs-review",
-      "accessibilityStatus": "approved",
-      "sourceReviewApproved": false,
-      "requestDigest": "04f02c8bc6d87bb2129f5556337541d218abe87dbe9c4df6e15a4d2228d7d2c0",
-      "historicalReceipts": [],
-      "acceptedPriorRequestDigests": []
-    },
-    {
-      "externalId": "asset:39e87f4dac6e71782f3b",
-      "idempotencyKey": "cms-media-binary-v1:asset:39e87f4dac6e71782f3b:fe594c3d7b508a8c9d311b5ac9ddfac88dd8e166141c79a4faaaabba1fdb3dcf",
-      "filename": "canon-3.jpg",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/canon-3.jpg",
-      "publicPath": "/images/cognirise/canon-3.jpg",
-      "checksum": "fe594c3d7b508a8c9d311b5ac9ddfac88dd8e166141c79a4faaaabba1fdb3dcf",
-      "mimeType": "image/jpeg",
-      "byteSize": 164774,
-      "width": 1024,
-      "height": 1024,
-      "cmsOwnership": "cms-candidate",
-      "usages": [
-        "artifacts/cognirise-website/src/content/idao.ts"
-      ],
-      "collection": "website",
-      "linkedinAssetKind": null,
-      "campaignMetadata": null,
-      "altText": "canon 3",
-      "credit": "Rights holder pending editorial review",
-      "rightsStatus": "needs-review",
-      "accessibilityStatus": "approved",
-      "sourceReviewApproved": false,
-      "requestDigest": "f597c20b5c18b8e46b6d49dc8e620827f69564bf095c2b29fc04c601eef76442",
-      "historicalReceipts": [],
-      "acceptedPriorRequestDigests": []
-    },
-    {
-      "externalId": "asset:a42b64cfc0f0ee26d8f2",
-      "idempotencyKey": "cms-media-binary-v1:asset:a42b64cfc0f0ee26d8f2:2297eb4ae2ec2f6f946d3d4066fe1467d215a60cb74e785aedb526e1394c2266",
-      "filename": "canon-4.jpg",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/canon-4.jpg",
-      "publicPath": "/images/cognirise/canon-4.jpg",
-      "checksum": "2297eb4ae2ec2f6f946d3d4066fe1467d215a60cb74e785aedb526e1394c2266",
-      "mimeType": "image/jpeg",
-      "byteSize": 172978,
-      "width": 1024,
-      "height": 1024,
-      "cmsOwnership": "cms-candidate",
-      "usages": [
-        "artifacts/cognirise-website/src/content/idao.ts"
-      ],
-      "collection": "website",
-      "linkedinAssetKind": null,
-      "campaignMetadata": null,
-      "altText": "canon 4",
-      "credit": "Rights holder pending editorial review",
-      "rightsStatus": "needs-review",
-      "accessibilityStatus": "approved",
-      "sourceReviewApproved": false,
-      "requestDigest": "149f9fddb705d4c2f5bb6a473cdbf4d1290a35d75760d89009b61f59c6fc8c52",
-      "historicalReceipts": [],
-      "acceptedPriorRequestDigests": []
-    },
-    {
-      "externalId": "asset:1bfbe8d44e94268f99d2",
-      "idempotencyKey": "cms-media-binary-v1:asset:1bfbe8d44e94268f99d2:ba22a9ddb5bbb7806b7b033acb9e8a20862e5e932b67206970e02f2a33b1d1bb",
-      "filename": "canon-5.jpg",
-      "sourceFile": "artifacts/cognirise-website/public/images/cognirise/canon-5.jpg",
-      "publicPath": "/images/cognirise/canon-5.jpg",
-      "checksum": "ba22a9ddb5bbb7806b7b033acb9e8a20862e5e932b67206970e02f2a33b1d1bb",
-      "mimeType": "image/jpeg",
-      "byteSize": 146432,
-      "width": 1024,
-      "height": 1024,
-      "cmsOwnership": "cms-candidate",
-      "usages": [
-        "artifacts/cognirise-website/src/content/idao.ts"
-      ],
-      "collection": "website",
-      "linkedinAssetKind": null,
-      "campaignMetadata": null,
-      "altText": "canon 5",
-      "credit": "Rights holder pending editorial review",
-      "rightsStatus": "needs-review",
-      "accessibilityStatus": "approved",
-      "sourceReviewApproved": false,
-      "requestDigest": "f50a48028b6a5e27c94e8b492ea6f28e4d9a6683db6cf702d38b89f8e0033b6b",
-      "historicalReceipts": [],
-      "acceptedPriorRequestDigests": []
-    },
-    {
       "externalId": "asset:3b30ec62a149240b9ccf",
       "idempotencyKey": "cms-media-binary-v1:asset:3b30ec62a149240b9ccf:b961284318d5c2b737465d195b0ed366e4ec229daa7346a0624362c67f1fc36f",
       "filename": "01-industrial-knowledge.jpg",
@@ -7689,26 +7554,5 @@
         "a861c514d1885fddd698a2ccf6fa66769072c3cd3f26ff75cbd61a165292786b"
       ]
     }
-  ],
-  "database": {
-    "before": {
-      "documents": 62,
-      "editions": 67,
-      "revisions": 157,
-      "media": 129,
-      "receipts": 480,
-      "audits": 825
-    },
-    "created": 1,
-    "replayed": 49,
-    "mediaCreated": 0,
-    "mediaRepaired": 0,
-    "mediaReplayed": 86,
-    "availabilityCreated": 0,
-    "availabilityReplayed": 8,
-    "availabilityConflicts": [],
-    "governanceCreated": 0,
-    "governanceReplayed": 5,
-    "governanceConflicts": []
-  }
+  ]
 }

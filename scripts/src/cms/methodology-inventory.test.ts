@@ -31,6 +31,7 @@ const STANDALONE_EDITORIAL_SLUGS = [
 
 type InventoryRecord = {
   type: string;
+  name?: string;
   fields: {
     slug: string;
     content: {
@@ -39,6 +40,8 @@ type InventoryRecord = {
       sources?: unknown[];
     };
     mediaPaths: string[];
+    publicPath?: string;
+    cmsOwnership?: string;
   };
 };
 
@@ -51,6 +54,11 @@ type ImportOperation = {
     };
   };
 };
+
+const RETIRED_IDAO_CANON_PATHS = Array.from(
+  { length: 5 },
+  (_, index) => `/images/cognirise/canon-${index + 1}.jpg`,
+);
 
 function frameworkSeed(
   slug: (typeof STANDALONE_EDITORIAL_SLUGS)[number],
@@ -131,7 +139,7 @@ test("the generic inventory retains only Agent Authority and all non-methodology
     "case-study": 22,
     industry: 6,
     framework: 1,
-    asset: 87,
+    asset: 82,
   });
   assert.deepEqual(
     inventory.records
@@ -166,7 +174,13 @@ test("the generic inventory retains only Agent Authority and all non-methodology
   });
   assert.equal(payload.availabilityOperations.length, 8);
   assert.equal(payload.governanceOperations.length, 5);
-  assert.equal(payload.mediaOperations.length, 87);
+  assert.equal(payload.mediaOperations.length, 82);
+  const serializedInventory = JSON.stringify(inventory);
+  const serializedPayload = JSON.stringify(payload);
+  for (const retiredPath of RETIRED_IDAO_CANON_PATHS) {
+    assert.equal(serializedInventory.includes(retiredPath), false, `${retiredPath} must not be inventoried`);
+    assert.equal(serializedPayload.includes(retiredPath), false, `${retiredPath} must not be importable`);
+  }
   assert.equal(
     payload.operations.find((operation) => operation.kind === "industry" && operation.slug === "financial-services")
       ?.payload.content?.thesis,

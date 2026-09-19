@@ -473,12 +473,12 @@ async function main() {
   }
   if (caseStudies.length !== 22) throw new Error(`Expected 22 governed case studies, found ${caseStudies.length}.`);
   if (frameworks.length !== 1) throw new Error(`Expected only the Agent Authority inventory framework; Task 241 methodology drafts have their own reconciler, found ${frameworks.length}.`);
-   if (assets.length !== 87) throw new Error(`Expected 78 website raster images and 9 LinkedIn PNGs, found ${assets.length}.`);
+   if (assets.length !== 82) throw new Error(`Expected 73 website raster images and 9 LinkedIn PNGs, found ${assets.length}.`);
 
   const stable = {
     schemaVersion: 2,
     source: relative(websiteRoot),
-      expectedCounts: { people: 8, founders: 3, leaders: 2, advisors: 3, partners: 5, platforms: 5, articles: 3, caseStudies: 22, caseStudyTaxonomy: CASE_STUDY_TAXONOMY_COUNTS, industries: 6, frameworks: 1, websiteAssets: 78, linkedinAssets: 9, assets: 87 },
+      expectedCounts: { people: 8, founders: 3, leaders: 2, advisors: 3, partners: 5, platforms: 5, articles: 3, caseStudies: 22, caseStudyTaxonomy: CASE_STUDY_TAXONOMY_COUNTS, industries: 6, frameworks: 1, websiteAssets: 73, linkedinAssets: 9, assets: 82 },
     explicitOmissions: {
       povDocuments: "No genuine public POV documents are present in the current website.",
       employees: "No additional public employee profiles are present in the current website.",
