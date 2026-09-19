@@ -11,12 +11,6 @@ import { contentRecord, useCmsCollection } from "@/lib/cms";
 import { useDynamicMetadata } from "@/lib/metadata";
 import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
 
-const articlesFallback = [
-  { number: "01", title: "AI should move the business—not just assist it.", copy: "Redesigning priority work around people, data, controls and intelligent execution.", topics: ["strategy"], url: "/insights/ai-should-move-the-business" },
-  { number: "02", title: "The conditions for AI that can hold up in production.", copy: "Why data, security, governance and architecture are part of the work.", topics: ["engineering"], url: "/insights/foundations-for-production" },
-  { number: "03", title: "From agent experiments to a governed digital workforce.", copy: "Deploying agents with people accountable at every decision point.", topics: ["governance", "operations"], url: "/insights/governed-digital-workforce" },
-];
-
 export default function InsightsEditorial() {
   const governedLanding = useGovernedLanding();
   const governedHero = governedLanding ? landingNarrative(governedLanding, "hero") : null;
@@ -33,7 +27,7 @@ export default function InsightsEditorial() {
   const { market } = useMarketStore();
   const searchString = useSearch();
   const [location, setLocation] = useLocation();
-  const articlesQuery = useCmsCollection("publication", articlesFallback, (item, index) => {
+  const articlesQuery = useCmsCollection("publication", [], (item, index) => {
     const content = contentRecord(item, "publication");
     return {
       number: String(index + 1).padStart(2, "0"),

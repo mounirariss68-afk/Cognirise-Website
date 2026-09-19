@@ -1,19 +1,14 @@
 import { Link } from "wouter";
 import { BrandButton } from "@/components/ui/brand-button";
-import { getMarketLocationLabel, OFFICE_LOCATIONS, useMarketStore } from "@/store/market";
+import { getMarketLocationLabel, useMarketStore } from "@/store/market";
 import { contentRecord, useCmsCollection, usePublishedContactEmail } from "@/lib/cms";
 import { OfficeContactCard } from "@/components/OfficeContactCard";
 import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
 
-const officeFallback: Array<{ city: string; address: string; phone?: string; order: number }> = Object.values(OFFICE_LOCATIONS).map((office, order) => ({
-  ...office,
-  order,
-}));
-
 export default function Contact() {
   const { market } = useMarketStore();
   const contactEmail = usePublishedContactEmail();
-  const offices = useCmsCollection("office", officeFallback, (item) => {
+  const offices = useCmsCollection("office", [], (item) => {
     const office = contentRecord(item, "office");
     return {
       city: office.city,

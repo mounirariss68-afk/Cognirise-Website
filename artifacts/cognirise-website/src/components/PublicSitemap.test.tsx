@@ -1,12 +1,11 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { test } from "node:test";
-import { mergeSitemapItems, STATIC_SITEMAP_PATHS } from "./PublicSitemap";
+import { mergeSitemapItems } from "./PublicSitemap";
 
-test("sitemap integration includes the public methodologies once across static and CMS sources", () => {
+test("sitemap integration includes released methodologies once and no compiled additions", () => {
   const origin = "https://cognirise.ai";
   const routes = ["/methodologies/ai-use-case-prioritization", "/methodologies/idao", "/methodologies/agent-authority-model"];
-  routes.forEach((route) => assert.ok(STATIC_SITEMAP_PATHS.includes(route)));
   const merged = mergeSitemapItems([
     { url: `${origin}/` },
     ...routes.map((route) => ({ url: `${origin}${route}` })),
@@ -18,11 +17,12 @@ test("sitemap integration includes the public methodologies once across static a
   assert.equal(merged.some((item) => item.url.endsWith("/advisors")), false);
   assert.equal(merged.some((item) => item.url.endsWith("/what-we-do")), false);
   assert.equal(merged.some((item) => item.url.endsWith("/services")), false);
-  assert.equal(
-    STATIC_SITEMAP_PATHS.includes("/methodologies/guardrails-framework"),
-    false,
-    "a CMS-governed framework must not enter the static sitemap before publication",
-  );
+});
+
+test("the release provider encloses the sitemap consumer", async () => {
+  const app = await readFile(new URL("../App.tsx", import.meta.url), "utf8");
+  assert.match(app, /<ReleaseProvider release=\{release\.data\}>[\s\S]*<PublicSitemap \/>[\s\S]*<Shell>/);
+  assert.doesNotMatch(app, /<AnalyticsBridge \/>[\s\S]*<PublicSitemap \/>[\s\S]*<Router \/>/);
 });
 
 test("the canonical methodology route is present in the static XML sitemap", async () => {

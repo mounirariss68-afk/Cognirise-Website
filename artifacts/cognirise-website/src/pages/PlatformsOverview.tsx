@@ -12,6 +12,7 @@ import { useGovernedLanding } from "@/components/GovernedLandingRoute";
 import { landingCta, landingMedia, landingNarrative, landingSeo, landingText } from "@/lib/cms";
 import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
 import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
+import { releaseHrefAvailable, useReleaseContext } from "@/lib/releases";
 
 export default function PlatformsOverview() {
   const governedLanding = useGovernedLanding();
@@ -19,6 +20,7 @@ export default function PlatformsOverview() {
   const heroVisual = landingMedia(governedLanding, "platforms-hero-visual", { src: "/media/platforms/cognios-rotation-fallback.jpg", alt: "A layered CogniOS ecosystem connected by a luminous central spine." });
   const closingCta = landingCta(governedLanding, "platforms-closing-cta", { label: "Book a value scan", href: "/value-scan" });
   const { market } = useMarketStore();
+  const releaseContext = useReleaseContext();
   const platformsQuery = useCmsCollection("platform", [], (item) => {
     const content = contentRecord(item, "platform");
     return { slug: item.slug, description: content.summary };
@@ -40,7 +42,8 @@ export default function PlatformsOverview() {
     { marketLocation },
   );
 
-  const platforms = composePlatformCatalog(platformsQuery.data);
+  const platforms = composePlatformCatalog(platformsQuery.data).filter((platform) =>
+    !releaseContext || releaseHrefAvailable(releaseContext.release.manifest, platform.href));
 
   return (
     <div className="flex flex-col" data-governed-landing={governedLanding?.pagePath}>

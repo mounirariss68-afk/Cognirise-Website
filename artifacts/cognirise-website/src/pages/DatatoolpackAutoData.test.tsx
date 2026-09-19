@@ -86,10 +86,9 @@ test("Datatoolpack AutoData fulfills content contract", async () => {
   }
 });
 
-test("the bespoke route cannot fall back to the generic alliance template", async () => {
+test("all alliance routes use the released platform renderer", async () => {
   const app = await readFile(new URL("../App.tsx", import.meta.url), "utf8");
-  assert.match(app, /<Route path="\/platforms\/datatoolpack" component=\{DatatoolpackAutoData\} \/>/);
-  assert.doesNotMatch(app, /<AlliancePlatformDetail slug="datatoolpack"/);
-  assert.match(app, /<AlliancePlatformDetail slug="lupitor"/);
-  assert.match(app, /<AlliancePlatformDetail slug="bunjee-ai"/);
+  assert.match(app, /<Route path="\/platforms\/datatoolpack" component=\{PlatformDetail\} \/>/);
+  assert.match(app, /<Route path="\/platforms\/lupitor" component=\{PlatformDetail\} \/>/);
+  assert.match(app, /<Route path="\/platforms\/bunjee-ai" component=\{PlatformDetail\} \/>/);
 });

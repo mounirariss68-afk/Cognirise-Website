@@ -115,7 +115,6 @@ export default function InsightArticle() {
   const { market } = useMarketStore();
   const slug = params?.slug || "";
   const cms = useCmsEntry("publication", slug);
-  const fallbackArticle = slug in articles ? articles[slug as keyof typeof articles] : undefined;
   const record = cms.data ? contentRecord(cms.data, "publication") : undefined;
   const heroMedia = record && cms.data
     ? resolveCmsMedia(cms.data.media, record.heroMedia, record.heroMediaId)
@@ -143,7 +142,7 @@ export default function InsightArticle() {
         return <p className={index === 0 ? "lead" : undefined} key={index}>{block.text}</p>;
       })}</>
     ),
-  } : fallbackArticle;
+  } : undefined;
   useDynamicMetadata(cms.data?.seo && metadataFromSeo(cms.data.seo, {
     title: `${cms.data.title} | Cognirise`,
     description: cms.data.summary || "A Cognirise perspective on governed AI-native organisations.",

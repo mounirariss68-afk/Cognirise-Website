@@ -20,6 +20,7 @@ import {
 } from "@workspace/api-zod";
 import { useMarketStore } from "@/store/market";
 import { getListPublishedContentQueryKey } from "@workspace/api-client-react";
+import { releasePublishedContent, useReleaseContext } from "@/lib/releases";
 
 export type CmsContentByKind = {
   person: PersonContent;
@@ -232,14 +233,24 @@ export function resolvePublishedContactEmail(
 
 export function usePublishedContactEmail(): string {
   const { market, locale } = useMarketStore();
+  const releaseContext = useReleaseContext();
   const params = publicContactConfigurationParams(market, locale);
   const query = useGetPublicContactConfiguration(params, {
     query: {
-      enabled: Boolean(market),
+      enabled: Boolean(market) && !releaseContext,
       queryKey: getGetPublicContactConfigurationQueryKey(params),
       retry: false,
     },
   });
+  if (releaseContext) {
+    const revision = releaseContext.release.manifest.revisions.find((item) => {
+      if (item.kind !== "site-configuration") return false;
+      const content = item.snapshot.content as { configuration?: unknown };
+      return content.configuration === "contact-email";
+    });
+    const content = revision?.snapshot.content as { contactEmail?: unknown } | undefined;
+    return typeof content?.contactEmail === "string" ? content.contactEmail : "";
+  }
   return resolvePublishedContactEmail(query.data);
 }
 
@@ -257,7 +268,6 @@ export function cmsEntryRenderPolicy(
   return "unavailable";
 }
 
-const env = import.meta.env ?? {};
 export type PublishedHeroFilmResponse = {
   slot: string;
   poster: { id: string; versionId: string; url: string; mimeType: string };
@@ -281,27 +291,53 @@ export function usePublishedHeroFilm(
   fallback: HeroFilmSources,
 ): HeroFilmSources {
   const { market, locale } = useMarketStore();
+  const releaseContext = useReleaseContext();
   const params = { market, locale };
   const query = useGetPublicHeroFilm(slot, params, {
     query: {
-      enabled: Boolean(market),
+      enabled: Boolean(market) && !releaseContext,
       queryKey: getGetPublicHeroFilmQueryKey(slot, params),
     },
   });
+  if (releaseContext) {
+    const revision = releaseContext.release.manifest.revisions.find((item) => {
+      if (item.kind !== "site-configuration") return false;
+      const content = item.snapshot.content as { page?: unknown };
+      return content.page === slot;
+    });
+    const content = revision?.snapshot.content as {
+      hero?: {
+        posterMediaId: string;
+        posterMediaVersionId: string;
+        sources: Array<{ mediaId: string; mediaVersionId: string; mimeType: string }>;
+      };
+    } | undefined;
+    const hero = content?.hero;
+    const findMedia = (id: string, versionId: string) =>
+      (revision?.media ?? []).find((item) => item.id === id && item.versionId === versionId);
+    const poster = hero && findMedia(hero.posterMediaId, hero.posterMediaVersionId);
+    const sources = hero?.sources.flatMap((source) => {
+      const media = findMedia(source.mediaId, source.mediaVersionId);
+      return media ? [{ id: media.id, versionId: media.versionId, url: media.url, mimeType: source.mimeType }] : [];
+    }) ?? [];
+    const released = poster && hero && sources.length === hero.sources.length ? {
+      slot,
+      poster: { id: poster.id, versionId: poster.versionId, url: poster.url, mimeType: poster.mimeType },
+      sources,
+    } : undefined;
+    return resolvePublishedHeroFilm(released, { mp4: "", webm: "", poster: "" });
+  }
   return resolvePublishedHeroFilm(query.data as PublishedHeroFilmResponse | undefined, fallback);
 }
 
 const CUTOVER: Record<WebsiteCmsDocumentKind, boolean> = {
   person: true,
-  partner: env.VITE_CMS_CUTOVER_PARTNERS === "true",
-  platform: env.VITE_CMS_CUTOVER_PLATFORMS === "true",
-  publication: env.VITE_CMS_CUTOVER_PUBLICATIONS === "true",
-  "case-study": env.VITE_CMS_CUTOVER_CASE_STUDIES === "true",
-  industry: env.VITE_CMS_CUTOVER_INDUSTRIES === "true",
-  // Framework delivery is explicitly authorised per route below. A collection
-  // flag must not turn every methodology into a CMS page merely because one
-  // edition was published.
-  framework: false,
+  partner: true,
+  platform: true,
+  publication: true,
+  "case-study": true,
+  industry: true,
+  framework: true,
   office: true,
   "landing-page": true,
 };
@@ -312,20 +348,7 @@ const CUTOVER: Record<WebsiteCmsDocumentKind, boolean> = {
  * collection flag so one approved framework cannot make every framework
  * route authoritative.
  */
-const ENTRY_CUTOVER: Partial<Record<WebsiteCmsDocumentKind, readonly string[]>> = {
-  // Framework detail routes are CMS-authoritative individually. In particular,
-  // do not substitute compiled Guardrails copy while its source edition is
-  // absent, unpublished, or unavailable.
-  framework: [
-    "agent-authority-model",
-    "guardrails-framework",
-    ...(env.VITE_CMS_CUTOVER_IDAO === "true" ? ["idao"] : []),
-    ...(env.VITE_CMS_CUTOVER_AI_USE_CASE_PRIORITIZATION === "true" ? ["ai-use-case-prioritization"] : []),
-    ...(env.VITE_CMS_CUTOVER_AI_VALUE_TO_SCALE === "true" ? ["ai-value-to-scale"] : []),
-    ...(env.VITE_CMS_CUTOVER_AGENTIC_OPERATIONS_READINESS === "true" ? ["agentic-operations-readiness"] : []),
-    ...(env.VITE_CMS_CUTOVER_HUMAN_AGENT_OPERATING_MODEL === "true" ? ["human-agent-operating-model"] : []),
-  ],
-};
+const ENTRY_CUTOVER: Partial<Record<WebsiteCmsDocumentKind, readonly string[]>> = {};
 
 export function cmsEntryIsCutOver(kind: WebsiteCmsDocumentKind, slug: string): boolean {
   return CUTOVER[kind] || ENTRY_CUTOVER[kind]?.includes(slug) === true;
@@ -335,7 +358,7 @@ export function cmsCollectionIsCutOver(
   kind: WebsiteCmsDocumentKind,
   isConfigured = true,
 ): boolean {
-  return kind === "person" || (CUTOVER[kind] && isConfigured);
+  return CUTOVER[kind] && isConfigured;
 }
 
 export function cmsCollectionDelivery(
@@ -352,9 +375,7 @@ export function cmsCollectionDelivery(
   if (state.isError) return "api-error";
   if (state.hasContractErrors) return "contract-error";
   if (state.hasItems) return "cms";
-  return cmsCollectionIsCutOver(kind, state.isConfigured)
-    ? "intentional-empty"
-    : "compiled-fallback";
+  return "intentional-empty";
 }
 
 export function governedLandingDelivery(
@@ -365,7 +386,7 @@ export function governedLandingDelivery(
 ): CmsDeliveryState {
   if (state === "loading" || state === "api-error" || state === "contract-error") return state;
   if (hasPage) return "cms";
-  return configuredPagePaths.includes(pagePath) ? "intentional-empty" : "compiled-fallback";
+  return "intentional-empty";
 }
 
 export function cmsCollectionData<T>(
@@ -465,6 +486,7 @@ export function useCmsCollection<T>(
   mapper: (item: PublishedContent, index: number) => T | null,
 ) {
   const { market, locale } = useMarketStore();
+  const releaseContext = useReleaseContext();
   const previewRequestDisabled = useContext(CmsPreviewRequestContext);
   const params = { kind: kind as DocumentKind, market, locale, pageSize: 100 };
   const query = useListPublishedContent(params, {
@@ -476,10 +498,24 @@ export function useCmsCollection<T>(
         refetchOnWindowFocus: true,
         placeholderData: undefined,
       } : {}),
-      ...(previewRequestDisabled ? { enabled: false } : {}),
+      ...((previewRequestDisabled || releaseContext) ? { enabled: false } : {}),
     },
   });
-  const response = (previewRequestDisabled ? undefined : query.data) as (typeof query.data & {
+  const releasedItems = releaseContext?.release.manifest.revisions
+    .filter((revision) => revision.kind === kind)
+    .map((revision) => releasePublishedContent(revision, releaseContext.release.manifest)) ?? [];
+  const response = (releaseContext ? {
+    items: releasedItems,
+    isConfigured: true,
+    configuredPagePaths: releasedItems
+      .filter((item) => item.kind === "landing-page")
+      .map((item) => (item.content as { pagePath?: string }).pagePath)
+      .filter((path): path is string => Boolean(path)),
+    market,
+    locale,
+    requestedMarket: market,
+    usedFallback: false,
+  } : previewRequestDisabled ? undefined : query.data) as (typeof query.data & {
     isConfigured?: boolean;
     configuredPagePaths?: string[];
   }) | undefined;
@@ -495,14 +531,14 @@ export function useCmsCollection<T>(
   const mapped = validItems.map(mapper).filter((item): item is T => item !== null);
   const cutover = cmsCollectionIsCutOver(kind, response?.isConfigured);
   const delivery = cmsCollectionDelivery(kind, {
-    isPending: query.isPending || (kind === "person" && query.isFetching && !query.isError),
-    isError: query.isError,
+    isPending: !releaseContext && (query.isPending || (kind === "person" && query.isFetching && !query.isError)),
+    isError: !releaseContext && query.isError,
     hasContractErrors: Boolean(contractErrors.length),
     hasItems: Boolean(mapped.length),
     isConfigured: response?.isConfigured,
   });
   const useFallback = !cutover && delivery !== "cms";
-  const issue = query.isError
+  const issue = !releaseContext && query.isError
     ? `CMS request failed for ${kind}.`
     : contractErrors.length
       ? `CMS contract rejected ${kind}: ${contractErrors.join("; ")}`
@@ -517,13 +553,14 @@ export function useCmsCollection<T>(
     isFallback: useFallback,
     isAuthoritative: cutover,
     configuredPagePaths: response?.configuredPagePaths ?? [],
-    selectedMarket: (query.data as (typeof query.data & { market?: string }) | undefined)?.market,
-    usedMarketFallback: (query.data as (typeof query.data & { usedFallback?: boolean }) | undefined)?.usedFallback ?? false,
+    selectedMarket: releaseContext ? market : (query.data as (typeof query.data & { market?: string }) | undefined)?.market,
+    usedMarketFallback: releaseContext ? false : (query.data as (typeof query.data & { usedFallback?: boolean }) | undefined)?.usedFallback ?? false,
   };
 }
 
 export function useCmsEntry(kind: WebsiteCmsDocumentKind, slug: string) {
   const { market, locale } = useMarketStore();
+  const releaseContext = useReleaseContext();
   const previewRequestDisabled = useContext(CmsPreviewRequestContext);
   // Collection landing narratives are intentionally code-owned; only entity
   // details are CMS-owned. Do not model landings as sentinel entity records.
@@ -532,12 +569,17 @@ export function useCmsEntry(kind: WebsiteCmsDocumentKind, slug: string) {
   const cutoverGated = kind === "framework" && !cutover;
   const query = useGetPublishedContent(market, locale, kind as DocumentKind, slug, {
     query: {
-      enabled: !codeOwnedLanding && !cutoverGated,
+      enabled: !releaseContext && !codeOwnedLanding && !cutoverGated,
       ...(previewRequestDisabled ? { enabled: false } : {}),
       queryKey: getGetPublishedContentQueryKey(market, locale, kind as DocumentKind, slug),
     },
   });
-  const deliveredData = previewRequestDisabled ? undefined : query.data;
+  const releasedRevision = releaseContext?.release.manifest.revisions.find(
+    (revision) => revision.kind === kind && revision.snapshot.slug === slug,
+  );
+  const deliveredData = releasedRevision
+    ? releasePublishedContent(releasedRevision, releaseContext!.release.manifest)
+    : previewRequestDisabled ? undefined : query.data;
   const validation = deliveredData
     ? validateCmsContent(kind as CmsDocumentKind, deliveredData.content, "publish")
     : undefined;
@@ -549,14 +591,18 @@ export function useCmsEntry(kind: WebsiteCmsDocumentKind, slug: string) {
   if (issue) console.error(issue);
   return {
     ...query,
-    data: codeOwnedLanding || cutoverGated ? undefined : validation?.success ? deliveredData : undefined,
-    delivery: codeOwnedLanding || cutoverGated ? "compiled-fallback" as const
+    data: releaseContext
+      ? validation?.success ? deliveredData : undefined
+      : codeOwnedLanding || cutoverGated ? undefined : validation?.success ? deliveredData : undefined,
+    delivery: releaseContext
+      ? deliveredData && validation?.success ? "cms" as const : "intentional-empty" as const
+      : codeOwnedLanding || cutoverGated ? "compiled-fallback" as const
       : query.isPending ? "loading" as const
       : issue ? (validation && !validation.success ? "contract-error" : "api-error") as CmsDeliveryState
       : deliveredData ? "cms" as const
       : "intentional-empty" as const,
     issue,
-    isAuthoritative: cutover,
+    isAuthoritative: Boolean(releaseContext) || cutover,
   };
 }
 

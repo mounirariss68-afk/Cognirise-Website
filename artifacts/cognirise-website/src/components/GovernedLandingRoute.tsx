@@ -104,7 +104,7 @@ function GovernedLandingPublishedRoute({ pagePath, compiled: Compiled }: Governe
     };
   }, [page]);
 
-  if (delivery === "compiled-fallback") return <Compiled />;
+  if (delivery === "compiled-fallback") return <PageUnavailable />;
   if (delivery === "loading") return <main aria-busy="true" className="min-h-[60vh] px-6 py-24">Loading published page…</main>;
   if (delivery === "api-error" || delivery === "contract-error") {
     return (

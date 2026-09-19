@@ -183,11 +183,21 @@ test("contact delivery keys requests by the selected runtime locale", () => {
   assert.equal(resolvePublishedContactEmail({ contactEmail: "marhaba@cognirise.ai" }), "marhaba@cognirise.ai");
 });
 
-test("landing cutover is isolated to each page publication history", () => {
+test("site configuration hooks stop live delivery while an immutable release is active", async () => {
+  const source = await import("node:fs/promises").then(({ readFile }) =>
+    readFile(new URL("./cms.ts", import.meta.url), "utf8"));
+  assert.match(source, /enabled: Boolean\(market\) && !releaseContext/);
+  assert.match(source, /item\.kind !== "site-configuration"/);
+  assert.match(source, /content\.configuration === "contact-email"/);
+  assert.match(source, /content\.page === slot/);
+  assert.match(source, /item\.id === id && item\.versionId === versionId/);
+});
+
+test("landing delivery fails closed for every missing released page", () => {
   const aboutOnly = ["/about"];
   assert.equal(governedLandingDelivery("cms", aboutOnly, "/about", true), "cms");
   for (const path of ["/", "/partners", "/platforms", "/insights"]) {
-    assert.equal(governedLandingDelivery("cms", aboutOnly, path, false), "compiled-fallback");
+    assert.equal(governedLandingDelivery("cms", aboutOnly, path, false), "intentional-empty");
   }
 
   assert.equal(
@@ -197,12 +207,12 @@ test("landing cutover is isolated to each page publication history", () => {
   );
   assert.equal(
     governedLandingDelivery("cms", ["/"], "/partners", false),
-    "compiled-fallback",
-    "publishing Home does not cut Partners over",
+    "intentional-empty",
+    "a missing Partners record remains unavailable",
   );
   assert.equal(
     governedLandingDelivery("compiled-fallback", [], "/about", false),
-    "compiled-fallback",
-    "draft-only inventory does not cut About over",
+    "intentional-empty",
+    "draft-only inventory cannot restore compiled About content",
   );
 });

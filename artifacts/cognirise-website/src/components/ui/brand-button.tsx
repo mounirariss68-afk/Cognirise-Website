@@ -5,6 +5,7 @@ import { Link } from "wouter";
 import { trackEvent } from "@/lib/analytics";
 import { useMarketStore } from "@/store/market";
 import { handleSamePageHashNavigation } from "@/lib/hashNavigation";
+import { useReleaseHrefAvailable } from "@/lib/releases";
 
 interface BrandButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
@@ -91,6 +92,7 @@ function usePulseActionMotion() {
 export const BrandButton = React.forwardRef<HTMLButtonElement | HTMLAnchorElement, BrandButtonProps & React.AnchorHTMLAttributes<HTMLAnchorElement>>(
   ({ children, variant = "primary", className, icon, href, isLoading, disabled, ...props }, ref) => {
     const { market } = useMarketStore();
+    const destinationAvailable = useReleaseHrefAvailable(href ?? "");
     const { motionNodeRef } = usePulseActionMotion();
     const isUnavailable = disabled || isLoading;
     const forcedTextColor =
@@ -155,6 +157,7 @@ export const BrandButton = React.forwardRef<HTMLButtonElement | HTMLAnchorElemen
       );
     };
 
+    if (href && !destinationAvailable) return null;
     if (href) {
       const anchorProps = props as React.AnchorHTMLAttributes<HTMLAnchorElement>;
       const onAnchorClick = (event: React.MouseEvent<HTMLAnchorElement>) => {

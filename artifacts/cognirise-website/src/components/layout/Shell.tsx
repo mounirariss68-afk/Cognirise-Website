@@ -8,6 +8,7 @@ import { PulseMotionPage } from "@/components/motion/PulseMotionPage";
 import { setAnalyticsConsent, useAnalyticsConsent } from "@/lib/analytics";
 import { ALLIANCE_PLATFORMS } from "@/lib/alliancePlatforms";
 import { useGetPublicConfiguration, useGetPublicNavigationSettings } from "@workspace/api-client-react";
+import { releaseHrefAvailable, useReleaseContext } from "@/lib/releases";
 import { handleSamePageHashNavigation } from "@/lib/hashNavigation";
 import { isCurrentRouteDestination, routePath } from "@/lib/routeState";
 import { marketAwareDestination } from "@/lib/marketDestination";
@@ -280,6 +281,7 @@ export function Shell({
   const { market: publicMarket, locale: publicLocale, setMarket } = useMarketStore();
   const market = marketContext?.market ?? publicMarket;
   const locale = marketContext?.locale ?? publicLocale;
+  const releaseContext = useReleaseContext();
   const publicConfiguration = useGetPublicConfiguration();
   const marketOptions = publicConfiguration.data?.markets ?? [];
   useEffect(() => {
@@ -290,10 +292,12 @@ export function Shell({
     );
   }, [marketContext, publicConfiguration.data]);
   const navigationSettings = useGetPublicNavigationSettings({ market, locale }, {
-    query: { queryKey: ["public-navigation", market, locale], enabled: !navigationOverride },
+    query: { queryKey: ["public-navigation", market, locale], enabled: !navigationOverride && !releaseContext },
   });
-  const snapshotItems = navigationOverride?.items ?? [];
-  const snapshotNavigation = navigationOverride
+  const releaseNavigation = releaseContext?.release.manifest.navigation;
+  const effectiveNavigation = navigationOverride ?? releaseNavigation;
+  const snapshotItems = effectiveNavigation?.items ?? [];
+  const snapshotNavigation = effectiveNavigation
     ? (() => {
         const childrenByParent = new Map<string, NavigationItem[]>();
         const roots: NavigationItem[] = [];
@@ -344,8 +348,29 @@ export function Shell({
         const right = navigationSettings.data!.items.find((item) => item.id === b.id)?.order ?? 0;
         return left - right;
       })
-    : navigationSettings.data?.isConfigured === false ? compiledNavigation : []);
-  const visibleNavigation = groupPlatformNavigation(rawVisibleNavigation);
+    : []);
+  const availabilityManifest = releaseContext?.release.manifest;
+  const filterAvailable = (items: NavigationItem[]): NavigationItem[] => items.flatMap((item) => {
+    const children = item.items ? filterAvailable(item.items) : undefined;
+    if (availabilityManifest && !releaseHrefAvailable(availabilityManifest, item.href)) return [];
+    return [{ ...item, items: children?.length ? children : undefined }];
+  });
+  const visibleNavigation = groupPlatformNavigation(filterAvailable(rawVisibleNavigation));
+  const footerLinks = (items: Array<{ href: string; label: string }>) =>
+    availabilityManifest ? items.filter((item) => releaseHrefAvailable(availabilityManifest, item.href)) : items;
+  const capabilityFooterLinks = footerLinks([
+    { href: "/#service-lines", label: "What we do" },
+    { href: "/platforms", label: "Platforms" },
+    { href: "/industries", label: "Industries" },
+    { href: "/methodologies/idao", label: "IDAO methodology" },
+    { href: "/methodologies/agent-authority-model", label: "Agent Authority Model" },
+  ]);
+  const companyFooterLinks = footerLinks([
+    { href: "/about", label: "About & Leadership" },
+    { href: "/insights", label: "Insights" },
+    { href: "/partners", label: "Partners" },
+    { href: "/contact", label: "Contact" },
+  ]);
   const [scrolled, setScrolled] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const previousPathRef = useRef(window.location.pathname);
@@ -691,21 +716,18 @@ export function Shell({
             <div>
               <h4 className="text-[10px] font-semibold uppercase tracking-widest text-white/40 mb-6">Capability</h4>
               <ul className="flex flex-col gap-3 text-sm text-white/80 font-semibold">
-                <li><a href="/#service-lines" onClick={(event) => handleSamePageHashNavigation(event, "/#service-lines")} className="hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white">What we do</a></li>
-                <li><Link href="/platforms" className="hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white">Platforms</Link></li>
-                <li><Link href="/industries" className="hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white">Industries</Link></li>
-                <li><Link href="/methodologies/idao" className="hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white">IDAO methodology</Link></li>
-                <li><Link href="/methodologies/agent-authority-model" className="hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white">Agent Authority Model</Link></li>
+                {capabilityFooterLinks.map((item) => (
+                  <li key={item.href}><Link href={item.href} className="hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white">{item.label}</Link></li>
+                ))}
               </ul>
             </div>
 
             <div>
               <h4 className="text-[10px] font-semibold uppercase tracking-widest text-white/40 mb-6">Company</h4>
               <ul className="flex flex-col gap-3 text-sm text-white/80 font-semibold">
-                <li><Link href="/about" className="hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white">About & Leadership</Link></li>
-                <li><Link href="/insights" className="hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white">Insights</Link></li>
-                <li><Link href="/partners" className="hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white">Partners</Link></li>
-                <li><Link href="/contact" className="hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white">Contact</Link></li>
+                {companyFooterLinks.map((item) => (
+                  <li key={item.href}><Link href={item.href} className="hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white">{item.label}</Link></li>
+                ))}
               </ul>
             </div>
 

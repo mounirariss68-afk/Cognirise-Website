@@ -101,7 +101,7 @@ export default function Partners() {
     alt: "Cognirise alliance partners connected through a governed enterprise network.",
   });
   const closingCta = landingCta(governedLanding, "partners-closing-cta", { label: "Talk to a partner", href: "/contact" });
-  const partnersQuery = useCmsCollection<PartnerCard>("partner", partnersFallback, (item) => {
+  const partnersQuery = useCmsCollection<PartnerCard>("partner", [], (item) => {
     const content = contentRecord(item, "partner");
     const category = content.allianceCategory;
     if (category !== "engineering" && category !== "platform") return null;

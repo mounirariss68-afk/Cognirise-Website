@@ -5,7 +5,8 @@ import { readFileSync } from "node:fs";
 const source = readFileSync(new URL("./IndustryPicker.tsx", import.meta.url), "utf8");
 
 test("is CMS-backed and provides explicit delivery states", () => {
-  assert.match(source, /useCmsCollection\("industry", INDUSTRIES/);
+  assert.match(source, /useCmsCollection\("industry", \[\]/);
+  assert.match(source, /releaseHrefAvailable/);
   assert.match(source, /role="status"/);
   assert.match(source, /role="alert"/);
   assert.match(source, /No industry points of view are currently published/);

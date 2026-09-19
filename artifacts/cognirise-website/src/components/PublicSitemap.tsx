@@ -1,20 +1,9 @@
 import { useEffect } from "react";
-import { useGetPublicNavigationSettings, useGetPublicSitemap } from "@workspace/api-client-react";
 import { useMarketStore } from "@/store/market";
-import { ALLIANCE_PLATFORM_LIST } from "@/lib/alliancePlatforms";
 import { useLocation } from "wouter";
-import { PLATFORM_CATALOG } from "@/lib/platformCatalog";
+import { useReleaseContext } from "@/lib/releases";
 
-export const STATIC_SITEMAP_PATHS = [
-  "/methodologies",
-  "/methodologies/ai-value-to-scale",
-  "/methodologies/agentic-operations-readiness",
-  "/methodologies/ai-use-case-prioritization",
-  "/methodologies/idao",
-  "/methodologies/agent-authority-model",
-  ...ALLIANCE_PLATFORM_LIST.map(({ slug }) => `/platforms/${slug}`),
-  ...PLATFORM_CATALOG.filter(({ ownership }) => ownership === "cognirise").map(({ href }) => href),
-];
+export const STATIC_SITEMAP_PATHS: string[] = [];
 
 export function mergeSitemapItems(items: Array<{ url: string }>, origin: string, unavailablePaths = new Set<string>()) {
    const redirectPaths = new Set([
@@ -37,24 +26,18 @@ export function mergeSitemapItems(items: Array<{ url: string }>, origin: string,
 
 export function PublicSitemap() {
   const { market, locale } = useMarketStore();
+  const releaseContext = useReleaseContext();
   const [location] = useLocation();
   const isPreview = location.split(/[?#]/)[0].startsWith("/preview/");
-  const sitemap = useGetPublicSitemap({ market, locale }, {
-    query: { queryKey: ["public-sitemap", market, locale], enabled: !isPreview },
-  });
-  const navigation = useGetPublicNavigationSettings({ market, locale }, {
-    query: { queryKey: ["public-navigation", market, locale], enabled: !isPreview },
-  });
 
   useEffect(() => {
     const id = "public-sitemap-jsonld";
     document.getElementById(id)?.remove();
     if (isPreview) return;
-    if (!sitemap.data?.items.length) return;
-    const unavailable = new Set(navigation.data?.isConfigured
-      ? navigation.data.pages.filter((page) => !page.enabled).map((page) => page.path)
-      : []);
-    const allItems = mergeSitemapItems(sitemap.data.items, window.location.origin, unavailable);
+    const routes = releaseContext?.release.manifest.revisions
+      .flatMap((revision) => revision.route ? [{ url: `${window.location.origin}${revision.route}` }] : []) ?? [];
+    if (!routes.length) return;
+    const allItems = mergeSitemapItems(routes, window.location.origin);
 
     const script = document.createElement("script");
     script.id = id;
@@ -70,7 +53,7 @@ export function PublicSitemap() {
     });
     document.head.appendChild(script);
     return () => script.remove();
-  }, [isPreview, sitemap.data, navigation.data]);
+  }, [isPreview, market, locale, releaseContext]);
 
   return null;
 }

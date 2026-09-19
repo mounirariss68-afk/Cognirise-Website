@@ -9,6 +9,7 @@ import {
   landingCta,
   landingMedia,
   landingText,
+  resolveCmsMedia,
   type CmsRecord,
   type CmsDeliveryState,
   useCmsCollection,
@@ -23,6 +24,7 @@ type TeamProfile = {
   title: string;
   background: string;
   contribution: string;
+  identityImage?: { src: string; alt: string; objectPosition?: string };
 };
 type PreviewPersonRecord = CmsRecord<PersonContent> & { content: PersonContent };
 
@@ -38,7 +40,16 @@ function ProfileList({ profiles, label, delivery }: { profiles: TeamProfile[]; l
         <article key={profile.name} className="grid gap-10 py-16 lg:grid-cols-[.55fr_1.25fr]" data-testid={`profile-${profile.group}-${profile.initials.toLowerCase()}`}>
           <header className="lg:sticky lg:top-28 lg:self-start">
             <div className="mb-8 flex items-start justify-between">
-              <span className="grid h-24 w-24 place-items-center bg-gradient-to-br from-[hsl(var(--brand-violet))] via-[hsl(var(--brand-pink))] to-[hsl(var(--brand-coral))] font-display text-2xl font-bold text-white [clip-path:polygon(0_0,100%_10%,88%_100%,10%_88%)]">{profile.initials}</span>
+              {profile.identityImage ? (
+                <img
+                  className="h-24 w-24 object-cover [clip-path:polygon(0_0,100%_10%,88%_100%,10%_88%)]"
+                  src={profile.identityImage.src}
+                  alt={profile.identityImage.alt}
+                  style={{ objectPosition: profile.identityImage.objectPosition }}
+                />
+              ) : (
+                <span aria-label={`${profile.name} identity placeholder`} className="grid h-24 w-24 place-items-center bg-gradient-to-br from-[hsl(var(--brand-violet))] via-[hsl(var(--brand-pink))] to-[hsl(var(--brand-coral))] font-display text-2xl font-bold text-white [clip-path:polygon(0_0,100%_10%,88%_100%,10%_88%)]">{profile.initials}</span>
+              )}
               <span className="text-xs font-bold text-[hsl(var(--brand-coral))]">{String(index + 1).padStart(2, "0")} / {String(profiles.length).padStart(2, "0")}</span>
             </div>
             <p className="text-[10px] font-bold uppercase tracking-[.18em] text-[hsl(var(--brand-pink))]">{profile.title}</p>
@@ -93,6 +104,7 @@ export default function AboutPeople({ previewPerson }: { previewPerson?: Preview
     const personContent = item.content as PersonContent;
     if (content.role !== "founder" && content.role !== "leader" && content.role !== "advisor") return null;
     const name = item.title;
+    const identityMedia = resolveCmsMedia(item.media, personContent.identityMedia);
     return {
       initials: name.split(/\s+/).map((part) => part[0]).join("").slice(0, 3),
       name,
@@ -100,6 +112,13 @@ export default function AboutPeople({ previewPerson }: { previewPerson?: Preview
       title: personContent.title,
       background: content.biography || "",
       contribution: content.contribution || "",
+      identityImage: identityMedia ? {
+        src: identityMedia.url,
+        alt: personContent.identityMedia?.altText || identityMedia.altText || `${name} portrait`,
+        objectPosition: identityMedia.focalPoint
+          ? `${identityMedia.focalPoint.x * 100}% ${identityMedia.focalPoint.y * 100}%`
+          : undefined,
+      } : undefined,
     };
   });
   const previewProfile = previewPerson
@@ -107,6 +126,7 @@ export default function AboutPeople({ previewPerson }: { previewPerson?: Preview
         const content = previewPerson.content;
         if (content.role !== "founder" && content.role !== "leader" && content.role !== "advisor") return undefined;
         const name = previewPerson.title;
+        const identityMedia = resolveCmsMedia(previewPerson.media, content.identityMedia);
         return {
           initials: name.split(/\s+/).map((part) => part[0]).join("").slice(0, 3),
           name,
@@ -114,6 +134,13 @@ export default function AboutPeople({ previewPerson }: { previewPerson?: Preview
           title: content.title,
           background: content.biography || "",
           contribution: content.contribution || "",
+          identityImage: identityMedia ? {
+            src: identityMedia.url,
+            alt: content.identityMedia?.altText || identityMedia.altText || `${name} portrait`,
+            objectPosition: identityMedia.focalPoint
+              ? `${identityMedia.focalPoint.x * 100}% ${identityMedia.focalPoint.y * 100}%`
+              : undefined,
+          } : undefined,
         };
       })()
     : undefined;

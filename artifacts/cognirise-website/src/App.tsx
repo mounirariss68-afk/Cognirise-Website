@@ -1,5 +1,4 @@
 import { Switch, Route, Redirect, useLocation, useSearch } from "wouter";
-import { useGetPublicNavigationSettings } from "@workspace/api-client-react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
@@ -10,8 +9,13 @@ import { PublicSitemap } from "@/components/PublicSitemap";
 import { GovernedLandingRoute } from "@/components/GovernedLandingRoute";
 import { useMarketStore } from "@/store/market";
 import { ServiceError } from "@/components/error-boundary";
-import { cmsRequestIsUnavailable } from "@/lib/cms";
 import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
+import {
+  ReleaseProvider,
+  releaseHasPath,
+  releaseRedirectForPath,
+  useActiveRelease,
+} from "@/lib/releases";
 
 function RedirectWithSearch({ to }: { to: string }) {
   const search = useSearch();
@@ -114,40 +118,41 @@ export function Router() {
     || path === "/industries/public-sector"
     || path === "/industries/education";
   const isPreview = path.startsWith("/preview/");
-  const policy = useGetPublicNavigationSettings({ market, locale }, {
-    query: { queryKey: ["public-navigation", market, locale], enabled: !isPreview },
-  });
+  const release = useActiveRelease(market, locale, !isPreview);
   // A preview is a capability-scoped composition. CmsPreview fetches its
   // immutable navigation snapshot and supplies it to Shell; do not consult
   // the live public policy or page availability for this route.
   if (isPreview) return <CmsPreview />;
-  // Retirement takes precedence over stale availability or a failed policy fetch.
-  // Only the overview is retired; shareable full records keep their routes.
-  if (path === "/work" || path === "/work/") return <CanonicalRedirect to="/industries" />;
-  if (path === "/platforms/cognitalk" || path === "/cognitalk") return <CanonicalRedirect to="/platforms/lupitor" />;
-  if (path === "/platforms/cogniware" || path === "/cogniware") return <CanonicalRedirect to="/platforms/cognibase" />;
+  if (release.isPending) return <Shell><NavigationBackControl /><div aria-busy="true" className="min-h-[60vh]" /></Shell>;
+  if (release.isError && (release.error as { status?: number } | undefined)?.status !== 404) {
+    return (
+      <Shell>
+        <NavigationBackControl />
+        <ServiceError onRetry={() => { void release.refetch(); }} message="The published release could not be loaded. Please try again." />
+      </Shell>
+    );
+  }
+  if (release.isError || !release.data) return <Shell><NavigationBackControl /><NotFound /></Shell>;
+  const governedRedirect = releaseRedirectForPath(release.data.manifest, path);
+  if (governedRedirect) {
+    return governedRedirect.anchor
+      ? <AnchoredRedirect to={governedRedirect.path} anchor={governedRedirect.anchor} />
+      : <CanonicalRedirect to={governedRedirect.path} />;
+  }
   if (
     legacyIndustryPaths.has(path)
     && typeof window !== "undefined"
     && window.location.hash === "#selected-work"
+    && releaseHasPath(release.data.manifest, "/industries")
   ) return <AnchoredRedirect to="/industries" anchor="selected-work" />;
-  const unavailable = policy.data?.isConfigured === true
-    && policy.data.pages.some((page) => page.path === path && !page.enabled);
-  if (policy.isPending) return <Shell><NavigationBackControl /><div aria-busy="true" className="min-h-[60vh]" /></Shell>;
-  if (policy.isError && cmsRequestIsUnavailable(policy.error)) {
-    return (
-      <Shell>
-        <NavigationBackControl />
-        <ServiceError onRetry={() => { void policy.refetch(); }} />
-      </Shell>
-    );
-  }
-  if (policy.isError) return <Shell><NavigationBackControl /><NotFound /></Shell>;
+  const unavailable = !releaseHasPath(release.data.manifest, path);
   return (
-    <Shell>
-      {(!embedsBackInHero || unavailable) && <NavigationBackControl />}
-      {unavailable ? <NotFound /> :
-      <Switch>
+    <ReleaseProvider release={release.data}>
+      <PublicSitemap />
+      <Shell>
+        {(!embedsBackInHero || unavailable) && <NavigationBackControl />}
+        {unavailable ? <NotFound /> :
+        <Switch>
         <Route path="/" component={Home} />
         
         {/* Methodologies */}
@@ -173,15 +178,15 @@ export function Router() {
         
         {/* Platforms */}
         <Route path="/platforms"><GovernedLandingRoute pagePath="/platforms" compiled={PlatformsOverview} /></Route>
-        <Route path="/platforms/cognios" component={CogniOSPlatform} />
-        <Route path="/platforms/cognidocs" component={CogniDocs} />
-        <Route path="/platforms/cogniagents" component={CogniAgents} />
+        <Route path="/platforms/cognios" component={PlatformDetail} />
+        <Route path="/platforms/cognidocs" component={PlatformDetail} />
+        <Route path="/platforms/cogniagents" component={PlatformDetail} />
         <Route path="/platforms/cognitalk"><CanonicalRedirect to="/platforms/lupitor" /></Route>
         <Route path="/platforms/cogniware"><CanonicalRedirect to="/platforms/cognibase" /></Route>
-        <Route path="/platforms/cognibase" component={CogniBase} />
-        <Route path="/platforms/lupitor"><AlliancePlatformDetail slug="lupitor" /></Route>
-        <Route path="/platforms/datatoolpack" component={DatatoolpackAutoData} />
-        <Route path="/platforms/bunjee-ai"><AlliancePlatformDetail slug="bunjee-ai" /></Route>
+        <Route path="/platforms/cognibase" component={PlatformDetail} />
+        <Route path="/platforms/lupitor" component={PlatformDetail} />
+        <Route path="/platforms/datatoolpack" component={PlatformDetail} />
+        <Route path="/platforms/bunjee-ai" component={PlatformDetail} />
         <Route path="/platforms/:slug" component={PlatformDetail} />
 
         {/* Industries */}
@@ -233,8 +238,9 @@ export function Router() {
         <Route path="/preview/:token" component={CmsPreview} />
         
         <Route component={NotFound} />
-      </Switch>}
-    </Shell>
+        </Switch>}
+      </Shell>
+    </ReleaseProvider>
   );
 }
 
@@ -242,7 +248,6 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AnalyticsBridge />
-      <PublicSitemap />
       <Router />
       <Toaster />
     </QueryClientProvider>

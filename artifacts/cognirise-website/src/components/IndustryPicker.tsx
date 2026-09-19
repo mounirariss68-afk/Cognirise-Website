@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { ArrowUpRight } from "lucide-react";
-import { INDUSTRIES } from "@/content/industries";
+import { releaseHrefAvailable, useReleaseContext } from "@/lib/releases";
 import { assetUrl } from "@/lib/assets";
 import { contentRecord, useCmsCollection } from "@/lib/cms";
 import { PulseImage } from "@/components/ui/pulse-image";
@@ -118,7 +118,8 @@ export function IndustryPicker({
   className = "",
   compact = false,
 }: IndustryPickerProps) {
-  const industryQuery = useCmsCollection("industry", INDUSTRIES, (item) => ({
+  const releaseContext = useReleaseContext();
+  const industryQuery = useCmsCollection("industry", [], (item) => ({
     ...contentRecord(item, "industry"),
     slug: item.slug,
   }));
@@ -131,7 +132,7 @@ export function IndustryPicker({
     detail: industry.dek,
     image: industry.image,
     imageAlt: industry.imageAlt,
-  }));
+  })).filter((industry) => !releaseContext || releaseHrefAvailable(releaseContext.release.manifest, industry.href));
   const rows = Array.from(
     { length: Math.ceil(industries.length / 3) },
     (_, index) => industries.slice(index * 3, index * 3 + 3),

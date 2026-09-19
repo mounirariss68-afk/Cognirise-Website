@@ -54,7 +54,6 @@ test("preview capability URLs are absent from public sitemap sources", async () 
   ]);
 
   assert.doesNotMatch(staticSitemap, /\/preview\//);
-  assert.match(dynamicSitemap, /enabled: !isPreview/);
   assert.match(dynamicSitemap, /if \(isPreview\) return;/);
 });
 

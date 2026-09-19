@@ -3,9 +3,9 @@ import test from "node:test";
 import { COMPILED_LANDING_ROUTES, cmsCollectionData, cmsCollectionDelivery, cmsCollectionIsCutOver, cmsEntryIsCutOver, cmsEntryRenderPolicy, cmsRequestIsUnavailable, landingNarrative, landingSections, landingVisualReferences, type CmsDeliveryState } from "./cms";
 import type { LandingPageContent } from "@workspace/api-zod";
 
-test("people never select compiled profiles, even with legacy cutover disabled or no publication history", () => {
+test("people never select compiled profiles and fail closed without released items", () => {
   for (const configured of [undefined, false, true]) {
-    assert.equal(cmsCollectionIsCutOver("person", configured), true);
+    assert.equal(cmsCollectionIsCutOver("person", configured), configured !== false);
     assert.equal(cmsCollectionDelivery("person", {
       isPending: false, isError: false, hasContractErrors: false, hasItems: false,
       isConfigured: configured,
@@ -30,10 +30,10 @@ test("compiled framework content is limited to explicit pre-cutover fallback", (
   assert.equal(cmsEntryRenderPolicy(true, "cms"), "cms");
 });
 
-test("only the approved Agent Authority framework entry is cut over when the framework collection is not", () => {
+test("all framework and publication entries are release-authoritative", () => {
   assert.equal(cmsEntryIsCutOver("framework", "agent-authority-model"), true);
-  assert.equal(cmsEntryIsCutOver("framework", "another-framework"), false);
-  assert.equal(cmsEntryIsCutOver("publication", "agent-authority-model"), false);
+  assert.equal(cmsEntryIsCutOver("framework", "another-framework"), true);
+  assert.equal(cmsEntryIsCutOver("publication", "agent-authority-model"), true);
 });
 
 test("compiled landing inventory has a governed source key for every known route", () => {
@@ -46,7 +46,7 @@ test("compiled landing inventory has a governed source key for every known route
   ]);
 });
 
-test("office fallback ends after CMS publication history exists", () => {
+test("office collections fail closed with or without prior publication", () => {
   assert.equal(cmsCollectionIsCutOver("office", false), false);
   assert.equal(cmsCollectionIsCutOver("office", true), true);
   assert.equal(cmsCollectionDelivery("office", {
@@ -62,14 +62,14 @@ test("office fallback ends after CMS publication history exists", () => {
     hasContractErrors: false,
     hasItems: false,
     isConfigured: false,
-  }), "compiled-fallback");
+  }), "intentional-empty");
 });
 
-test("homepage renderer consumes ordered governed narrative and only falls back while unconfigured", () => {
+test("homepage renderer consumes ordered governed narrative and never falls back to compiled content", () => {
   assert.equal(cmsCollectionIsCutOver("landing-page", false), false);
   assert.equal(cmsCollectionDelivery("landing-page", {
     isPending: false, isError: false, hasContractErrors: false, hasItems: false, isConfigured: false,
-  }), "compiled-fallback");
+  }), "intentional-empty");
   assert.equal(cmsCollectionDelivery("landing-page", {
     isPending: false, isError: false, hasContractErrors: false, hasItems: false, isConfigured: true,
   }), "intentional-empty");
