@@ -5,7 +5,7 @@ import {
   destinationReferenceSchema,
   resourceScopedGrantSchema,
 } from "@workspace/api-zod";
-import { auditConfiguredReleaseMatrix, releaseInventory, validateReleaseManifestParity } from "../src/lib/release-contract";
+import { auditConfiguredReleaseMatrix, releaseInventory, releaseParityEvidence, validateReleaseManifestParity } from "../src/lib/release-contract";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
@@ -196,6 +196,32 @@ test("release evidence is database-enforced append-only", async () => {
   assert.match(migration, /BEFORE UPDATE OR DELETE ON cms_release_candidates/);
   assert.match(migration, /BEFORE UPDATE OR DELETE ON cms_release_receipts/);
   assert.match(migration, /cms_release_receipts_required_actors_check/);
+});
+
+test("generated parity evidence is commit-stamped and bound to a release digest", () => {
+  const first = releaseParityEvidence("release-digest-one");
+  const second = releaseParityEvidence("release-digest-two");
+  assert.equal(first.report.status, "pass");
+  assert.match(first.sourceCommit, /^[0-9a-f]{40,64}$/);
+  assert.match(first.reportDigest, /^[0-9a-f]{64}$/);
+  assert.match(first.attestationDigest, /^[0-9a-f]{64}$/);
+  assert.notEqual(first.attestationDigest, second.attestationDigest);
+  assert.throws(
+    () => releaseParityEvidence("release-digest", { ...first.report, status: "fail" }),
+    /parity report is required/,
+  );
+  assert.throws(
+    () => releaseParityEvidence("release-digest", { ...first.report, sourceCommit: "" }),
+    /parity report is required/,
+  );
+});
+
+test("release promotion stores parity evidence and exposes only a redacted administrator report", async () => {
+  const source = await readFile(resolve(process.cwd(), "src/routes/releases.ts"), "utf8");
+  assert.match(source, /releaseParityEvidence\(integrityDigest\)/);
+  assert.match(source, /parity_report_digest,parity_attestation_digest/);
+  assert.match(source, /\/releases\/:releaseId\/parity-report/);
+  assert.doesNotMatch(source, /report:\s*\{[^}]*publisher_user_id/s);
 });
 
 test("external submission, preview, and media binding use distinct grant actions", async () => {

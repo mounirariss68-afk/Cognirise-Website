@@ -73,6 +73,8 @@ const expectedMigrations = [
   { idx: 44, when: 1788998400022, tag: "0044_cms_legacy_administrator_snapshot_repair" },
   { idx: 45, when: 1788998400023, tag: "0045_cms_release_contract" },
   { idx: 46, when: 1788998400024, tag: "0046_cms_release_contract_hardening" },
+  { idx: 47, when: 1788998400025, tag: "0047_cms_release_candidate_once" },
+  { idx: 48, when: 1788998400026, tag: "0048_cms_release_parity_evidence" },
 ];
 
 test("registers migrations in ordered Drizzle history", async () => {

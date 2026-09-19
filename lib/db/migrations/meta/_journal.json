@@ -330,6 +330,20 @@
       "when": 1788998400024,
       "tag": "0046_cms_release_contract_hardening",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1788998400025,
+      "tag": "0047_cms_release_candidate_once",
+      "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1788998400026,
+      "tag": "0048_cms_release_parity_evidence",
+      "breakpoints": true
     }
   ]
 }

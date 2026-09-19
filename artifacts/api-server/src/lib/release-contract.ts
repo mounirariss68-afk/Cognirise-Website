@@ -10,6 +10,7 @@ import {
 } from "@workspace/api-zod";
 import { navigationCandidates } from "./navigation-policy";
 import type { Queryable } from "./cms";
+import generatedParityReport from "../generated/cms-publication-parity.json";
 
 const digest = (value: unknown) => createHash("sha256")
   .update(JSON.stringify(value, (_key, item) =>
@@ -381,3 +382,43 @@ export async function publicReleaseManifest(market: string, locale: string) {
 }
 
 export const releaseDigest = digest;
+
+type GeneratedParityReport = {
+  formatVersion: number;
+  generatedAt: string;
+  sourceCommit: string;
+  registryVersion: string;
+  status: string;
+  reportDigest: string;
+  errors: string[];
+  [key: string]: unknown;
+};
+
+export function releaseParityEvidence(
+  releaseIntegrityDigest: string,
+  report = generatedParityReport as GeneratedParityReport,
+) {
+  const expectedReportDigest = digest(Object.fromEntries(
+    Object.entries(report).filter(([key]) => key !== "reportDigest"),
+  ));
+  const ready = report.status === "pass"
+    && report.registryVersion === CMS_RELEASE_REGISTRY.version
+    && /^[0-9a-f]{40,64}$/i.test(report.sourceCommit)
+    && report.reportDigest === expectedReportDigest;
+  if (!ready) {
+    throw Object.assign(new Error("A passing, commit-stamped CMS publication parity report is required for promotion."), {
+      code: "CMS_PARITY_REPORT_REQUIRED",
+    });
+  }
+  return {
+    report,
+    sourceCommit: report.sourceCommit,
+    reportDigest: report.reportDigest,
+    attestationDigest: digest({
+      formatVersion: report.formatVersion,
+      sourceCommit: report.sourceCommit,
+      reportDigest: report.reportDigest,
+      releaseIntegrityDigest,
+    }),
+  };
+}

@@ -1,14 +1,25 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { resolve } from "node:path";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+import { createHash } from "node:crypto";
 import { CMS_RELEASE_REGISTRY } from "@workspace/api-zod";
 
+const execFileAsync = promisify(execFile);
+const digest = (value: unknown) => createHash("sha256")
+  .update(JSON.stringify(value, (_key, item) =>
+    item && typeof item === "object" && !Array.isArray(item)
+      ? Object.fromEntries(Object.entries(item).sort(([a], [b]) => a.localeCompare(b)))
+      : item))
+  .digest("hex");
 const root = resolve(fileURLToPath(new URL(".", import.meta.url)), "..");
 const appPath = resolve(root, "artifacts/cognirise-website/src/App.tsx");
 const releaseClientPath = resolve(root, "artifacts/cognirise-website/src/lib/releases.tsx");
 const releaseServerPath = resolve(root, "artifacts/api-server/src/lib/release-contract.ts");
 const releaseRoutesPath = resolve(root, "artifacts/api-server/src/routes/releases.ts");
 const outputPath = resolve(root, ".local/reports/cms-publication-parity.json");
+const releaseOutputPath = resolve(root, "artifacts/api-server/src/generated/cms-publication-parity.json");
 
 const [app, releaseClient, releaseServer, releaseRoutes] = await Promise.all([
   readFile(appPath, "utf8"),
@@ -87,8 +98,18 @@ const requiredEvidence: Array<[string, boolean]> = [
 ];
 for (const [label, present] of requiredEvidence) if (!present) errors.push(`Missing evidence: ${label}.`);
 
-const report = {
+let sourceCommit = "";
+try {
+  sourceCommit = (await execFileAsync("git", ["rev-parse", "HEAD"], { cwd: root })).stdout.trim();
+} catch {
+  errors.push("Unable to identify the source commit for release evidence.");
+}
+
+const unsignedReport = {
+  formatVersion: 1,
   generatedBy: "pnpm run audit:cms-publication-parity",
+  generatedAt: new Date().toISOString(),
+  sourceCommit,
   registryVersion: CMS_RELEASE_REGISTRY.version,
   status: errors.length === 0 ? "pass" : "fail",
   summary: {
@@ -107,11 +128,18 @@ const report = {
   acceptanceEvidence: Object.fromEntries(requiredEvidence),
   errors,
 };
+const reportDigest = digest(unsignedReport);
+const report = { ...unsignedReport, reportDigest };
 
 await mkdir(resolve(root, ".local/reports"), { recursive: true });
-await writeFile(outputPath, `${JSON.stringify(report, null, 2)}\n`);
+await mkdir(resolve(root, "artifacts/api-server/src/generated"), { recursive: true });
+await Promise.all([
+  writeFile(outputPath, `${JSON.stringify(report, null, 2)}\n`),
+  writeFile(releaseOutputPath, `${JSON.stringify(report, null, 2)}\n`),
+]);
 console.log(`CMS publication parity audit: ${report.status}; ${routeEvidence.length} routes; ${errors.length} unexplained.`);
 console.log(`Report: ${outputPath}`);
+console.log(`Release evidence: ${releaseOutputPath}`);
 if (errors.length) {
   for (const error of errors) console.error(`- ${error}`);
   process.exitCode = 1;

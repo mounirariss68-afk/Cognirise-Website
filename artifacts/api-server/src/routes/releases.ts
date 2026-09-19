@@ -23,6 +23,7 @@ import {
   publicReleaseManifest,
   releaseDigest,
   releaseInventory,
+  releaseParityEvidence,
   validateReleaseManifestParity,
 } from "../lib/release-contract";
 
@@ -35,6 +36,9 @@ function releaseReceipt(row: Record<string, any>) {
     releaseNumber: Number(row.release_number),
     releasedAt: row.released_at,
     integrityDigest: row.integrity_digest,
+    parityReportDigest: row.parity_report_digest,
+    parityAttestationDigest: row.parity_attestation_digest,
+    sourceCommit: row.source_commit,
   };
 }
 
@@ -61,7 +65,8 @@ router.get("/releases/history", requireAdministrator, asyncRoute(async (req, res
   if (!parsed.success) { res.status(400).json({ error: "Invalid release scope." }); return; }
   const result = await pool.query(
     `SELECT id::text,release_number,status,registry_version,validation_digest,
-            integrity_digest,released_at,previous_release_id::text,
+            integrity_digest,released_at,previous_release_id::text,source_commit,
+            parity_report_digest,parity_attestation_digest,
             publisher_user_id::text,
             (SELECT release_id=receipt.id FROM cms_active_releases
               WHERE market=receipt.market AND locale=receipt.locale) active
@@ -79,11 +84,45 @@ router.get("/releases/history", requireAdministrator, asyncRoute(async (req, res
       registryVersion: row.registry_version,
       validationDigest: row.validation_digest,
       integrityDigest: row.integrity_digest,
+      sourceCommit: row.source_commit,
+      parityReportDigest: row.parity_report_digest,
+      parityAttestationDigest: row.parity_attestation_digest,
       releasedAt: row.released_at,
       previousReleaseId: row.previous_release_id,
       publisherId: row.publisher_user_id,
       active: Boolean(row.active),
     })),
+  });
+}));
+
+router.get("/releases/:releaseId/parity-report", requireAdministrator, asyncRoute(async (req, res) => {
+  const result = await pool.query(
+    `SELECT id::text,release_number,market,locale,registry_version,released_at,
+            integrity_digest,source_commit,parity_report,parity_report_digest,
+            parity_attestation_digest
+       FROM cms_release_receipts WHERE id=$1`,
+    [String(req.params.releaseId)],
+  );
+  if (!result.rowCount) { res.status(404).json({ error: "Release receipt not found." }); return; }
+  const row = result.rows[0];
+  if (!row.parity_report || !row.parity_report_digest || !row.parity_attestation_digest) {
+    res.status(409).json({ error: "This legacy release has no signed CMS parity report." });
+    return;
+  }
+  res.json({
+    release: {
+      id: row.id,
+      releaseNumber: Number(row.release_number),
+      market: row.market,
+      locale: row.locale,
+      registryVersion: row.registry_version,
+      releasedAt: row.released_at,
+      integrityDigest: row.integrity_digest,
+      sourceCommit: row.source_commit,
+    },
+    report: row.parity_report,
+    reportDigest: row.parity_report_digest,
+    attestationDigest: row.parity_attestation_digest,
   });
 }));
 
@@ -177,7 +216,8 @@ router.post("/releases/publish", requireCsrf, requireAdministrator, asyncRoute(a
       return;
     }
     const alreadyPublished = await client.query(
-      `SELECT id::text,release_number,released_at,integrity_digest
+      `SELECT id::text,release_number,released_at,integrity_digest,source_commit,
+              parity_report_digest,parity_attestation_digest
          FROM cms_release_receipts WHERE candidate_id=$1 AND status='released'
          ORDER BY release_number LIMIT 1`,
       [row.id],
@@ -204,20 +244,26 @@ router.post("/releases/publish", requireCsrf, requireAdministrator, asyncRoute(a
       market: row.market, locale: row.locale, previousReleaseId: previous.rows[0]?.release_id ?? null,
       publisherId: auth.user.id,
     });
+    const parityEvidence = releaseParityEvidence(integrityDigest);
     const inserted = await client.query(
       `INSERT INTO cms_release_receipts
         (market,locale,registry_version,candidate_id,manifest,validation_digest,status,
          previous_release_id,submitter_user_id,reviewer_user_id,approver_user_id,publisher_user_id,
-         grant_version,separation_of_duties_valid,integrity_digest)
-       VALUES ($1,$2,$3,$4,$5,$6,'released',$7,$8,$9,$10,$11,$12,true,$13)
+          grant_version,separation_of_duties_valid,integrity_digest,source_commit,parity_report,
+          parity_report_digest,parity_attestation_digest)
+        VALUES ($1,$2,$3,$4,$5,$6,'released',$7,$8,$9,$10,$11,$12,true,$13,$14,$15,$16,$17)
        ON CONFLICT (integrity_digest) DO NOTHING
-       RETURNING id::text,release_number,released_at,integrity_digest`,
+        RETURNING id::text,release_number,released_at,integrity_digest,source_commit,
+                  parity_report_digest,parity_attestation_digest`,
       [row.market, row.locale, row.registry_version, row.id, row.manifest, row.validation_digest,
         previous.rows[0]?.release_id ?? null, row.submitted_by_user_id, row.reviewer_user_id,
-        row.approver_user_id, auth.user.id, row.grant_version, integrityDigest],
+        row.approver_user_id, auth.user.id, row.grant_version, integrityDigest,
+        parityEvidence.sourceCommit, parityEvidence.report, parityEvidence.reportDigest,
+        parityEvidence.attestationDigest],
     );
     const publishedReceipt = inserted.rows[0] ?? (await client.query(
-      `SELECT id::text,release_number,released_at,integrity_digest
+      `SELECT id::text,release_number,released_at,integrity_digest,source_commit,
+              parity_report_digest,parity_attestation_digest
          FROM cms_release_receipts WHERE integrity_digest=$1`,
       [integrityDigest],
     )).rows[0];
@@ -279,20 +325,26 @@ router.post("/releases/rollback", requireCsrf, requireAdministrator, asyncRoute(
       [row.market, row.locale],
     );
     const integrityDigest = releaseDigest({ rollbackTo: row.id, from: active.rows[0]?.release_id ?? null, actor: auth.user.id });
+    const parityEvidence = releaseParityEvidence(integrityDigest);
     const receipt = await client.query(
       `INSERT INTO cms_release_receipts
         (market,locale,registry_version,candidate_id,manifest,validation_digest,status,previous_release_id,
          submitter_user_id,reviewer_user_id,approver_user_id,publisher_user_id,grant_version,
-         separation_of_duties_valid,integrity_digest)
-       VALUES ($1,$2,$3,$4,$5,$6,'rolled-back',$7,$8,$9,$10,$11,$12,$13,$14)
+          separation_of_duties_valid,integrity_digest,source_commit,parity_report,
+          parity_report_digest,parity_attestation_digest)
+        VALUES ($1,$2,$3,$4,$5,$6,'rolled-back',$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
        ON CONFLICT (integrity_digest) DO NOTHING
-       RETURNING id::text,release_number,released_at,integrity_digest`,
+        RETURNING id::text,release_number,released_at,integrity_digest,source_commit,
+                  parity_report_digest,parity_attestation_digest`,
       [row.market,row.locale,row.registry_version,row.candidate_id,row.manifest,row.validation_digest,
         active.rows[0]?.release_id ?? null,row.submitter_user_id,row.reviewer_user_id,row.approver_user_id,
-        auth.user.id,row.grant_version,row.separation_of_duties_valid,integrityDigest],
+        auth.user.id,row.grant_version,row.separation_of_duties_valid,integrityDigest,
+        parityEvidence.sourceCommit,parityEvidence.report,parityEvidence.reportDigest,
+        parityEvidence.attestationDigest],
     );
     const rollbackReceipt = receipt.rows[0] ?? (await client.query(
-      `SELECT id::text,release_number,released_at,integrity_digest
+      `SELECT id::text,release_number,released_at,integrity_digest,source_commit,
+              parity_report_digest,parity_attestation_digest
          FROM cms_release_receipts WHERE integrity_digest=$1`,
       [integrityDigest],
     )).rows[0];

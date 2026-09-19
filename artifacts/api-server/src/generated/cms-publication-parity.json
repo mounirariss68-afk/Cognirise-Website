@@ -1,0 +1,1883 @@
+{
+  "formatVersion": 1,
+  "generatedBy": "pnpm run audit:cms-publication-parity",
+  "generatedAt": "2026-09-19T12:46:50.715Z",
+  "sourceCommit": "3e6d189ba9bec5ce1d21029b29768f0a883c05e3",
+  "registryVersion": "2026-09-19.2",
+  "status": "pass",
+  "summary": {
+    "routes": 64,
+    "kinds": 10,
+    "compiledPublicationAuthority": 0,
+    "unexplained": 0
+  },
+  "authority": {
+    "publication": "cms_release_receipts.manifest selected by cms_active_releases",
+    "website": "ActiveRelease.manifest",
+    "rendererShellsMayBeCompiled": true,
+    "compiledContentMayBePublicAuthority": false
+  },
+  "routeAndSlotAudit": [
+    {
+      "destinationId": "home",
+      "path": "/",
+      "routeType": "page",
+      "registryRecord": "2026-09-19.2:home",
+      "cmsSource": "immutable manifest.revisions[kind=landing-page]",
+      "renderer": "home",
+      "dispatchEvidence": "App.tsx Route /",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [
+          "title",
+          "content"
+        ],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "absent",
+      "compiledRendererShell": true,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "methodologies",
+      "path": "/methodologies",
+      "routeType": "page",
+      "registryRecord": "2026-09-19.2:methodologies",
+      "cmsSource": "immutable manifest.revisions[kind=landing-page]",
+      "renderer": "methodologies",
+      "dispatchEvidence": "App.tsx Route /methodologies",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [
+          "title",
+          "content"
+        ],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "absent",
+      "compiledRendererShell": true,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "methodology.ai-use-case-prioritization",
+      "path": "/methodologies/ai-use-case-prioritization",
+      "routeType": "page",
+      "registryRecord": "2026-09-19.2:methodology.ai-use-case-prioritization",
+      "cmsSource": "immutable manifest.revisions[kind=framework]",
+      "renderer": "methodology-detail",
+      "dispatchEvidence": "App.tsx Route /methodologies/ai-use-case-prioritization",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [
+          "title",
+          "content"
+        ],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "absent",
+      "compiledRendererShell": true,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "methodology.ai-value-to-scale",
+      "path": "/methodologies/ai-value-to-scale",
+      "routeType": "page",
+      "registryRecord": "2026-09-19.2:methodology.ai-value-to-scale",
+      "cmsSource": "immutable manifest.revisions[kind=framework]",
+      "renderer": "methodology-detail",
+      "dispatchEvidence": "App.tsx Route /methodologies/ai-value-to-scale",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [
+          "title",
+          "content"
+        ],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "absent",
+      "compiledRendererShell": true,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "methodology.agentic-operations-readiness",
+      "path": "/methodologies/agentic-operations-readiness",
+      "routeType": "page",
+      "registryRecord": "2026-09-19.2:methodology.agentic-operations-readiness",
+      "cmsSource": "immutable manifest.revisions[kind=framework]",
+      "renderer": "methodology-detail",
+      "dispatchEvidence": "App.tsx Route /methodologies/agentic-operations-readiness",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [
+          "title",
+          "content"
+        ],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "absent",
+      "compiledRendererShell": true,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "methodology.idao",
+      "path": "/methodologies/idao",
+      "routeType": "page",
+      "registryRecord": "2026-09-19.2:methodology.idao",
+      "cmsSource": "immutable manifest.revisions[kind=framework]",
+      "renderer": "methodology-detail",
+      "dispatchEvidence": "App.tsx Route /methodologies/idao",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [
+          "title",
+          "content"
+        ],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "absent",
+      "compiledRendererShell": true,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "methodology.agent-authority-model",
+      "path": "/methodologies/agent-authority-model",
+      "routeType": "page",
+      "registryRecord": "2026-09-19.2:methodology.agent-authority-model",
+      "cmsSource": "immutable manifest.revisions[kind=framework]",
+      "renderer": "methodology-detail",
+      "dispatchEvidence": "App.tsx Route /methodologies/agent-authority-model",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [
+          "title",
+          "content"
+        ],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "absent",
+      "compiledRendererShell": true,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "methodology.guardrails-framework",
+      "path": "/methodologies/guardrails-framework",
+      "routeType": "page",
+      "registryRecord": "2026-09-19.2:methodology.guardrails-framework",
+      "cmsSource": "immutable manifest.revisions[kind=framework]",
+      "renderer": "methodology-detail",
+      "dispatchEvidence": "App.tsx Route /methodologies/guardrails-framework",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [
+          "title",
+          "content"
+        ],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "absent",
+      "compiledRendererShell": true,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "methodology.human-agent-operating-model",
+      "path": "/methodologies/human-agent-operating-model",
+      "routeType": "page",
+      "registryRecord": "2026-09-19.2:methodology.human-agent-operating-model",
+      "cmsSource": "immutable manifest.revisions[kind=framework]",
+      "renderer": "methodology-detail",
+      "dispatchEvidence": "App.tsx Route /methodologies/human-agent-operating-model",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [
+          "title",
+          "content"
+        ],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "absent",
+      "compiledRendererShell": true,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "what-we-do",
+      "path": "/what-we-do",
+      "routeType": "redirect",
+      "registryRecord": "2026-09-19.2:what-we-do",
+      "cmsSource": "registry redirect target",
+      "renderer": "redirect",
+      "dispatchEvidence": "manifest destinationIdTarget resolved by releaseRedirectForPath",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "redirect",
+      "compiledRendererShell": false,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "services",
+      "path": "/services",
+      "routeType": "redirect",
+      "registryRecord": "2026-09-19.2:services",
+      "cmsSource": "registry redirect target",
+      "renderer": "redirect",
+      "dispatchEvidence": "manifest destinationIdTarget resolved by releaseRedirectForPath",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "redirect",
+      "compiledRendererShell": false,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "service.agentic-enterprise-transformation",
+      "path": "/what-we-do/agentic-enterprise-transformation",
+      "routeType": "page",
+      "registryRecord": "2026-09-19.2:service.agentic-enterprise-transformation",
+      "cmsSource": "immutable manifest.revisions[kind=landing-page]",
+      "renderer": "service-detail",
+      "dispatchEvidence": "App.tsx Route /what-we-do/agentic-enterprise-transformation",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [
+          "title",
+          "content"
+        ],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "absent",
+      "compiledRendererShell": true,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "service.data-ai-foundations",
+      "path": "/what-we-do/data-ai-foundations",
+      "routeType": "page",
+      "registryRecord": "2026-09-19.2:service.data-ai-foundations",
+      "cmsSource": "immutable manifest.revisions[kind=landing-page]",
+      "renderer": "service-detail",
+      "dispatchEvidence": "App.tsx Route /what-we-do/data-ai-foundations",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [
+          "title",
+          "content"
+        ],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "absent",
+      "compiledRendererShell": true,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "service.engineering-with-ai",
+      "path": "/what-we-do/engineering-with-ai",
+      "routeType": "page",
+      "registryRecord": "2026-09-19.2:service.engineering-with-ai",
+      "cmsSource": "immutable manifest.revisions[kind=landing-page]",
+      "renderer": "service-detail",
+      "dispatchEvidence": "App.tsx Route /what-we-do/engineering-with-ai",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [
+          "title",
+          "content"
+        ],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "absent",
+      "compiledRendererShell": true,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "service.sovereign-regulated-ai",
+      "path": "/what-we-do/sovereign-regulated-ai",
+      "routeType": "page",
+      "registryRecord": "2026-09-19.2:service.sovereign-regulated-ai",
+      "cmsSource": "immutable manifest.revisions[kind=landing-page]",
+      "renderer": "service-detail",
+      "dispatchEvidence": "App.tsx Route /what-we-do/sovereign-regulated-ai",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [
+          "title",
+          "content"
+        ],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "absent",
+      "compiledRendererShell": true,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "service.digital-ai-workforce",
+      "path": "/what-we-do/digital-ai-workforce",
+      "routeType": "page",
+      "registryRecord": "2026-09-19.2:service.digital-ai-workforce",
+      "cmsSource": "immutable manifest.revisions[kind=landing-page]",
+      "renderer": "service-detail",
+      "dispatchEvidence": "App.tsx Route /what-we-do/digital-ai-workforce",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [
+          "title",
+          "content"
+        ],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "absent",
+      "compiledRendererShell": true,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "platforms",
+      "path": "/platforms",
+      "routeType": "page",
+      "registryRecord": "2026-09-19.2:platforms",
+      "cmsSource": "immutable manifest.revisions[kind=landing-page]",
+      "renderer": "platforms",
+      "dispatchEvidence": "App.tsx Route /platforms",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [
+          "title",
+          "content"
+        ],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "absent",
+      "compiledRendererShell": true,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "platform.detail",
+      "path": "/platforms/:slug",
+      "routeType": "dynamic",
+      "registryRecord": "2026-09-19.2:platform.detail",
+      "cmsSource": "immutable manifest.revisions[kind=platform]",
+      "renderer": "platform-detail",
+      "dispatchEvidence": "App.tsx Route /platforms/:slug",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [
+          "title",
+          "content"
+        ],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "absent",
+      "compiledRendererShell": true,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "platform.cognios",
+      "path": "/platforms/cognios",
+      "routeType": "page",
+      "registryRecord": "2026-09-19.2:platform.cognios",
+      "cmsSource": "immutable manifest.revisions[kind=platform]",
+      "renderer": "platform-detail",
+      "dispatchEvidence": "App.tsx Route /platforms/cognios",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [
+          "title",
+          "content"
+        ],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "absent",
+      "compiledRendererShell": true,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "platform.cognidocs",
+      "path": "/platforms/cognidocs",
+      "routeType": "page",
+      "registryRecord": "2026-09-19.2:platform.cognidocs",
+      "cmsSource": "immutable manifest.revisions[kind=platform]",
+      "renderer": "platform-detail",
+      "dispatchEvidence": "App.tsx Route /platforms/cognidocs",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [
+          "title",
+          "content"
+        ],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "absent",
+      "compiledRendererShell": true,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "platform.cogniagents",
+      "path": "/platforms/cogniagents",
+      "routeType": "page",
+      "registryRecord": "2026-09-19.2:platform.cogniagents",
+      "cmsSource": "immutable manifest.revisions[kind=platform]",
+      "renderer": "platform-detail",
+      "dispatchEvidence": "App.tsx Route /platforms/cogniagents",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [
+          "title",
+          "content"
+        ],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "absent",
+      "compiledRendererShell": true,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "platform.cognibase",
+      "path": "/platforms/cognibase",
+      "routeType": "page",
+      "registryRecord": "2026-09-19.2:platform.cognibase",
+      "cmsSource": "immutable manifest.revisions[kind=platform]",
+      "renderer": "platform-detail",
+      "dispatchEvidence": "App.tsx Route /platforms/cognibase",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [
+          "title",
+          "content"
+        ],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "absent",
+      "compiledRendererShell": true,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "platform.lupitor",
+      "path": "/platforms/lupitor",
+      "routeType": "page",
+      "registryRecord": "2026-09-19.2:platform.lupitor",
+      "cmsSource": "immutable manifest.revisions[kind=platform]",
+      "renderer": "platform-detail",
+      "dispatchEvidence": "App.tsx Route /platforms/lupitor",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [
+          "title",
+          "content"
+        ],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "absent",
+      "compiledRendererShell": true,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "platform.datatoolpack",
+      "path": "/platforms/datatoolpack",
+      "routeType": "page",
+      "registryRecord": "2026-09-19.2:platform.datatoolpack",
+      "cmsSource": "immutable manifest.revisions[kind=platform]",
+      "renderer": "platform-detail",
+      "dispatchEvidence": "App.tsx Route /platforms/datatoolpack",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [
+          "title",
+          "content"
+        ],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "absent",
+      "compiledRendererShell": true,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "platform.bunjee-ai",
+      "path": "/platforms/bunjee-ai",
+      "routeType": "page",
+      "registryRecord": "2026-09-19.2:platform.bunjee-ai",
+      "cmsSource": "immutable manifest.revisions[kind=platform]",
+      "renderer": "platform-detail",
+      "dispatchEvidence": "App.tsx Route /platforms/bunjee-ai",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [
+          "title",
+          "content"
+        ],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "absent",
+      "compiledRendererShell": true,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "industries",
+      "path": "/industries",
+      "routeType": "page",
+      "registryRecord": "2026-09-19.2:industries",
+      "cmsSource": "immutable manifest.revisions[kind=landing-page]",
+      "renderer": "industries",
+      "dispatchEvidence": "App.tsx Route /industries",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [
+          "title",
+          "content"
+        ],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "absent",
+      "compiledRendererShell": true,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "industry.financial-services",
+      "path": "/industries/financial-services",
+      "routeType": "page",
+      "registryRecord": "2026-09-19.2:industry.financial-services",
+      "cmsSource": "immutable manifest.revisions[kind=industry]",
+      "renderer": "industry-detail",
+      "dispatchEvidence": "App.tsx Route /industries/financial-services",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [
+          "title",
+          "content"
+        ],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "absent",
+      "compiledRendererShell": true,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "industry.public-sector",
+      "path": "/industries/public-sector",
+      "routeType": "page",
+      "registryRecord": "2026-09-19.2:industry.public-sector",
+      "cmsSource": "immutable manifest.revisions[kind=industry]",
+      "renderer": "industry-detail",
+      "dispatchEvidence": "App.tsx Route /industries/public-sector",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [
+          "title",
+          "content"
+        ],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "absent",
+      "compiledRendererShell": true,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "industry.telecoms",
+      "path": "/industries/telecoms",
+      "routeType": "page",
+      "registryRecord": "2026-09-19.2:industry.telecoms",
+      "cmsSource": "immutable manifest.revisions[kind=industry]",
+      "renderer": "industry-detail",
+      "dispatchEvidence": "App.tsx Route /industries/telecoms",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [
+          "title",
+          "content"
+        ],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "absent",
+      "compiledRendererShell": true,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "industry.travel-hospitality",
+      "path": "/industries/travel-hospitality",
+      "routeType": "page",
+      "registryRecord": "2026-09-19.2:industry.travel-hospitality",
+      "cmsSource": "immutable manifest.revisions[kind=industry]",
+      "renderer": "industry-detail",
+      "dispatchEvidence": "App.tsx Route /industries/travel-hospitality",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [
+          "title",
+          "content"
+        ],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "absent",
+      "compiledRendererShell": true,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "industry.energy-resources",
+      "path": "/industries/energy-resources",
+      "routeType": "page",
+      "registryRecord": "2026-09-19.2:industry.energy-resources",
+      "cmsSource": "immutable manifest.revisions[kind=industry]",
+      "renderer": "industry-detail",
+      "dispatchEvidence": "App.tsx Route /industries/energy-resources",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [
+          "title",
+          "content"
+        ],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "absent",
+      "compiledRendererShell": true,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "industry.education",
+      "path": "/industries/education",
+      "routeType": "page",
+      "registryRecord": "2026-09-19.2:industry.education",
+      "cmsSource": "immutable manifest.revisions[kind=industry]",
+      "renderer": "industry-detail",
+      "dispatchEvidence": "App.tsx Route /industries/education",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [
+          "title",
+          "content"
+        ],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "absent",
+      "compiledRendererShell": true,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "case-study.detail",
+      "path": "/work/:slug",
+      "routeType": "dynamic",
+      "registryRecord": "2026-09-19.2:case-study.detail",
+      "cmsSource": "immutable manifest.revisions[kind=case-study]",
+      "renderer": "case-study-detail",
+      "dispatchEvidence": "App.tsx Route /work/:slug",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [
+          "title",
+          "content"
+        ],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "absent",
+      "compiledRendererShell": true,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "insights",
+      "path": "/insights",
+      "routeType": "page",
+      "registryRecord": "2026-09-19.2:insights",
+      "cmsSource": "immutable manifest.revisions[kind=landing-page]",
+      "renderer": "insights",
+      "dispatchEvidence": "App.tsx Route /insights",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [
+          "title",
+          "content"
+        ],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "absent",
+      "compiledRendererShell": true,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "insight.detail",
+      "path": "/insights/:slug",
+      "routeType": "dynamic",
+      "registryRecord": "2026-09-19.2:insight.detail",
+      "cmsSource": "immutable manifest.revisions[kind=publication]",
+      "renderer": "insight-detail",
+      "dispatchEvidence": "App.tsx Route /insights/:slug",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [
+          "title",
+          "content"
+        ],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "absent",
+      "compiledRendererShell": true,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "about",
+      "path": "/about",
+      "routeType": "page",
+      "registryRecord": "2026-09-19.2:about",
+      "cmsSource": "immutable manifest.revisions[kind=landing-page]",
+      "renderer": "about",
+      "dispatchEvidence": "App.tsx Route /about",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [
+          "title",
+          "content"
+        ],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "absent",
+      "compiledRendererShell": true,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "partners",
+      "path": "/partners",
+      "routeType": "page",
+      "registryRecord": "2026-09-19.2:partners",
+      "cmsSource": "immutable manifest.revisions[kind=landing-page]",
+      "renderer": "partners",
+      "dispatchEvidence": "App.tsx Route /partners",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [
+          "title",
+          "content"
+        ],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "absent",
+      "compiledRendererShell": true,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "faq",
+      "path": "/faq",
+      "routeType": "page",
+      "registryRecord": "2026-09-19.2:faq",
+      "cmsSource": "immutable manifest.revisions[kind=landing-page]",
+      "renderer": "faq",
+      "dispatchEvidence": "App.tsx Route /faq",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [
+          "title",
+          "content"
+        ],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "absent",
+      "compiledRendererShell": true,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "contact",
+      "path": "/contact",
+      "routeType": "page",
+      "registryRecord": "2026-09-19.2:contact",
+      "cmsSource": "immutable manifest.revisions[kind=landing-page]",
+      "renderer": "contact",
+      "dispatchEvidence": "App.tsx Route /contact",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [
+          "title",
+          "content"
+        ],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "absent",
+      "compiledRendererShell": true,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "value-scan",
+      "path": "/value-scan",
+      "routeType": "page",
+      "registryRecord": "2026-09-19.2:value-scan",
+      "cmsSource": "immutable manifest.revisions[kind=landing-page]",
+      "renderer": "value-scan",
+      "dispatchEvidence": "App.tsx Route /value-scan",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [
+          "title",
+          "content"
+        ],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "absent",
+      "compiledRendererShell": true,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "preview",
+      "path": "/preview/:token",
+      "routeType": "preview",
+      "registryRecord": "2026-09-19.2:preview",
+      "cmsSource": "resource-scoped immutable preview composition",
+      "renderer": "cms-preview",
+      "dispatchEvidence": "App.tsx Route /preview/:token",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [
+          "title",
+          "content"
+        ],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "absent",
+      "compiledRendererShell": false,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "work",
+      "path": "/work",
+      "routeType": "redirect",
+      "registryRecord": "2026-09-19.2:work",
+      "cmsSource": "registry redirect target",
+      "renderer": "redirect",
+      "dispatchEvidence": "manifest destinationIdTarget resolved by releaseRedirectForPath",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "redirect",
+      "compiledRendererShell": false,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "platform.cognitalk",
+      "path": "/platforms/cognitalk",
+      "routeType": "redirect",
+      "registryRecord": "2026-09-19.2:platform.cognitalk",
+      "cmsSource": "registry redirect target",
+      "renderer": "redirect",
+      "dispatchEvidence": "manifest destinationIdTarget resolved by releaseRedirectForPath",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "redirect",
+      "compiledRendererShell": false,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "platform.cogniware",
+      "path": "/platforms/cogniware",
+      "routeType": "redirect",
+      "registryRecord": "2026-09-19.2:platform.cogniware",
+      "cmsSource": "registry redirect target",
+      "renderer": "redirect",
+      "dispatchEvidence": "manifest destinationIdTarget resolved by releaseRedirectForPath",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "redirect",
+      "compiledRendererShell": false,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "industry.banking",
+      "path": "/industries/banking",
+      "routeType": "redirect",
+      "registryRecord": "2026-09-19.2:industry.banking",
+      "cmsSource": "registry redirect target",
+      "renderer": "redirect",
+      "dispatchEvidence": "manifest destinationIdTarget resolved by releaseRedirectForPath",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "redirect",
+      "compiledRendererShell": false,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "industry.government",
+      "path": "/industries/government",
+      "routeType": "redirect",
+      "registryRecord": "2026-09-19.2:industry.government",
+      "cmsSource": "registry redirect target",
+      "renderer": "redirect",
+      "dispatchEvidence": "manifest destinationIdTarget resolved by releaseRedirectForPath",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "redirect",
+      "compiledRendererShell": false,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "industry.travel",
+      "path": "/industries/travel",
+      "routeType": "redirect",
+      "registryRecord": "2026-09-19.2:industry.travel",
+      "cmsSource": "registry redirect target",
+      "renderer": "redirect",
+      "dispatchEvidence": "manifest destinationIdTarget resolved by releaseRedirectForPath",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "redirect",
+      "compiledRendererShell": false,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "industry.energy",
+      "path": "/industries/energy",
+      "routeType": "redirect",
+      "registryRecord": "2026-09-19.2:industry.energy",
+      "cmsSource": "registry redirect target",
+      "renderer": "redirect",
+      "dispatchEvidence": "manifest destinationIdTarget resolved by releaseRedirectForPath",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "redirect",
+      "compiledRendererShell": false,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "sectors",
+      "path": "/sectors",
+      "routeType": "redirect",
+      "registryRecord": "2026-09-19.2:sectors",
+      "cmsSource": "registry redirect target",
+      "renderer": "redirect",
+      "dispatchEvidence": "manifest destinationIdTarget resolved by releaseRedirectForPath",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "redirect",
+      "compiledRendererShell": false,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "who",
+      "path": "/who",
+      "routeType": "redirect",
+      "registryRecord": "2026-09-19.2:who",
+      "cmsSource": "registry redirect target",
+      "renderer": "redirect",
+      "dispatchEvidence": "manifest destinationIdTarget resolved by releaseRedirectForPath",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "redirect",
+      "compiledRendererShell": false,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "architecture",
+      "path": "/architecture",
+      "routeType": "redirect",
+      "registryRecord": "2026-09-19.2:architecture",
+      "cmsSource": "registry redirect target",
+      "renderer": "redirect",
+      "dispatchEvidence": "manifest destinationIdTarget resolved by releaseRedirectForPath",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "redirect",
+      "compiledRendererShell": false,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "cognios.architecture",
+      "path": "/platforms/cognios/architecture",
+      "routeType": "redirect",
+      "registryRecord": "2026-09-19.2:cognios.architecture",
+      "cmsSource": "registry redirect target",
+      "renderer": "redirect",
+      "dispatchEvidence": "manifest destinationIdTarget resolved by releaseRedirectForPath",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "redirect",
+      "compiledRendererShell": false,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "cognidocs",
+      "path": "/cognidocs",
+      "routeType": "redirect",
+      "registryRecord": "2026-09-19.2:cognidocs",
+      "cmsSource": "registry redirect target",
+      "renderer": "redirect",
+      "dispatchEvidence": "manifest destinationIdTarget resolved by releaseRedirectForPath",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "redirect",
+      "compiledRendererShell": false,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "cogniagents",
+      "path": "/cogniagents",
+      "routeType": "redirect",
+      "registryRecord": "2026-09-19.2:cogniagents",
+      "cmsSource": "registry redirect target",
+      "renderer": "redirect",
+      "dispatchEvidence": "manifest destinationIdTarget resolved by releaseRedirectForPath",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "redirect",
+      "compiledRendererShell": false,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "cognitalk",
+      "path": "/cognitalk",
+      "routeType": "redirect",
+      "registryRecord": "2026-09-19.2:cognitalk",
+      "cmsSource": "registry redirect target",
+      "renderer": "redirect",
+      "dispatchEvidence": "manifest destinationIdTarget resolved by releaseRedirectForPath",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "redirect",
+      "compiledRendererShell": false,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "cogniware",
+      "path": "/cogniware",
+      "routeType": "redirect",
+      "registryRecord": "2026-09-19.2:cogniware",
+      "cmsSource": "registry redirect target",
+      "renderer": "redirect",
+      "dispatchEvidence": "manifest destinationIdTarget resolved by releaseRedirectForPath",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "redirect",
+      "compiledRendererShell": false,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "pov-banking",
+      "path": "/pov-banking",
+      "routeType": "redirect",
+      "registryRecord": "2026-09-19.2:pov-banking",
+      "cmsSource": "registry redirect target",
+      "renderer": "redirect",
+      "dispatchEvidence": "manifest destinationIdTarget resolved by releaseRedirectForPath",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "redirect",
+      "compiledRendererShell": false,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "pov-government",
+      "path": "/pov-government",
+      "routeType": "redirect",
+      "registryRecord": "2026-09-19.2:pov-government",
+      "cmsSource": "registry redirect target",
+      "renderer": "redirect",
+      "dispatchEvidence": "manifest destinationIdTarget resolved by releaseRedirectForPath",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "redirect",
+      "compiledRendererShell": false,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "pov-telecoms",
+      "path": "/pov-telecoms",
+      "routeType": "redirect",
+      "registryRecord": "2026-09-19.2:pov-telecoms",
+      "cmsSource": "registry redirect target",
+      "renderer": "redirect",
+      "dispatchEvidence": "manifest destinationIdTarget resolved by releaseRedirectForPath",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "redirect",
+      "compiledRendererShell": false,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "pov-travel",
+      "path": "/pov-travel",
+      "routeType": "redirect",
+      "registryRecord": "2026-09-19.2:pov-travel",
+      "cmsSource": "registry redirect target",
+      "renderer": "redirect",
+      "dispatchEvidence": "manifest destinationIdTarget resolved by releaseRedirectForPath",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "redirect",
+      "compiledRendererShell": false,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "pov-energy",
+      "path": "/pov-energy",
+      "routeType": "redirect",
+      "registryRecord": "2026-09-19.2:pov-energy",
+      "cmsSource": "registry redirect target",
+      "renderer": "redirect",
+      "dispatchEvidence": "manifest destinationIdTarget resolved by releaseRedirectForPath",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "redirect",
+      "compiledRendererShell": false,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "industry.manufacturing",
+      "path": "/industries/manufacturing",
+      "routeType": "redirect",
+      "registryRecord": "2026-09-19.2:industry.manufacturing",
+      "cmsSource": "registry redirect target",
+      "renderer": "redirect",
+      "dispatchEvidence": "manifest destinationIdTarget resolved by releaseRedirectForPath",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "redirect",
+      "compiledRendererShell": false,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "pov-manufacturing",
+      "path": "/pov-manufacturing",
+      "routeType": "redirect",
+      "registryRecord": "2026-09-19.2:pov-manufacturing",
+      "cmsSource": "registry redirect target",
+      "renderer": "redirect",
+      "dispatchEvidence": "manifest destinationIdTarget resolved by releaseRedirectForPath",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "redirect",
+      "compiledRendererShell": false,
+      "compiledPublicationAuthority": false
+    },
+    {
+      "destinationId": "pov-public-sector",
+      "path": "/pov-public-sector",
+      "routeType": "redirect",
+      "registryRecord": "2026-09-19.2:pov-public-sector",
+      "cmsSource": "registry redirect target",
+      "renderer": "redirect",
+      "dispatchEvidence": "manifest destinationIdTarget resolved by releaseRedirectForPath",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "redirect",
+      "compiledRendererShell": false,
+      "compiledPublicationAuthority": false
+    }
+  ],
+  "acceptanceEvidence": {
+    "website fetches only the active release manifest for route authority": true,
+    "website does not retry a failed manifest as absent content": true,
+    "website distinguishes unavailable release from service failure": true,
+    "website gates route dispatch before rendering": true,
+    "candidate records typed link closure": true,
+    "candidate records immutable media closure": true,
+    "candidate records exact revision identity": true,
+    "candidate validates manifest slots and renderer identity": true,
+    "public delivery reads active immutable receipts": true,
+    "public endpoint distinguishes absent from failed delivery": true,
+    "release receipts support idempotent publish and rollback": true,
+    "registry contains no compiled publication authority": true
+  },
+  "errors": [],
+  "reportDigest": "112b2668ca863ab402ca58d34498c516562efa1d444bd93913efeebfd0caabf9"
+}
