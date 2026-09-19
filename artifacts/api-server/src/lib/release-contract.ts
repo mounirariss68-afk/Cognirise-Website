@@ -46,6 +46,140 @@ export function releaseInventory() {
   };
 }
 
+type ReleaseManifestLike = {
+  scope?: { market?: string; locale?: string };
+  registryVersion?: string;
+  revisions?: Array<Record<string, any>>;
+  resolvedLinks?: Array<Record<string, any>>;
+  mediaPins?: Array<Record<string, any>>;
+};
+
+function slotValue(revision: Record<string, any>, slot: string) {
+  const root = slot === "title" || slot === "content"
+    ? revision.snapshot ?? revision
+    : revision;
+  return slot.split(".").reduce<unknown>((value, key) =>
+    value && typeof value === "object" ? (value as Record<string, unknown>)[key] : undefined, root);
+}
+
+function registryRouteForReleasedPath(path: string) {
+  return CMS_RELEASE_REGISTRY.routes.find((entry) => entry.routeType !== "dynamic" && entry.path === path)
+    ?? CMS_RELEASE_REGISTRY.routes.find((entry) =>
+      entry.routeType === "dynamic" && path.startsWith(entry.path.replace("/:slug", "/")));
+}
+
+export function validateReleaseManifestParity(
+  manifest: ReleaseManifestLike,
+  expectedScope?: { market: string; locale: string },
+) {
+  const errors: string[] = [];
+  const revisions = Array.isArray(manifest.revisions) ? manifest.revisions : [];
+  const links = Array.isArray(manifest.resolvedLinks) ? manifest.resolvedLinks : [];
+  const mediaPins = Array.isArray(manifest.mediaPins) ? manifest.mediaPins : [];
+  if (manifest.registryVersion !== CMS_RELEASE_REGISTRY.version) {
+    errors.push(`Registry version ${String(manifest.registryVersion)} does not match ${CMS_RELEASE_REGISTRY.version}.`);
+  }
+  if (!manifest.scope?.market || !manifest.scope?.locale) errors.push("Manifest scope must identify an exact market and locale.");
+  if (expectedScope && (
+    manifest.scope?.market !== expectedScope.market
+    || manifest.scope?.locale !== expectedScope.locale
+  )) {
+    errors.push(
+      `Manifest scope ${String(manifest.scope?.market)}/${String(manifest.scope?.locale)} does not match active scope ${expectedScope.market}/${expectedScope.locale}.`,
+    );
+  }
+
+  const representedRoutes = revisions.map((revision) => ({
+    revision,
+    route: typeof revision.route === "string"
+      ? registryRouteForReleasedPath(revision.route)
+      : null,
+  }));
+  const routeIds = new Set(representedRoutes.flatMap(({ route }) => route ? [route.destinationId] : []));
+  for (const revision of revisions) {
+    const route = representedRoutes.find((entry) => entry.revision === revision)?.route;
+    const label = `${manifest.scope?.market ?? "?"}/${manifest.scope?.locale ?? "?"}/${String(revision.route ?? revision.documentId ?? "?")}`;
+    if (!route) {
+      const kindHasPublicRoute = typeof revision.kind === "string"
+        && CMS_RELEASE_REGISTRY.routes.some((entry) => entry.kind === revision.kind);
+      if (!revision.route && !kindHasPublicRoute) continue;
+      errors.push(`${label}: no public renderer registry record resolves this revision.`);
+      continue;
+    }
+    if (route.routeType === "redirect" || route.routeType === "preview") {
+      errors.push(`${label}: no public renderer registry record resolves this revision.`);
+      continue;
+    }
+    if (route.routeType !== "dynamic"
+      && representedRoutes.filter((entry) => entry.route?.destinationId === route.destinationId).length > 1) {
+      errors.push(`${label}: duplicate destination ${route.destinationId}.`);
+    }
+    if (revision.destinationId !== route.destinationId || revision.rendererKey !== route.rendererKey) {
+      errors.push(`${label}: manifest renderer identity does not match ${route.destinationId}/${route.rendererKey}.`);
+    }
+    for (const slot of route.requiredContentSlots) {
+      if (slotValue(revision, slot) === undefined || slotValue(revision, slot) === null) {
+        errors.push(`${label}: required content slot ${slot} is absent.`);
+      }
+    }
+    for (const slot of route.requiredLinkSlots) {
+      if (!links.some((link) => link.documentId === revision.documentId && link.fieldPath === slot && routeIds.has(String(link.destinationId)))) {
+        errors.push(`${label}: required typed link slot ${slot} is unresolved.`);
+      }
+    }
+    for (const slot of route.requiredMediaSlots) {
+      if (!mediaPins.some((pin) =>
+        pin.documentId === revision.documentId
+        && pin.fieldPath === slot
+        && typeof pin.mediaVersionId === "string"
+        && pin.mediaVersionId.length > 0)) {
+        errors.push(`${label}: required media placement ${slot} lacks an immutable version pin.`);
+      }
+    }
+  }
+  for (const link of links) {
+    if (!routeIds.has(String(link.destinationId))) {
+      errors.push(`${manifest.scope?.market ?? "?"}/${manifest.scope?.locale ?? "?"}/${String(link.fieldPath ?? "?")}: resolved link targets unavailable destination ${String(link.destinationId)}.`);
+    }
+  }
+  for (const pin of mediaPins) {
+    if (typeof pin.mediaVersionId !== "string" || !pin.mediaVersionId) {
+      errors.push(`${manifest.scope?.market ?? "?"}/${manifest.scope?.locale ?? "?"}/${String(pin.fieldPath ?? "?")}: media pin is mutable.`);
+    }
+  }
+  return { ready: errors.length === 0, errors };
+}
+
+export async function auditConfiguredReleaseMatrix(executor: Queryable) {
+  const markets = await executor.query(
+    `SELECT code,default_locale,fallback_locale
+       FROM market_editions WHERE enabled=true ORDER BY code`,
+  );
+  const scopes = markets.rows.flatMap((market) =>
+    [...new Set([market.default_locale, market.fallback_locale].filter(Boolean))]
+      .map((locale) => ({ market: String(market.code), locale: String(locale) })));
+  const results = [];
+  for (const scope of scopes) {
+    const active = await executor.query(
+      `SELECT receipt.id::text,receipt.manifest
+         FROM cms_active_releases active
+         JOIN cms_release_receipts receipt ON receipt.id=active.release_id
+        WHERE active.market=$1 AND active.locale=$2`,
+      [scope.market, scope.locale],
+    );
+    if (!active.rowCount) {
+      results.push({ ...scope, releaseId: null, ready: false, errors: [`${scope.market}/${scope.locale}: no active immutable release.`] });
+      continue;
+    }
+    const validation = validateReleaseManifestParity(active.rows[0].manifest, scope);
+    results.push({ ...scope, releaseId: String(active.rows[0].id), ...validation });
+  }
+  return {
+    ready: results.length > 0 && results.every((result) => result.ready),
+    scopes: results,
+  };
+}
+
 export async function buildReleaseCandidate(
   executor: Queryable,
   market: string,
@@ -108,11 +242,7 @@ export async function buildReleaseCandidate(
     const validation = validateCmsSnapshotForDelivery(row.kind as CmsDocumentKind, row.payload, "publish");
     if (!validation.success) continue;
     const path = cmsPublicRoute(row.kind as CmsDocumentKind, validation.data.slug, validation.data.content);
-    const destination = path ? (
-      CMS_RELEASE_REGISTRY.routes.find((entry) => entry.routeType !== "dynamic" && entry.path === path)
-      ?? CMS_RELEASE_REGISTRY.routes.find((entry) =>
-        entry.routeType === "dynamic" && path.startsWith(entry.path.replace("/:slug", "/")))
-    ) : null;
+    const destination = path ? registryRouteForReleasedPath(path) : null;
     if (destination) availableDestinations.add(destination.destinationId);
   }
   let changed = true;
@@ -146,11 +276,7 @@ export async function buildReleaseCandidate(
       continue;
     }
     const route = cmsPublicRoute(row.kind as CmsDocumentKind, row.payload.slug, row.payload.content);
-    const destination = route ? (
-      CMS_RELEASE_REGISTRY.routes.find((entry) => entry.routeType !== "dynamic" && entry.path === route)
-      ?? CMS_RELEASE_REGISTRY.routes.find((entry) =>
-        entry.routeType === "dynamic" && route.startsWith(entry.path.replace("/:slug", "/")))
-    ) : null;
+    const destination = route ? registryRouteForReleasedPath(route) : null;
     if (route && !destination) errors.push(`${route}: no registry destination represents this published revision.`);
     const links = collectDestinationReferences(row.payload.content);
     for (const link of links) {
@@ -232,6 +358,8 @@ export async function buildReleaseCandidate(
     mediaPins,
     fallback: { candidates: candidates ?? [], canonicalMarketFallback: false },
   };
+  const parity = validateReleaseManifestParity(manifest);
+  errors.push(...parity.errors);
   const validation = { ready: errors.length === 0, errors, warnings: releaseInventory().compiledOnly.map((route) => `${route.path} remains compiled-only until parity cutover.`) };
   return {
     manifest, validation, validationDigest: digest({ manifest, validation }),

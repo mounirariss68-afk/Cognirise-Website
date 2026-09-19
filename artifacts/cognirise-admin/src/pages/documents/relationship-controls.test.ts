@@ -22,7 +22,7 @@ test("relationship controls use searchable governed records and preserve unavail
   assert.match(controls, /reciprocal association/);
   assert.match(controls, /relationshipRecordHref/);
   assert.match(editor, /<RecordPicker label="Related records"/);
-  assert.match(editor, /<RecordPicker label="Related platforms" kind="platform"/);
+  assert.match(editor, /<RecordPicker label="Related platforms"[\s\S]*kind="platform"/);
   assert.doesNotMatch(editor, /label="Related record IDs"/);
   assert.doesNotMatch(editor, /One CMS record UUID per line/);
 });

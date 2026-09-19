@@ -44,7 +44,8 @@ test("generic filters reset the shared server page and controls have keyboard la
 
   assert.match(list, /setSearch\(e\.target\.value\);\s*setPage\(1\)/);
   assert.match(list, /setStatus\(v === "all" \? undefined : v as DocumentStatus\);\s*setPage\(1\)/);
-  assert.match(list, /aria-label=\{`Search \$\{getKindLabel\(kind\)\}s`\}/);
+  assert.match(list, /const pluralLabel = kind === "industry"[\s\S]*`\$\{getKindLabel\(kind\)\}s`/);
+  assert.match(list, /aria-label=\{`Search \$\{pluralLabel\}`\}/);
   assert.match(list, /aria-label="Filter documents by status"/);
   assert.match(docMatrix, /aria-label="Go to previous page"/);
   assert.match(docMatrix, /aria-label="Go to next page"/);

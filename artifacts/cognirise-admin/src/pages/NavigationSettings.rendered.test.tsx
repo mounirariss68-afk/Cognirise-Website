@@ -109,6 +109,7 @@ if (typeof moduleMock !== "function") {
 } else {
   mock.module("@workspace/api-client-react", {
     namedExports: {
+      customFetch: async () => ({ items: [] }),
       getGetNavigationSettingsQueryKey: (params: Record<string, string>) => ["/api/navigation", params],
       getGetPublicNavigationSettingsQueryKey: (params: Record<string, string>) => ["/api/public/navigation", params],
       useGetNavigationSettings: (
@@ -129,6 +130,15 @@ if (typeof moduleMock !== "function") {
           ...(fixture && params.locale === "en" ? { initialData: fixture } : {}),
         });
       },
+      useListMarketEditions: () => ({
+        data: {
+          items: [
+            { code: "uae", displayName: "UAE", defaultLocale: "en", fallbackLocale: "fr", enabled: true, isCanonical: true },
+          ],
+        },
+        isLoading: false,
+        isError: false,
+      }),
       useUpdateNavigationSettings: () => ({ isPending: false, mutateAsync: async () => navigationByLocale.en }),
       useReviewNavigationSettings: () => ({ isPending: false, mutateAsync: async () => navigationByLocale.en }),
       usePublishNavigationSettings: () => ({ isPending: false, mutateAsync: async () => navigationByLocale.en }),

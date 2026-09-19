@@ -9,7 +9,7 @@ test("people controls consume configured markets instead of a hard-coded geograp
 
   assert.match(list, /useListMarketEditions/);
   assert.match(list, /\.filter\(\(market\) => market\.enabled\)/);
-  assert.match(list, /enabledMarkets\.find\(\(market\) => market\.isCanonical\) \?\? enabledMarkets\[0\]/);
+  assert.match(list, /permittedMarkets\.find\(\(market\) => market\.isCanonical\) \?\? permittedMarkets\[0\]/);
   assert.doesNotMatch(list, /\[['"]uae['"],\s*['"]ksa['"],\s*['"]turkiye['"],\s*['"]europe['"]\]/i);
 });
 

@@ -45,7 +45,7 @@ test("content editor chooses governed media instead of accepting copied IDs", as
 
 test("landing and complex records use structured controls rather than JSON or pipe input", async () => {
   const editor = await readFile(new URL("src/pages/documents/ContentEditor.tsx", adminRoot), "utf8");
-  assert.match(editor, /<LandingSections value=\{value\.sections\}/);
+  assert.match(editor, /<LandingSections[\s\S]*value=\{value\.sections\}/);
   assert.match(editor, /<RecordList label="Sector examples"/);
   assert.doesNotMatch(editor, /Structured sections \(one JSON object per line\)/);
   assert.doesNotMatch(editor, /Visual media references \(one JSON object per line\)/);
@@ -138,7 +138,7 @@ test("customizations use the neutral binding and sparse override contract", asyn
   assert.match(detail, /getDocumentAvailability\(id!\)/);
   assert.match(detail, /A source save advances availability's version/);
   assert.match(detail, /if \(!sharedSource\)/);
-  assert.match(detail, /if \(canManageSharedDestinations\)/);
+  assert.match(detail, /if \(legacyAdministratorContentAuthority \|\| canManageSharedDestinations\)/);
   assert.match(detail, /The shared binding is now adapted/);
   assert.doesNotMatch(detail, /useCreateDocumentCustomization/);
 });

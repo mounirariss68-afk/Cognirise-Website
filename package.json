@@ -8,7 +8,9 @@
     "typecheck:libs": "tsc --build",
     "typecheck": "pnpm --filter @workspace/api-spec run codegen:check && pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck",
     "generate:landing-parity": "node scripts/generate-landing-parity.mjs",
-    "check:landing-parity": "node scripts/generate-landing-parity.mjs --check"
+    "check:landing-parity": "node scripts/generate-landing-parity.mjs --check",
+    "audit:cms-publication-parity": "pnpm --filter @workspace/cognirise-website exec tsx ../../scripts/cms-publication-parity.ts",
+    "validate:cms-publication-parity": "pnpm run audit:cms-publication-parity && pnpm --filter @workspace/api-server test && pnpm --filter @workspace/cognirise-admin test && pnpm --filter @workspace/cognirise-website test"
   },
   "private": true,
   "dependencies": {

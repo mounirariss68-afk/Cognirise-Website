@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { cmsDocumentKinds } from "./cms-content";
 
-export const CMS_RELEASE_REGISTRY_VERSION = "2026-09-19.1";
+export const CMS_RELEASE_REGISTRY_VERSION = "2026-09-19.2";
 
 export const destinationReferenceSchema = z.object({
   destinationId: z.string().trim().min(1).max(160),
@@ -80,10 +80,20 @@ export const CMS_RELEASE_REGISTRY = cmsReleaseRegistrySchema.parse({
   routes: [
     page("home", "/", "landing-page", "home"),
     page("methodologies", "/methodologies", "landing-page", "methodologies"),
-    page("methodology.detail", "/methodologies/:slug", "framework", "methodology-detail", "dynamic"),
-    page("services.detail", "/what-we-do/:slug", "landing-page", "service-detail", "dynamic"),
+    page("methodology.ai-use-case-prioritization", "/methodologies/ai-use-case-prioritization", "framework", "methodology-detail"),
+    page("methodology.ai-value-to-scale", "/methodologies/ai-value-to-scale", "framework", "methodology-detail"),
+    page("methodology.agentic-operations-readiness", "/methodologies/agentic-operations-readiness", "framework", "methodology-detail"),
+    page("methodology.idao", "/methodologies/idao", "framework", "methodology-detail"),
+    page("methodology.agent-authority-model", "/methodologies/agent-authority-model", "framework", "methodology-detail"),
+    page("methodology.guardrails-framework", "/methodologies/guardrails-framework", "framework", "methodology-detail"),
+    page("methodology.human-agent-operating-model", "/methodologies/human-agent-operating-model", "framework", "methodology-detail"),
     redirect("what-we-do", "/what-we-do", "home", "service-lines"),
     redirect("services", "/services", "home", "service-lines"),
+    page("service.agentic-enterprise-transformation", "/what-we-do/agentic-enterprise-transformation", "landing-page", "service-detail"),
+    page("service.data-ai-foundations", "/what-we-do/data-ai-foundations", "landing-page", "service-detail"),
+    page("service.engineering-with-ai", "/what-we-do/engineering-with-ai", "landing-page", "service-detail"),
+    page("service.sovereign-regulated-ai", "/what-we-do/sovereign-regulated-ai", "landing-page", "service-detail"),
+    page("service.digital-ai-workforce", "/what-we-do/digital-ai-workforce", "landing-page", "service-detail"),
     page("platforms", "/platforms", "landing-page", "platforms"),
     page("platform.detail", "/platforms/:slug", "platform", "platform-detail", "dynamic"),
     page("platform.cognios", "/platforms/cognios", "platform", "platform-detail"),
@@ -94,7 +104,6 @@ export const CMS_RELEASE_REGISTRY = cmsReleaseRegistrySchema.parse({
     page("platform.datatoolpack", "/platforms/datatoolpack", "platform", "platform-detail"),
     page("platform.bunjee-ai", "/platforms/bunjee-ai", "platform", "platform-detail"),
     page("industries", "/industries", "landing-page", "industries"),
-    page("industry.detail", "/industries/:slug", "industry", "industry-detail", "dynamic"),
     page("industry.financial-services", "/industries/financial-services", "industry", "industry-detail"),
     page("industry.public-sector", "/industries/public-sector", "industry", "industry-detail"),
     page("industry.telecoms", "/industries/telecoms", "industry", "industry-detail"),

@@ -14,3 +14,9 @@ Keep single-route migrations isolated from pre-existing parity drift on other ro
 **Why:** A full regeneration can pick up unrelated source edits and add new required slots to another page's publication contract, invalidating its already-approved content.
 
 **How to apply:** Compare every regenerated route with its previous inventory. Preserve unrelated route inventories and report their drift separately rather than silently including another page's migration in a media replacement.
+
+A compiled React component may remain as a presentation shell after cutover, but it must never decide whether a route exists or supply public content when the exact immutable release is absent.
+
+**Why:** Treating every compiled component as publication authority creates false audit failures, while allowing its embedded copy to reappear on manifest failure silently reopens the legacy bypass.
+
+**How to apply:** Audit route reachability, content, links, and media against the active market-locale receipt. Classify compiled code separately as a renderer shell and fail whenever it can become public authority.

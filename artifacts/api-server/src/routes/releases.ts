@@ -19,9 +19,11 @@ import {
 } from "../lib/cms";
 import {
   buildReleaseCandidate,
+  auditConfiguredReleaseMatrix,
   publicReleaseManifest,
   releaseDigest,
   releaseInventory,
+  validateReleaseManifestParity,
 } from "../lib/release-contract";
 
 const router: IRouter = Router();
@@ -46,7 +48,12 @@ router.get("/releases/inventory", requireAdministrator, asyncRoute(async (_req, 
     `SELECT record_type,status,count(*)::int count FROM cms_release_migration_records
       GROUP BY record_type,status ORDER BY record_type,status`,
   );
-  res.json({ ...releaseInventory(), enabledMarkets: markets.rows, migration: migration.rows });
+  res.json({
+    ...releaseInventory(),
+    enabledMarkets: markets.rows,
+    migration: migration.rows,
+    publicationParity: await auditConfiguredReleaseMatrix(pool),
+  });
 }));
 
 router.get("/releases/history", requireAdministrator, asyncRoute(async (req, res) => {
@@ -157,6 +164,18 @@ router.post("/releases/publish", requireCsrf, requireAdministrator, asyncRoute(a
     );
     if (!candidate.rowCount) { await client.query("ROLLBACK"); res.status(404).json({ error: "Release candidate not found." }); return; }
     const row = candidate.rows[0];
+    const currentParity = validateReleaseManifestParity(row.manifest, {
+      market: String(row.market),
+      locale: String(row.locale),
+    });
+    if (row.registry_version !== CMS_RELEASE_REGISTRY.version || !currentParity.ready) {
+      await client.query("ROLLBACK");
+      res.status(409).json({
+        error: "This release candidate is stale or no longer matches the current publication registry.",
+        validation: currentParity,
+      });
+      return;
+    }
     const alreadyPublished = await client.query(
       `SELECT id::text,release_number,released_at,integrity_digest
          FROM cms_release_receipts WHERE candidate_id=$1 AND status='released'

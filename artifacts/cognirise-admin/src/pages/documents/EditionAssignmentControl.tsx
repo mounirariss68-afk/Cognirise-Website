@@ -151,7 +151,9 @@ export function EditionAssignmentControl({
 
   const busy = saveAssignment.isPending || removeAssignment.isPending || review.isPending;
   const eligibleAssignees = assigneesQuery.data?.items ?? [];
-  const eligibleReviewers = eligibleAssignees.filter((assignee) => assignee.id !== editorId);
+  const effectiveEditorId = editorId || memberId(assignment?.editor);
+  const eligibleReviewers = eligibleAssignees.filter((assignee) =>
+    assignee.id !== effectiveEditorId && assignee.id !== currentUser?.id);
   const assigneeControlsDisabled = busy || assigneesQuery.isLoading || assigneesQuery.isError;
   return (
     <section className="rounded-lg border bg-card p-4" aria-label="Edition assignment">
