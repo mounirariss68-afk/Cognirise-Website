@@ -216,6 +216,7 @@ function authFromUser(row: Record<string, any>): AuthContext {
       name: row.name ?? "",
       email: String(row.email),
       role: row.role,
+      accountType: row.account_type ?? "internal",
       status: row.status,
       marketCodes: row.market_codes ?? [],
       legacyAdministratorMarketCodes: row.legacy_administrator_market_codes ?? [],
@@ -232,7 +233,9 @@ function authFromUser(row: Record<string, any>): AuthContext {
 
 async function currentDigestRecipient(executor: Queryable, userId: string): Promise<AuthContext | undefined> {
   const result = await executor.query(
-    `SELECT u.id,u.display_name name,u.email,u.role,u.status,u.last_login_at,u.created_at,u.updated_at,
+    `SELECT u.id,u.display_name name,u.email,u.role,
+            COALESCE(to_jsonb(u)->>'account_type','internal') account_type,
+            u.status,u.last_login_at,u.created_at,u.updated_at,
             p.must_rotate,
             COALESCE((SELECT array_agg(a.market_code ORDER BY a.market_code)
               FROM cms_user_market_assignments a WHERE a.user_id=u.id),'{}') market_codes,

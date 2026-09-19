@@ -38,6 +38,7 @@ import { asyncRoute } from "../lib/http";
 import { hashToken, randomToken } from "../lib/security";
 import {
   canAccessContent,
+  canAccessResourceGrant,
   canChangeCanonicalSlug,
   isCmsDocumentTopic,
   isPublicContentVisible,
@@ -486,6 +487,7 @@ function scopedDocumentSelect(
 }
 
 function requesterMarkets(auth: AuthContext): string[] | null {
+  if (auth.user.accountType === "external-representative") return null;
   // Legacy administrators retain their documented compatibility projection.
   // Once the durable configuration sentinel is set, including for an empty
   // matrix, role must never widen scope.  The list hydration below performs
@@ -586,7 +588,15 @@ export async function canAccessEditionTarget(
   market: string,
   locale: string,
   capability: CmsCapability = "view",
+  externalAction?: import("../lib/policy").ResourceGrantAction,
 ): Promise<boolean> {
+  if (auth.user.accountType === "external-representative") {
+    if (capability === "review" || capability === "publish") return false;
+    const action = externalAction ?? (capability === "view" ? "view" : "edit");
+    return (await canAccessResourceGrant(client, auth.user, {
+      documentId, market, locale, action,
+    })).allowed;
+  }
   const edition = await client.query(
     `SELECT e.id edition_id,e.content_mode,d.kind FROM cms_documents d
       LEFT JOIN cms_market_editions e
@@ -3243,6 +3253,18 @@ router.patch(
         return;
       }
       const snapshot = validated.data;
+      if (transactionAuth.user.accountType === "external-representative"
+        && expectedMedia(current.kind as CmsDocumentKind, snapshot).length > 0
+        && !(await canAccessResourceGrant(client, transactionAuth.user, {
+          documentId: id,
+          market: requestedMarket,
+          locale: requestedLocale,
+          action: "bind-media",
+        })).allowed) {
+        await client.query("ROLLBACK");
+        res.status(403).json({ error: "This resource grant does not allow media binding." });
+        return;
+      }
       const pendingCarryErrors = await pendingMediaCarryForwardErrors(
         client,
         id,
@@ -3634,6 +3656,7 @@ router.post(
         String(candidate.rows[0].market),
         String(candidate.rows[0].locale),
         "edit",
+        "submit",
       )) {
         await client.query("ROLLBACK");
         res.status(403).json({ error: "You are not assigned to this market." });
@@ -5219,7 +5242,7 @@ router.get(
       return;
     }
     if (!await canAccessEditionTarget(
-      pool, res.locals.auth as AuthContext, id, market, locale, "edit",
+      pool, res.locals.auth as AuthContext, id, market, locale, "edit", "preview",
     )) {
       res.status(403).json({ error: "You are not assigned to this market." });
       return;

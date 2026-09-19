@@ -316,6 +316,20 @@
       "when": 1788998400022,
       "tag": "0044_cms_legacy_administrator_snapshot_repair",
       "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1788998400023,
+      "tag": "0045_cms_release_contract",
+      "breakpoints": true
+    },
+    {
+      "idx": 46,
+      "version": "7",
+      "when": 1788998400024,
+      "tag": "0046_cms_release_contract_hardening",
+      "breakpoints": true
     }
   ]
 }

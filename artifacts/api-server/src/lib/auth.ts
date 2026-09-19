@@ -8,12 +8,14 @@ export const CSRF_COOKIE = "__Host-cognirise_csrf";
 const SESSION_TTL_MS = 8 * 60 * 60 * 1000;
 
 export type CmsRole = "administrator" | "publisher" | "editor" | "viewer";
+export type CmsAccountType = "internal" | "external-representative";
 
 export interface AuthUser {
   id: string;
   name: string;
   email: string;
   role: CmsRole;
+  accountType: CmsAccountType;
   status: "invited" | "active" | "suspended";
   marketCodes: string[];
   /** Frozen compatibility geography for an unconfigured legacy administrator. */
@@ -90,7 +92,8 @@ export async function createSession(
 }
 
 export async function getUser(userId: string): Promise<AuthUser> {
-  const query = `SELECT u.id,u.display_name name,u.email,u.role,u.status,u.last_login_at,
+  const query = `SELECT u.id,u.display_name name,u.email,u.role,
+              COALESCE(to_jsonb(u)->>'account_type','internal') account_type,u.status,u.last_login_at,
              u.created_at,u.updated_at,p.must_rotate,
              COALESCE((SELECT array_agg(a.market_code ORDER BY a.market_code)
                FROM cms_user_market_assignments a WHERE a.user_id=u.id),'{}') market_codes,
@@ -136,6 +139,7 @@ export async function getUser(userId: string): Promise<AuthUser> {
     name: row.name,
     email: row.email,
     role: row.role,
+    accountType: row.account_type ?? "internal",
     status: row.status,
     marketCodes: row.market_codes ?? [],
     legacyAdministratorMarketCodes: row.legacy_administrator_market_codes ?? [],
@@ -172,7 +176,8 @@ export async function authenticate(
   const tokenHash = hashToken(rawToken);
   const result = await pool.query(
     `SELECT s.id, s.token_digest, s.mfa_satisfied_at, s.created_at, s.expires_at,
-            u.id user_id, u.display_name name, u.email, u.role, u.status,
+             u.id user_id, u.display_name name, u.email, u.role,
+             COALESCE(to_jsonb(u)->>'account_type','internal') account_type,u.status,
              u.last_login_at, u.created_at user_created_at,
              u.updated_at user_updated_at,p.must_rotate,
              COALESCE((SELECT array_agg(a.market_code ORDER BY a.market_code)
@@ -208,6 +213,7 @@ export async function authenticate(
       name: row.name,
       email: row.email,
       role: row.role,
+      accountType: row.account_type ?? "internal",
       status: row.status,
       marketCodes: row.market_codes ?? [],
         legacyAdministratorMarketCodes: row.legacy_administrator_market_codes ?? [],

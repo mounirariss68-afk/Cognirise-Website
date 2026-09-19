@@ -98,6 +98,7 @@ export type CapabilityGrant = {
 
 export type CapabilitySubject = {
   role: CmsRole;
+  accountType?: "internal" | "external-representative";
   marketCodes: readonly string[];
   id?: string;
 };
@@ -111,6 +112,48 @@ export type ContentAuthorityRequest = {
   sourceMarketCode?: string;
   destinationMarketCodes?: readonly string[];
 };
+
+export type ResourceGrantAction =
+  | "view" | "create" | "edit" | "delete-draft" | "bind-media"
+  | "preview" | "submit" | "propose-withdrawal";
+
+export async function canAccessResourceGrant(
+  executor: { query: (sql: string, values?: unknown[]) => Promise<{ rows: any[]; rowCount?: number | null }> },
+  subject: CapabilitySubject,
+  input: {
+    documentId: string;
+    market: string;
+    locale: string;
+    action: ResourceGrantAction;
+  },
+): Promise<{ allowed: boolean; grantVersion?: number }> {
+  if (subject.accountType !== "external-representative" || !subject.id) return { allowed: false };
+  const result = await executor.query(
+    `SELECT grant.version
+       FROM cms_resource_grants grant
+       JOIN cms_documents document ON document.id=$2
+       LEFT JOIN cms_partner_ownership ownership ON ownership.document_id=document.id
+      WHERE grant.user_id=$1
+        AND grant.market=$3 AND grant.locale=$4
+        AND $5=ANY(grant.actions)
+        AND grant.revoked_at IS NULL
+        AND (grant.expires_at IS NULL OR grant.expires_at>now())
+        AND (
+          (grant.resource_type='canonical-page' AND grant.resource_id=document.id::text)
+          OR (
+            grant.resource_type='partner-case-studies'
+            AND document.kind='case-study'
+            AND grant.owner_id=ownership.partner_document_id
+            AND grant.resource_id=ownership.partner_document_id::text
+          )
+        )
+      ORDER BY grant.version DESC LIMIT 1`,
+    [subject.id, input.documentId, input.market, input.locale, input.action],
+  );
+  return result.rowCount
+    ? { allowed: true, grantVersion: Number(result.rows[0].version) }
+    : { allowed: false };
+}
 
 const topicSet = new Set<string>(cmsDocumentTopics);
 const capabilitySet = new Set<string>(cmsCapabilities);
@@ -279,6 +322,9 @@ export async function canAccessContent(
   subject: CapabilitySubject,
   request: ContentAuthorityRequest,
 ): Promise<boolean> {
+  // External representatives never inherit role/topic compatibility access.
+  // Exact resource grants are evaluated by the object-level release policy.
+  if (subject.accountType === "external-representative") return false;
   if (!subject.id) return canAccessLegacyContent(subject, request);
   const configured = await capabilityMatrixConfiguredForUser(subject.id);
   const grants = await capabilityGrantsForUser(subject.id);
@@ -302,6 +348,7 @@ export async function canAccessAnyContentCapability(
   subject: CapabilitySubject,
   capability: CmsCapability,
 ): Promise<boolean> {
+  if (subject.accountType === "external-representative") return false;
   if (!subject.id) {
     return legacyCapabilitiesForRole(subject.role).includes(capability) &&
       subject.marketCodes.length > 0;

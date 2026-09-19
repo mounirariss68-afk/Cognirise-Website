@@ -62,7 +62,7 @@ async function hasEditionAccess(
   capability: CmsCapability = "view",
 ) {
   const user = await client.query(
-    `SELECT id,status,role
+    `SELECT id,status,role,COALESCE(to_jsonb(cms_users)->>'account_type','internal') account_type
        FROM cms_users
       WHERE id=$1
       FOR SHARE`,
@@ -81,6 +81,7 @@ async function hasEditionAccess(
     id: "", tokenHash: "", mfaVerified: true, createdAt: new Date(0), expiresAt: new Date(0),
     user: {
       id: userId, name: "", email: "", role: (user.rows[0].role ?? role) as AuthContext["user"]["role"], status: "active",
+      accountType: user.rows[0].account_type ?? "internal",
       marketCodes: assignments.rows.map((row: { market_code: string }) => String(row.market_code)),
       capabilityMatrixConfigured: false, capabilityGrants: [], legacyAdministratorMarketCodes: [],
       mfaEnabled: true, mustRotate: false, lastLoginAt: null, createdAt: new Date(0), updatedAt: new Date(0),

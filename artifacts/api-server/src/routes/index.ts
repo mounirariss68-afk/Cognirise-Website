@@ -11,6 +11,7 @@ import mediaRouter from "./media";
 import navigationRouter from "./navigation";
 import readinessAssessmentsRouter from "./readiness-assessments";
 import editorialWorkRouter from "./editorial-work";
+import releasesRouter from "./releases";
 
 const router: IRouter = Router();
 
@@ -26,5 +27,6 @@ router.use(mediaRouter);
 router.use(navigationRouter);
 router.use(readinessAssessmentsRouter);
 router.use(editorialWorkRouter);
+router.use(releasesRouter);
 
 export default router;
