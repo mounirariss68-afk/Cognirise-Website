@@ -176,3 +176,106 @@
   .bc-front .bc-rule { left: 76%; }
   .bc-back::before { width: 110%; }
 }
+
+/* Quiet reverse: deliberately reduced to paper, ink, one signal, and a vCard zone. */
+.bc-back-quiet {
+  --paper: #f7f3eb;
+  position: relative;
+  color: #102849;
+  background: var(--paper);
+}
+.bcq-safe {
+  position: absolute;
+  inset: 40px;
+  display: grid;
+  grid-template-columns: 1fr 270px;
+  grid-template-rows: 1fr auto;
+  gap: 30px;
+}
+.bcq-rule { position: absolute; height: 1px; background: rgba(16, 40, 73, .24); }
+.bcq-rule-top { top: 40px; right: 40px; left: 40px; }
+.bcq-rule-bottom { right: 40px; bottom: 40px; left: 40px; }
+.bcq-rail {
+  position: absolute;
+  top: 40px;
+  bottom: 40px;
+  left: 60.2%;
+  width: 3px;
+  background: linear-gradient(#7436c8, #d02a8a 50%, #ef6a58);
+}
+.bcq-brand { align-self: start; padding-top: 27px; }
+.bcq-brand img { width: 190px; height: auto; }
+.bcq-brand p {
+  margin: 18px 0 0;
+  color: #51647e;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.bcq-statement {
+  display: flex;
+  gap: 18px;
+  align-self: end;
+  padding-bottom: 24px;
+  font-family: "Comfortaa", sans-serif;
+  font-size: 22px;
+  letter-spacing: -.055em;
+}
+.bcq-statement span:not(:last-child)::after {
+  content: "·";
+  margin-left: 18px;
+  color: #d02a8a;
+}
+.bcq-vcard {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: end;
+  justify-self: end;
+  display: grid;
+  gap: 12px;
+  width: 240px;
+  padding: 0 0 17px;
+}
+.bcq-qr {
+  display: grid;
+  place-items: center;
+  width: 240px;
+  aspect-ratio: 1;
+  padding: 10px;
+  background: #fff;
+  border: 1px solid #102849;
+}
+.bcq-qr-inner {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  width: 100%;
+  height: 100%;
+  gap: 10px;
+  color: #102849;
+  border: 1px solid #102849;
+  text-align: center;
+}
+.bcq-qr-inner strong { font-family: "Comfortaa", sans-serif; font-size: 38px; letter-spacing: -.08em; }
+.bcq-qr-inner span { font-size: 12px; font-weight: 600; line-height: 1.4; letter-spacing: .08em; text-transform: uppercase; }
+.bcq-vcard-copy {
+  display: grid;
+  gap: 4px;
+  font-size: 11px;
+  line-height: 1.25;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+.bcq-vcard-copy strong {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .12em;
+}
+@media (max-aspect-ratio: 1.28/1) {
+  .bcq-safe { inset: 9vw; grid-template-columns: 1fr; }
+  .bcq-rule-top { top: 9vw; right: 9vw; left: 9vw; }
+  .bcq-rule-bottom { right: 9vw; bottom: 9vw; left: 9vw; }
+  .bcq-rail { left: auto; right: 9vw; top: 9vw; bottom: 9vw; }
+  .bcq-vcard { justify-self: start; }
+}
