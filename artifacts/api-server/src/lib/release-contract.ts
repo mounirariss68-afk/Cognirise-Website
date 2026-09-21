@@ -222,9 +222,11 @@ export async function buildReleaseCandidate(
     [market, locale],
   );
   const availability = await executor.query(
-    `SELECT a.document_id::text,a.locale,a.published_decision,a.published_version
+    `SELECT a.document_id::text,a.locale,a.published_decision,
+            COALESCE(state.published_version,0) published_version
        FROM cms_document_market_availability a
        JOIN market_editions m ON m.id=a.market_edition_id
+       LEFT JOIN cms_document_availability_states state ON state.document_id=a.document_id
       WHERE m.code=$1 AND a.locale=$2 ORDER BY a.document_id`,
     [market, locale],
   );

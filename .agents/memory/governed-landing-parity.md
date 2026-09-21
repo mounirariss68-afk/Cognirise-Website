@@ -20,3 +20,9 @@ A compiled React component may remain as a presentation shell after cutover, but
 **Why:** Treating every compiled component as publication authority creates false audit failures, while allowing its embedded copy to reappear on manifest failure silently reopens the legacy bypass.
 
 **How to apply:** Audit route reachability, content, links, and media against the active market-locale receipt. Classify compiled code separately as a renderer shell and fail whenever it can become public authority.
+
+A CMS cutover is not complete when the revision is merely approved and published. The market-locale also needs an active immutable release that includes every renderer-required media slot and exact delivered media version.
+
+**Why:** The public router treats a missing active release as an absent route, and a landing renderer correctly rejects an approved snapshot when required media slots are missing from the release.
+
+**How to apply:** Before declaring a migrated route live, verify the active release endpoint, the route revision in its manifest, every renderer-specific media slot, and a clean browser render from a fresh client cache.
