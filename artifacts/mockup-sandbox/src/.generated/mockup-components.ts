@@ -3,6 +3,10 @@ type ModuleMap = Record<string, () => Promise<Record<string, unknown>>>;
 export const modules: ModuleMap = {
   "./components/mockups/cognios-authority-atlas/AuthorityAtlas.tsx": () => import("../components/mockups/cognios-authority-atlas/AuthorityAtlas.tsx"),
   "./components/mockups/cognios-kernel-stack/ExplodedKernelStack.tsx": () => import("../components/mockups/cognios-kernel-stack/ExplodedKernelStack.tsx"),
+  "./components/mockups/cognirise-business-ariss/ColumnBack.tsx": () => import("../components/mockups/cognirise-business-ariss/ColumnBack.tsx"),
+  "./components/mockups/cognirise-business-ariss/ColumnFront.tsx": () => import("../components/mockups/cognirise-business-ariss/ColumnFront.tsx"),
+  "./components/mockups/cognirise-business-ariss/OpenBack.tsx": () => import("../components/mockups/cognirise-business-ariss/OpenBack.tsx"),
+  "./components/mockups/cognirise-business-ariss/OpenFront.tsx": () => import("../components/mockups/cognirise-business-ariss/OpenFront.tsx"),
   "./components/mockups/cognirise-business-cards/Back.tsx": () => import("../components/mockups/cognirise-business-cards/Back.tsx"),
   "./components/mockups/cognirise-business-cards/BackGallery.tsx": () => import("../components/mockups/cognirise-business-cards/BackGallery.tsx"),
   "./components/mockups/cognirise-business-cards/Front.tsx": () => import("../components/mockups/cognirise-business-cards/Front.tsx"),
