@@ -4,6 +4,7 @@ import { releaseHrefAvailable, useReleaseContext } from "@/lib/releases";
 import { assetUrl } from "@/lib/assets";
 import { contentRecord, useCmsCollection } from "@/lib/cms";
 import { PulseImage } from "@/components/ui/pulse-image";
+import { INDUSTRIES } from "@/content/industries";
 import {
   SpatialDisclosure,
   SpatialDisclosureItem,
@@ -123,15 +124,21 @@ export function IndustryPicker({
     ...contentRecord(item, "industry"),
     slug: item.slug,
   }));
+  const compiledIndustryBySlug = new Map(INDUSTRIES.map((industry) => [industry.slug, industry]));
   const industries = industryQuery.data.map((industry, index) => ({
+    ...(() => {
+      const compiled = compiledIndustryBySlug.get(industry.slug);
+      return {
+        image: releaseContext && compiled ? compiled.image : industry.image,
+        imageAlt: releaseContext && compiled ? compiled.imageAlt : industry.imageAlt,
+      };
+    })(),
     id: String(index + 1).padStart(2, "0"),
     slug: industry.slug,
     name: industry.name,
     href: `/industries/${industry.slug}`,
     orientation: industry.thesis,
     detail: industry.dek,
-    image: industry.image,
-    imageAlt: industry.imageAlt,
   })).filter((industry) => !releaseContext || releaseHrefAvailable(releaseContext.release.manifest, industry.href));
   const rows = Array.from(
     { length: Math.ceil(industries.length / 3) },

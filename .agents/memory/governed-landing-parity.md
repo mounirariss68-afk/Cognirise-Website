@@ -15,11 +15,11 @@ Keep single-route migrations isolated from pre-existing parity drift on other ro
 
 **How to apply:** Compare every regenerated route with its previous inventory. Preserve unrelated route inventories and report their drift separately rather than silently including another page's migration in a media replacement.
 
-A compiled React component may remain as a presentation shell after cutover, but it must never decide whether a route exists or supply public content when the exact immutable release is absent.
+A compiled React component may remain as public authority for a route that has not been cut over. Once that specific route is cut over, it becomes only a presentation shell and must not replace a missing immutable revision.
 
-**Why:** Treating every compiled component as publication authority creates false audit failures, while allowing its embedded copy to reappear on manifest failure silently reopens the legacy bypass.
+**Why:** Applying one route's CMS cutover to the whole registry can make unrelated compiled pages disappear. Conversely, allowing a cut-over route to fall back silently reopens the legacy bypass.
 
-**How to apply:** Audit route reachability, content, links, and media against the active market-locale receipt. Classify compiled code separately as a renderer shell and fail whenever it can become public authority.
+**How to apply:** Track cutover authority per route. Preserve compiled delivery for routes not represented by an approved release revision; fail closed only for routes whose CMS cutover is complete.
 
 A CMS cutover is not complete when the revision is merely approved and published. The market-locale also needs an active immutable release that includes every renderer-required media slot and exact delivered media version.
 

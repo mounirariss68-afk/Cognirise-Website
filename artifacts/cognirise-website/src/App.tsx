@@ -12,6 +12,7 @@ import { ServiceError } from "@/components/error-boundary";
 import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
 import {
   ReleaseProvider,
+  registryRouteForPath,
   releaseHasPath,
   releaseRedirectForPath,
   useActiveRelease,
@@ -145,9 +146,10 @@ export function Router() {
     && window.location.hash === "#selected-work"
     && releaseHasPath(release.data.manifest, "/industries")
   ) return <AnchoredRedirect to="/industries" anchor="selected-work" />;
-  const unavailable = !releaseHasPath(release.data.manifest, path);
-  return (
-    <ReleaseProvider release={release.data}>
+  const released = releaseHasPath(release.data.manifest, path);
+  const unavailable = !released && !registryRouteForPath(path);
+  const routedPage = (
+    <>
       <PublicSitemap />
       <Shell>
         {(!embedsBackInHero || unavailable) && <NavigationBackControl />}
@@ -156,7 +158,7 @@ export function Router() {
         <Route path="/" component={Home} />
         
         {/* Methodologies */}
-        <Route path="/methodologies"><GovernedLandingRoute pagePath="/methodologies" compiled={MethodologiesPortfolio} /></Route>
+        <Route path="/methodologies" component={MethodologiesPortfolio} />
         <Route path="/methodologies/ai-use-case-prioritization" component={AIUseCasePrioritization} />
         <Route path="/methodologies/ai-value-to-scale" component={AIValueToScale} />
         <Route path="/methodologies/agentic-operations-readiness" component={AgenticOperationsReadiness} />
@@ -177,7 +179,11 @@ export function Router() {
         <Route path="/services"><AnchoredRedirect to="/" anchor="service-lines" /></Route>
         
         {/* Platforms */}
-        <Route path="/platforms"><GovernedLandingRoute pagePath="/platforms" compiled={PlatformsOverview} /></Route>
+        <Route path="/platforms">
+          {released
+            ? <GovernedLandingRoute pagePath="/platforms" compiled={PlatformsOverview} />
+            : <PlatformsOverview />}
+        </Route>
         <Route path="/platforms/cognios" component={PlatformDetail} />
         <Route path="/platforms/cognidocs" component={PlatformDetail} />
         <Route path="/platforms/cogniagents" component={PlatformDetail} />
@@ -226,12 +232,24 @@ export function Router() {
 
         {/* Work & Insights */}
         <Route path="/work/:slug" component={CaseStudyDetail} />
-        <Route path="/insights"><GovernedLandingRoute pagePath="/insights" compiled={InsightsEditorial} /></Route>
+        <Route path="/insights">
+          {released
+            ? <GovernedLandingRoute pagePath="/insights" compiled={InsightsEditorial} />
+            : <InsightsEditorial />}
+        </Route>
         <Route path="/insights/:slug" component={InsightArticle} />
         
         {/* Company */}
-        <Route path="/about"><GovernedLandingRoute pagePath="/about" compiled={AboutPeople} /></Route>
-        <Route path="/partners"><GovernedLandingRoute pagePath="/partners" compiled={Partners} /></Route>
+        <Route path="/about">
+          {released
+            ? <GovernedLandingRoute pagePath="/about" compiled={AboutPeople} />
+            : <AboutPeople />}
+        </Route>
+        <Route path="/partners">
+          {released
+            ? <GovernedLandingRoute pagePath="/partners" compiled={Partners} />
+            : <Partners />}
+        </Route>
         <Route path="/faq" component={FAQ} />
         <Route path="/contact" component={Contact} />
         <Route path="/value-scan" component={ValueScan} />
@@ -240,8 +258,11 @@ export function Router() {
         <Route component={NotFound} />
         </Switch>}
       </Shell>
-    </ReleaseProvider>
+    </>
   );
+  return released
+    ? <ReleaseProvider release={release.data}>{routedPage}</ReleaseProvider>
+    : routedPage;
 }
 
 function App() {

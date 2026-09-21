@@ -325,7 +325,7 @@ export function usePublishedHeroFilm(
       poster: { id: poster.id, versionId: poster.versionId, url: poster.url, mimeType: poster.mimeType },
       sources,
     } : undefined;
-    return resolvePublishedHeroFilm(released, { mp4: "", webm: "", poster: "" });
+    return resolvePublishedHeroFilm(released, fallback);
   }
   return resolvePublishedHeroFilm(query.data as PublishedHeroFilmResponse | undefined, fallback);
 }
