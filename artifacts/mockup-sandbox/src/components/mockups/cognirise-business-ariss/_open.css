@@ -111,7 +111,7 @@
   white-space: nowrap;
 }
 
-.cognirise-open-front__contact p:last-child {
+.cognirise-open-front__contact p:nth-last-child(-n + 2) {
   margin-top: 12px;
   font-family: "Comfortaa", sans-serif;
   font-size: 19px;

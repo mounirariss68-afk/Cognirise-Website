@@ -20,6 +20,7 @@ export function OpenFront() {
           <div className="cognirise-open-front__contact" aria-label="Phone contact details">
             <p>+971 (50) 650 4416</p>
             <p>+ 966 (50) 876 0 874</p>
+            <p>mounir@cognirise.ai</p>
             <p>cognirise.ai</p>
           </div>
         </div>

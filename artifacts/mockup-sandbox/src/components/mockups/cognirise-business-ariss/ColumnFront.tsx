@@ -17,6 +17,7 @@ export function ColumnFront() {
         <div className="ariss-column-contact" aria-label="Contact information">
           <div className="ariss-column-phone">+971 (50) 650 4416</div>
           <div className="ariss-column-phone">+ 966 (50) 876 0 874</div>
+          <div className="ariss-column-phone">mounir@cognirise.ai</div>
         </div>
         <div className="ariss-column-site">cognirise.ai</div>
       </section>
