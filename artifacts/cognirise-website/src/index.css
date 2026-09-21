@@ -811,3 +811,10 @@
     padding-inline: 3rem !important;
   }
 }
+
+@media (min-width: 1024px) {
+  .home-layout-frame {
+    max-width: none;
+    padding-inline: 4.8vw !important;
+  }
+}

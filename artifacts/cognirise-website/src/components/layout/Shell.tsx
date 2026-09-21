@@ -492,7 +492,7 @@ export function Shell({
       <header
         className="fixed top-0 z-50 flex h-[72px] w-full items-center border-b border-border bg-white/95 backdrop-blur transition-colors duration-300 md:h-[82px]"
       >
-        <div className="mx-auto flex w-full max-w-[1440px] min-w-0 items-center justify-between px-6 md:px-12">
+        <div className={`${routePath(location) === "/" ? "home-layout-frame" : "mx-auto max-w-[1440px] px-6 md:px-12"} flex w-full min-w-0 items-center justify-between`}>
           <Link href="/" className="relative z-50 flex h-full shrink-0 items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-pink))] focus-visible:ring-offset-2">
             <img
               src={assetUrl("images/cognirise/logo-blue.svg")}
