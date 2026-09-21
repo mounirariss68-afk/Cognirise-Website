@@ -71,6 +71,10 @@
   flex-direction: column;
 }
 
+.ariss-column-details .ariss-column-name {
+  margin-top: 28px;
+}
+
 .ariss-column-kicker {
   color: var(--ariss-violet);
   font-family: "Comfortaa", sans-serif;
@@ -175,6 +179,7 @@
   padding: 48px 40px 40px 54px;
   display: flex;
   flex-direction: column;
+  justify-content: center;
 }
 
 .ariss-column-qr-caption {
@@ -191,7 +196,7 @@
 .ariss-column-qr-row {
   align-items: center;
   display: flex;
-  flex: 1;
+  flex: 0;
   gap: 36px;
 }
 

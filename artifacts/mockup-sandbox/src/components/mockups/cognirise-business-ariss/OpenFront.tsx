@@ -14,13 +14,13 @@ export function OpenFront() {
         </div>
 
         <div className="cognirise-open-front__details">
-          <p className="cognirise-open-front__kicker">Leadership</p>
           <h1 className="cognirise-open-front__name">Mounir Ariss</h1>
           <p className="cognirise-open-front__title">CEO &amp; Co-founder</p>
 
           <div className="cognirise-open-front__contact" aria-label="Phone contact details">
             <p>+971 (50) 650 4416</p>
             <p>+ 966 (50) 876 0 874</p>
+            <p>cognirise.ai</p>
           </div>
         </div>
       </div>

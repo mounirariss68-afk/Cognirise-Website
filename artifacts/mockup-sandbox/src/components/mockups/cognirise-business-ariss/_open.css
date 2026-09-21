@@ -111,6 +111,12 @@
   white-space: nowrap;
 }
 
+.cognirise-open-front__contact p:last-child {
+  margin-top: 12px;
+  font-family: "Comfortaa", sans-serif;
+  font-size: 19px;
+}
+
 .cognirise-open-back__safe {
   display: grid;
   grid-template-columns: 1fr 240px;

@@ -9,10 +9,8 @@ export function ColumnFront() {
           src="/__mockup/images/cognirise/logo-white.svg"
           alt="Cognirise"
         />
-        <p className="ariss-column-brand-note">Cognirise</p>
       </section>
       <section className="ariss-column-details">
-        <p className="ariss-column-kicker">Leadership</p>
         <h1 className="ariss-column-name">Mounir Ariss</h1>
         <p className="ariss-column-title">CEO &amp; Co-founder</p>
         <div className="ariss-column-rule" />
@@ -20,7 +18,7 @@ export function ColumnFront() {
           <div className="ariss-column-phone">+971 (50) 650 4416</div>
           <div className="ariss-column-phone">+ 966 (50) 876 0 874</div>
         </div>
-        <div className="ariss-column-site">cognirise.com</div>
+        <div className="ariss-column-site">cognirise.ai</div>
       </section>
     </article>
   );

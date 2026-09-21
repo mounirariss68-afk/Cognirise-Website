@@ -10,17 +10,13 @@ export function OpenBack() {
             src="/__mockup/images/cognirise/logo-blue.svg"
             alt="Cognirise"
           />
-          <p className="cognirise-open-back__web">cognirise.com</p>
+          <p className="cognirise-open-back__web">cognirise.ai</p>
         </div>
 
         <div className="cognirise-open-back__qr-group">
           <div className="cognirise-open-back__qr" aria-label="240 pixel square reserved vCard QR placeholder">
-            <div className="cognirise-open-back__qr-copy">
-              <strong>QR</strong>
-              <span>vCard QR placeholder</span>
-            </div>
+            <div className="cognirise-open-back__qr-copy"><strong>QR</strong></div>
           </div>
-          <p className="cognirise-open-back__caption">Reserved for employee vCard</p>
         </div>
 
         <div className="cognirise-open-back__signature" aria-hidden="true">
