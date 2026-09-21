@@ -297,7 +297,7 @@ export function Shell({
   const releaseNavigation = releaseContext?.release.manifest.navigation;
   const effectiveNavigation = navigationOverride ?? releaseNavigation;
   const snapshotItems = effectiveNavigation?.items ?? [];
-  const snapshotNavigation = effectiveNavigation
+  const snapshotNavigation = effectiveNavigation && snapshotItems.length > 0
     ? (() => {
         const childrenByParent = new Map<string, NavigationItem[]>();
         const roots: NavigationItem[] = [];
@@ -348,7 +348,7 @@ export function Shell({
         const right = navigationSettings.data!.items.find((item) => item.id === b.id)?.order ?? 0;
         return left - right;
       })
-    : []);
+    : compiledNavigation);
   const availabilityManifest = releaseContext?.release.manifest;
   const filterAvailable = (items: NavigationItem[]): NavigationItem[] => items.flatMap((item) => {
     const children = item.items ? filterAvailable(item.items) : undefined;

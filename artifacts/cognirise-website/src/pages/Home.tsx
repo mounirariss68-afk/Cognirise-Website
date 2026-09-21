@@ -104,8 +104,8 @@ export default function Home() {
     <div className="bg-[#fdfcfb] text-[#102957] font-sans overflow-x-hidden selection:bg-[hsl(var(--brand-pink))] selection:text-white">
       
       {/* HERO */}
-      <section ref={heroRef} className="public-hero-shell px-6 md:px-[4.8vw] pt-8 md:pt-[22px] overflow-hidden">
-        <div className="grid grid-cols-1 lg:grid-cols-[0.94fr_1.06fr] gap-10 lg:gap-[4vw] items-start pb-10 lg:pb-[34px]">
+      <section ref={heroRef} className="public-hero-shell home-layout-frame pt-8 md:pt-[22px] overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-10 lg:gap-[clamp(2rem,2.5vw,2.5rem)] items-start pb-10 lg:pb-[34px]">
           <motion.div className="home-hero-copy flex max-w-[600px] flex-col lg:min-h-[640px] lg:max-w-none">
             <div className="flex flex-col gap-7">
               <NavigationBackControl embedded />
@@ -120,7 +120,7 @@ export default function Home() {
             </div>
             <div className="mt-10 lg:mt-auto">
             <motion.h1
-              className="font-display font-semibold text-[clamp(40px,4.8vw,76px)] leading-[0.94] tracking-[-0.08em] mb-7 [overflow-wrap:anywhere]"
+              className="max-w-[660px] font-display font-semibold text-[clamp(40px,4.8vw,76px)] leading-[0.94] tracking-[-0.08em] mb-7 [overflow-wrap:anywhere]"
               initial={prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: prefersReducedMotion ? 0 : 0.8, delay: prefersReducedMotion ? 0 : 0.1, ease: [0.16, 1, 0.3, 1] }}
@@ -129,7 +129,7 @@ export default function Home() {
             </motion.h1>
             
             <motion.p
-              className="text-[16.5px] leading-[1.6] text-[#405777] max-w-[440px] mb-8"
+              className="text-[16.5px] leading-[1.6] text-[#405777] max-w-[540px] mb-8"
               initial={{ opacity: prefersReducedMotion ? 1 : 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: prefersReducedMotion ? 0 : 0.8, delay: prefersReducedMotion ? 0 : 0.3, ease: "easeOut" }}
@@ -210,7 +210,8 @@ export default function Home() {
       )}
 
       {/* PROOF LEDGER */}
-      <section className="mx-6 md:mx-[4.8vw] border-y border-[#102957] grid grid-cols-2 lg:grid-cols-4" aria-label="Cognirise company qualities">
+      <section className="home-layout-frame" aria-label="Cognirise company qualities">
+        <div className="border-y border-[#102957] grid grid-cols-2 lg:grid-cols-4">
         {[
           { label: landingText(governedLanding, "home-proof-model-label", "Model"), value: landingText(governedLanding, "home-proof-model", "Advisory + Engineering") },
           { label: landingText(governedLanding, "home-proof-focus-label", "Focus"), value: landingText(governedLanding, "home-proof-focus", "Complex enterprise & government") },
@@ -225,6 +226,7 @@ export default function Home() {
             <strong className="font-semibold">{item.value}</strong>
           </div>
         ))}
+        </div>
       </section>
 
       {/* MODEL */}
