@@ -105,7 +105,7 @@ export default function Home() {
       
       {/* HERO */}
       <section ref={heroRef} className="public-hero-shell home-layout-frame pt-8 md:pt-[22px] overflow-hidden">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-10 lg:gap-[clamp(2rem,2.5vw,2.5rem)] items-start pb-10 lg:pb-[34px]">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-10 lg:gap-8 items-start pb-10 lg:pb-[34px]">
           <motion.div className="home-hero-copy flex max-w-[600px] flex-col lg:min-h-[640px] lg:max-w-none">
             <div className="flex flex-col gap-7">
               <NavigationBackControl embedded />
@@ -120,7 +120,7 @@ export default function Home() {
             </div>
             <div className="mt-10 lg:mt-auto">
             <motion.h1
-              className="max-w-[660px] font-display font-semibold text-[clamp(40px,4.8vw,76px)] leading-[0.94] tracking-[-0.08em] mb-7 [overflow-wrap:anywhere]"
+              className="max-w-[660px] xl:max-w-[820px] font-display font-semibold text-[clamp(40px,4.8vw,76px)] leading-[0.94] tracking-[-0.08em] mb-7 [overflow-wrap:anywhere]"
               initial={prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: prefersReducedMotion ? 0 : 0.8, delay: prefersReducedMotion ? 0 : 0.1, ease: [0.16, 1, 0.3, 1] }}
@@ -129,7 +129,7 @@ export default function Home() {
             </motion.h1>
             
             <motion.p
-              className="text-[16.5px] leading-[1.6] text-[#405777] max-w-[540px] mb-8"
+              className="text-[16.5px] leading-[1.6] text-[#405777] max-w-[540px] xl:max-w-[680px] mb-8"
               initial={{ opacity: prefersReducedMotion ? 1 : 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: prefersReducedMotion ? 0 : 0.8, delay: prefersReducedMotion ? 0 : 0.3, ease: "easeOut" }}
