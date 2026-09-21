@@ -1,15 +1,15 @@
 {
   "formatVersion": 1,
   "generatedBy": "pnpm run audit:cms-publication-parity",
-  "generatedAt": "2026-09-21T18:46:15.024Z",
-  "sourceCommit": "2baadc476ed92dd8a408bbc420ee777ce7a8190a",
+  "generatedAt": "2026-09-21T19:59:48.020Z",
+  "sourceCommit": "08ba3d31032e1013edd2c1cb0d0053ad885d0755",
   "registryVersion": "2026-09-19.2",
-  "status": "fail",
+  "status": "pass",
   "summary": {
     "routes": 64,
     "kinds": 10,
     "compiledPublicationAuthority": 0,
-    "unexplained": 1
+    "unexplained": 0
   },
   "authority": {
     "publication": "cms_release_receipts.manifest selected by cms_active_releases",
@@ -1868,7 +1868,7 @@
     "website fetches only the active release manifest for route authority": true,
     "website does not retry a failed manifest as absent content": true,
     "website distinguishes unavailable release from service failure": true,
-    "website gates route dispatch before rendering": false,
+    "website gates route dispatch before rendering": true,
     "candidate records typed link closure": true,
     "candidate records immutable media closure": true,
     "candidate records exact revision identity": true,
@@ -1878,8 +1878,6 @@
     "release receipts support idempotent publish and rollback": true,
     "registry contains no compiled publication authority": true
   },
-  "errors": [
-    "Missing evidence: website gates route dispatch before rendering."
-  ],
-  "reportDigest": "b00329346112fe8d3cf1a191d458989a16e1d19dcb4291396c0b5d70846b2fe7"
+  "errors": [],
+  "reportDigest": "dc7b93a2c6bed0bd2e4b8cc2ef3549e8658e5027f32cc364af8586a3d086e312"
 }

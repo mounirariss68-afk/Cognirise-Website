@@ -12,7 +12,6 @@ import { ServiceError } from "@/components/error-boundary";
 import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
 import {
   ReleaseProvider,
-  registryRouteForPath,
   releaseHasPath,
   releaseRedirectForPath,
   useActiveRelease,
@@ -152,7 +151,7 @@ export function Router() {
     || path === "/methodologies/agentic-operations-readiness"
     || path === "/methodologies/idao"
     || path === "/methodologies/human-agent-operating-model";
-  const unavailable = !released && !registryRouteForPath(path);
+  const unavailable = !releaseHasPath(release.data.manifest, path);
   const routedPage = (
     <>
       <PublicSitemap />
