@@ -119,7 +119,9 @@ export function releaseRedirectForPath(manifest: ReleaseManifest, pathname: stri
   if (!route || (route.routeType !== "redirect" && route.routeType !== "alias") || !route.destinationIdTarget) return null;
   const target = CMS_RELEASE_REGISTRY.routes.find((candidate) => candidate.destinationId === route.destinationIdTarget);
   if (!target) return null;
-  const targetAvailable = target.routeType === "redirect" || releaseHasPath(manifest, target.path);
+  const targetAvailable = target.routeType === "redirect"
+    || releaseHasPath(manifest, target.path)
+    || Boolean(registryRouteForPath(target.path));
   if (!targetAvailable) return null;
   return { path: target.path, anchor: route.anchor };
 }
@@ -127,7 +129,9 @@ export function releaseRedirectForPath(manifest: ReleaseManifest, pathname: stri
 export function releaseHrefAvailable(manifest: ReleaseManifest, href: string): boolean {
   if (!href.startsWith("/")) return true;
   const url = new URL(href, "https://release.invalid");
-  return releaseHasPath(manifest, url.pathname) || Boolean(releaseRedirectForPath(manifest, url.pathname));
+  return releaseHasPath(manifest, url.pathname)
+    || Boolean(registryRouteForPath(url.pathname))
+    || Boolean(releaseRedirectForPath(manifest, url.pathname));
 }
 
 export function useReleaseHrefAvailable(href: string): boolean {

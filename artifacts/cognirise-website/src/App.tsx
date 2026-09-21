@@ -147,6 +147,11 @@ export function Router() {
     && releaseHasPath(release.data.manifest, "/industries")
   ) return <AnchoredRedirect to="/industries" anchor="selected-work" />;
   const released = releaseHasPath(release.data.manifest, path);
+  const methodologyUsesReleaseAwareFallback = path === "/methodologies/ai-use-case-prioritization"
+    || path === "/methodologies/ai-value-to-scale"
+    || path === "/methodologies/agentic-operations-readiness"
+    || path === "/methodologies/idao"
+    || path === "/methodologies/human-agent-operating-model";
   const unavailable = !released && !registryRouteForPath(path);
   const routedPage = (
     <>
@@ -260,7 +265,7 @@ export function Router() {
       </Shell>
     </>
   );
-  return released
+  return released || methodologyUsesReleaseAwareFallback
     ? <ReleaseProvider release={release.data}>{routedPage}</ReleaseProvider>
     : routedPage;
 }

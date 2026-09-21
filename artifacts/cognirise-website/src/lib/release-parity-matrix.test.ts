@@ -79,11 +79,11 @@ test("market and locale manifests remain isolated even when registry destination
   assert.equal(releasePublishedContent(ksaRevision, ksa).content.marker, "ksa|ar|platform.cognios");
 });
 
-test("unavailable destinations are removed before links render and redirects fail closed", () => {
+test("registered compiled destinations remain linked until their route is released", () => {
   const release = manifest(scopes[0]);
   release.revisions = release.revisions.filter((item) => item.route !== "/platforms/lupitor");
-  assert.equal(releaseHrefAvailable(release, "/platforms/lupitor"), false);
-  assert.equal(releaseRedirectForPath(release, "/cognitalk"), null);
+  assert.equal(releaseHrefAvailable(release, "/platforms/lupitor"), true);
+  assert.equal(releaseRedirectForPath(release, "/cognitalk")?.path, "/platforms/lupitor");
   assert.equal(releaseHrefAvailable(release, "/platforms/cognios"), true);
   assert.equal(releaseRedirectForPath(release, "/architecture")?.path, "/platforms/cognios");
 });

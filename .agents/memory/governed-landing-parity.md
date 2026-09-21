@@ -21,6 +21,12 @@ A compiled React component may remain as public authority for a route that has n
 
 **How to apply:** Track cutover authority per route. Preserve compiled delivery for routes not represented by an approved release revision; fail closed only for routes whose CMS cutover is complete.
 
+Partial releases must apply the same route-authority decision to direct routing, visible links, redirects, and nested CMS delivery contexts.
+
+**Why:** A page can load by direct URL while homepage buttons and navigation still hide it, or a nested CMS boundary can reject its compiled fallback after the router admitted it.
+
+**How to apply:** Test migration recovery by clicking real navigation from a released page into both released and not-yet-cut-over routes. Verify the destination content and browser console, not only direct URL screenshots.
+
 A CMS cutover is not complete when the revision is merely approved and published. The market-locale also needs an active immutable release that includes every renderer-required media slot and exact delivered media version.
 
 **Why:** The public router treats a missing active release as an absent route, and a landing renderer correctly rejects an approved snapshot when required media slots are missing from the release.

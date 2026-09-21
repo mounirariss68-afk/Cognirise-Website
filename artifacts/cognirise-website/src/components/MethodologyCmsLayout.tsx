@@ -17,6 +17,7 @@ import {
 } from "@/lib/cms";
 import { metadataFromSeo, type PageMetadata, useDynamicMetadata } from "@/lib/metadata";
 import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
+import { useReleaseContext } from "@/lib/releases";
 
 export type MethodologyTemplate = Extract<
   FrameworkContent,
@@ -67,6 +68,7 @@ export function MethodologyCmsDelivery({
   children: ReactNode;
 }) {
   const inherited = useContext(MethodologyCmsContext);
+  const releaseContext = useReleaseContext();
   const query = useCmsEntry("framework", slug);
   if (inherited) return <>{children}</>;
 
@@ -82,10 +84,14 @@ export function MethodologyCmsDelivery({
     && resolveCmsMedia(delivered.media, selected.hero.media, selected.hero.mediaId)
     && hasResolvedMethodologyMedia(selected, delivered.media, false),
   );
+  const hasReleasedRevision = Boolean(releaseContext?.release.manifest.revisions.some((revision) =>
+    revision.kind === "framework" && revision.snapshot.slug === slug
+  ));
+  const useCompiledReleaseFallback = Boolean(releaseContext && !hasReleasedRevision);
   // A configured methodology must never leave an indexable stale page behind
   // while its exact revision or immutable media cannot be delivered.
   useDynamicMetadata(
-    query.isAuthoritative && !cmsMediaAvailable
+    query.isAuthoritative && !cmsMediaAvailable && !useCompiledReleaseFallback
       ? {
           title: "Methodology unavailable | Cognirise",
           description: "The requested methodology is temporarily unavailable.",
@@ -94,6 +100,7 @@ export function MethodologyCmsDelivery({
         }
       : undefined,
   );
+  if (useCompiledReleaseFallback) return <>{children}</>;
   if (policy === "compiled-fallback") return <>{children}</>;
   if (selected && delivered) {
     const record = {
