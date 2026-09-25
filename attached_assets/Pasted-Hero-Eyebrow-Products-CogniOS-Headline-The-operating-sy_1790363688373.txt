@@ -1,0 +1,75 @@
+Hero
+
+Eyebrow: Products / CogniOS
+Headline: The operating system for enterprise AI.
+Subhead: CogniOS manages the full lifecycle of your agentic workflows, from design and approval to scheduling, monitoring and retirement. It runs your models on your own infrastructure and lets you spawn new AI applications from the Cogni toolset in days.
+CTAs: Book a demo · See the architecture
+
+Proof strip: Full lifecycle governance · Performance management · Scheduling & orchestration · On-prem AI/ML ops · App builder
+
+The problem
+
+The first AI agent is easy. The twentieth is where it breaks down. Agents get built in silos with no shared inventory, no owner and no approval trail. Nobody can say which agents are running, what they cost or whether they still perform. Models sit on scattered servers without monitoring. And every new use case starts from scratch.
+
+CogniOS gives AI the same operational discipline you expect from any other enterprise system.
+
+Core capabilities
+
+Lifecycle governance
+Every agent and workflow moves through a controlled lifecycle: design, review, approval, deployment, monitoring and retirement. Versioning, role-based sign-off and a central agent registry mean you always know what is running, who owns it and why it was approved.
+
+Performance management
+Track each agent against business KPIs, answer quality, task completion, latency and cost per run. Built-in evaluation catches regressions and drift before users do, and dashboards show value delivered per function.
+
+Scheduling and orchestration
+Run workflows on schedules, on events or on demand. CogniOS handles queues, retries, dependencies between agents and handovers to human reviewers, so multi-step processes run reliably at scale.
+
+AI/ML ops on your infrastructure
+Serve, version and monitor models on your own hardware or private cloud. A model registry, GPU scheduling, open-weight model deployment, fine-tuning pipelines and evaluation runs keep your AI stack sovereign and under control.
+
+Spawn new applications
+Compose new AI apps from CogniBase knowledge sources, CogniAgents workflows and ready-made interface templates. What used to be a months-long project becomes a configurable build.
+
+Control and audit
+Central policies set which data, tools and actions each agent can use. Full audit trails, risk classification per use case and an instant kill switch support oversight under the EU AI Act and internal governance.
+
+The agent lifecycle
+Design. Define the workflow, data sources, tools and human checkpoints, starting from a CogniAgents template or from scratch.
+Approve. Risk owners review scope, data access and risk class before anything goes live.
+Deploy. Release to a schedule, an event trigger or an interface, with version control and rollback.
+Monitor. Track quality, cost, usage and KPIs continuously, with alerts on drift or failure.
+Improve. Evaluate changes against test sets, then promote new versions with a full record.
+Retire. Decommission agents cleanly, with their history preserved for audit.
+One platform, three layers
+
+CogniBase connects AI to your documents, data and systems with grounded, cited answers.
+CogniAgents deliver function-specific workflows with best practices built in.
+CogniOS governs, schedules, runs and scales them, and turns them into new applications.
+
+Start with any layer. CogniOS brings them together as your AI estate grows.
+
+Who it's for
+
+CIOs and CTOs get one view of every AI system in the organisation, with its cost and value.
+Risk and compliance teams get approvals, risk classification and audit trails in one place.
+AI and platform teams get model serving, scheduling and monitoring without stitching tools together.
+Business owners get faster delivery of new AI use cases, built on components that are already proven.
+
+Deployment options
+
+On-premises. Fully isolated, with models running on your own GPUs.
+Private cloud. Deployed into your own cloud tenant.
+Managed EU cloud. Operated for you in European regions.
+
+FAQ
+
+Do we need CogniBase and CogniAgents to use CogniOS? No. CogniOS can govern and monitor existing agents too, but it delivers the most value with the full Cogni stack.
+Which models can we run? Open-weight models on your own hardware, commercial models via API, or both, all managed in one registry.
+How does CogniOS support the EU AI Act? Through an agent inventory, risk classification, human oversight controls, logging and documentation for every use case. It supports your obligations rather than replacing your compliance process.
+What does "spawning an app" mean in practice? You combine a knowledge source, one or more agent workflows and an interface template into a new application, configured rather than coded from zero.
+
+Closing CTA
+
+Headline: Run AI like the rest of your enterprise.
+Body: Governed, measured, scheduled and on your own terms.
+CTA: Book a demo

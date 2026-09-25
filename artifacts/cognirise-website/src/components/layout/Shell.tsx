@@ -49,8 +49,8 @@ const pageMeta: Record<string, { title: string; description: string }> = {
     description: "Discover the platform architecture that connects enterprise knowledge, agents, integrations and human accountability.",
   },
   "/platforms/cognios": {
-    title: "CogniOS AI Platform | Cognirise",
-    description: "The operating system for governed intelligence.",
+    title: "CogniOS | The Operating System for Enterprise AI | Cognirise",
+    description: "CogniOS manages the full lifecycle of your agentic workflows, from design and approval to scheduling, monitoring and retirement.",
   },
   "/platforms/cognios/architecture": {
     title: "CogniOS Architecture | Cognirise",
