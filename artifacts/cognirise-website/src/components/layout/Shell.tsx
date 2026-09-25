@@ -61,8 +61,8 @@ const pageMeta: Record<string, { title: string; description: string }> = {
     description: "Turn complex financial statements and engineering drawings into structured, source-linked findings for human review.",
   },
   "/platforms/cogniagents": {
-    title: "CogniAgents | Cognirise",
-    description: "Governed agents that coordinate specialist tasks in defined operational environments.",
+    title: "CogniAgents | Agentic Workflows for Every Business Function | Cognirise",
+    description: "CogniAgents are function-specific AI workflows tailored to your business, with best practices, human oversight and grounded knowledge built in.",
   },
   "/platforms/cognibase": {
     title: "CogniBase | Enterprise Knowledge with Cited Answers | Cognirise",

@@ -1,0 +1,92 @@
+Hero
+
+Eyebrow: Products / CogniAgents
+Headline: Agentic workflows for every business function.
+Subhead: CogniAgents are ready-made AI workflows for finance, operations, customer service, sales, HR and IT. Each comes with proven best practices built in and is tailored to how your company actually works.
+CTAs: Explore the agents · Book a workshop
+
+Proof strip: Function-specific · Best practices built in · Human-in-the-loop · Runs on CogniBase · Sovereign deployment
+
+The problem
+
+Generic AI assistants answer questions, but they don't finish the work. Building agents from scratch takes months, and every team reinvents the same processes. Many pilots automate a broken process instead of a good one, and agents that act without oversight are a risk no compliance team will sign off on.
+
+CogniAgents start from a proven way of running each function, then adapt it to yours.
+
+What makes CogniAgents different
+
+Best practices, pre-built
+Each agent encodes how leading organisations run that function: the steps, the checks, the approvals and the KPIs. You start from a mature process, not a blank canvas.
+
+Tailored to your business
+Workflows, rules, approval thresholds, tone and terminology are configured to your policies. Agents adapt to your process instead of forcing you into theirs.
+
+Agents that act, not just answer
+CogniAgents read, decide and take action in your systems: they create tickets, update records, draft documents, route cases and trigger follow-ups.
+
+Human in the loop, by design
+You define exactly where people review, approve or override. Every decision is logged with its reasoning and the sources it used.
+
+Grounded in your knowledge
+Built on CogniBase, every agent works from your own documents, data and systems, with citations, so outcomes are explainable and auditable.
+
+Sovereign and secure
+Agents can be deployed in an EU cloud, in your own tenant or on premises, with open-weight models where required. Role-based permissions limit what each agent can see and do.
+
+Agents by function
+
+Finance
+Invoice intake and coding, three-way matching, expense review, collections follow-up, month-end close support and variance commentary.
+
+Customer Service
+Ticket triage and routing, grounded answer drafting, case summarisation, escalation handling and quality review of resolved cases.
+
+Sales
+Lead qualification, account research, personalised outreach drafting, CRM hygiene and conversational sales agents on web, WhatsApp and Telegram.
+
+Insurance & Claims
+First notice of loss intake, document checks, claim triage, fraud signals and handler assistance across the claim file.
+
+Operations & Manufacturing
+Predictive maintenance alerts, anomaly detection, SOP guidance for field and plant teams, and BOM-to-QA checks.
+
+IT & Network Operations
+Incident triage, runbook execution, change-request drafting and network monitoring agents inside Microsoft Teams.
+
+People & HR
+Policy Q&A, onboarding workflows, candidate screening against defined criteria and HR case handling.
+
+Risk & Compliance
+AML alert triage, KYC document review, regulatory change monitoring and audit evidence collection.
+
+Project & Portfolio Management
+Status reporting, risk and dependency tracking, meeting follow-ups and portfolio health summaries.
+
+How it works
+Discover. In a short workshop, we map the function, its current process and the outcome it needs.
+Configure. We start from the best-practice agent and tailor its rules, approvals, systems and language to your organisation.
+Pilot. The agent runs on a defined scope with human review, measured against agreed KPIs.
+Scale. Proven agents are rolled out across teams, and new functions are added from the same foundation.
+Built on CogniBase
+
+Every CogniAgent draws on CogniBase for grounded knowledge, system integration and audit logging. Your first agent sets up the foundation, and every agent after it deploys faster.
+
+Deployment options
+
+Managed EU cloud. Fastest start, hosted in European regions.
+Your cloud. Deployed into your own cloud tenant.
+On-premises. Fully isolated, with open-weight models on your own hardware.
+
+FAQ
+
+Are these off-the-shelf or custom? Both. Each agent starts from a best-practice template and is then tailored to your processes, systems and policies.
+Can agents take action in our systems? Yes, through CogniBase's integration layer, and always within permissions and approval rules you define.
+How do we keep control? Human checkpoints, role-based permissions and full decision logs are built into every workflow.
+How quickly can we start? A single-function pilot typically runs in weeks, starting with one process and clear KPIs.
+Do you support the EU AI Act? CogniAgents are designed with transparency, human oversight and logging, which support obligations under the EU AI Act.
+
+Closing CTA
+
+Headline: Start with one function. Prove it. Then scale.
+Body: Pick the process that costs your team the most time, and we'll show you what an agent can do with it.
+CTA: Book a workshop
