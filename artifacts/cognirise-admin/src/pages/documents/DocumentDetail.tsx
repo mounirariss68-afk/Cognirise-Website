@@ -408,6 +408,16 @@ export function PublicContextDisclosure({ document }: { document: PublicDisclosu
 type ContentNavigatorEntry = { label: string; path: string };
 
 function contentNavigatorEntries(kind: CmsDocumentKind, value: Record<string, unknown>): ContentNavigatorEntry[] {
+  if (kind === "platform" && value.pulsePage && typeof value.pulsePage === "object") {
+    const pulse = value.pulsePage as { sectionOrder?: string[] };
+    return [
+      { label: "Hero", path: "pulse:hero" },
+      { label: "Diagram", path: "pulse:diagram" },
+      { label: "Proof", path: "pulse:proof" },
+      ...(pulse.sectionOrder ?? []).map((id) => ({ label: id.replaceAll("-", " "), path: `pulse:section:${id}` })),
+      { label: "Closing", path: "pulse:closing" },
+    ];
+  }
   const collection = Array.isArray(value.sections) ? ["sections", value.sections]
     : Array.isArray(value.body) ? ["body", value.body]
       : Array.isArray(value.methodology) ? ["methodology", value.methodology]
@@ -3403,10 +3413,17 @@ export default function DocumentDetail() {
                        size="sm"
                        variant="ghost"
                        className="h-7 px-2 text-[11px]"
-                       onClick={() => focusReadinessTarget(
-                         entry.path === "document-title" ? entry.path : contentFieldId(entry.path),
-                         entry.path === "document-title" ? undefined : contentFieldId(`content.${entry.path.split(".")[1]}`),
-                       )}
+                       onClick={() => {
+                         if (entry.path.startsWith("pulse:")) {
+                           const [, part, section] = entry.path.split(":");
+                           document.querySelector<HTMLButtonElement>(`[data-testid="tab-pulse-${part === "section" ? "sections" : part}"]`)?.click();
+                           if (section) requestAnimationFrame(() => document.querySelector<HTMLButtonElement>(`[data-testid="button-pulse-section-${section}"]`)?.click());
+                           document.querySelector('[aria-label="Pulse page editor"]')?.scrollIntoView({ block: "start" });
+                         } else focusReadinessTarget(
+                           entry.path === "document-title" ? entry.path : contentFieldId(entry.path),
+                           entry.path === "document-title" ? undefined : contentFieldId(`content.${entry.path.split(".")[1]}`),
+                         );
+                       }}
                      >
                        {entry.label}
                      </Button>
@@ -3731,7 +3748,7 @@ export default function DocumentDetail() {
                   presentation="content"
               /></fieldset></OverridesContext.Provider></div></div>
             )}
-            {!sharedContextActive && doc.kind !== "industry" && <details className="rounded-md border bg-muted/20 p-4">
+            {!sharedContextActive && doc.kind !== "industry" && !(doc.kind === "platform" && content.pulsePage) && <details className="rounded-md border bg-muted/20 p-4">
               <summary className="cursor-pointer text-xs font-semibold uppercase tracking-wider">Advanced structured view (read only)</summary>
               <pre className="mt-4 max-h-96 overflow-auto whitespace-pre-wrap text-xs">{JSON.stringify(content, null, 2)}</pre>
             </details>}

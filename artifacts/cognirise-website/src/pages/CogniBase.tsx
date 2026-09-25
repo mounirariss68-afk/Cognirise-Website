@@ -1,81 +1,31 @@
-import { ArrowDown, ArrowRight, ArrowUpRight, Check, Database, FileText, LockKeyhole, Search, ShieldCheck } from "lucide-react";
+import { ArrowDown, ArrowRight, ArrowUpRight, Check, Database, FileText, Search, ShieldCheck } from "lucide-react";
 import { BrandButton } from "@/components/ui/brand-button";
-
-const capabilities = [
-  {
-    number: "01",
-    title: "Grounded answers with citations",
-    body: "Every answer links back to the passage, page or record it came from. If the answer isn't in your data, CogniBase says so instead of guessing.",
-    tag: "Evidence, not inference",
-  },
-  {
-    number: "02",
-    title: "Hybrid retrieval and reranking",
-    body: "Keyword and semantic search run together, and a reranking stage then promotes the most relevant evidence. The result is higher precision on the questions that matter: policy details, part numbers, contract clauses.",
-    tag: "Find the right passage",
-  },
-  {
-    number: "03",
-    title: "Documents and structured data in one place",
-    body: "Ask questions across PDFs, Word files and wikis, and query databases in plain language through text-to-SQL. One interface covers both unstructured and structured knowledge.",
-    tag: "One knowledge surface",
-  },
-  {
-    number: "04",
-    title: "Composable integration layer",
-    body: "Connectors and adapters bring CogniBase into Microsoft Teams, web chat, internal portals and workflow tools, so AI shows up where work already happens instead of in yet another app.",
-    tag: "In the flow of work",
-  },
-  {
-    number: "05",
-    title: "Sovereign by design",
-    body: "You can deploy on your own infrastructure or in an EU cloud region, with open-weight models where required. Your data, embeddings, logs and prompts stay under your control.",
-    tag: "Your boundary",
-  },
-  {
-    number: "06",
-    title: "Security and quality built in",
-    body: "Prompt-injection hardening, role-based access to sources and full audit logs are standard. Built-in evaluation measures answer accuracy against golden question sets before and after every change.",
-    tag: "Measured continuously",
-  },
-];
-
-const steps = [
-  { number: "01", title: "Connect", body: "Point CogniBase at your document stores, databases and systems." },
-  { number: "02", title: "Index", body: "Content is chunked, enriched with metadata and indexed for hybrid search, respecting existing access rights." },
-  { number: "03", title: "Ask", body: "Users ask questions in Teams, on the web or through an API." },
-  { number: "04", title: "Verify", body: "Answers arrive with citations, and quality is tracked continuously with evaluation reports." },
-];
-
-const teams = [
-  { title: "Customer Support", body: "Resolve tickets faster with answers drawn from manuals, FAQs and past cases." },
-  { title: "Legal & Compliance", body: "Search contracts and regulations with clause-level citations." },
-  { title: "Finance", body: "Query policies and financial data in plain language, including via text-to-SQL." },
-  { title: "People & HR", body: "Give employees instant, accurate answers on policies and benefits." },
-  { title: "Operations", body: "Put procedures, SOPs and technical documentation at the fingertips of field and plant teams." },
-  { title: "IT & Engineering", body: "Make runbooks, architecture decisions and internal docs searchable in one place." },
-];
-
-const deployments = [
-  { number: "01", title: "Managed EU cloud", body: "Fastest start, hosted in European regions.", detail: "Hosted in region" },
-  { number: "02", title: "Your cloud", body: "Deployed into your Azure, AWS or GCP tenant.", detail: "Your tenant" },
-  { number: "03", title: "On-premises", body: "Fully air-gapped with open-weight models on your own hardware.", detail: "Your hardware" },
-];
-
-const faqs = [
-  { question: "Which models does CogniBase use?", answer: "Commercial or open-weight models, depending on your sovereignty and cost requirements. You choose, and you can switch." },
-  { question: "Does it respect existing permissions?", answer: "Yes. Users only retrieve content they are already allowed to see." },
-  { question: "How long does a pilot take?", answer: "A focused proof of concept on one knowledge domain typically runs in weeks, not months." },
-  { question: "Can it take actions, not just answer questions?", answer: "Yes. Through the integration layer, CogniBase can feed agentic workflows that act in your systems." },
-];
+import { PulseHeading, PulseLinks } from "@/components/cms/PulseCopy";
+import { cognibasePulsePageDraft, type CogniBasePulsePage } from "@workspace/api-zod";
 
 function Kicker({ children }: { children: React.ReactNode }) {
   return <span className="cb-kicker"><span className="cb-kicker-line" aria-hidden="true" />{children}</span>;
 }
 
-export default function CogniBase() {
+export default function CogniBase({ page = cognibasePulsePageDraft, preview = false }: { page?: CogniBasePulsePage; preview?: boolean }) {
+  const sections = Object.fromEntries(page.sections.map(section => [section.id, section])) as Record<CogniBasePulsePage["sections"][number]["id"], CogniBasePulsePage["sections"][number]>;
+  const diagram = Object.fromEntries(page.diagram.labels.map(label => [label.id, label.text])) as Record<CogniBasePulsePage["diagram"]["labels"][number]["id"], string>;
+  const renderSection = (id: CogniBasePulsePage["sections"][number]["id"]) => {
+    const section = sections[id];
+    if (!section.visible) return null;
+    switch (id) {
+      case "problem": return <section className="cb-problem cb-frame" key={id} aria-labelledby="cb-problem-title"><div><Kicker>{section.eyebrow}</Kicker><h2 id="cb-problem-title" className="cb-display"><PulseHeading text={section.heading} /></h2></div><div className="cb-problem-copy"><p>{section.body}</p>{section.items.map((item, i) => <div key={i}><strong>{item.title}</strong>{item.body !== item.title && <p>{item.body}</p>}</div>)}<PulseLinks links={section.links} className="cb-text-link" /></div></section>;
+      case "capabilities": return <section className="cb-capabilities" key={id} aria-labelledby="cb-capabilities-title"><div className="cb-frame"><div className="cb-section-head"><div><Kicker>{section.eyebrow}</Kicker><h2 id="cb-capabilities-title" className="cb-display"><PulseHeading text={section.heading} /></h2></div><p className="cb-muted">{section.body}</p></div><div className="cb-cap-list">{section.items.map((item, i) => <article className="cb-cap" key={i}><span className="cb-cap-number">{item.label ? String(i + 1).padStart(2, "0") + " / " + String(section.items.length).padStart(2, "0") : String(i + 1).padStart(2, "0")}</span><h3>{item.title}</h3><p>{item.body}</p><span className="cb-cap-tag">{item.label}</span></article>)}</div><PulseLinks links={section.links} className="cb-text-link" /></div></section>;
+      case "how-it-works": return <section className="cb-how cb-frame" id="how-it-works" key={id} aria-labelledby="cb-how-title"><div className="cb-section-head"><div><Kicker>{section.eyebrow}</Kicker><h2 id="cb-how-title" className="cb-display"><PulseHeading text={section.heading} /></h2></div><p className="cb-muted">{section.body}</p></div><div className="cb-flow">{section.items.map((item, i) => <article className="cb-step" key={i}><span className="cb-step-node" aria-hidden="true" /><small>{item.label}</small><h3>{item.title}</h3><p>{item.body}</p></article>)}</div>{section.footer && <div className="cb-flow-note"><FileText size={16} aria-hidden="true" />{section.footer}</div>}<PulseLinks links={section.links} className="cb-text-link" /></section>;
+      case "teams": return <section className="cb-teams" key={id} aria-labelledby="cb-teams-title"><div className="cb-frame"><div className="cb-section-head"><div><Kicker>{section.eyebrow}</Kicker><h2 id="cb-teams-title" className="cb-display"><PulseHeading text={section.heading} /></h2></div><p className="cb-muted">{section.body}</p></div><div className="cb-team-list">{section.items.map((item, i) => <article className="cb-team" key={i}><ArrowUpRight aria-hidden="true" /><div>{item.label && <small>{item.label}</small>}<h3>{item.title}</h3><p>{item.body}</p>{item.detail && <small>{item.detail}</small>}</div></article>)}</div><PulseLinks links={section.links} className="cb-text-link" /></div></section>;
+      case "deployment": return <section className="cb-deploy cb-frame" key={id} aria-labelledby="cb-deploy-title"><div className="cb-section-head"><div><Kicker>{section.eyebrow}</Kicker><h2 id="cb-deploy-title" className="cb-display"><PulseHeading text={section.heading} /></h2></div><p className="cb-muted">{section.body}</p></div><div className="cb-deploy-list">{section.items.map((item, i) => <article className="cb-deploy-row" key={i}><span>{item.label}</span><h3>{item.title}</h3><p>{item.body}</p><small>{item.detail}</small></article>)}</div><PulseLinks links={section.links} className="cb-text-link" /></section>;
+      case "trust": return <section className="cb-trust" key={id} aria-labelledby="cb-trust-title"><div className="cb-trust-inner cb-frame"><div><Kicker>{section.eyebrow}</Kicker><h2 id="cb-trust-title" className="cb-display"><PulseHeading text={section.heading} /></h2><p>{section.body}</p><PulseLinks links={section.links} className="cb-text-link" /></div><div className="cb-trust-rail" aria-label={section.eyebrow}>{section.items.map((item, i) => <div key={i}><ShieldCheck size={18} aria-hidden="true" /><span>{item.title}{item.body !== item.title && <small className="block">{item.body}</small>}</span></div>)}</div></div></section>;
+      case "faq": return <section className="cb-faq cb-frame" key={id} aria-labelledby="cb-faq-title"><div><Kicker>{section.eyebrow}</Kicker><h2 id="cb-faq-title" className="cb-display"><PulseHeading text={section.heading} /></h2><p className="cb-faq-intro">{section.body}</p></div><div className="cb-faq-list">{section.items.map((item, i) => <article className="cb-faq-item" key={i} data-testid={`faq-cognibase-${i + 1}`}><span className="cb-faq-number">{item.label ?? String(i + 1).padStart(2, "0")}</span><div><h3>{item.title}</h3><p>{item.body}</p>{item.detail && <small>{item.detail}</small>}</div></article>)}<PulseLinks links={section.links} className="cb-text-link" /></div></section>;
+    }
+    return null;
+  };
   return (
-    <main className="cb-page">
+    <main className="cb-page" data-layout={page.layout} data-tone={page.tone} data-preview={preview ? "draft" : undefined}>
       <style>{`
         .cb-page{--cb-ink:#102957;--cb-deep:#071936;--cb-paper:#fdfcfb;--cb-lilac:#f2effb;--cb-blush:#faf0f0;--cb-mist:#eef1f6;--cb-line:#cbd3e1;--cb-violet:#7659df;--cb-pink:#db509e;--cb-coral:#ff775d;background:var(--cb-paper);color:var(--cb-ink);font-family:Inter,sans-serif;overflow:clip}
         .cb-page *{box-sizing:border-box}.cb-page :focus-visible{outline:3px solid var(--cb-coral);outline-offset:4px}
@@ -196,6 +146,10 @@ export default function CogniBase() {
         .cb-close h2{font-size:clamp(45px,6.3vw,94px);max-width:950px;margin:25px 0}
         .cb-close p{font-size:19px;line-height:1.6;color:#405777;margin:0 0 33px}
         .cb-close-bottom{margin-top:98px;border-top:1px solid var(--cb-ink);padding-top:18px;display:flex;justify-content:space-between;gap:20px;font-size:10px;letter-spacing:.13em;text-transform:uppercase;font-weight:700;color:#6e7290}
+        .cb-section-extras{padding-block:22px 32px;border-top:1px solid var(--cb-line);font-size:15px;line-height:1.6;color:#526786}.cb-section-extras strong{font-family:Comfortaa,sans-serif;color:var(--cb-ink)}.cb-section-extras p{margin:8px 0 0}
+        .cb-page[data-layout="compact"] .cb-problem,.cb-page[data-layout="compact"] .cb-how,.cb-page[data-layout="compact"] .cb-deploy,.cb-page[data-layout="compact"] .cb-faq{padding-top:75px;padding-bottom:78px}
+        .cb-page[data-layout="compact"] .cb-capabilities,.cb-page[data-layout="compact"] .cb-teams{padding-top:75px;padding-bottom:78px}
+        .cb-page[data-tone="operational"] .cb-kicker-line,.cb-page[data-tone="operational"] .cb-proof i{background:var(--cb-coral)}
         @media(max-width:1000px){.cb-cap{grid-template-columns:55px 1fr 1.15fr}.cb-cap-tag{display:none}.cb-deploy-row{grid-template-columns:55px 1fr 1fr}.cb-deploy-row small{display:none}.cb-system{padding:35px 25px;min-height:555px}.cb-hero-grid{gap:3vw}}
         @media(max-width:767px){
           .cb-frame{padding-left:24px;padding-right:24px}.cb-hero{padding-top:31px;padding-bottom:35px}.cb-hero-grid{display:block;min-height:0}.cb-hero-copy{padding:0 0 36px}.cb-hero h1{font-size:clamp(47px,11vw,69px);margin:25px 0}.cb-hero h1 em{display:inline}.cb-hero-copy>p{font-size:16px;margin-bottom:28px}.cb-hero-aside{margin-top:38px}.cb-system{min-height:0;padding:30px 24px 31px;margin:0 -24px;clip-path:polygon(7% 0,100% 0,100% 94%,93% 100%,0 100%,0 6%)}
@@ -216,158 +170,56 @@ export default function CogniBase() {
       `}</style>
 
       <section className="cb-hero cb-frame public-hero-shell" aria-labelledby="cb-title">
-        <Kicker>Products / CogniBase</Kicker>
+        <Kicker>{page.hero.eyebrow}</Kicker>
         <div className="cb-hero-grid">
           <div className="cb-hero-copy">
-            <h1 id="cb-title" className="cb-display">Enterprise knowledge, <em>answered with proof.</em></h1>
-            <p>CogniBase connects AI to your documents, databases and business systems, and returns grounded answers with the source cited. It runs in your cloud, on your premises, under your control.</p>
+            <h1 id="cb-title" className="cb-display"><PulseHeading text={page.hero.headline} /></h1>
+            <p>{page.hero.body}</p>
             <div className="cb-actions">
-              <BrandButton href="/contact" data-testid="link-cognibase-demo-hero">Book a demo</BrandButton>
-              <a href="#how-it-works" className="cb-text-link" data-testid="link-cognibase-how-it-works">See how it works <ArrowDown size={15} aria-hidden="true" /></a>
+              {page.hero.ctas[0] && <BrandButton href={page.hero.ctas[0].href} data-testid="link-cognibase-demo-hero">{page.hero.ctas[0].label}</BrandButton>}
+              {page.hero.ctas.slice(1).map((cta, index) => <a href={cta.href} key={index} className="cb-text-link" data-testid="link-cognibase-how-it-works">{cta.label} <ArrowDown size={15} aria-hidden="true" /></a>)}
             </div>
-            <div className="cb-hero-aside"><span aria-hidden="true" />Knowledge in. Evidence out.</div>
+            <div className="cb-hero-aside"><span aria-hidden="true" />{page.hero.footnote}</div>
           </div>
-          <div className="cb-system" role="img" aria-label="A question retrieves passages from controlled enterprise sources through hybrid search and reranking, producing an answer with source citations.">
-             <div className="cb-system-top"><span>CogniBase / Evidence route</span><span>Illustrative flow</span></div>
-            <div className="cb-system-query"><span>What does the policy actually say?</span><Search size={20} aria-hidden="true" /></div>
+          <div className="cb-system" role="img" aria-label={page.diagram.accessibleDescription}>
+             <div className="cb-system-top"><span>{diagram.topBrand}</span><span>{diagram.topCaption}</span></div>
+            <div className="cb-system-query"><span>{diagram.question}</span><Search size={20} aria-hidden="true" /></div>
             <div className="cb-system-middle">
               <div className="cb-source-stack">
-                 <div className="cb-source"><b>Policy / PDF</b><small>Page · passage</small></div>
-                 <div className="cb-source"><b>Internal wiki</b><small>Section · article</small></div>
-                 <div className="cb-source"><b>Records / SQL</b><small>Record · source</small></div>
+                  <div className="cb-source"><b>{diagram.sourcePolicy}</b><small>{diagram.sourcePolicyDetail}</small></div>
+                  <div className="cb-source"><b>{diagram.sourceWiki}</b><small>{diagram.sourceWikiDetail}</small></div>
+                  <div className="cb-source"><b>{diagram.sourceRecords}</b><small>{diagram.sourceRecordsDetail}</small></div>
               </div>
               <div className="cb-system-transfer"><ArrowRight size={22} aria-hidden="true" /></div>
               <div className="cb-retrieval">
-                <span className="cb-retrieval-label">Retrieve &amp; rerank</span>
-                <div><Search size={13} aria-hidden="true" /> Keyword <span /></div>
-                <div><Database size={13} aria-hidden="true" /> Semantic <span /></div>
-                <div><Check size={13} aria-hidden="true" /> Relevant evidence <span /></div>
+                <span className="cb-retrieval-label">{diagram.retrieval}</span>
+                <div><Search size={13} aria-hidden="true" /> {diagram.keyword} <span /></div>
+                <div><Database size={13} aria-hidden="true" /> {diagram.semantic} <span /></div>
+                <div><Check size={13} aria-hidden="true" /> {diagram.relevantEvidence} <span /></div>
               </div>
             </div>
             <div className="cb-system-down"><ArrowDown size={17} aria-hidden="true" /></div>
             <div className="cb-answer">
-              <div className="cb-answer-head"><span>Grounded answer</span><span><ShieldCheck size={13} aria-hidden="true" /> Source linked</span></div>
-              <p>An answer you can trace back to the exact passage, page or record.</p>
-               <div className="cb-citation"><span>↗ Policy · page</span><span>↗ Wiki · section</span></div>
+              <div className="cb-answer-head"><span>{diagram.answerTitle}</span><span><ShieldCheck size={13} aria-hidden="true" /> {diagram.sourceLinked}</span></div>
+              <p>{diagram.answer}</p>
+                <div className="cb-citation"><span>{diagram.citationPolicy}</span><span>{diagram.citationWiki}</span></div>
             </div>
-            <div className="cb-system-foot"><span>Access rights preserved</span><span>Not in the data? No guess.</span></div>
+            <div className="cb-system-foot"><span>{diagram.accessRights}</span><span>{diagram.noGuess}</span></div>
           </div>
         </div>
         <div className="cb-proof" aria-label="CogniBase at a glance">
-          {["Cited answers", "Hybrid retrieval", "Self-hostable", "EU data residency", "Teams-native"].map(item => <span key={item}><i aria-hidden="true" />{item}</span>)}
+          {page.proofItems.map((item, index) => <span key={index}><i aria-hidden="true" />{item}</span>)}
         </div>
       </section>
-
-      <section className="cb-problem cb-frame" aria-labelledby="cb-problem-title">
-        <div><Kicker>The problem</Kicker><h2 id="cb-problem-title" className="cb-display">A plausible answer is <em>not enough.</em></h2></div>
-        <div className="cb-problem-copy">
-          <p>Most enterprise AI pilots stall for the same three reasons. Answers can't be traced back to a source, so nobody trusts them. The knowledge they need is scattered across SharePoint, ERP, CRM, wikis and databases. And data can't leave the building, which rules out most off-the-shelf tools.</p>
-          <strong>CogniBase is built for exactly these constraints.</strong>
-        </div>
-      </section>
-
-      <section className="cb-capabilities" aria-labelledby="cb-capabilities-title">
-        <div className="cb-frame">
-          <div className="cb-section-head">
-            <div><Kicker>Core capabilities</Kicker><h2 id="cb-capabilities-title" className="cb-display">From scattered sources to <em>defensible answers.</em></h2></div>
-            <p className="cb-muted">Retrieval, integration, sovereignty and evaluation are designed as parts of the same knowledge system.</p>
-          </div>
-          <div className="cb-cap-list">
-            {capabilities.map(item => (
-              <article className="cb-cap" key={item.number}>
-                <span className="cb-cap-number">{item.number} / 06</span>
-                <h3>{item.title}</h3>
-                <p>{item.body}</p>
-                <span className="cb-cap-tag">{item.tag}</span>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="cb-how cb-frame" id="how-it-works" aria-labelledby="cb-how-title">
-        <div className="cb-section-head">
-          <div><Kicker>How it works</Kicker><h2 id="cb-how-title" className="cb-display">A clear path from source to <em>answer.</em></h2></div>
-          <p className="cb-muted">Every step keeps the evidence and its boundaries in view.</p>
-        </div>
-        <div className="cb-flow">
-          {steps.map(step => (
-            <article className="cb-step" key={step.number}>
-              <span className="cb-step-node" aria-hidden="true" />
-              <small>{step.number} / 04</small>
-              <h3>{step.title}</h3>
-              <p>{step.body}</p>
-            </article>
-          ))}
-        </div>
-        <div className="cb-flow-note"><FileText size={16} aria-hidden="true" /> The answer keeps its route back to the evidence.</div>
-      </section>
-
-      <section className="cb-teams" aria-labelledby="cb-teams-title">
-        <div className="cb-frame">
-          <div className="cb-section-head">
-            <div><Kicker>Built for every team</Kicker><h2 id="cb-teams-title" className="cb-display">One knowledge layer. <em>Many ways to work.</em></h2></div>
-            <p className="cb-muted">Different questions, same standard of traceability.</p>
-          </div>
-          <div className="cb-team-list">
-            {teams.map(team => (
-              <article className="cb-team" key={team.title}>
-                <ArrowUpRight aria-hidden="true" />
-                <div><h3>{team.title}</h3><p>{team.body}</p></div>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="cb-deploy cb-frame" aria-labelledby="cb-deploy-title">
-        <div className="cb-section-head">
-          <div><Kicker>Deployment options</Kicker><h2 id="cb-deploy-title" className="cb-display">Your environment sets <em>the boundary.</em></h2></div>
-          <p className="cb-muted">Choose the operating model that fits your infrastructure and sovereignty requirements.</p>
-        </div>
-        <div className="cb-deploy-list">
-          {deployments.map(option => (
-            <article className="cb-deploy-row" key={option.number}>
-              <span>{option.number} / 03</span><h3>{option.title}</h3><p>{option.body}</p><small>{option.detail}</small>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="cb-trust" aria-labelledby="cb-trust-title">
-        <div className="cb-trust-inner cb-frame">
-          <div>
-            <Kicker>Trust and compliance</Kicker>
-            <h2 id="cb-trust-title" className="cb-display">Control is part of the <em>architecture.</em></h2>
-            <p>CogniBase is designed for regulated industries. It keeps data in the region you choose, gives you traceability for every answer, logs every query for audit, and uses architecture patterns that support GDPR and EU AI Act obligations.</p>
-          </div>
-          <div className="cb-trust-rail" aria-label="Trust principles">
-            <div><LockKeyhole size={18} aria-hidden="true" /> Data in the region you choose</div>
-            <div><FileText size={18} aria-hidden="true" /> Traceability for every answer</div>
-            <div><ShieldCheck size={18} aria-hidden="true" /> Every query logged for audit</div>
-          </div>
-        </div>
-      </section>
-
-      <section className="cb-faq cb-frame" aria-labelledby="cb-faq-title">
-        <div><Kicker>FAQ</Kicker><h2 id="cb-faq-title" className="cb-display">The practical questions.</h2><p className="cb-faq-intro">The details that matter before you put knowledge into production.</p></div>
-        <div className="cb-faq-list">
-           {faqs.map((item, index) => (
-             <article className="cb-faq-item" key={item.question} data-testid={`faq-cognibase-${index + 1}`}>
-               <span className="cb-faq-number">{String(index + 1).padStart(2, "0")}</span>
-               <div><h3>{item.question}</h3><p>{item.answer}</p></div>
-             </article>
-           ))}
-        </div>
-      </section>
+      {page.sectionOrder.map(id => sections[id].visible && <div className="cb-section-slot" key={id}>{renderSection(id)}{(sections[id].highlightedText || (id !== "how-it-works" && sections[id].footer)) && <aside className="cb-frame cb-section-extras">{sections[id].highlightedText && <strong>{sections[id].highlightedText}</strong>}{id !== "how-it-works" && sections[id].footer && <p>{sections[id].footer}</p>}</aside>}</div>)}
 
       <section className="cb-close" aria-labelledby="cb-close-title">
         <div className="cb-close-inner cb-frame">
-          <Kicker>Start with evidence</Kicker>
-          <h2 id="cb-close-title" className="cb-display">Put your enterprise knowledge <em>to work.</em></h2>
-          <p>Start with one team and one knowledge domain, then measure the results.</p>
-          <BrandButton href="/contact" data-testid="link-cognibase-demo-closing">Book a demo</BrandButton>
-          <div className="cb-close-bottom"><span>CogniBase / Cognirise</span><span>Answers you can account for <ArrowRight size={12} aria-hidden="true" style={{display:"inline-block",verticalAlign:"middle",marginLeft:5}} /></span></div>
+          <Kicker>{page.closing.eyebrow}</Kicker>
+          <h2 id="cb-close-title" className="cb-display"><PulseHeading text={page.closing.heading} /></h2>
+          <p>{page.closing.body}</p>
+          <BrandButton href={page.closing.cta.href} data-testid="link-cognibase-demo-closing">{page.closing.cta.label}</BrandButton>
+          <div className="cb-close-bottom"><span>{page.closing.footerLeft}</span><span>{page.closing.footerRight} <ArrowRight size={12} aria-hidden="true" style={{display:"inline-block",verticalAlign:"middle",marginLeft:5}} /></span></div>
         </div>
       </section>
     </main>

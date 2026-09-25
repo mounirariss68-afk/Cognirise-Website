@@ -167,13 +167,186 @@ export const officeContentSchema = z.object({
   ...governance,
 }).strict();
 
-export const platformContentSchema = z.object({
+const pulseCognibaseSectionIds = [
+  "problem", "capabilities", "how-it-works", "teams", "deployment", "trust", "faq",
+] as const;
+const pulseCogniagentsSectionIds = [
+  "problem", "differences", "functions", "how-it-works", "foundation", "deployment", "faq",
+] as const;
+
+const pulseCtaSchema = z.object({
+  label: z.string().trim().min(1).max(120).refine((value) => !/[<>]/.test(value), "HTML is not allowed in Pulse copy."),
+  href: z.union([safeLink, z.string().regex(/^#[a-z0-9_-]+$/i, "Use a safe in-page anchor.")]),
+}).strict();
+
+const pulseText = (max: number) => z.string().trim().min(1).max(max)
+  .refine((value) => !/[<>]/.test(value), "HTML is not allowed in Pulse copy.");
+
+const pulsePageItemSchema = z.object({
+  title: pulseText(240),
+  body: pulseText(8_000),
+  label: pulseText(240).optional(),
+  detail: pulseText(1_000).optional(),
+}).strict();
+
+const pulseSectionSchema = <T extends readonly [string, ...string[]]>(ids: T) => z.object({
+  id: z.enum(ids as unknown as [string, ...string[]]),
+  visible: z.boolean().default(true),
+  eyebrow: pulseText(160),
+  heading: pulseText(500),
+  body: pulseText(8_000),
+  highlightedText: pulseText(2_000).optional(),
+  items: z.array(pulsePageItemSchema).min(1).max(30),
+  footer: pulseText(1_000).optional(),
+  links: z.array(pulseCtaSchema).max(4).default([]),
+}).strict();
+
+function createPulsePageSchema<const V extends "cognibase-pulse" | "cogniagents-pulse", const T extends readonly [string, ...string[]], const D extends readonly [string, ...string[]]>(
+  variant: V,
+  sectionIds: T,
+  diagramLabelIds: D,
+) {
+  const sectionSchema = pulseSectionSchema(sectionIds);
+  const diagramLabelIdSchema = z.enum(diagramLabelIds as unknown as [string, ...string[]]);
+  const sectionIdSchema = z.enum(sectionIds as unknown as [string, ...string[]]);
+  const baseSchema = z.object({
+    variant: z.literal(variant),
+    layout: z.enum(["editorial", "compact"]).default("editorial"),
+    tone: z.enum(["evidence-led", "operational"]).default("evidence-led"),
+    hero: z.object({
+      eyebrow: pulseText(160),
+      headline: pulseText(500),
+      body: pulseText(8_000),
+      ctas: z.array(pulseCtaSchema).min(1).max(2),
+      footnote: pulseText(500),
+    }).strict(),
+    diagram: z.object({
+      accessibleDescription: pulseText(2_000),
+      labels: z.array(z.object({
+        id: diagramLabelIdSchema,
+        text: pulseText(500),
+      }).strict()).max(40),
+    }).strict(),
+    proofItems: z.array(pulseText(240)).min(3).max(8),
+    sections: z.array(sectionSchema).min(sectionIds.length).max(sectionIds.length),
+    sectionOrder: z.array(sectionIdSchema).length(sectionIds.length),
+    closing: z.object({
+      eyebrow: pulseText(160),
+      heading: pulseText(500),
+      body: pulseText(8_000),
+      cta: pulseCtaSchema,
+      footerLeft: pulseText(500),
+      footerRight: pulseText(500),
+    }).strict(),
+  }).strict();
+  const completeSchema = baseSchema.superRefine((page, context) => {
+    const sectionIdsReceived = page.sections.map((section) => section.id);
+    if (new Set(sectionIdsReceived).size !== sectionIdsReceived.length) {
+      context.addIssue({ code: "custom", path: ["sections"], message: "Pulse section IDs must be unique." });
+    }
+    if (sectionIds.some((id) => !sectionIdsReceived.includes(id))) {
+      context.addIssue({ code: "custom", path: ["sections"], message: "Every template section must be present." });
+    }
+    if (new Set(page.sectionOrder).size !== page.sectionOrder.length) {
+      context.addIssue({ code: "custom", path: ["sectionOrder"], message: "Pulse section order IDs must be unique." });
+    }
+    if (sectionIds.some((id) => !page.sectionOrder.includes(id))) {
+      context.addIssue({ code: "custom", path: ["sectionOrder"], message: "Section order must include every template section exactly once." });
+    }
+    const diagramIds = page.diagram.labels.map((item) => item.id);
+    if (new Set(diagramIds).size !== diagramIds.length) {
+      context.addIssue({ code: "custom", path: ["diagram", "labels"], message: "Diagram label IDs must be unique." });
+    }
+    if (diagramLabelIds.some((id) => !diagramIds.includes(id))) {
+      context.addIssue({ code: "custom", path: ["diagram", "labels"], message: "Every template diagram label must be present." });
+    }
+    pulseAnchorIssues(page, true).forEach((issue) => {
+      context.addIssue({ code: "custom", path: issue.path, message: issue.message });
+    });
+  });
+  return { baseSchema, completeSchema };
+}
+
+const cognibasePulsePageSchemas = createPulsePageSchema("cognibase-pulse", pulseCognibaseSectionIds, [
+  "topBrand", "topCaption", "question", "sourcePolicy", "sourcePolicyDetail", "sourceWiki",
+  "sourceWikiDetail", "sourceRecords", "sourceRecordsDetail", "retrieval", "keyword",
+  "semantic", "relevantEvidence", "answerTitle", "sourceLinked", "answer", "citationPolicy",
+  "citationWiki", "accessRights", "noGuess",
+] as const);
+const cogniagentsPulsePageSchemas = createPulsePageSchema("cogniagents-pulse", pulseCogniagentsSectionIds, [
+  "topBrand", "topCaption", "title", "intake", "prepare", "humanCheckpoint", "humanReview",
+  "act", "permissions", "decisionLogged", "intakeStep", "prepareStep", "actStep",
+] as const);
+export const cognibasePulsePageSchema = cognibasePulsePageSchemas.completeSchema;
+export const cogniagentsPulsePageSchema = cogniagentsPulsePageSchemas.completeSchema;
+const pulsePageDraftSchema = z.union([
+  cognibasePulsePageSchemas.baseSchema.deepPartial(),
+  cogniagentsPulsePageSchemas.baseSchema.deepPartial(),
+]);
+export const pulsePageSchema = z.union([
+  cognibasePulsePageSchema,
+  cogniagentsPulsePageSchema,
+]);
+
+type PulseAnchorValidationInput = {
+  variant?: string;
+  hero?: { ctas?: { href?: string }[] };
+  sections?: { id?: string; visible?: boolean; links?: { href?: string }[] }[];
+  closing?: { cta?: { href?: string } };
+};
+
+function pulseAnchorIssues(page: PulseAnchorValidationInput, requireSectionPresence: boolean) {
+  const anchorTargets = page.variant === "cognibase-pulse"
+    ? { "how-it-works": "how-it-works" }
+    : page.variant === "cogniagents-pulse"
+      ? { "agents-by-function": "functions" }
+      : {};
+  const links = [
+    ...(page.hero?.ctas ?? []),
+    ...(page.sections ?? []).flatMap((section) => section.links ?? []),
+    ...(page.closing?.cta ? [page.closing.cta] : []),
+  ];
+  const errors: { path: (string | number)[]; message: string }[] = [];
+  for (const [linkIndex, link] of links.entries()) {
+    if (!link.href?.startsWith("#")) continue;
+    const anchor = link.href.slice(1);
+    const sectionId = anchorTargets[anchor as keyof typeof anchorTargets];
+    if (!sectionId) {
+      errors.push({
+        path: ["links", linkIndex, "href"],
+        message: `Pulse link "${link.href}" does not target an approved page section anchor.`,
+      });
+      continue;
+    }
+    const target = page.sections?.find((section) => section.id === sectionId);
+    if (target?.visible === false) {
+      errors.push({
+        path: ["links", linkIndex, "href"],
+        message: `Pulse link "${link.href}" targets a hidden section.`,
+      });
+    } else if (requireSectionPresence && !target) {
+      errors.push({
+        path: ["links", linkIndex, "href"],
+        message: `Pulse link "${link.href}" targets an absent section.`,
+      });
+    } else if (!requireSectionPresence && page.sections && !target) {
+      errors.push({
+        path: ["links", linkIndex, "href"],
+        message: `Pulse link "${link.href}" targets an absent section.`,
+      });
+    }
+  }
+  return errors;
+}
+
+const platformContentBaseSchema = z.object({
   schemaVersion: z.literal(CMS_CONTRACT_VERSION).default(CMS_CONTRACT_VERSION),
   category: z.string().trim().min(1).max(160),
   summary: z.string().trim().min(1).max(2_000),
   heroMedia: optionalMediaReference,
   heroMediaId: legacyMediaId,
-  template: z.enum(["standard", "cognios-specialist"]).default("standard"),
+  template: z.enum(["standard", "cognios-specialist", "cognibase-pulse", "cogniagents-pulse"]).default("standard"),
+  pulsePage: pulsePageSchema.optional(),
   sections: z.array(z.object({
     heading: z.string().trim().min(1).max(240),
     body: z.array(cmsRichBlockSchema).max(50),
@@ -183,6 +356,31 @@ export const platformContentSchema = z.object({
   cta: z.object({ label: z.string().trim().min(1).max(120), href: safeLink }).strict().optional(),
   ...governance,
 }).strict();
+
+export const platformContentSchema = platformContentBaseSchema.superRefine((content, context) => {
+  const pulseTemplate = content.template === "cognibase-pulse" || content.template === "cogniagents-pulse";
+  if (pulseTemplate && !content.pulsePage) {
+    context.addIssue({ code: "custom", path: ["pulsePage"], message: "Pulse page content is required for this template." });
+  } else if (!pulseTemplate && content.pulsePage) {
+    context.addIssue({ code: "custom", path: ["pulsePage"], message: "Pulse page content is only valid for a Pulse template." });
+  } else if (content.pulsePage && content.pulsePage.variant !== content.template) {
+    context.addIssue({ code: "custom", path: ["pulsePage", "variant"], message: "Pulse page variant must match the platform template." });
+  }
+});
+const platformContentDraftSchema = platformContentBaseSchema
+  .omit({ pulsePage: true })
+  .deepPartial()
+  .extend({ pulsePage: pulsePageDraftSchema.optional() })
+  .superRefine((content, context) => {
+    if (content.pulsePage?.variant && content.template && content.pulsePage.variant !== content.template) {
+      context.addIssue({ code: "custom", path: ["pulsePage", "variant"], message: "Pulse page variant must match the platform template." });
+    }
+    if (content.pulsePage?.variant) {
+      pulseAnchorIssues(content.pulsePage, false).forEach((issue) => {
+        context.addIssue({ code: "custom", path: ["pulsePage", ...issue.path], message: issue.message });
+      });
+    }
+  });
 
 export const publicationContentSchema = z.object({
   schemaVersion: z.literal(CMS_CONTRACT_VERSION).default(CMS_CONTRACT_VERSION),
@@ -1331,6 +1529,9 @@ export const cmsContentSchemas = {
 export type PersonContent = z.infer<typeof personContentSchema>;
 export type PartnerContent = z.infer<typeof partnerContentSchema>;
 export type PlatformContent = z.infer<typeof platformContentSchema>;
+export type PulsePagePayload = z.infer<typeof pulsePageSchema>;
+export type CogniBasePulsePage = z.infer<typeof cognibasePulsePageSchema>;
+export type CogniAgentsPulsePage = z.infer<typeof cogniagentsPulsePageSchema>;
 export type PublicationContent = z.infer<typeof publicationContentSchema>;
 export type CaseStudyContent = z.infer<typeof caseStudyContentSchema>;
 export type IndustryContent = z.infer<typeof industryContentSchema>;
@@ -1665,6 +1866,8 @@ export function validateCmsContent(kind: CmsDocumentKind, input: unknown, mode: 
     : null;
   const schema = mode === "draft" && kind === "framework"
     ? frameworkDraftSchema!
+    : mode === "draft" && kind === "platform"
+    ? platformContentDraftSchema
     : mode === "draft" && kind === "landing-page"
     ? cmsLandingPageContentBaseSchema.deepPartial()
     : mode === "draft" && kind === "site-configuration"
@@ -1741,6 +1944,28 @@ function validateCmsSnapshotStructure(
   }
   const content = validateCmsContent(kind, snapshot.data.content, mode);
   if (!content.success) return content;
+  if (kind === "platform") {
+    const platform = content.data as PlatformContent;
+    const canonicalSlug = platform.template === "cognibase-pulse"
+      ? "cognibase"
+      : platform.template === "cogniagents-pulse"
+        ? "cogniagents"
+        : undefined;
+    if (canonicalSlug && snapshot.data.slug !== canonicalSlug) {
+      const message = `The ${platform.template} template must use the canonical slug "${canonicalSlug}".`;
+      return {
+        success: false as const,
+        errors: [message],
+        issues: [{
+          code: validationCode(kind, mode, "slug", "canonical-pulse-slug"),
+          path: "slug",
+          message,
+          scope: mode,
+          action: "focus-content-field" as const,
+        }],
+      };
+    }
+  }
   if (mode === "publish" && kind === "case-study") {
     const caseStudy = content.data as CaseStudyContent;
     if (caseStudy.variant === "summary" && !snapshot.data.summary?.trim()) {

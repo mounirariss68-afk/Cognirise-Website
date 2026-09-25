@@ -4,6 +4,7 @@ import { cmsRequestIsUnavailable, contentRecord, resolveCmsMedia, useCmsEntry } 
 import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
 import { PlatformPresentation } from "@/components/cms/PublicCmsPresentations";
 import { ServiceError } from "@/components/error-boundary";
+import { PulsePlatformPresentation, pulsePlatformVariant } from "@/components/cms/pulse-platform";
 
 export default function PlatformDetail() {
   const [match, params] = useRoute("/platforms/:slug");
@@ -22,7 +23,8 @@ export default function PlatformDetail() {
   if (query.isError && cmsRequestIsUnavailable(query.error)) {
     return <ServiceError onRetry={() => { void query.refetch(); }} />;
   }
-  if (!query.isPending && (!record || record.template !== "standard")) return <NotFound />;
+  if (!query.isPending && (!record || (record.template !== "standard" && !pulsePlatformVariant(slug, record)))) return <NotFound />;
   if (!record || !query.data) return null;
+  if (pulsePlatformVariant(slug, record)) return <PulsePlatformPresentation slug={slug} content={record} />;
   return <PlatformPresentation title={query.data.title} content={record} summary={record.summary} heroMedia={hero} />;
 }

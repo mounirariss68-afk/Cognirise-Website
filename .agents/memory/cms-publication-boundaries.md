@@ -43,6 +43,14 @@ Build partial navigation or availability releases by overlaying reviewed changes
 
 **How to apply:** Lock the live snapshot, overlay only the current reviewed changes, validate the complete resulting policy, and publish it atomically. Unreviewed drafts must never enter the replacement snapshot.
 
+## Bespoke page cutovers
+
+When a bespoke compiled page becomes CMS-governed, require one complete, typed page payload to drive the protected preview and public rendering alike. Validate template identity, visible destinations, and that every editor-controlled field has a visible result; do not substitute a generic preview or call a draft a release.
+
+**Why:** A generic platform record can silently replace an approved composition, while a reassuring preview can conceal missing content. Publishing code does not transfer development drafts into the separate production content store or supply independent editorial approval.
+
+**How to apply:** Deploy renderer support before authorizing its content release; have accountable editors review the exact revision in each environment and publish through the governed release flow. Keep draft import provenance distinct from review and publication authority.
+
 ## Retiring a landing without deleting its history
 
 Prefer explicit delivery-time retirement over mutating historical publication state when a route is removed but editorial history and shared assets must remain.

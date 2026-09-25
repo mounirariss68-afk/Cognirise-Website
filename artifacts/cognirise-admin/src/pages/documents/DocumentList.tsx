@@ -38,6 +38,7 @@ import { initialCmsContent, validateCmsContent } from "@workspace/api-zod";
 import { CONTENT_GUIDANCE, collectContentMediaIds } from "./authoring";
 import { ContentEditor } from "./ContentEditor";
 import { normalizeCmsDraftContent } from "./draft-save";
+import { hasAuthoredPlatformContent, pulseCreationContent, pulseTemplateForSlug } from "./pulse-authoring";
 import {
   canAccessContent,
   marketsForContentCapability,
@@ -71,6 +72,7 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
   const [readiness, setReadiness] = useState<SharedEditionReadiness | undefined>();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [slugWasEdited, setSlugWasEdited] = useState(false);
+  const [createContentTouched, setCreateContentTouched] = useState(false);
   const [createContent, setCreateContent] = useState<Record<string, any>>(
     () => normalizeCmsDraftContent(kind, initialCmsContent(kind) as Record<string, unknown>),
   );
@@ -145,6 +147,7 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
 
   useEffect(() => {
     setCreateContent(normalizeCmsDraftContent(kind, initialCmsContent(kind) as Record<string, unknown>));
+    setCreateContentTouched(false);
   }, [kind]);
 
   useEffect(() => {
@@ -223,6 +226,7 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
         setIsCreateOpen(false);
         form.reset({ title: "", slug: "", markets: primaryMarket ? [primaryMarket.code] : [], locale: primaryMarket?.defaultLocale || "en", address: "", phone: "" });
         setSlugWasEdited(false);
+        setCreateContentTouched(false);
         setCreateContent(normalizeCmsDraftContent(kind, initialCmsContent(kind) as Record<string, unknown>));
 
         // Neutral source editing is administrator-only. Restricted creators
@@ -480,6 +484,7 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
           if (!open && !createDocument.isPending) {
             form.reset({ title: "", slug: "", markets: primaryMarket ? [primaryMarket.code] : [], locale: primaryMarket?.defaultLocale || "en", address: "", phone: "" });
             setSlugWasEdited(false);
+            setCreateContentTouched(false);
             setCreateContent(normalizeCmsDraftContent(kind, initialCmsContent(kind) as Record<string, unknown>));
           }
         }}
@@ -522,6 +527,17 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
                 )}
               />
 
+               {kind === "platform" && <FormField control={form.control} name="slug" render={({ field }) => (
+                 <FormItem><FormLabel className="font-mono text-xs uppercase tracking-wider">URL slug · choose before writing</FormLabel><FormControl><Input {...field} placeholder="cognibase or cogniagents" className="font-mono text-sm" onChange={(event) => {
+                   setSlugWasEdited(true);
+                   field.onChange(event);
+                   if (!createContentTouched) {
+                     const initial = normalizeCmsDraftContent(kind, initialCmsContent(kind) as Record<string, unknown>);
+                     setCreateContent(pulseCreationContent(kind, event.target.value, initial));
+                   }
+                 }} /></FormControl><FormMessage /></FormItem>
+               )} />}
+
               {kind !== "office" && kind !== "person" && (
                 <div className="border-t pt-4">
                   <div className="mb-3 flex items-center justify-between gap-3">
@@ -534,16 +550,26 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
                         : `${createContentValidation.errors.length} issue${createContentValidation.errors.length === 1 ? "" : "s"} remaining`}
                     </Badge>
                   </div>
-                  <ContentEditor
+                   {kind === "platform" && pulseTemplateForSlug(form.watch("slug")) && (
+                     <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/25 bg-primary/5 p-3 text-xs">
+                       <p>Owner-supplied {form.watch("slug") === "cognibase" ? "CogniBase" : "CogniAgents"} Pulse draft · all page fields are editable below. Creating saves a draft only.</p>
+                       {createContent.template !== pulseTemplateForSlug(form.watch("slug")) && <Button type="button" variant="outline" size="sm" onClick={() => {
+                         if (hasAuthoredPlatformContent(createContent) && !window.confirm("Replace your current creation form with the full owner-supplied Pulse draft?")) return;
+                         setCreateContent(pulseCreationContent(kind, form.getValues("slug"), createContent));
+                         setCreateContentTouched(false);
+                       }}>Load full page draft</Button>}
+                     </div>
+                   )}
+                   <ContentEditor
                     kind={kind}
                     value={createContent}
-                    onChange={setCreateContent}
+                     onChange={(next) => { setCreateContent(next); setCreateContentTouched(true); }}
                     errors={createContentValidation.success ? [] : createContentValidation.errors}
                   />
                 </div>
               )}
               
-              <FormField
+               {kind !== "platform" && <FormField
                 control={form.control}
                 name="slug"
                 render={({ field }) => (
@@ -563,7 +589,7 @@ export default function DocumentList({ kind }: { kind: DocumentKind }) {
                     <FormMessage />
                   </FormItem>
                 )}
-              />
+              />}
 
               {kind === "office" && <>
                 <FormField

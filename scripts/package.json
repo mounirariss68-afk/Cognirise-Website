@@ -26,6 +26,7 @@
     "cms:setup-public-sector-postmerge": "tsx ./src/cms/public-sector-editions.ts --apply-db --target=development --write --report-conflict",
     "cms:media-staging-janitor": "tsx ./src/cms/media-staging-janitor-cli.ts",
     "cms:verify-public-sector-editions": "tsx ./src/cms/public-sector-editions-verify.ts",
+    "cms:stage-pulse-platform-drafts": "tsx ./src/cms/pulse-platform-draft-staging-cli.ts",
     "cms:verify-banking-publication": "tsx ./src/cms/banking-publication-verify.ts",
     "cms:publish-industry-images": "tsx ./src/cms/industry-cutover.ts",
     "cms:publish-education-hero": "tsx ./src/cms/industry-cutover.ts --slug=education",

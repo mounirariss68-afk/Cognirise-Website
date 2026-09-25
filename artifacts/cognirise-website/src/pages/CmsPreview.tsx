@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useRoute } from "wouter";
+import { PulsePlatformPresentation, platformPreviewPresentation } from "@/components/cms/pulse-platform";
 import {
   type CaseStudyContent,
   type CmsDocumentKind,
@@ -427,10 +428,16 @@ function DraftPreviewContent({ preview, warnings }: { preview: Preview; warnings
       capabilities: Array.isArray(content.capabilities) ? content.capabilities : [],
       differentiators: Array.isArray(content.differentiators) ? content.differentiators : [],
     } as PlatformContent;
+    const slug = typeof preview.document.slug === "string" ? preview.document.slug : "";
+    const presentation = platformPreviewPresentation(slug, platform);
     return (
       <>
         <PreviewWarningPanel warnings={warnings} missingMedia={missingMedia} />
-        <PlatformPresentation
+        {presentation === "invalid-pulse"
+          ? <ProtectedPreviewError error={{ kind: "invalid-response", message: "This Pulse platform preview is unavailable: its template, canonical slug, and complete page content must agree. The saved draft has not been replaced with generic platform content." }} />
+          : presentation !== "standard"
+          ? <PulsePlatformPresentation slug={slug} content={platform} preview />
+          : <PlatformPresentation
           title={typeof preview.document.title === "string" ? preview.document.title : "Untitled platform"}
           content={platform}
            // Kept for public/card parity metadata; preview presentation uses
@@ -439,6 +446,7 @@ function DraftPreviewContent({ preview, warnings }: { preview: Preview; warnings
           heroMedia={resolvePinnedCmsMedia(media, platform.heroMedia)}
           preview
         />
+        }
       </>
     );
   }

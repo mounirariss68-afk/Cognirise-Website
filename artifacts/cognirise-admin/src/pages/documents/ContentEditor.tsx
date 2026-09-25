@@ -4,6 +4,7 @@ import {
   type MethodologySlot,
 } from "@workspace/api-zod";
 import type { ReactNode } from "react";
+import { useState } from "react";
 import { belongsToIndustrySection, isIndustrySectionId } from "@workspace/api-zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +20,9 @@ import {
 import { MediaField, type MediaSelection } from "./MediaField";
 import { contentErrorMap } from "./authoring";
 import { useOverrides } from "./OverridesContext";
+import { PulsePageEditor } from "./PulsePageEditor";
+import { hasAuthoredPlatformContent, replacePlatformTemplate, type PulseTemplate } from "./pulse-authoring";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { updateEducationPov } from "./education-fields";
 import { governedLandingSlotType, newLandingNarrativeSection, updateLandingSection } from "./landing-section-fields";
 import {
@@ -118,6 +122,7 @@ export function ContentEditor({ kind, value, onChange, errors, publicationErrors
    */
   presentation?: ContentEditorPresentation;
 }) {
+  const [pendingTemplate, setPendingTemplate] = useState<"standard" | "cognios-specialist" | PulseTemplate | null>(null);
   const overrides = useOverrides();
   const compactValidation = ["partner", "platform", "industry", "framework", "office", "case-study", "publication"].includes(kind);
   // The regular document PATCH remains the persistence path.  This only keeps
@@ -158,6 +163,9 @@ export function ContentEditor({ kind, value, onChange, errors, publicationErrors
 
   return (
     <div className="space-y-6">
+      <AlertDialog open={Boolean(pendingTemplate)} onOpenChange={(open) => { if (!open) setPendingTemplate(null); }}>
+        <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Replace the platform page?</AlertDialogTitle><AlertDialogDescription>Changing the template replaces existing page copy and composition with the selected template’s owner-supplied draft. This will not save, submit, approve, or publish the document. Governance fields stay as they are.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Keep current content</AlertDialogCancel><AlertDialogAction onClick={() => { if (pendingTemplate) onChange(replacePlatformTemplate(value, pendingTemplate)); setPendingTemplate(null); }}>Replace page draft</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
+      </AlertDialog>
       {showContent && errors.length > 0 && (compactValidation
         ? <details className="rounded-md border border-destructive/30 p-3"><summary className="cursor-pointer text-xs text-destructive">{errors.length} field{errors.length === 1 ? "" : "s"} need attention before saving</summary><ul className="mt-2 space-y-1 text-xs">{errors.map((error) => <li key={error}><button type="button" className="text-left underline" onClick={() => { const target = document.getElementById(contentFieldId(readinessPath(error))); target?.scrollIntoView({ block: "center" }); target?.focus(); }}>{error}</button></li>)}</ul></details>
         : <div role="alert" className="rounded-md border border-destructive/30 bg-destructive/5 p-4"><p className="font-semibold text-destructive">Fix these content-field issues before saving this draft:</p><p className="mt-1 text-xs text-muted-foreground">Drafts may remain incomplete; publication readiness is checked separately. These errors identify values that cannot be saved under the current contract.</p><ul className="mt-2 list-disc space-y-1 pl-5 text-sm">{errors.map((error) => <li key={error}>{error}</li>)}</ul></div>)}
@@ -263,11 +271,16 @@ export function ContentEditor({ kind, value, onChange, errors, publicationErrors
       {kind === "platform" && <>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Category" required error={fieldErrors.category} path="content.category" value={value.category} onChange={(next) => set("category", next)} />
-          <Choice label="Template" path="content.template" value={value.template ?? "standard"} options={["standard", "cognios-specialist"]} onChange={(next) => set("template", next)} />
-          <Field label="CTA label" path="content.cta.label" value={value.cta?.label} onChange={(next) => set("cta", next ? { label: next, href: value.cta?.href ?? "/value-scan" } : undefined)} />
-          <SafeDestinationField label="CTA destination" path="content.cta.href" value={value.cta?.href} onChange={(next) => set("cta", next ? { label: value.cta?.label ?? "Learn more", href: next } : undefined)} />
+          <Choice label="Template" path="content.template" value={value.template ?? "standard"} options={["standard", "cognios-specialist", "cognibase-pulse", "cogniagents-pulse"]} onChange={(next) => { if (next === value.template) return; if (hasAuthoredPlatformContent(value)) setPendingTemplate(next as typeof pendingTemplate); else onChange(replacePlatformTemplate(value, next as "standard" | "cognios-specialist" | PulseTemplate)); }} />
         </div>
-        <MediaField
+         <Area label="Summary" required error={fieldErrors.summary} path="content.summary" value={value.summary ?? ""} onChange={(next) => set("summary", next)} />
+         {(value.template === "cognibase-pulse" || value.template === "cogniagents-pulse") && value.pulsePage && <PulsePageEditor page={value.pulsePage} onChange={(next) => set("pulsePage", next)} errors={[...errors, ...publicationErrors.map((error) => error.replace(/^content\./, ""))]} />}
+         {value.template !== "cognibase-pulse" && value.template !== "cogniagents-pulse" && <>
+         <div className="grid gap-4 sm:grid-cols-2">
+           <Field label="CTA label" path="content.cta.label" value={value.cta?.label} onChange={(next) => set("cta", next ? { label: next, href: value.cta?.href ?? "/value-scan" } : undefined)} />
+           <SafeDestinationField label="CTA destination" path="content.cta.href" value={value.cta?.href} onChange={(next) => set("cta", next ? { label: value.cta?.label ?? "Learn more", href: next } : undefined)} />
+         </div>
+         <MediaField
           label="Hero image"
           value={value.heroMedia}
           legacyMediaId={value.heroMediaId}
@@ -278,10 +291,9 @@ export function ContentEditor({ kind, value, onChange, errors, publicationErrors
             onChange(updated);
           }}
         />
-          <Area label="Summary" required error={fieldErrors.summary} path="content.summary" value={value.summary ?? ""} onChange={(next) => set("summary", next)} />
         <StringList label="Capabilities" path="content.capabilities" value={value.capabilities} onChange={(next) => set("capabilities", next)} />
         <StringList label="Differentiators" path="content.differentiators" value={value.differentiators} onChange={(next) => set("differentiators", next)} />
-        <section className="space-y-4">
+         <section className="space-y-4">
           <Label>Standard page sections</Label>
           {(Array.isArray(value.sections) ? value.sections : []).map((section: any, index: number) => (
             <fieldset key={index} className="space-y-3 rounded-md border p-3">
@@ -296,7 +308,7 @@ export function ContentEditor({ kind, value, onChange, errors, publicationErrors
             </fieldset>
           ))}
           <Button type="button" variant="outline" onClick={() => set("sections", [...(Array.isArray(value.sections) ? value.sections : []), { heading: "", body: [{ type: "paragraph", text: "" }] }])}>Add section</Button>
-        </section>
+         </section></>}
       </>}
 
       {kind === "publication" && <>
