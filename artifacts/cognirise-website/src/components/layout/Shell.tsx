@@ -65,8 +65,8 @@ const pageMeta: Record<string, { title: string; description: string }> = {
     description: "Governed agents that coordinate specialist tasks in defined operational environments.",
   },
   "/platforms/cognibase": {
-    title: "CogniBase | Cognirise",
-    description: "Composable intelligence capabilities connected to the systems that run the enterprise.",
+    title: "CogniBase | Enterprise Knowledge with Cited Answers | Cognirise",
+    description: "CogniBase connects enterprise documents, databases and systems to deliver grounded answers with citations, hybrid retrieval and controlled deployment.",
   },
   "/industries": {
     title: "AI Transformation by Industry | Cognirise",

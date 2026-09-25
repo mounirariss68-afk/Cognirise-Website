@@ -27,7 +27,7 @@ test("overview cards use full-surface canonical links and canonical metadata use
   assert.match(overview, /href=\{platform\.href\}/);
   assert.match(overview, /data-testid=\{`link-platform-\$\{platform\.slug\}`\}/);
   assert.match(overview, /focus-visible:ring-2/);
-  assert.match(shell, /"\/platforms\/cognibase": \{\s+title: "CogniBase \| Cognirise"/);
+  assert.match(shell, /"\/platforms\/cognibase": \{\s+title: "CogniBase \| Enterprise Knowledge with Cited Answers \| Cognirise"/);
   assert.doesNotMatch(shell, /CogniTalk|CogniWare/);
   assert.match(detail, /Products \/ CogniBase/);
 });
