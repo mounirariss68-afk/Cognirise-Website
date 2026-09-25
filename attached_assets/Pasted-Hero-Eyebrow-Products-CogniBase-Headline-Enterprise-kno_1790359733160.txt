@@ -1,0 +1,71 @@
+Hero
+
+Eyebrow: Products / CogniBase
+Headline: Enterprise knowledge, answered with proof.
+Subhead: CogniBase connects AI to your documents, databases and business systems, and returns grounded answers with the source cited. It runs in your cloud, on your premises, under your control.
+CTAs: Book a demo · See how it works
+
+Proof strip (under hero): Cited answers · Hybrid retrieval · Self-hostable · EU data residency · Teams-native
+
+The problem
+
+Most enterprise AI pilots stall for the same three reasons. Answers can't be traced back to a source, so nobody trusts them. The knowledge they need is scattered across SharePoint, ERP, CRM, wikis and databases. And data can't leave the building, which rules out most off-the-shelf tools.
+
+CogniBase is built for exactly these constraints.
+
+Core capabilities
+
+Grounded answers with citations
+Every answer links back to the passage, page or record it came from. If the answer isn't in your data, CogniBase says so instead of guessing.
+
+Hybrid retrieval and reranking
+Keyword and semantic search run together, and a reranking stage then promotes the most relevant evidence. The result is higher precision on the questions that matter: policy details, part numbers, contract clauses.
+
+Documents and structured data in one place
+Ask questions across PDFs, Word files and wikis, and query databases in plain language through text-to-SQL. One interface covers both unstructured and structured knowledge.
+
+Composable integration layer
+Connectors and adapters bring CogniBase into Microsoft Teams, web chat, internal portals and workflow tools, so AI shows up where work already happens instead of in yet another app.
+
+Sovereign by design
+You can deploy on your own infrastructure or in an EU cloud region, with open-weight models where required. Your data, embeddings, logs and prompts stay under your control.
+
+Security and quality built in
+Prompt-injection hardening, role-based access to sources and full audit logs are standard. Built-in evaluation measures answer accuracy against golden question sets before and after every change.
+
+How it works
+Connect. Point CogniBase at your document stores, databases and systems.
+Index. Content is chunked, enriched with metadata and indexed for hybrid search, respecting existing access rights.
+Ask. Users ask questions in Teams, on the web or through an API.
+Verify. Answers arrive with citations, and quality is tracked continuously with evaluation reports.
+Built for every team
+
+Customer Support. Resolve tickets faster with answers drawn from manuals, FAQs and past cases.
+Legal & Compliance. Search contracts and regulations with clause-level citations.
+Finance. Query policies and financial data in plain language, including via text-to-SQL.
+People & HR. Give employees instant, accurate answers on policies and benefits.
+Operations. Put procedures, SOPs and technical documentation at the fingertips of field and plant teams.
+IT & Engineering. Make runbooks, architecture decisions and internal docs searchable in one place.
+
+Deployment options
+
+Managed EU cloud. Fastest start, hosted in European regions.
+Your cloud. Deployed into your Azure, AWS or GCP tenant.
+On-premises. Fully air-gapped with open-weight models on your own hardware.
+
+Trust and compliance
+
+CogniBase is designed for regulated industries. It keeps data in the region you choose, gives you traceability for every answer, logs every query for audit, and uses architecture patterns that support GDPR and EU AI Act obligations.
+
+FAQ
+
+Which models does CogniBase use? Commercial or open-weight models, depending on your sovereignty and cost requirements. You choose, and you can switch.
+Does it respect existing permissions? Yes. Users only retrieve content they are already allowed to see.
+How long does a pilot take? A focused proof of concept on one knowledge domain typically runs in weeks, not months.
+Can it take actions, not just answer questions? Yes. Through the integration layer, CogniBase can feed agentic workflows that act in your systems.
+
+Closing CTA
+
+Headline: Put your enterprise knowledge to work.
+Body: Start with one team and one knowledge domain, then measure the results.
+CTA: Book a demo
