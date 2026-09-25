@@ -12,6 +12,7 @@ import { ServiceError } from "@/components/error-boundary";
 import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
 import {
   ReleaseProvider,
+  registryRouteForPath,
   releaseHasPath,
   releaseRedirectForPath,
   useActiveRelease,
@@ -151,7 +152,13 @@ export function Router() {
     || path === "/methodologies/agentic-operations-readiness"
     || path === "/methodologies/idao"
     || path === "/methodologies/human-agent-operating-model";
-  const unavailable = !releaseHasPath(release.data.manifest, path);
+  // The owner explicitly approved the existing UAE website pages for public
+  // viewing. Restore their compiled routes while the separate CMS release
+  // migration is incomplete; never use this exception for other editions or
+  // for unknown URLs. Released pages still use their immutable CMS snapshot.
+  const ownerApprovedLegacyRoute = market === "uae" && locale === "en"
+    && Boolean(registryRouteForPath(path));
+  const unavailable = !released && !ownerApprovedLegacyRoute;
   const routedPage = (
     <>
       <PublicSitemap />
@@ -188,15 +195,15 @@ export function Router() {
             ? <GovernedLandingRoute pagePath="/platforms" compiled={PlatformsOverview} />
             : <PlatformsOverview />}
         </Route>
-        <Route path="/platforms/cognios" component={PlatformDetail} />
-        <Route path="/platforms/cognidocs" component={PlatformDetail} />
-        <Route path="/platforms/cogniagents" component={PlatformDetail} />
+        <Route path="/platforms/cognios">{released ? <PlatformDetail /> : <CogniOSPlatform />}</Route>
+        <Route path="/platforms/cognidocs">{released ? <PlatformDetail /> : <CogniDocs />}</Route>
+        <Route path="/platforms/cogniagents">{released ? <PlatformDetail /> : <CogniAgents />}</Route>
         <Route path="/platforms/cognitalk"><CanonicalRedirect to="/platforms/lupitor" /></Route>
         <Route path="/platforms/cogniware"><CanonicalRedirect to="/platforms/cognibase" /></Route>
-        <Route path="/platforms/cognibase" component={PlatformDetail} />
-        <Route path="/platforms/lupitor" component={PlatformDetail} />
-        <Route path="/platforms/datatoolpack" component={PlatformDetail} />
-        <Route path="/platforms/bunjee-ai" component={PlatformDetail} />
+        <Route path="/platforms/cognibase">{released ? <PlatformDetail /> : <CogniBase />}</Route>
+        <Route path="/platforms/lupitor">{released ? <PlatformDetail /> : <AlliancePlatformDetail slug="lupitor" />}</Route>
+        <Route path="/platforms/datatoolpack">{released ? <PlatformDetail /> : <DatatoolpackAutoData />}</Route>
+        <Route path="/platforms/bunjee-ai">{released ? <PlatformDetail /> : <AlliancePlatformDetail slug="bunjee-ai" />}</Route>
         <Route path="/platforms/:slug" component={PlatformDetail} />
 
         {/* Industries */}

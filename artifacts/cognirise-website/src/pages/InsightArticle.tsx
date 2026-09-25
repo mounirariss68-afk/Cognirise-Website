@@ -8,6 +8,7 @@ import { cmsRequestIsUnavailable, contentRecord, resolveCmsMedia, useCmsEntry } 
 import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
 import { PublicationPresentation } from "@/components/cms/PublicCmsPresentations";
 import { ServiceError } from "@/components/error-boundary";
+import { useReleaseContext } from "@/lib/releases";
 
 const articles = {
   "ai-should-move-the-business": {
@@ -112,9 +113,12 @@ const articles = {
 
 export default function InsightArticle() {
   const [match, params] = useRoute("/insights/:slug");
-  const { market } = useMarketStore();
+  const { market, locale } = useMarketStore();
   const slug = params?.slug || "";
-  const cms = useCmsEntry("publication", slug);
+  const releaseContext = useReleaseContext();
+  const compiledArticle = market === "uae" && locale === "en"
+    && !releaseContext && Object.hasOwn(articles, slug);
+  const cms = useCmsEntry("publication", slug, { preferCompiled: compiledArticle });
   const record = cms.data ? contentRecord(cms.data, "publication") : undefined;
   const heroMedia = record && cms.data
     ? resolveCmsMedia(cms.data.media, record.heroMedia, record.heroMediaId)
@@ -142,7 +146,9 @@ export default function InsightArticle() {
         return <p className={index === 0 ? "lead" : undefined} key={index}>{block.text}</p>;
       })}</>
     ),
-  } : undefined;
+  } : compiledArticle
+    ? articles[slug as keyof typeof articles]
+    : undefined;
   useDynamicMetadata(cms.data?.seo && metadataFromSeo(cms.data.seo, {
     title: `${cms.data.title} | Cognirise`,
     description: cms.data.summary || "A Cognirise perspective on governed AI-native organisations.",

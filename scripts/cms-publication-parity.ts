@@ -86,7 +86,7 @@ const requiredEvidence: Array<[string, boolean]> = [
   ["website fetches only the active release manifest for route authority", releaseClient.includes("/api/public/releases/")],
   ["website does not retry a failed manifest as absent content", releaseClient.includes("retry: false")],
   ["website distinguishes unavailable release from service failure", app.includes("release.isError") && app.includes("ServiceError") && app.includes("NotFound")],
-  ["website gates route dispatch before rendering", app.includes("const unavailable = !releaseHasPath")],
+  ["website limits owner-approved compiled availability to UAE English registered routes", app.includes('market === "uae" && locale === "en"') && app.includes("Boolean(registryRouteForPath(path))") && app.includes("const unavailable = !released && !ownerApprovedLegacyRoute")],
   ["candidate records typed link closure", releaseServer.includes("resolvedLinks.push") && releaseServer.includes("unknown destination")],
   ["candidate records immutable media closure", releaseServer.includes("mediaPins") && releaseServer.includes("every released media reference must pin an immutable version")],
   ["candidate records exact revision identity", releaseServer.includes("revisionId: row.published_revision_id")],

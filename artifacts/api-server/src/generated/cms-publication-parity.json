@@ -1,8 +1,8 @@
 {
   "formatVersion": 1,
   "generatedBy": "pnpm run audit:cms-publication-parity",
-  "generatedAt": "2026-09-25T11:50:55.300Z",
-  "sourceCommit": "62a3437fa854bac759aa09333c108ef7ffd09258",
+  "generatedAt": "2026-09-25T17:04:30.534Z",
+  "sourceCommit": "1c5f9c031b5e380826c76f93dfeed85cd6d3e7c7",
   "registryVersion": "2026-09-19.2",
   "status": "pass",
   "summary": {
@@ -1868,7 +1868,7 @@
     "website fetches only the active release manifest for route authority": true,
     "website does not retry a failed manifest as absent content": true,
     "website distinguishes unavailable release from service failure": true,
-    "website gates route dispatch before rendering": true,
+    "website limits owner-approved compiled availability to UAE English registered routes": true,
     "candidate records typed link closure": true,
     "candidate records immutable media closure": true,
     "candidate records exact revision identity": true,
@@ -1879,5 +1879,5 @@
     "registry contains no compiled publication authority": true
   },
   "errors": [],
-  "reportDigest": "f7a27f0bc6b9ac7e02e9a0b1a29cfcc6fddf5ab13ab1b6a6024d01a9c97abf9f"
+  "reportDigest": "d5b92b51fef0cf03b3f774aa96aaff58d2544655f7f8671da1995e29fb27a9a0"
 }

@@ -558,7 +558,11 @@ export function useCmsCollection<T>(
   };
 }
 
-export function useCmsEntry(kind: WebsiteCmsDocumentKind, slug: string) {
+export function useCmsEntry(
+  kind: WebsiteCmsDocumentKind,
+  slug: string,
+  { preferCompiled = false }: { preferCompiled?: boolean } = {},
+) {
   const { market, locale } = useMarketStore();
   const releaseContext = useReleaseContext();
   const previewRequestDisabled = useContext(CmsPreviewRequestContext);
@@ -569,7 +573,7 @@ export function useCmsEntry(kind: WebsiteCmsDocumentKind, slug: string) {
   const cutoverGated = kind === "framework" && !cutover;
   const query = useGetPublishedContent(market, locale, kind as DocumentKind, slug, {
     query: {
-      enabled: !releaseContext && !codeOwnedLanding && !cutoverGated,
+       enabled: !releaseContext && !codeOwnedLanding && !cutoverGated && !preferCompiled,
       ...(previewRequestDisabled ? { enabled: false } : {}),
       queryKey: getGetPublishedContentQueryKey(market, locale, kind as DocumentKind, slug),
     },
@@ -594,7 +598,7 @@ export function useCmsEntry(kind: WebsiteCmsDocumentKind, slug: string) {
     data: releaseContext
       ? validation?.success ? deliveredData : undefined
       : codeOwnedLanding || cutoverGated ? undefined : validation?.success ? deliveredData : undefined,
-    delivery: releaseContext
+    delivery: preferCompiled && !releaseContext ? "compiled-fallback" as const : releaseContext
       ? deliveredData && validation?.success ? "cms" as const : "intentional-empty" as const
       : codeOwnedLanding || cutoverGated ? "compiled-fallback" as const
       : query.isPending ? "loading" as const
@@ -602,7 +606,7 @@ export function useCmsEntry(kind: WebsiteCmsDocumentKind, slug: string) {
       : deliveredData ? "cms" as const
       : "intentional-empty" as const,
     issue,
-    isAuthoritative: Boolean(releaseContext) || cutover,
+    isAuthoritative: !preferCompiled && (Boolean(releaseContext) || cutover),
   };
 }
 

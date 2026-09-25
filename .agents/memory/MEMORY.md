@@ -58,3 +58,4 @@
 - [Image-led hero vertical contract](image-led-hero-vertical-contract.md) — Align Back and eyebrow at the image top; anchor the intact narrative group to the image bottom.
 - [CMS public media contracts](cms-public-media-contracts.md) — Public media needs exact revision refs, deliverable asset state, approved version metadata, and slot-kind-aware validation.
 - [Release parity evidence](release-parity-evidence.md) — Bind commit-stamped CMS parity reports to immutable release receipts and expose only redacted evidence.
+- [UAE legacy page visibility](uae-legacy-page-visibility.md) — Owner-approved compiled pages may remain visible during CMS migration; do not confuse this with a CMS release.

@@ -10,6 +10,31 @@ import { landingCta, landingMedia, landingNarrative, landingSeo, landingText } f
 import { contentRecord, useCmsCollection } from "@/lib/cms";
 import { useDynamicMetadata } from "@/lib/metadata";
 import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
+import { useReleaseContext } from "@/lib/releases";
+
+const approvedUaeArticles = [
+  {
+    number: "01",
+    title: "AI should move the business—not just assist it.",
+    copy: "AI transformation is not a portfolio of pilots. It is a decision to redesign priority work around people, data, controls and intelligent execution.",
+    topics: ["strategy", "operations"],
+    url: "/insights/ai-should-move-the-business",
+  },
+  {
+    number: "02",
+    title: "The conditions for AI that can hold up in production.",
+    copy: "Data, security, governance and architecture are not the preamble. They are the work.",
+    topics: ["engineering", "governance"],
+    url: "/insights/foundations-for-production",
+  },
+  {
+    number: "03",
+    title: "From agent experiments to a governed digital workforce.",
+    copy: "A digital workforce needs defined authority, connected knowledge and accountable execution.",
+    topics: ["operations", "governance"],
+    url: "/insights/governed-digital-workforce",
+  },
+];
 
 export default function InsightsEditorial() {
   const governedLanding = useGovernedLanding();
@@ -24,7 +49,8 @@ export default function InsightsEditorial() {
   const [email, setEmail] = useState("");
   const subscribeNewsletter = useSubscribeNewsletter();
   const { toast } = useToast();
-  const { market } = useMarketStore();
+  const { market, locale } = useMarketStore();
+  const releaseContext = useReleaseContext();
   const searchString = useSearch();
   const [location, setLocation] = useLocation();
   const articlesQuery = useCmsCollection("publication", [], (item, index) => {
@@ -122,7 +148,9 @@ export default function InsightsEditorial() {
     },
   ];
 
-  const articles = articlesQuery.data;
+  const articles = !releaseContext && market === "uae" && locale === "en" && articlesQuery.data.length === 0
+    ? approvedUaeArticles
+    : articlesQuery.data;
 
   const filteredArticles = activeTopic === "all" ? articles : articles.filter(a => a.topics.includes(activeTopic));
 

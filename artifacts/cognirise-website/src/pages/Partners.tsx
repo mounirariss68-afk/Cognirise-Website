@@ -7,6 +7,7 @@ import { PartnerProfilePresentation } from "@/components/cms/PublicCmsPresentati
 import type { PartnerContent } from "@workspace/api-zod";
 import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
 import { getMarketLocationLabel, useMarketStore } from "@/store/market";
+import { useReleaseContext } from "@/lib/releases";
 
 type PartnerCard = {
   category: string;
@@ -86,7 +87,7 @@ const allianceGroups = [
 ];
 
 export default function Partners() {
-  const { market } = useMarketStore();
+  const { market, locale } = useMarketStore();
   const marketLocation = getMarketLocationLabel(market);
   const governedLanding = useGovernedLanding();
   const governedHero = governedLanding ? landingNarrative(governedLanding, "hero") : null;
@@ -124,7 +125,10 @@ export default function Partners() {
     canonicalUrl: governedSeo.canonicalUrl,
     noIndex: governedSeo.noIndex,
   } : undefined);
-  const partners = partnersQuery.data;
+  const releaseContext = useReleaseContext();
+  const partners = !releaseContext && market === "uae" && locale === "en" && partnersQuery.data.length === 0
+    ? partnersFallback
+    : partnersQuery.data;
   const valueHeadline = landingText(
     governedLanding,
     "partners-value-headline",
