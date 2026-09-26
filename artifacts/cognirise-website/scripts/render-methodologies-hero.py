@@ -7,7 +7,8 @@ generative discontinuities, without reversing or replaying a passage. The
 last second resolves to the exact first frame for a gentle native-video loop.
 
 Run: python artifacts/cognirise-website/scripts/render-methodologies-hero.py
-Requires FFmpeg. Writes MP4, WebM and poster for the UAE-English route only.
+Requires FFmpeg. Writes optimized desktop MP4, compact mobile MP4,
+720p WebM fallback and poster for the UAE-English route only.
 """
 
 from pathlib import Path
@@ -38,8 +39,10 @@ def main():
     VIDEO.mkdir(parents=True, exist_ok=True)
     IMAGES.mkdir(parents=True, exist_ok=True)
     mp4 = VIDEO / f"{STEM}.mp4"
+    mobile = VIDEO / f"{STEM}-720.mp4"
     with TemporaryDirectory(prefix="methodologies-journey-") as directory:
         first = Path(directory) / "first-frame.png"
+        assembled = Path(directory) / "assembled.mp4"
         ffmpeg("-i", sources[0], "-frames:v", "1", first)
         inputs = [arg for source in sources for arg in ("-i", source)]
         inputs.extend(("-loop", "1", "-framerate", "24", "-t", "1", "-i", first))
@@ -66,20 +69,30 @@ def main():
             *inputs, "-filter_complex", ";".join(filters),
             "-map", "[out]", "-an", "-t", f"{DURATION:.2f}",
             "-c:v", "libx264", "-preset", "medium", "-crf", "24",
-            "-movflags", "+faststart", mp4,
+            "-movflags", "+faststart", assembled,
         )
-
-    ffmpeg(
-        "-i", mp4, "-an", "-c:v", "libvpx-vp9",
-        "-b:v", "0", "-crf", "35", "-deadline", "realtime",
-        "-cpu-used", "5", "-row-mt", "1", "-threads", "4",
-        VIDEO / f"{STEM}.webm",
-    )
-    ffmpeg(
-        "-ss", "4", "-i", mp4, "-frames:v", "1", "-q:v", "3",
-        IMAGES / f"{STEM}-poster.jpg",
-    )
-    print(f"Saved {DURATION:.2f}s MP4, WebM and poster: {STEM}")
+        ffmpeg(
+            "-i", assembled, "-an", "-c:v", "libx264", "-preset", "medium",
+            "-crf", "29", "-maxrate", "2500k", "-bufsize", "5000k",
+            "-g", "48", "-pix_fmt", "yuv420p", "-movflags", "+faststart", mp4,
+        )
+        ffmpeg(
+            "-i", assembled, "-vf", "scale=1280:720:flags=lanczos",
+            "-an", "-c:v", "libx264", "-preset", "medium",
+            "-crf", "29", "-maxrate", "1300k", "-bufsize", "2600k",
+            "-g", "48", "-pix_fmt", "yuv420p", "-movflags", "+faststart", mobile,
+        )
+        ffmpeg(
+            "-i", assembled, "-vf", "scale=1280:720:flags=lanczos",
+            "-an", "-c:v", "libvpx-vp9", "-b:v", "0", "-crf", "39",
+            "-deadline", "realtime", "-cpu-used", "5", "-row-mt", "1",
+            "-threads", "4", VIDEO / f"{STEM}.webm",
+        )
+        ffmpeg(
+            "-ss", "4", "-i", assembled, "-frames:v", "1", "-q:v", "3",
+            IMAGES / f"{STEM}-poster.jpg",
+        )
+    print(f"Saved {DURATION:.2f}s desktop MP4, 720p MP4/WebM and poster: {STEM}")
 
 
 if __name__ == "__main__":

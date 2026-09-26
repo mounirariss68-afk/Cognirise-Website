@@ -41,9 +41,26 @@ const target = await getDebugTarget();
 const socket = new WebSocket(target.webSocketDebuggerUrl);
 const pending = new Map();
 let commandId = 0;
+let filmIntercept = null;
+const filmWarnings = [];
 
 socket.onmessage = ({ data }) => {
   const message = JSON.parse(data);
+  if (message.method === "Runtime.consoleAPICalled" && message.params.type === "warning") {
+    filmWarnings.push(message.params.args.map(arg => arg.value ?? arg.description).join(" "));
+  }
+  if (message.method === "Fetch.requestPaused" && filmIntercept) {
+    const requestId = message.params.requestId;
+    filmIntercept.count += 1;
+    if (filmIntercept.mode === "fail") {
+      void send("Fetch.failRequest", { requestId, errorReason: "Failed" });
+    } else if (filmIntercept.released) {
+      void send("Fetch.continueRequest", { requestId });
+    } else {
+      filmIntercept.paused.push(requestId);
+    }
+    return;
+  }
   if (!message.id || !pending.has(message.id)) return;
   const { resolve, reject } = pending.get(message.id);
   pending.delete(message.id);
@@ -185,19 +202,119 @@ async function assertUaeFilmPlayback() {
       paused: video?.paused,
       readyState: video?.readyState,
       currentTime: video?.currentTime,
-      source: video?.querySelector('source')?.getAttribute('src'),
+      source: video?.currentSrc,
+      diagnostics: window.__filmDiagnostics,
+      url: location.href,
+      market: document.querySelector('select')?.value,
+      reducedMotion: matchMedia('(prefers-reduced-motion: reduce)').matches,
+      figure: Boolean(document.querySelector('[data-testid="hero-figure"]')),
+      posterRequests: performance.getEntriesByType('resource').filter(x => x.name.includes('methodologies-pulse-hero-journey')).map(x => ({name:x.name, size:x.transferSize})),
     };
   })()`);
-  assert.equal(state.layer, true, "UAE English mounts its route-owned film");
+  assert.equal(state.layer, true, `UAE English mounts its route-owned film: ${JSON.stringify({ ...state, filmWarnings })}`);
   assert.equal(state.posterLoaded, true, "the reduced-motion poster is deliverable");
   assert.equal(state.videoPresent, true, "normal-motion visitors receive the video");
   assert.equal(state.paused, false, "the muted inline video starts playing");
   assert.ok(state.readyState >= 2 && state.currentTime > 0.1, "the film decodes and moves beyond its opening frame");
   assert.match(state.source, /methodologies-pulse-hero-journey\.mp4$/);
+  await setViewport(390, 844, true);
+  await navigate("/methodologies", `document.querySelectorAll('[data-route-index]').length === 7`);
+  await waitForFilm(`document.querySelector('[data-testid="methodologies-hero-film"] video')?.currentTime > 0.1`, "mobile film playback");
+  assert.match(await evaluate(`document.querySelector('[data-testid="methodologies-hero-film"] video')?.currentSrc`),
+    /methodologies-pulse-hero-journey-720\.mp4$/, "mobile loads the compact rendition");
+  await setViewport(1440);
   await send("Emulation.setEmulatedMedia", {
     media: "screen",
     features: [{ name: "prefers-reduced-motion", value: "reduce" }],
   });
+}
+
+async function waitForFilm(expression, description, attempts = 80) {
+  for (let i = 0; i < attempts; i += 1) {
+    if (await evaluate(expression)) return;
+    await delay(100);
+  }
+  const diagnostics = await evaluate(`(() => {
+    const layer = document.querySelector('[data-testid="methodologies-hero-film"]');
+    const video = layer?.querySelector('video');
+    return { layer: !!layer, poster: layer?.querySelector('img')?.naturalWidth,
+      video: !!video, error: video?.error?.code, networkState: video?.networkState,
+      readyState: video?.readyState, currentSrc: video?.currentSrc, currentTime: video?.currentTime,
+      events: window.__filmDiagnostics };
+  })()`);
+  const navigation = await evaluate(`({
+    href: location.href, ready: document.readyState, routeCount: document.querySelectorAll('[data-route-index]').length,
+    market: document.querySelector('select')?.value
+  })`);
+  throw new Error(`Timed out waiting for ${description}: ${JSON.stringify({ diagnostics, navigation, filmWarnings, filmIntercept })}`);
+}
+
+async function assertDelayedFilmAndFallback() {
+  await send("Emulation.setEmulatedMedia", {
+    media: "screen",
+    features: [{ name: "prefers-reduced-motion", value: "no-preference" }],
+  });
+  const patterns = [
+    { urlPattern: "*methodologies-pulse-hero-journey.mp4*", requestStage: "Request" },
+    { urlPattern: "*methodologies-pulse-hero-journey-720.mp4*", requestStage: "Request" },
+    { urlPattern: "*methodologies-pulse-hero-journey.webm*", requestStage: "Request" },
+  ];
+  await send("Network.enable");
+  await send("Network.setCacheDisabled", { cacheDisabled: true });
+  filmIntercept = { mode: "delay", count: 0, paused: [], released: false };
+  await send("Fetch.enable", { patterns });
+  await navigate("/methodologies", `document.querySelectorAll('[data-route-index]').length === 7`);
+  for (let i = 0; filmIntercept.count < 1 && i < 80; i += 1) await delay(100);
+  assert.ok(filmIntercept.count > 0, "delayed test intercepted the film");
+  await waitForFilm(`Boolean(document.querySelector('[data-testid="methodologies-hero-film"] img')?.naturalWidth)`, "film poster");
+  // The guarded version removed the film after eight seconds even though the
+  // server had not returned video bytes. Hold its requests longer than that.
+  await delay(8500);
+  assert.ok(await evaluate(`(() => {
+    const layer = document.querySelector('[data-testid="methodologies-hero-film"]');
+    return Boolean(layer?.querySelector('img')?.naturalWidth)
+      && layer.querySelector('video')?.currentTime === 0;
+  })()`), "the film poster remains visible while the video response is delayed");
+  filmIntercept.released = true;
+  for (const requestId of filmIntercept.paused) {
+    await send("Fetch.continueRequest", { requestId });
+  }
+  await waitForFilm(`document.querySelector('[data-testid="methodologies-hero-film"] video')?.currentTime > 0.2`, "late film playback");
+  await send("Fetch.disable");
+  filmIntercept = null;
+
+  filmIntercept = { mode: "fail", count: 0 };
+  await send("Fetch.enable", { patterns });
+  await navigate("/methodologies", `document.querySelectorAll('[data-route-index]').length === 7`);
+  for (let i = 0; filmIntercept.count < 2 && i < 80; i += 1) await delay(100);
+  assert.ok(filmIntercept.count >= 2, "both MP4 and WebM sources were rejected");
+  await waitForFilm(`Boolean(document.querySelector('[data-testid="hero-figure"]')) &&
+    !document.querySelector('[data-testid="methodologies-hero-film"]')`, "governed image after video errors");
+  assert.ok(await evaluate(`Boolean(document.querySelector('[data-testid="hero-figure"] img')?.naturalWidth)`),
+    "the governed image remains deliverable after real film failure");
+  await send("Fetch.disable");
+  filmIntercept = null;
+  await send("Network.setCacheDisabled", { cacheDisabled: false });
+
+  await send("Emulation.setEmulatedMedia", {
+    media: "screen",
+    features: [{ name: "prefers-reduced-motion", value: "reduce" }],
+  });
+  await navigate("/methodologies", `document.querySelectorAll('[data-route-index]').length === 7`);
+  await waitForFilm(`(() => {
+    const layer = document.querySelector('[data-testid="methodologies-hero-film"]');
+    return Boolean(layer?.querySelector('img')?.naturalWidth) && !layer.querySelector('video');
+  })()`, "reduced-motion poster without video");
+
+  await send("Page.navigate", { url: `${baseUrl}/methodologies?market=ksa&locale=en` });
+  await waitForFilm(`document.readyState === "complete"
+    && document.querySelector('select')?.value === 'ksa'`, "Saudi edition");
+  assert.equal(await evaluate(`Boolean(document.querySelector('[data-testid="methodologies-hero-film"]'))`),
+    false, "other markets keep their governed hero image");
+  await send("Page.navigate", { url: `${baseUrl}/methodologies?market=uae&locale=en` });
+  await waitForFilm(`document.readyState === "complete"
+    && document.querySelectorAll('[data-route-index]').length === 7
+    && document.querySelector('select')?.value === 'uae'`, "restored UAE edition");
 }
 
 async function tabInto(selector) {
@@ -344,6 +461,18 @@ try {
   // (default property: all). Disable it fully so resampling sees baseline fonts,
   // not the starting frame of a font-size transition from the previous scale.
   await send("Page.addScriptToEvaluateOnNewDocument", { source: `
+    window.__filmDiagnostics = [];
+    document.addEventListener("error", (event) => {
+      if (event.target instanceof HTMLMediaElement) {
+        window.__filmDiagnostics.push({type: "error", code: event.target.error?.code, src: event.target.currentSrc});
+      }
+      if (event.target instanceof HTMLSourceElement) {
+        window.__filmDiagnostics.push({type: "source-error", src: event.target.src});
+      }
+    }, true);
+    document.addEventListener("playing", (event) => {
+      if (event.target instanceof HTMLMediaElement) window.__filmDiagnostics.push({type: "playing", src: event.target.currentSrc});
+    }, true);
     document.addEventListener("DOMContentLoaded", () => {
       const style = document.createElement("style");
       style.textContent = "html, body, * { scroll-behavior: auto !important; overflow-anchor: none !important; transition: none !important; }";
@@ -353,6 +482,7 @@ try {
 
   await assertArtworkHover();
   await assertUaeFilmPlayback();
+  await assertDelayedFilmAndFallback();
   // Print at native typography before any text-only overrides are introduced.
   await assertPrintRoutes();
   await send("Emulation.setEmulatedMedia", { media: "screen", features: [{ name: "prefers-reduced-motion", value: "reduce" }] });

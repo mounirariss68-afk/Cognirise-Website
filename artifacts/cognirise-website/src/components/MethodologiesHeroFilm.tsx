@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { assetUrl } from "@/lib/assets";
 
 const FILM = {
+  mobileMp4: assetUrl("/videos/cognirise/methodologies-pulse-hero-journey-720.mp4"),
   mp4: assetUrl("/videos/cognirise/methodologies-pulse-hero-journey.mp4"),
   webm: assetUrl("/videos/cognirise/methodologies-pulse-hero-journey.webm"),
   poster: assetUrl("/images/cognirise/methodologies-pulse-hero-journey-poster.jpg"),
@@ -19,6 +20,7 @@ export function MethodologiesHeroFilm() {
   );
   const [playing, setPlaying] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [posterFailed, setPosterFailed] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -33,22 +35,32 @@ export function MethodologiesHeroFilm() {
     if (reducedMotion || failed) return;
     const attempt = window.setTimeout(() => {
       const video = videoRef.current;
-      if (video?.paused) void video.play().catch(() => setFailed(true));
+      if (video?.paused) void video.play().catch((error: DOMException) => {
+        // A source change or unmount can abort play without a media failure.
+        if (error.name !== "AbortError" && videoRef.current === video) {
+          console.warn("Methodologies film could not play:", error.name, error.message);
+          setFailed(true);
+        }
+      });
     }, 250);
-    const loadingGuard = window.setTimeout(() => {
-      if ((videoRef.current?.readyState ?? 0) < HTMLMediaElement.HAVE_CURRENT_DATA) {
-        setFailed(true);
-      }
-    }, 8000);
-    return () => {
-      window.clearTimeout(attempt);
-      window.clearTimeout(loadingGuard);
-    };
+    // Slow delivery is not a broken film: the poster remains visible until
+    // playback starts. Only actual media errors trigger the governed fallback.
+    return () => window.clearTimeout(attempt);
   }, [reducedMotion, failed]);
 
-  // On either media failure reveal the governed image already rendered by
-  // the parent, rather than leaving a poster-painted layer over that image.
-  if (failed) return null;
+  const checkSources = () => {
+    // Chromium can report NETWORK_NO_SOURCE without setting video.error or
+    // rejecting play() when every child <source> fails.
+    window.setTimeout(() => {
+      if (videoRef.current?.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) {
+        setFailed(true);
+      }
+    }, 250);
+  };
+
+  // With no video (reduced motion), a missing poster reveals the approved
+  // governed image. With video, let playback proceed even if its poster fails.
+  if (failed || (reducedMotion && posterFailed)) return null;
 
   return (
     <div
@@ -60,7 +72,7 @@ export function MethodologiesHeroFilm() {
         src={FILM.poster}
         alt=""
         draggable={false}
-        onError={() => setFailed(true)}
+        onError={() => setPosterFailed(true)}
         className="absolute inset-0 h-full w-full object-cover"
       />
       {!reducedMotion && !failed && (
@@ -71,14 +83,21 @@ export function MethodologiesHeroFilm() {
           muted
           loop
           playsInline
-          preload="metadata"
+          preload="auto"
           poster={FILM.poster}
           tabIndex={-1}
           onPlaying={() => setPlaying(true)}
-          onError={() => setFailed(true)}
+          onError={(event) => {
+            // A rejected <source> (including a media query mismatch) can emit
+            // an error while the video still has another playable source.
+            if (!event.currentTarget.error) return;
+            console.warn("Methodologies film media error:", event.currentTarget.error.code);
+            setFailed(true);
+          }}
         >
-          <source src={FILM.mp4} type="video/mp4" />
-          <source src={FILM.webm} type="video/webm" />
+          <source src={FILM.mobileMp4} type="video/mp4" media="(max-width: 767px)" onError={checkSources} />
+          <source src={FILM.mp4} type="video/mp4" onError={checkSources} />
+          <source src={FILM.webm} type="video/webm" onError={checkSources} />
         </video>
       )}
     </div>

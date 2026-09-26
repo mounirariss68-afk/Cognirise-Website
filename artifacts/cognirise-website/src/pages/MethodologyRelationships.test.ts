@@ -74,6 +74,7 @@ describe("Methodology Relationships and Boundaries", () => {
     assert.match(portfolio, /src: assetUrl\("\/images\/cognirise\/method-overview\.jpg"\)/);
     for (const file of [
       "videos/cognirise/methodologies-pulse-hero-journey.mp4",
+      "videos/cognirise/methodologies-pulse-hero-journey-720.mp4",
       "videos/cognirise/methodologies-pulse-hero-journey.webm",
       "images/cognirise/methodologies-pulse-hero-journey-poster.jpg",
     ]) {
@@ -81,9 +82,11 @@ describe("Methodology Relationships and Boundaries", () => {
       assert.ok(readFileSync(resolve(root, `public/${file}`)).byteLength > 1000);
     }
     assert.match(heroFilm, /prefers-reduced-motion: reduce/);
-    assert.match(heroFilm, /video\.play\(\)\.catch\(\(\) => setFailed\(true\)\)/);
-    assert.match(heroFilm, /onError=\{\(\) => setFailed\(true\)\}/);
-    assert.match(heroFilm, /if \(failed\) return null/);
+    assert.match(heroFilm, /video\.play\(\)\.catch/);
+    assert.match(heroFilm, /error\.name !== "AbortError"/);
+    assert.match(heroFilm, /networkState === HTMLMediaElement\.NETWORK_NO_SOURCE/);
+    assert.match(heroFilm, /if \(failed \|\| \(reducedMotion && posterFailed\)\) return null/);
+    assert.doesNotMatch(heroFilm, /loadingGuard|8000/, "slow downloads should not be mistaken for broken media");
     assert.match(portfolio, /route-navigator/);
     assert.match(portfolio, /seven situations/);
     assert.match(portfolio, /Value Scan remains a separate optional facilitated enquiry/);
