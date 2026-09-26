@@ -1,11 +1,23 @@
 import { useState, useEffect, type KeyboardEvent, useRef } from "react";
-import { BriefcaseBusiness, Building2, CircleGauge, Layers3, Route, Target, Workflow, CornerDownRight } from "lucide-react";
+import { CornerDownRight } from "lucide-react";
 import { Link } from "wouter";
 import { BrandButton } from "@/components/ui/brand-button";
 import { trackProjectEvent } from "@/lib/analytics";
+import { assetUrl } from "@/lib/assets";
+import "./MethodologyRouteMap.css";
 import "./MethodologyRouteMap.print.css";
 
 type RouteSituation = "investment" | "competing-ideas" | "existing-strategy" | "process-problem" | "pilot-release" | "proven-expansion" | "underperformance";
+
+const SITUATION_ART: Record<RouteSituation, { src: string; alt: string }> = {
+  investment: { src: "/images/cognirise/situations/investment.jpg", alt: "Several illuminated paths narrow toward a bounded architectural opening." },
+  "competing-ideas": { src: "/images/cognirise/situations/competing-ideas.jpg", alt: "Distinct illuminated passages meet at a central decision threshold." },
+  "existing-strategy": { src: "/images/cognirise/situations/existing-strategy.jpg", alt: "Translucent planning planes lead into a structured passage for delivery." },
+  "process-problem": { src: "/images/cognirise/situations/process-problem.jpg", alt: "A disrupted light path is deliberately rerouted through an architectural opening." },
+  "pilot-release": { src: "/images/cognirise/situations/pilot-release.jpg", alt: "An experimental module connects to a supported operating structure." },
+  "proven-expansion": { src: "/images/cognirise/situations/proven-expansion.jpg", alt: "A working structure connects by light paths to new contextual spaces." },
+  underperformance: { src: "/images/cognirise/situations/underperformance.jpg", alt: "A misaligned signal passes through a diagnostic loop toward a deliberate next decision." },
+};
 
 const STORAGE_KEY_SELECTION = "cognirise-methodology-selection";
 const STORAGE_KEY_SCROLL = "cognirise-methodology-scroll";
@@ -20,7 +32,7 @@ function printWords(text: string) {
 
 const ROUTE_DATA = [
   {
-    id: "investment", label: "We need to know where AI is worth investing.", icon: CircleGauge,
+    id: "investment", label: "We need to know where AI is worth investing.",
     description: "We are exploring AI, but have not established a useful opportunity or a convincing business case. We need to understand the likely benefits, costs and evidence before committing.",
     existingAssets: "Strategic goals, cost pressures, baseline information or a few ideas may exist; a chosen project is not required.",
     decision: "What problem, if any, is worth addressing with AI, and what evidence would justify the investment?",
@@ -37,7 +49,7 @@ const ROUTE_DATA = [
     ]
   },
   {
-    id: "competing-ideas", label: "We have several AI ideas and need to choose.", icon: Target,
+    id: "competing-ideas", label: "We have several AI ideas and need to choose.",
     description: "We have competing proposals and limited money or capacity. We need to decide what to fund first, what to investigate and what to stop.",
     existingAssets: "Candidate descriptions, value hypotheses and some feasibility information exist, even if the evidence quality varies.",
     decision: "Which proposals should advance, in what order, and which should wait or stop?",
@@ -54,7 +66,7 @@ const ROUTE_DATA = [
     ]
   },
   {
-    id: "existing-strategy", label: "We have an AI strategy and need to implement it.", icon: Route,
+    id: "existing-strategy", label: "We have an AI strategy and need to implement it.",
     description: "We already have a strategy or roadmap, whether developed internally or by a consultant. We need to turn it into owned, funded delivery work without repeating decisions that are already supported.",
     existingAssets: "The strategy may include priority use cases, architecture, recommendations and a governance model; its completeness and evidence still need to be checked.",
     decision: "What can we start delivering now, who owns it, and what evidence or dependencies are still missing?",
@@ -71,7 +83,7 @@ const ROUTE_DATA = [
     ]
   },
   {
-    id: "process-problem", label: "We need to improve a specific process.", icon: Workflow,
+    id: "process-problem", label: "We need to improve a specific process.",
     description: "We know where work is slow, costly or unreliable. We need to work out whether AI would help and what must change in the process—not start by assuming it needs agents.",
     existingAssets: "A known operational problem, affected work and ideally a process owner and baseline are available; an AI solution is not yet assumed.",
     decision: "What change would improve this process, and does AI have a useful role?",
@@ -90,7 +102,7 @@ const ROUTE_DATA = [
     ]
   },
   {
-    id: "pilot-release", label: "We have a pilot and need to put it into everyday use.", icon: BriefcaseBusiness,
+    id: "pilot-release", label: "We have a pilot and need to put it into everyday use.",
     description: "We have tested something, but it is not yet a supported part of normal work. We need to establish what remains before people can rely on it.",
     existingAssets: "A prototype or limited trial exists, with some test evidence; integration, security, support, ownership, adoption or a safe release decision may remain unresolved.",
     decision: "What must be proven or completed before this can become a dependable part of normal work?",
@@ -109,7 +121,7 @@ const ROUTE_DATA = [
     ]
   },
   {
-    id: "proven-expansion", label: "AI works in one area. We need to expand it.", icon: Layers3,
+    id: "proven-expansion", label: "AI works in one area. We need to expand it.",
     description: "We have evidence of value in an existing live setting. We need to decide what can be reused and what must change for other teams, locations or workloads.",
     existingAssets: "An operating use case has a baseline, demonstrated benefit, an owner and service or control experience; the new context may differ in data, language, permissions or accountability.",
     decision: "What can we reuse, what changes in the new context, and where should expansion proceed?",
@@ -129,7 +141,7 @@ const ROUTE_DATA = [
     ]
   },
   {
-    id: "underperformance", label: "Our AI is in use, but the results are falling short.", icon: Building2,
+    id: "underperformance", label: "Our AI is in use, but the results are falling short.",
     description: "AI is already part of the work, but the benefits, quality, cost or adoption are disappointing. We need to identify the cause and decide whether to improve, redesign, replace or stop it.",
     existingAssets: "A live deployment and some usage or performance evidence exist; a measurement gap must be acknowledged rather than filled with an assumed result.",
     decision: "Why are the results insufficient, and should we improve, redesign, replace, reduce scope or stop?",
@@ -162,12 +174,14 @@ export function MethodologyRouteMap() {
     } catch (e) {}
     return "investment";
   });
+  const [previewSituation, setPreviewSituation] = useState<RouteSituation | null>(null);
 
   const outputRef = useRef<HTMLDivElement>(null);
   // Defaults and restored state are not buyer interactions.
   const lastSelectedSituation = useRef<RouteSituation | null>(null);
 
   const selectSituation = (situation: RouteSituation) => {
+    setPreviewSituation(null);
     setActiveSituation(situation);
     if (lastSelectedSituation.current === situation) return;
     lastSelectedSituation.current = situation;
@@ -223,13 +237,20 @@ export function MethodologyRouteMap() {
 
   const handleRadioClick = (id: RouteSituation) => {
     selectSituation(id);
-    if (window.innerWidth < 768 && outputRef.current) {
+    if (window.innerWidth < 1024 && outputRef.current) {
        const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
        outputRef.current.scrollIntoView({ behavior: reducedMotion ? "instant" : "smooth", block: "start" });
     }
   };
 
-  const activeRoute = ROUTE_DATA.find(r => r.id === activeSituation) || ROUTE_DATA[0];
+  const displayedSituation = previewSituation ?? activeSituation;
+  const activeRoute = ROUTE_DATA.find(r => r.id === displayedSituation) || ROUTE_DATA[0];
+  const activeArt = SITUATION_ART[displayedSituation];
+  const previewOnMouse = (id: RouteSituation, pointerType: string) => {
+    if (pointerType === "mouse") {
+      setPreviewSituation(id);
+    }
+  };
 
   return (
     <>
@@ -269,10 +290,10 @@ export function MethodologyRouteMap() {
         <p><Link href="/methodologies/agent-authority-model#guardrails-and-authority">Read approved guardrails-versus-authority distinction</Link></p>
       </section>
     </section>
-    <div data-testid="methodology-route-map" className="methodology-route-screen bg-[#fdfcfb] flex flex-col xl:flex-row shadow-lg border border-[#cbd3e1] [overflow-wrap:anywhere] [&_button]:scroll-mt-32 [&_a]:scroll-mt-32">
+    <div data-testid="methodology-route-map" className="methodology-route-screen [&_button]:scroll-mt-32 [&_a]:scroll-mt-32">
       {/* Left Side: Situations Radio Group */}
-      <div className="xl:w-[400px] min-w-0 shrink-0 border-b xl:border-b-0 xl:border-r border-[#cbd3e1] bg-[#f9fafb]">
-        <div className="p-6 lg:p-8 border-b border-[#cbd3e1]">
+      <div className="methodology-route-rail" onPointerLeave={() => setPreviewSituation(null)}>
+        <div className="methodology-route-rail-heading">
           <h3 className="font-display text-xl font-semibold text-[#102957]">Start with your situation</h3>
         </div>
         <div 
@@ -282,8 +303,8 @@ export function MethodologyRouteMap() {
           data-testid="situation-radiogroup"
         >
           {ROUTE_DATA.map((sit, index) => {
-            const Icon = sit.icon;
             const isActive = activeSituation === sit.id;
+            const isPreview = previewSituation === sit.id;
             return (
               <button
                 key={sit.id}
@@ -292,26 +313,24 @@ export function MethodologyRouteMap() {
                 aria-controls="selected-route-output"
                 data-route-index={index}
                 data-testid={`situation-radio-${sit.id}`}
+                data-committed={isActive}
+                data-preview={isPreview}
                 tabIndex={isActive ? 0 : -1}
                 onClick={() => handleRadioClick(sit.id as RouteSituation)}
+                onPointerEnter={(event) => previewOnMouse(sit.id as RouteSituation, event.pointerType)}
+                onFocus={() => setPreviewSituation(null)}
                 onKeyDown={(event) => handleSituationKeyDown(event, index)}
-                className={`w-full text-left flex items-start gap-4 p-6 lg:p-8 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[hsl(var(--brand-pink))] border-b border-[#cbd3e1] last:border-b-0 group ${
-                  isActive 
-                    ? "bg-[#102957] text-white" 
-                    : "bg-transparent text-[#405777] hover:bg-white"
-                }`}
+                className="methodology-route-choice"
               >
-                <div className={`shrink-0 mt-0.5 flex h-6 w-6 items-center justify-center rounded-sm ${isActive ? 'bg-[hsl(var(--brand-pink))] text-white' : 'bg-black/5 text-[#647491] group-hover:bg-[#102957] group-hover:text-white'}`}>
-                  <Icon size={14} />
-                </div>
-                <div className="min-w-0">
-                  <span className={`block font-semibold text-[15px] leading-tight ${isActive ? "text-white" : "text-[#102957]"}`}>
+                <span className="methodology-route-thumb" aria-hidden="true">
+                  <img src={assetUrl(SITUATION_ART[sit.id].src)} alt="" loading="lazy" data-pulse-image-resilient="true" />
+                </span>
+                <span className="min-w-0">
+                  <span className="methodology-route-choice-index">{String(index + 1).padStart(2, "0")} / 07{isActive ? " · Selected" : ""}</span>
+                  <span className="methodology-route-choice-label">
                     {sit.label}
                   </span>
-                  <span className={`mt-2 block text-[13px] leading-[1.4] ${isActive ? "text-white/80" : "text-[#647491]"}`}>
-                     {sit.description}
-                  </span>
-                </div>
+                </span>
               </button>
             )
           })}
@@ -322,28 +341,28 @@ export function MethodologyRouteMap() {
       <div 
         id="selected-route-output"
         role="region"
-        aria-live="polite"
+        aria-label="Situation route details"
         data-testid="route-output-panel"
         ref={outputRef}
-        className="min-w-0 flex-1 scroll-mt-24 p-6 sm:p-8 md:p-10 lg:p-16 bg-white flex flex-col relative min-h-[600px]"
+        className="methodology-route-detail scroll-mt-24"
       >
-        <div key={activeSituation} className="motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-right-4 motion-safe:duration-500 motion-safe:fill-mode-both">
+        <span className="sr-only" role="status" aria-live="polite">Selected situation: {ROUTE_DATA.find(r => r.id === activeSituation)?.label}</span>
+        <div>
            {/* Decision-first output header */}
-           <div className="mb-10">
-            <div className="flex items-center gap-3 mb-5">
-              <span className="inline-block w-1.5 h-1.5 rounded-full bg-[hsl(var(--brand-pink))]" />
-              <span className="font-bold text-[10px] uppercase tracking-[0.14em] text-[#647491]">
-                 Situation
-              </span>
-            </div>
+            <div className="methodology-route-hero">
+             <div className="methodology-route-hero-copy">
+              <div className="methodology-route-hero-kicker">Your situation / {String(ROUTE_DATA.findIndex(r => r.id === displayedSituation) + 1).padStart(2, "0")}</div>
              <h4 className="font-display text-[clamp(32px,5vw,52px)] font-semibold text-[#102957] tracking-[-.04em] leading-[1.05]" data-testid="route-detail-situation">
                {activeRoute.label}
-            </h4>
-             <p className="mt-6 max-w-[760px] text-[18px] leading-[1.6] text-[#405777]">{activeRoute.description}</p>
+              </h4>
+             </div>
+             <figure className="methodology-route-hero-figure">
+               <img key={displayedSituation} src={assetUrl(activeArt.src)} alt={activeArt.alt} loading="eager" data-pulse-image-resilient="true" data-testid="route-detail-art" />
+             </figure>
           </div>
 
           {/* Grid of details */}
-           <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,18rem),1fr))] gap-10 mb-12">
+            <div className="route-detail-grid mb-12">
              <div data-testid="route-detail-assets">
                <h5 className="text-[11px] font-bold uppercase tracking-wider text-[#102957] mb-3 flex items-center gap-2">
                  <CornerDownRight size={14} className="text-[hsl(var(--brand-pink))]" />
@@ -393,7 +412,7 @@ export function MethodologyRouteMap() {
            </div>
 
           {/* Anchors Box */}
-          <div className="bg-[#f9fafb] border-l-2 border-[#102957] p-8 mb-12">
+           <div className="route-governing p-6 sm:p-8 mb-12">
             <h5 className="text-sm font-bold text-[#102957] mb-6 uppercase tracking-wider">
               Connections to Governing Frameworks
             </h5>
