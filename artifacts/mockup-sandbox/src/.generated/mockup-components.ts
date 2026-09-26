@@ -2,15 +2,12 @@
 type ModuleMap = Record<string, () => Promise<Record<string, unknown>>>;
 export const modules: ModuleMap = {
   "./components/mockups/cognios-authority-atlas/AuthorityAtlas.tsx": () => import("../components/mockups/cognios-authority-atlas/AuthorityAtlas.tsx"),
+  "./components/mockups/cognios-kernel-stack/ExplodedKernelStack.tsx": () => import("../components/mockups/cognios-kernel-stack/ExplodedKernelStack.tsx"),
   "./components/mockups/cognirise-business-ariss/ColumnBack.tsx": () => import("../components/mockups/cognirise-business-ariss/ColumnBack.tsx"),
   "./components/mockups/cognirise-business-ariss/ColumnFront.tsx": () => import("../components/mockups/cognirise-business-ariss/ColumnFront.tsx"),
   "./components/mockups/cognirise-business-ariss/OpenBack.tsx": () => import("../components/mockups/cognirise-business-ariss/OpenBack.tsx"),
   "./components/mockups/cognirise-business-ariss/OpenFront.tsx": () => import("../components/mockups/cognirise-business-ariss/OpenFront.tsx"),
-  "./components/mockups/cognios-kernel-stack/ExplodedKernelStack.tsx": () => import("../components/mockups/cognios-kernel-stack/ExplodedKernelStack.tsx"),
-  "./components/mockups/cognirise-business-cards/Back.tsx": () => import("../components/mockups/cognirise-business-cards/Back.tsx"),
-  "./components/mockups/cognirise-business-cards/BackGallery.tsx": () => import("../components/mockups/cognirise-business-cards/BackGallery.tsx"),
-  "./components/mockups/cognirise-business-cards/Front.tsx": () => import("../components/mockups/cognirise-business-cards/Front.tsx"),
-  "./components/mockups/cognirise-business-cards/FrontPolished.tsx": () => import("../components/mockups/cognirise-business-cards/FrontPolished.tsx"),
+  "./components/mockups/cognirise-business-refined-quiet/SignatureFront.tsx": () => import("../components/mockups/cognirise-business-refined-quiet/SignatureFront.tsx"),
   "./components/mockups/cognirise-business-refined/EditorialBack.tsx": () => import("../components/mockups/cognirise-business-refined/EditorialBack.tsx"),
   "./components/mockups/cognirise-business-refined/EditorialFront.tsx": () => import("../components/mockups/cognirise-business-refined/EditorialFront.tsx"),
   "./components/mockups/cognirise-business-refined/SignatureBack.tsx": () => import("../components/mockups/cognirise-business-refined/SignatureBack.tsx"),
@@ -19,7 +16,10 @@ export const modules: ModuleMap = {
   "./components/mockups/cognirise-business-refined-copy-Ws1teyxV/EditorialBack.tsx": () => import("../components/mockups/cognirise-business-refined-copy-Ws1teyxV/EditorialBack.tsx"),
   "./components/mockups/cognirise-business-refined-copy-Ws1teyxV/EditorialFront.tsx": () => import("../components/mockups/cognirise-business-refined-copy-Ws1teyxV/EditorialFront.tsx"),
   "./components/mockups/cognirise-business-refined-copy-Ws1teyxV/SignatureBack.tsx": () => import("../components/mockups/cognirise-business-refined-copy-Ws1teyxV/SignatureBack.tsx"),
-  "./components/mockups/cognirise-business-refined-quiet/SignatureFront.tsx": () => import("../components/mockups/cognirise-business-refined-quiet/SignatureFront.tsx"),
+  "./components/mockups/cognirise-business-cards/Back.tsx": () => import("../components/mockups/cognirise-business-cards/Back.tsx"),
+  "./components/mockups/cognirise-business-cards/BackGallery.tsx": () => import("../components/mockups/cognirise-business-cards/BackGallery.tsx"),
+  "./components/mockups/cognirise-business-cards/Front.tsx": () => import("../components/mockups/cognirise-business-cards/Front.tsx"),
+  "./components/mockups/cognirise-business-cards/FrontPolished.tsx": () => import("../components/mockups/cognirise-business-cards/FrontPolished.tsx"),
   "./components/mockups/cognirise-directions/AgenticSurge.tsx": () => import("../components/mockups/cognirise-directions/AgenticSurge.tsx"),
   "./components/mockups/cognirise-directions/CogniriseLinkedInPulse.tsx": () => import("../components/mockups/cognirise-directions/CogniriseLinkedInPulse.tsx"),
   "./components/mockups/cognirise-directions/CognirisePulse.tsx": () => import("../components/mockups/cognirise-directions/CognirisePulse.tsx"),
@@ -40,6 +40,7 @@ export const modules: ModuleMap = {
   "./components/mockups/cognirise-site/ValueScan.tsx": () => import("../components/mockups/cognirise-site/ValueScan.tsx"),
   "./components/mockups/cognirise-site/WorkProof.tsx": () => import("../components/mockups/cognirise-site/WorkProof.tsx"),
   "./components/mockups/method-route-cards/Current.tsx": () => import("../components/mockups/method-route-cards/Current.tsx"),
+  "./components/mockups/method-route-cards/DecisionIntake.tsx": () => import("../components/mockups/method-route-cards/DecisionIntake.tsx"),
   "./components/mockups/method-route-cards/Editorial.tsx": () => import("../components/mockups/method-route-cards/Editorial.tsx"),
   "./components/mockups/method-route-cards/Pathways.tsx": () => import("../components/mockups/method-route-cards/Pathways.tsx")
 };
