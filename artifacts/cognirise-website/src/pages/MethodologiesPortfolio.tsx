@@ -19,8 +19,8 @@ export default function MethodologiesPortfolio() {
     label: "Find your situation",
     href: "/methodologies#route-navigator",
   });
-  // Only the UAE English edition has this route-owned film. Keep the existing
-  // governed image and compiled fallback untouched across all markets.
+  // Only the UAE English edition has this route-owned film. Other markets
+  // retain their governed hero image; UAE never paints the retired still.
   const showFilm = market === "uae" && locale === "en";
   const heroMedia = landingMedia(governedLanding, "methodologies-hero-media", {
     src: assetUrl("/images/cognirise/method-overview.jpg"),
@@ -98,15 +98,16 @@ export default function MethodologiesPortfolio() {
           </div>
           
           <figure data-methodology-hero-frame className="clip-diagonal relative h-[430px] w-full overflow-hidden bg-[#e8e1dc] md:h-[520px] lg:h-[620px] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-right-8 motion-safe:duration-700 motion-safe:ease-out" data-testid="hero-figure">
-            <PulseImage
-              key={heroMedia.src}
-              src={heroMedia.src}
-              alt={heroMedia.alt}
-              style={{ objectPosition: heroMedia.objectPosition }}
-              className="absolute inset-0 h-full w-full object-cover"
-              eager
-            />
-            {showFilm && <MethodologiesHeroFilm />}
+            {showFilm ? <MethodologiesHeroFilm /> : (
+              <PulseImage
+                key={heroMedia.src}
+                src={heroMedia.src}
+                alt={heroMedia.alt}
+                style={{ objectPosition: heroMedia.objectPosition }}
+                className="absolute inset-0 h-full w-full object-cover"
+                eager
+              />
+            )}
           </figure>
         </div>
       </header>

@@ -64,12 +64,12 @@ describe("Methodology Relationships and Boundaries", () => {
     assert.match(routeMap, /#guardrails-and-authority/);
   });
 
-  it("keeps the approved hero image as a fallback under the dedicated UAE film", () => {
+  it("plays the UAE film without mounting the retired image, leaving governed images to other markets", () => {
     assert.match(portfolio, /landingMedia\(governedLanding, "methodologies-hero-media"/);
     assert.match(portfolio, /src=\{heroMedia\.src\}/);
     assert.match(portfolio, /alt=\{heroMedia\.alt\}/);
     assert.match(portfolio, /market === "uae" && locale === "en"/);
-    assert.match(portfolio, /showFilm && <MethodologiesHeroFilm/);
+    assert.match(portfolio, /showFilm \? <MethodologiesHeroFilm/);
     assert.match(portfolio, /<NavigationBackControl embedded \/>/);
     assert.match(portfolio, /src: assetUrl\("\/images\/cognirise\/method-overview\.jpg"\)/);
     for (const file of [
@@ -81,11 +81,14 @@ describe("Methodology Relationships and Boundaries", () => {
       assert.match(heroFilm, new RegExp(file.replaceAll(".", "\\.")));
       assert.ok(readFileSync(resolve(root, `public/${file}`)).byteLength > 1000);
     }
-    assert.match(heroFilm, /prefers-reduced-motion: reduce/);
+    assert.doesNotMatch(heroFilm, /prefers-reduced-motion: reduce/);
+    assert.match(heroFilm, /autoPlay/);
     assert.match(heroFilm, /video\.play\(\)\.catch/);
-    assert.match(heroFilm, /error\.name !== "AbortError"/);
+    assert.match(heroFilm, /error\.name === "AbortError"/);
     assert.match(heroFilm, /networkState === HTMLMediaElement\.NETWORK_NO_SOURCE/);
-    assert.match(heroFilm, /if \(failed \|\| \(reducedMotion && posterFailed\)\) return null/);
+    assert.match(heroFilm, /The film could not load\./);
+    assert.match(heroFilm, /Retry film/);
+    assert.doesNotMatch(heroFilm, /governed image|heroMedia\.src/i);
     assert.doesNotMatch(heroFilm, /loadingGuard|8000/, "slow downloads should not be mistaken for broken media");
     assert.match(portfolio, /route-navigator/);
     assert.match(portfolio, /seven situations/);

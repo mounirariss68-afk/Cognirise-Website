@@ -8,103 +8,92 @@ const FILM = {
   poster: assetUrl("/images/cognirise/methodologies-pulse-hero-journey-poster.jpg"),
 };
 
-/**
- * The UAE route's new film is a presentation layer over the exact approved
- * methodologies-hero-media image. The image remains in the page underneath,
- * including if the route's film and poster cannot load. Other market editions
- * retain their own governed hero images until their film is approved.
- */
+/** UAE-English film. The poster is its first frame; no legacy hero image is mounted. */
 export function MethodologiesHeroFilm() {
-  const [reducedMotion, setReducedMotion] = useState(
-    () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches,
-  );
-  const [playing, setPlaying] = useState(false);
-  const [failed, setFailed] = useState(false);
-  const [posterFailed, setPosterFailed] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [unavailable, setUnavailable] = useState(false);
+  const [needsGesture, setNeedsGesture] = useState(false);
+  const [started, setStarted] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const update = () => setReducedMotion(preference.matches);
-    update();
-    preference.addEventListener("change", update);
-    return () => preference.removeEventListener("change", update);
-  }, []);
-
-  useEffect(() => {
-    if (reducedMotion || failed) return;
-    let attempt: number | undefined;
+    if (unavailable || needsGesture) return;
+    let resumeTimer: number | undefined;
     const resume = () => {
-      attempt = undefined;
+      resumeTimer = undefined;
       if (document.visibilityState !== "visible") return;
       const video = videoRef.current;
       if (!video?.paused || video.ended || video.error) return;
       void video.play().catch((error: DOMException) => {
-        // A source change, unmount or a hidden tab can abort play without a
-        // media failure. Do not discard a good film in those cases.
-        if (error.name !== "AbortError" && videoRef.current === video && document.visibilityState === "visible") {
-          console.warn("Methodologies film could not play:", error.name, error.message);
-          setFailed(true);
+        if (error.name === "AbortError" || videoRef.current !== video || document.visibilityState !== "visible") return;
+        if (video.error || video.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) {
+          setUnavailable(true);
+        } else {
+          // Autoplay can be denied by the host browser/iframe. Only a visitor's
+          // own click can unlock it; never misreport this as damaged media.
+          setNeedsGesture(true);
         }
       });
     };
     const scheduleResume = () => {
-      if (attempt !== undefined) window.clearTimeout(attempt);
-      attempt = window.setTimeout(resume, 250);
+      if (resumeTimer !== undefined) window.clearTimeout(resumeTimer);
+      resumeTimer = window.setTimeout(resume, 250);
     };
-    const video = videoRef.current;
     const onVisible = () => {
       if (document.visibilityState === "visible") scheduleResume();
     };
+    const video = videoRef.current;
     scheduleResume();
     video?.addEventListener("pause", scheduleResume);
     document.addEventListener("visibilitychange", onVisible);
     window.addEventListener("pageshow", onVisible);
-    // Slow delivery is not a broken film: the poster remains visible until
-    // playback starts. Only actual media errors trigger the governed fallback.
     return () => {
-      if (attempt !== undefined) window.clearTimeout(attempt);
+      if (resumeTimer !== undefined) window.clearTimeout(resumeTimer);
       video?.removeEventListener("pause", scheduleResume);
       document.removeEventListener("visibilitychange", onVisible);
       window.removeEventListener("pageshow", onVisible);
     };
-  }, [reducedMotion, failed]);
+  }, [unavailable, needsGesture]);
+
+  useEffect(() => {
+    if (started || unavailable || needsGesture) return;
+    const timer = window.setTimeout(() => setLoading(true), 3000);
+    return () => window.clearTimeout(timer);
+  }, [started, unavailable, needsGesture]);
 
   const checkSources = () => {
-    // Chromium can report NETWORK_NO_SOURCE without setting video.error or
-    // rejecting play() when every child <source> fails.
+    // A media-query mismatch can reject one <source> without breaking the
+    // video. Only an exhausted source list with no decoded frame is fatal.
     window.setTimeout(() => {
       const video = videoRef.current;
-      if (video?.networkState === HTMLMediaElement.NETWORK_NO_SOURCE
-        && video.readyState === HTMLMediaElement.HAVE_NOTHING
-        && video.currentTime === 0) {
-        setFailed(true);
+      if (video?.networkState === HTMLMediaElement.NETWORK_NO_SOURCE &&
+        video.readyState === HTMLMediaElement.HAVE_NOTHING && video.currentTime === 0) {
+        setUnavailable(true);
       }
     }, 250);
   };
 
-  // With no video (reduced motion), a missing poster reveals the approved
-  // governed image. With video, let playback proceed even if its poster fails.
-  if (failed || (reducedMotion && posterFailed)) return null;
+  const playFromGesture = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    setNeedsGesture(false);
+    void video.play().catch((error: DOMException) => {
+      if (videoRef.current !== video || error.name === "AbortError") return;
+      if (video.error || video.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) {
+        setUnavailable(true);
+      } else {
+        setNeedsGesture(true);
+      }
+    });
+  };
 
   return (
-    <div
-      className="absolute inset-0 bg-[#132040]"
-      aria-hidden="true"
-      data-testid="methodologies-hero-film"
-    >
-      <img
-        src={FILM.poster}
-        alt=""
-        draggable={false}
-        fetchPriority="high"
-        onError={() => setPosterFailed(true)}
-        className="absolute inset-0 h-full w-full object-cover"
-      />
-      {!reducedMotion && !failed && (
+    <div className="absolute inset-0 bg-[#132040]" data-testid="methodologies-hero-film">
+      {!unavailable && (
         <video
           ref={videoRef}
-          className={`h-full w-full object-cover transition-opacity duration-500 ${playing ? "opacity-100" : "opacity-0"}`}
+          className="h-full w-full object-cover"
+          aria-hidden="true"
           autoPlay
           muted
           loop
@@ -112,19 +101,50 @@ export function MethodologiesHeroFilm() {
           preload="auto"
           poster={FILM.poster}
           tabIndex={-1}
-          onPlaying={() => setPlaying(true)}
+          onPlaying={() => {
+            setStarted(true);
+            setLoading(false);
+            setNeedsGesture(false);
+          }}
           onError={(event) => {
-            // A rejected <source> (including a media query mismatch) can emit
-            // an error while the video still has another playable source.
-            if (!event.currentTarget.error) return;
-            console.warn("Methodologies film media error:", event.currentTarget.error.code);
-            setFailed(true);
+            if (event.currentTarget.error) setUnavailable(true);
           }}
         >
           <source src={FILM.mobileMp4} type="video/mp4" media="(max-width: 767px)" onError={checkSources} />
           <source src={FILM.mp4} type="video/mp4" onError={checkSources} />
           <source src={FILM.webm} type="video/webm" onError={checkSources} />
         </video>
+      )}
+      {loading && !needsGesture && !unavailable && (
+        <span className="absolute bottom-5 left-5 rounded bg-[#102957]/90 px-3 py-2 text-sm text-white" role="status">
+          Loading film…
+        </span>
+      )}
+      {needsGesture && !unavailable && (
+        <button
+          type="button"
+          onClick={playFromGesture}
+          data-testid="methodologies-film-play"
+          className="absolute bottom-5 left-5 rounded-full bg-white px-5 py-3 text-sm font-semibold text-[#102957] shadow-lg focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-white"
+        >
+          Play film
+        </button>
+      )}
+      {unavailable && (
+        <div className="flex h-full w-full flex-col items-center justify-center gap-4 px-6 text-center text-white" role="alert">
+          <p>The film could not load.</p>
+          <button
+            type="button"
+            onClick={() => {
+              setStarted(false);
+              setLoading(false);
+              setUnavailable(false);
+            }}
+            className="rounded-full border border-white px-5 py-2 font-semibold focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-white"
+          >
+            Retry film
+          </button>
+        </div>
       )}
     </div>
   );

@@ -152,8 +152,7 @@ async function assertArtworkHover() {
     const layer = document.querySelector('[data-testid="methodologies-hero-film"]');
     return {
       present: Boolean(layer),
-      poster: layer?.querySelector('img')?.getAttribute('src'),
-      imageLoaded: layer?.querySelector('img')?.complete,
+       poster: layer?.querySelector('video')?.poster,
       storedMarket: localStorage.getItem('cognirise-market'),
       url: location.href,
     };
@@ -219,11 +218,10 @@ async function assertUaeFilmPlayback() {
   await delay(1200);
   const state = await evaluate(`(() => {
     const layer = document.querySelector('[data-testid="methodologies-hero-film"]');
-    const poster = layer?.querySelector('img');
     const video = layer?.querySelector('video');
     return {
       layer: Boolean(layer),
-      posterLoaded: Boolean(poster?.complete && poster.naturalWidth),
+       poster: video?.poster,
       videoPresent: Boolean(video),
       paused: video?.paused,
       readyState: video?.readyState,
@@ -238,7 +236,7 @@ async function assertUaeFilmPlayback() {
     };
   })()`);
   assert.equal(state.layer, true, `UAE English mounts its route-owned film: ${JSON.stringify({ ...state, filmWarnings })}`);
-  assert.equal(state.posterLoaded, true, "the reduced-motion poster is deliverable");
+  assert.match(state.poster, /methodologies-pulse-hero-journey-poster\.jpg$/);
   assert.equal(state.videoPresent, true, "normal-motion visitors receive the video");
   assert.equal(state.paused, false, "the muted inline video starts playing");
   assert.ok(state.readyState >= 2 && state.currentTime > 0.1, "the film decodes and moves beyond its opening frame");
@@ -373,13 +371,13 @@ async function assertDelayedFilmAndFallback() {
   await navigate("/methodologies", `document.querySelectorAll('[data-route-index]').length === 7`);
   for (let i = 0; filmIntercept.count < 1 && i < 80; i += 1) await delay(100);
   assert.ok(filmIntercept.count > 0, "delayed test intercepted the film");
-  await waitForFilm(`Boolean(document.querySelector('[data-testid="methodologies-hero-film"] img')?.naturalWidth)`, "film poster");
+  await waitForFilm(`Boolean(document.querySelector('[data-testid="methodologies-hero-film"] video')?.poster)`, "film poster");
   // The guarded version removed the film after eight seconds even though the
   // server had not returned video bytes. Hold its requests longer than that.
   await delay(8500);
   assert.ok(await evaluate(`(() => {
     const layer = document.querySelector('[data-testid="methodologies-hero-film"]');
-    return Boolean(layer?.querySelector('img')?.naturalWidth)
+    return Boolean(layer?.querySelector('video')?.poster)
       && layer.querySelector('video')?.currentTime === 0
       && getComputedStyle(layer).backgroundColor === 'rgb(19, 32, 64)';
   })()`), "the film poster remains visible while the video response is delayed");
@@ -396,10 +394,10 @@ async function assertDelayedFilmAndFallback() {
   await navigate("/methodologies", `document.querySelectorAll('[data-route-index]').length === 7`);
   for (let i = 0; filmIntercept.count < 2 && i < 80; i += 1) await delay(100);
   assert.ok(filmIntercept.count >= 2, "both MP4 and WebM sources were rejected");
-  await waitForFilm(`Boolean(document.querySelector('[data-testid="hero-figure"]')) &&
-    !document.querySelector('[data-testid="methodologies-hero-film"]')`, "governed image after video errors");
-  assert.ok(await evaluate(`Boolean(document.querySelector('[data-testid="hero-figure"] img')?.naturalWidth)`),
-    "the governed image remains deliverable after real film failure");
+  await waitForFilm(`Boolean(document.querySelector('[data-testid="methodologies-hero-film"] [role="alert"]'))`,
+    "visible failure message after all video sources fail");
+  assert.equal(await evaluate(`document.querySelector('[data-testid="hero-figure"] img')?.src`),
+    undefined, "the old hero image is not mounted even after a real film failure");
   await send("Fetch.disable");
   filmIntercept = null;
   await send("Network.setCacheDisabled", { cacheDisabled: false });
@@ -409,10 +407,10 @@ async function assertDelayedFilmAndFallback() {
     features: [{ name: "prefers-reduced-motion", value: "reduce" }],
   });
   await navigate("/methodologies", `document.querySelectorAll('[data-route-index]').length === 7`);
-  await waitForFilm(`(() => {
-    const layer = document.querySelector('[data-testid="methodologies-hero-film"]');
-    return Boolean(layer?.querySelector('img')?.naturalWidth) && !layer.querySelector('video');
-  })()`, "reduced-motion poster without video");
+  await waitForFilm(`document.querySelector('[data-testid="methodologies-hero-film"] video')?.currentTime > 0.2`,
+    "the UAE film auto-plays even under reduced-motion preference");
+  assert.equal(await evaluate(`Boolean(document.querySelector('[data-testid="methodologies-film-play"]'))`),
+    false, "the play control is hidden while autoplay works");
 
   await send("Page.navigate", { url: `${baseUrl}/methodologies?market=ksa&locale=en` });
   await waitForFilm(`document.readyState === "complete"
