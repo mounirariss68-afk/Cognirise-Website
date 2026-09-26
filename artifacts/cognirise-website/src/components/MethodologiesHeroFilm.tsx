@@ -12,13 +12,13 @@ const FILM = {
 // Timed to the actual 51-second film, not wall-clock time. Each chapter
 // matches one of the seven starting situations in the decision journey below.
 const JOURNEY_HEADLINES = [
-  { from: 0, heading: "Finding where AI can help?", emphasis: "Find value with us." },
-  { from: 6.5, heading: "More ideas than resources?", emphasis: "Choose the right bets." },
-  { from: 13.5, heading: "Already have a strategy?", emphasis: "Put it to work." },
-  { from: 19, heading: "A process needs to change?", emphasis: "Improve the work." },
-  { from: 27, heading: "A pilot needs a path forward?", emphasis: "Release with confidence." },
-  { from: 34.5, heading: "Ready to reach further?", emphasis: "Expand what works." },
-  { from: 41, heading: "Results falling short?", emphasis: "Recover missing value." },
+  { from: 0, heading: "When the opportunity is still taking shape", emphasis: "We find the value worth pursuing." },
+  { from: 6.5, heading: "When good ideas pull in different directions", emphasis: "We help you choose the right bets." },
+  { from: 13.5, heading: "When the strategy is already there", emphasis: "We make your strategy work." },
+  { from: 19, heading: "When a process needs a better way", emphasis: "Together, we improve the work." },
+  { from: 27, heading: "When a pilot is ready for its next decision", emphasis: "We help pilots earn their place." },
+  { from: 34.5, heading: "When one success could reach further", emphasis: "We take what works further." },
+  { from: 41, heading: "When results fall short of the promise", emphasis: "We find the way back to value." },
 ] as const;
 
 /** UAE-English film. The poster is its first frame; no legacy hero image is mounted. */
