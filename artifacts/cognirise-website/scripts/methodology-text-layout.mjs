@@ -50,7 +50,8 @@ export async function assertNoClipping(evaluate, selector, context) {
     const root = document.querySelector(${JSON.stringify(selector)});
     const issues = [];
     const describe = el => el.getAttribute("data-testid") || el.tagName + ":" + el.textContent.trim().slice(0, 55);
-    const visible = el => el.checkVisibility() && el.getBoundingClientRect().width > 0;
+    // Live announcements are intentionally clipped visually, not broken copy.
+    const visible = el => !el.closest(".sr-only") && el.checkVisibility() && el.getBoundingClientRect().width > 0;
     const inside = (a, b) => a.left >= b.left - 2 && a.right <= b.right + 2 && a.top >= b.top - 2 && a.bottom <= b.bottom + 2;
     const rootRect = root.getBoundingClientRect();
     if (document.documentElement.scrollWidth > innerWidth + 1) issues.push("horizontal page scrolling");

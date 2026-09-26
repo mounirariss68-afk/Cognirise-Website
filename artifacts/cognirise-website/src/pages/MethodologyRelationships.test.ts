@@ -13,6 +13,7 @@ describe("Methodology Relationships and Boundaries", () => {
 
   const analytics = readFileSync(resolve(root, "src/lib/analytics.ts"), "utf8");
   const portfolio = readFileSync(resolve(root, "src/pages/MethodologiesPortfolio.tsx"), "utf8");
+  const heroFilm = readFileSync(resolve(root, "src/components/MethodologiesHeroFilm.tsx"), "utf8");
   const landingInventory = readFileSync(resolve(root, "../../lib/db/landing-page-inventory.json"), "utf8");
   const relBlock = readFileSync(resolve(root, "src/components/MethodologyRelationship.tsx"), "utf8");
   const vts = readFileSync(resolve(root, "src/pages/AIValueToScale.tsx"), "utf8");
@@ -63,10 +64,25 @@ describe("Methodology Relationships and Boundaries", () => {
     assert.match(routeMap, /#guardrails-and-authority/);
   });
 
-  it("verifies the new method overview image and routing approach in portfolio", () => {
+  it("keeps the approved hero image as a fallback under the dedicated UAE film", () => {
     assert.match(portfolio, /landingMedia\(governedLanding, "methodologies-hero-media"/);
     assert.match(portfolio, /src=\{heroMedia\.src\}/);
     assert.match(portfolio, /alt=\{heroMedia\.alt\}/);
+    assert.match(portfolio, /market === "uae" && locale === "en"/);
+    assert.match(portfolio, /showFilm && <MethodologiesHeroFilm/);
+    assert.match(portfolio, /<NavigationBackControl embedded \/>/);
+    assert.match(portfolio, /src: assetUrl\("\/images\/cognirise\/method-overview\.jpg"\)/);
+    for (const file of [
+      "videos/cognirise/methodologies-pulse-hero.mp4",
+      "videos/cognirise/methodologies-pulse-hero.webm",
+      "images/cognirise/methodologies-pulse-hero-poster.jpg",
+    ]) {
+      assert.match(heroFilm, new RegExp(file.replaceAll(".", "\\.")));
+      assert.ok(readFileSync(resolve(root, `public/${file}`)).byteLength > 1000);
+    }
+    assert.match(heroFilm, /prefers-reduced-motion: reduce/);
+    assert.match(heroFilm, /video\.play\(\)\.catch\(\(\) => setFailed\(true\)\)/);
+    assert.match(heroFilm, /onError=\{\(\) => setFailed\(true\)\}/);
     assert.match(portfolio, /route-navigator/);
     assert.match(portfolio, /seven situations/);
     assert.match(portfolio, /Value Scan remains a separate optional facilitated enquiry/);
@@ -74,7 +90,7 @@ describe("Methodology Relationships and Boundaries", () => {
     assert.doesNotMatch(portfolio, /AI Value-to-Scale Maturity Model/);
     assert.doesNotMatch(portfolio, /Complete static route/i);
     assert.doesNotMatch(portfolio, /Download the VTS assessment worksheet/i);
-    assert.match(routeMap, /Start with your situation/i);
+    assert.match(routeMap, /Choose the decision in front of you/i);
     assert.match(routeMap, /Direct specialist access/);
   });
 

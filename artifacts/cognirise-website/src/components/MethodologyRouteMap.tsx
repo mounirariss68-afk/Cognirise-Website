@@ -239,13 +239,12 @@ export function MethodologyRouteMap() {
     selectSituation(id);
     if (window.innerWidth < 1024 && outputRef.current) {
        const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-       outputRef.current.scrollIntoView({ behavior: reducedMotion ? "instant" : "smooth", block: "start" });
+       outputRef.current.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
     }
   };
 
   const displayedSituation = previewSituation ?? activeSituation;
   const activeRoute = ROUTE_DATA.find(r => r.id === displayedSituation) || ROUTE_DATA[0];
-  const activeArt = SITUATION_ART[displayedSituation];
   const previewOnMouse = (id: RouteSituation, pointerType: string) => {
     if (pointerType === "mouse") {
       setPreviewSituation(id);
@@ -291,15 +290,16 @@ export function MethodologyRouteMap() {
       </section>
     </section>
     <div data-testid="methodology-route-map" className="methodology-route-screen [&_button]:scroll-mt-32 [&_a]:scroll-mt-32">
-      {/* Left Side: Situations Radio Group */}
+       {/* The artwork is the choice, not a thumbnail beside the choice. */}
       <div className="methodology-route-rail" onPointerLeave={() => setPreviewSituation(null)}>
         <div className="methodology-route-rail-heading">
-          <h3 className="font-display text-xl font-semibold text-[#102957]">Start with your situation</h3>
+           <h3>Choose the decision in front of you</h3>
+           <p>Seven starting points. One next decision.</p>
         </div>
         <div 
           role="radiogroup" 
           aria-label="Starting situation" 
-          className="flex flex-col"
+           className="methodology-route-choices"
           data-testid="situation-radiogroup"
         >
           {ROUTE_DATA.map((sit, index) => {
@@ -322,10 +322,10 @@ export function MethodologyRouteMap() {
                 onKeyDown={(event) => handleSituationKeyDown(event, index)}
                 className="methodology-route-choice"
               >
-                <span className="methodology-route-thumb" aria-hidden="true">
-                  <img src={assetUrl(SITUATION_ART[sit.id].src)} alt="" loading="lazy" data-pulse-image-resilient="true" />
+                 <span className="methodology-route-art">
+                   <img src={assetUrl(SITUATION_ART[sit.id].src)} alt={SITUATION_ART[sit.id].alt} loading={index < 3 ? "eager" : "lazy"} data-pulse-image-resilient="true" />
                 </span>
-                <span className="min-w-0">
+                 <span className="methodology-route-choice-content">
                   <span className="methodology-route-choice-index">{String(index + 1).padStart(2, "0")} / 07{isActive ? " · Selected" : ""}</span>
                   <span className="methodology-route-choice-label">
                     {sit.label}
@@ -337,7 +337,7 @@ export function MethodologyRouteMap() {
         </div>
       </div>
 
-      {/* Right Side: Output */}
+       {/* Details remain editorial copy; no second copy of the selected scene. */}
       <div 
         id="selected-route-output"
         role="region"
@@ -351,14 +351,12 @@ export function MethodologyRouteMap() {
            {/* Decision-first output header */}
             <div className="methodology-route-hero">
              <div className="methodology-route-hero-copy">
-              <div className="methodology-route-hero-kicker">Your situation / {String(ROUTE_DATA.findIndex(r => r.id === displayedSituation) + 1).padStart(2, "0")}</div>
+               <div className="methodology-route-hero-kicker">{previewSituation ? "Previewing" : "Selected route"} / {String(ROUTE_DATA.findIndex(r => r.id === displayedSituation) + 1).padStart(2, "0")}</div>
              <h4 className="font-display text-[clamp(32px,5vw,52px)] font-semibold text-[#102957] tracking-[-.04em] leading-[1.05]" data-testid="route-detail-situation">
                {activeRoute.label}
               </h4>
              </div>
-             <figure className="methodology-route-hero-figure">
-               <img key={displayedSituation} src={assetUrl(activeArt.src)} alt={activeArt.alt} loading="eager" data-pulse-image-resilient="true" data-testid="route-detail-art" />
-             </figure>
+              <p className="methodology-route-hero-aside">The route below connects your current evidence to a practical next decision. Methods are selected for the question, not prescribed as a sequence.</p>
           </div>
 
           {/* Grid of details */}

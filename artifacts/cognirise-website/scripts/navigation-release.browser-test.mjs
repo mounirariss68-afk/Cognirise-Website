@@ -95,6 +95,20 @@ try {
     assert.equal(geometry.embedded, "true");
     assert.ok(Math.abs(geometry.backTop - geometry.imageTop) <= 1, `Embedded Back and hero image tops differ: ${JSON.stringify(geometry)}`);
   };
+  if (process.env.PULSE_NAV_METHODOLOGIES_ONLY === "1") {
+    await send("Page.enable");
+    await send("Network.enable");
+    await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
+    await send("Page.navigate", { url: `${base}/?market=uae` });
+    await wait(`location.pathname==='/' && document.querySelector('h1')`);
+    await evaluate(`document.querySelector('a[href="/methodologies"]').click()`);
+    await wait(`location.pathname==='/methodologies' && Boolean(${back}) && document.querySelector('[data-testid="hero-figure"]')`);
+    assert.equal(await evaluate(`document.querySelectorAll('[data-navigation-back-row]').length`), 1);
+    await assertEmbeddedBackGeometry("[data-testid='hero-figure']");
+    await evaluate(`${back}.click()`);
+    await wait(`location.pathname==='/' && document.querySelector('h1')`);
+    console.log("PASS methodologies uses exactly one hero-aligned Back and returns home");
+  } else {
   await send("Page.enable");
   await send("Network.enable");
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
@@ -143,8 +157,8 @@ try {
   console.log("PASS laptop navigation, regional delivery, native hash and subtle full-document Back");
   // Navigate through Wouter to a real dirty assessment; dismiss then accept.
   await evaluate(`document.querySelector('a[href="/methodologies"]').click()`);
-  await wait(`location.pathname==='/methodologies'`);
-  await assertBackRowGeometry();
+  await wait(`location.pathname==='/methodologies' && Boolean(${back}) && document.querySelector('[data-testid="hero-figure"]')`);
+  await assertEmbeddedBackGeometry("[data-testid='hero-figure']");
   await evaluate(`document.querySelector('a[href="/methodologies/ai-value-to-scale"]').click()`);
   await wait(`document.querySelector('input[type="radio"]')`);
   await assertEmbeddedBackGeometry("[data-methodology-hero-frame]");
@@ -219,6 +233,7 @@ try {
   assert.equal(await evaluate(`document.querySelector('header').getBoundingClientRect().right <= document.documentElement.clientWidth + 1`), true);
   console.log("PASS production mobile hiding, no orphan separator or header overflow");
   console.log("Resource failures:", [...failed]);
+  }
 } finally {
   socket?.close();
   browser.kill("SIGTERM");

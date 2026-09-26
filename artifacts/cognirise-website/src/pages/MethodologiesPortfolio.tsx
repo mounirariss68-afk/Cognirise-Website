@@ -4,17 +4,24 @@ import { PulseImage } from "@/components/ui/pulse-image";
 import { BrandButton } from "@/components/ui/brand-button";
 import { assetUrl } from "@/lib/assets";
 import { MethodologyRouteMap } from "@/components/MethodologyRouteMap";
+import { MethodologiesHeroFilm } from "@/components/MethodologiesHeroFilm";
+import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
 import { useGovernedLanding } from "@/components/GovernedLandingRoute";
 import { landingCta, landingMedia, landingNarrative } from "@/lib/cms";
+import { useMarketStore } from "@/store/market";
 
 export default function MethodologiesPortfolio() {
   const [location] = useLocation();
+  const { market, locale } = useMarketStore();
   const governedLanding = useGovernedLanding();
   const governedHero = governedLanding ? landingNarrative(governedLanding, "hero") : null;
   const primaryAction = landingCta(governedLanding, "primary-action", {
     label: "Find your situation",
     href: "/methodologies#route-navigator",
   });
+  // Only the UAE English edition has this route-owned film. Keep the existing
+  // governed image and compiled fallback untouched across all markets.
+  const showFilm = market === "uae" && locale === "en";
   const heroMedia = landingMedia(governedLanding, "methodologies-hero-media", {
     src: assetUrl("/images/cognirise/method-overview.jpg"),
     alt: "Architectural intersection representing connected methods",
@@ -60,40 +67,46 @@ export default function MethodologiesPortfolio() {
 
   return (
     <main className="bg-[#fdfcfb] text-[#102957]">
-      <header className="public-hero-shell px-6 pb-20 pt-12 md:px-[4.8vw] lg:pb-28 border-b border-[#cbd3e1]">
-        <p data-hero-content-edge className="text-[10px] font-bold uppercase tracking-[.14em] text-[hsl(var(--brand-pink))]" data-testid="portfolio-kicker">
-          How we do it
-        </p>
-        <div className="mt-7 grid gap-12 lg:gap-16 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
-          <div className="flex flex-col gap-8">
-            <h1 className="font-display text-[clamp(45px,7vw,100px)] font-semibold leading-[.88] tracking-[-.08em]" data-testid="portfolio-title">
-              {governedHero?.heading ?? "From AI ambition to working outcomes."}
-            </h1>
-            <div className="border-t border-[#102957] pt-8 max-w-[620px]">
-              <p className="text-[19px] leading-[1.58] text-[#405777]" data-testid="portfolio-description">
-                {governedHero?.text ?? "Start with the decision in front of you—not a framework name. Choose one of seven situations to see what you may already have, what needs deciding and which existing method can help. Strategy, operations and implementation are context, not a required sequence."}
+      <header className="public-hero-shell border-b border-[#cbd3e1] px-6 pb-16 pt-8 md:px-[4.8vw] md:pt-[22px] lg:pb-20">
+        <div className="grid items-start gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-[4vw]">
+          <div className="flex min-w-0 flex-col lg:min-h-[620px]">
+            <div className="flex flex-col gap-7">
+              <NavigationBackControl embedded />
+              <p data-hero-content-edge className="text-[10px] font-bold uppercase tracking-[.14em] text-[hsl(var(--brand-pink))]" data-testid="portfolio-kicker">
+                How we do it
               </p>
-              
-              <BrandButton
-                href={primaryAction.href}
-                onClick={handleNavClick}
-                data-testid="hero-primary-cta"
-                className="mt-10 max-w-full min-w-0"
-              >
-                {primaryAction.label}
-              </BrandButton>
+            </div>
+            <div className="mt-10 lg:mt-auto">
+              <h1 className="font-display text-[clamp(40px,4.8vw,76px)] font-semibold leading-[.94] tracking-[-.08em] [overflow-wrap:anywhere]" data-testid="portfolio-title">
+                {governedHero?.heading ?? "From AI ambition to working outcomes."}
+              </h1>
+              <div className="mt-7 max-w-[620px] border-t border-[#102957] pt-7">
+                <p className="text-[clamp(16px,1.4vw,19px)] leading-[1.58] text-[#405777]" data-testid="portfolio-description">
+                  {governedHero?.text ?? "Start with the decision in front of you—not a framework name. Choose one of seven situations to see what you may already have, what needs deciding and which existing method can help. Strategy, operations and implementation are context, not a required sequence."}
+                </p>
+
+                <BrandButton
+                  href={primaryAction.href}
+                  onClick={handleNavClick}
+                  data-testid="hero-primary-cta"
+                  className="mt-8 max-w-full min-w-0"
+                >
+                  {primaryAction.label}
+                </BrandButton>
+              </div>
             </div>
           </div>
           
-          <figure data-methodology-hero-frame className="clip-diagonal relative h-[430px] w-full overflow-hidden bg-[#071936] md:h-[520px] lg:h-[620px] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-right-8 motion-safe:duration-700 motion-safe:ease-out" data-testid="hero-figure">
+          <figure data-methodology-hero-frame className="clip-diagonal relative h-[430px] w-full overflow-hidden bg-[#e8e1dc] md:h-[520px] lg:h-[620px] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-right-8 motion-safe:duration-700 motion-safe:ease-out" data-testid="hero-figure">
             <PulseImage
               key={heroMedia.src}
               src={heroMedia.src}
               alt={heroMedia.alt}
-               style={{ objectPosition: heroMedia.objectPosition }}
-              className="h-full w-full object-cover opacity-90"
+              style={{ objectPosition: heroMedia.objectPosition }}
+              className="absolute inset-0 h-full w-full object-cover"
               eager
             />
+            {showFilm && <MethodologiesHeroFilm />}
           </figure>
         </div>
       </header>

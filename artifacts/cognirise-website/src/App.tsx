@@ -106,6 +106,7 @@ export function Router() {
   const path = rawPath === "/" ? rawPath : rawPath.replace(/\/+$/, "");
   const embedsBackInHero = path === "/"
     || path === "/platforms"
+    || path === "/methodologies"
     || path === "/methodologies/ai-use-case-prioritization"
     || path === "/methodologies/ai-value-to-scale"
     || path === "/methodologies/agentic-operations-readiness"

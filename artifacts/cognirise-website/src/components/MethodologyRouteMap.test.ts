@@ -13,7 +13,7 @@ const situationIds = [
 ];
 
 describe("illustrated methodology route navigator", () => {
-  it("maps every approved route to its own existing art file and meaningful main alt", () => {
+  it("maps every approved route to its own existing artwork, used inside the clickable choice", () => {
     const art = source.match(/const SITUATION_ART:[\s\S]*?\n};/)?.[0] ?? "";
     assert.ok(art);
     for (const id of situationIds) {
@@ -21,8 +21,12 @@ describe("illustrated methodology route navigator", () => {
       assert.ok(art.includes(`"/images/cognirise/situations/${id}.jpg"`));
     }
     assert.equal((art.match(/src: "\/images\/cognirise\/situations\//g) ?? []).length, 7);
-    assert.match(source, /src=\{assetUrl\(SITUATION_ART\[sit\.id\]\.src\)\} alt="" loading="lazy" data-pulse-image-resilient="true"/);
-    assert.match(source, /src=\{assetUrl\(activeArt\.src\)\} alt=\{activeArt\.alt\} loading="eager" data-pulse-image-resilient="true"/);
+    assert.match(source, /<button[\s\S]*?className="methodology-route-choice"[\s\S]*?<span className="methodology-route-art">[\s\S]*?<img src=\{assetUrl\(SITUATION_ART\[sit\.id\]\.src\)\} alt=\{SITUATION_ART\[sit\.id\]\.alt\}/);
+    assert.match(source, /<span className="methodology-route-choice-content">[\s\S]*?\{sit\.label\}/);
+    assert.doesNotMatch(source, /methodology-route-thumb|route-detail-art|methodology-route-hero-figure|activeArt/);
+    assert.match(styles, /\.methodology-route-choices \{[\s\S]*?grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/);
+    assert.match(styles, /\.methodology-route-art img \{ object-fit: cover/);
+    assert.match(styles, /\.methodology-route-choice:first-child \{ grid-column: span 2/);
   });
 
   it("retains description data for print but removes both repeated on-screen copies", () => {
@@ -47,7 +51,10 @@ describe("illustrated methodology route navigator", () => {
     assert.match(source, /sessionStorage\.setItem\(STORAGE_KEY_SELECTION, activeSituation\)/);
     assert.match(source, /onKeyDown=\{\(event\) => handleSituationKeyDown\(event, index\)\}/);
     assert.match(source, /onClick=\{\(\) => handleRadioClick\(sit\.id as RouteSituation\)\}/);
-    assert.match(styles, /\.methodology-route-choice\[data-preview="true"\] \.methodology-route-thumb/);
+    assert.match(styles, /\.methodology-route-choice\[data-preview="true"\]::after/);
+    assert.match(styles, /\.methodology-route-choice:focus-visible/);
+    assert.match(styles, /@media \(max-width: 640px\)/);
     assert.match(styles, /@media \(prefers-reduced-motion: no-preference\)/);
+    assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/);
   });
 });
