@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { assetUrl } from "@/lib/assets";
+import "./MethodologiesHeroFilm.css";
 
 const FILM = {
   mobileMp4: assetUrl("/videos/cognirise/methodologies-hero-clean-cut-20260926/methodologies-pulse-hero-journey-720.mp4"),
@@ -8,6 +9,18 @@ const FILM = {
   poster: assetUrl("/images/cognirise/methodologies-pulse-hero-journey-poster.jpg"),
 };
 
+// Timed to the actual 51-second film, not wall-clock time. Each chapter
+// matches one of the seven starting situations in the decision journey below.
+const JOURNEY_HEADLINES = [
+  { from: 0, heading: "Finding where AI can help?", emphasis: "Find value with us." },
+  { from: 6.5, heading: "More ideas than resources?", emphasis: "Choose the right bets." },
+  { from: 13.5, heading: "Already have a strategy?", emphasis: "Put it to work." },
+  { from: 19, heading: "A process needs to change?", emphasis: "Improve the work." },
+  { from: 27, heading: "A pilot needs a path forward?", emphasis: "Release with confidence." },
+  { from: 34.5, heading: "Ready to reach further?", emphasis: "Expand what works." },
+  { from: 41, heading: "Results falling short?", emphasis: "Recover missing value." },
+] as const;
+
 /** UAE-English film. The poster is its first frame; no legacy hero image is mounted. */
 export function MethodologiesHeroFilm() {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -15,6 +28,17 @@ export function MethodologiesHeroFilm() {
   const [needsGesture, setNeedsGesture] = useState(false);
   const [started, setStarted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [chapter, setChapter] = useState(0);
+
+  const syncHeadline = () => {
+    const time = videoRef.current?.currentTime ?? 0;
+    for (let index = JOURNEY_HEADLINES.length - 1; index >= 0; index--) {
+      if (time >= JOURNEY_HEADLINES[index].from) {
+        setChapter(index);
+        break;
+      }
+    }
+  };
 
   useEffect(() => {
     if (unavailable || needsGesture) return;
@@ -101,7 +125,12 @@ export function MethodologiesHeroFilm() {
           preload="auto"
           poster={FILM.poster}
           tabIndex={-1}
+          onTimeUpdate={syncHeadline}
+          onSeeking={syncHeadline}
+          onSeeked={syncHeadline}
+          onLoadedMetadata={syncHeadline}
           onPlaying={() => {
+            syncHeadline();
             setStarted(true);
             setLoading(false);
             setNeedsGesture(false);
@@ -114,6 +143,25 @@ export function MethodologiesHeroFilm() {
           <source src={FILM.mp4} type="video/mp4" onError={checkSources} />
           <source src={FILM.webm} type="video/webm" onError={checkSources} />
         </video>
+      )}
+      {!unavailable && (
+        <>
+          <div className="methodologies-film-caption" aria-hidden="true" data-testid="methodologies-film-caption">
+            <p className="methodologies-film-eyebrow">Wherever you are, Cognirise is with you</p>
+            <div key={chapter} className="methodologies-film-chapter">
+              <p className="methodologies-film-question">{JOURNEY_HEADLINES[chapter].heading}</p>
+              <p className="methodologies-film-headline">{JOURNEY_HEADLINES[chapter].emphasis}</p>
+            </div>
+            <span className="methodologies-film-progress" aria-hidden="true">
+              {String(chapter + 1).padStart(2, "0")} / 07
+            </span>
+          </div>
+          <ol className="sr-only" aria-label="How Cognirise supports your AI journey">
+            {JOURNEY_HEADLINES.map(({ heading, emphasis }) => (
+              <li key={heading}>{heading} {emphasis}</li>
+            ))}
+          </ol>
+        </>
       )}
       {loading && !needsGesture && !unavailable && (
         <span className="absolute bottom-5 left-5 rounded bg-[#102957]/90 px-3 py-2 text-sm text-white" role="status">
