@@ -813,8 +813,30 @@
 }
 
 @media (min-width: 1024px) {
-  .home-layout-frame {
+  .home-layout-frame,
+  .public-hero-shell {
     max-width: none;
     padding-inline: 4.8vw !important;
+  }
+
+  /* The 1440px utility is used for outer section rails throughout the public
+     pages. Open that rail on desktop only, without widening constrained copy,
+     cards, media, or the independent tablet/mobile compositions. */
+  main [class~="max-w-[1440px]"] {
+    max-width: none;
+  }
+
+  main [class~="max-w-[1440px]"][class~="md:px-12"] {
+    padding-inline: 4.8vw;
+  }
+
+  .fluid-page-rule {
+    margin-inline: 4.8vw;
+  }
+
+  /* A hidden-overflow industry root creates a second vertical scrollbar,
+     shortening its hero rail by one scrollbar width relative to the header. */
+  .pulse-motion-page .industry {
+    overflow-x: clip;
   }
 }

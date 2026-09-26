@@ -60,7 +60,7 @@ export default function DataAIFoundations() {
         </div>
       </section>
 
-      <section className="border-y border-foreground mx-6 md:mx-12 max-w-[1440px] xl:mx-auto">
+      <section className="fluid-page-rule border-y border-foreground mx-6 md:mx-12 max-w-[1440px] xl:mx-auto">
         <div className="grid grid-cols-2 lg:grid-cols-4">
           <div className="border-b lg:border-b-0 lg:border-r border-border p-5 lg:p-6">
             <span className="block text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">Target</span>

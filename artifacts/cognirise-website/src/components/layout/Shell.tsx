@@ -492,7 +492,7 @@ export function Shell({
       <header
         className="fixed top-0 z-50 flex h-[72px] w-full items-center border-b border-border bg-white/95 backdrop-blur transition-colors duration-300 md:h-[82px]"
       >
-        <div className={`${routePath(location) === "/" ? "home-layout-frame" : "mx-auto max-w-[1440px] px-6 md:px-12"} flex w-full min-w-0 items-center justify-between`}>
+        <div className="home-layout-frame flex w-full min-w-0 items-center justify-between">
           <Link href="/" className="relative z-50 flex h-full shrink-0 items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-pink))] focus-visible:ring-offset-2">
             <img
               src={assetUrl("images/cognirise/logo-blue.svg")}
@@ -695,7 +695,7 @@ export function Shell({
           COGNIRISE
         </div>
         
-        <div className="mx-auto w-full max-w-[1440px] px-6 md:px-12 relative z-10">
+        <div className="home-layout-frame relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8 mb-16">
             <div className="flex flex-col gap-6">
               <Link href="/">

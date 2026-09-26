@@ -9,6 +9,12 @@ Use Cognirise Pulse as the shared design language: an off-white architectural ca
 
 **How to apply:** Use this direction across Cognirise website pages, presentations, campaign assets and related brand materials unless the user explicitly asks for a new visual direction. Translate each content model into its own clear spatial composition.
 
+For the public website, use the corrected homepage's fluid desktop page edges as the alignment reference across page families. Keep hero copy to readable widths and preserve each page's image proportions and angular crops; a shared outer edge does not mean one fixed-width content container or one uniform hero design.
+
+**Why:** On September 26, 2026, the user explicitly approved carrying the corrected homepage's fluid desktop edges across the rest of the public website. The previous fixed-width desktop frame visibly diverged from the fluid sections below it on wide screens.
+
+**How to apply:** Check header, hero, section rails, and footer together at standard and ultra-wide desktop sizes; leave tablet and mobile compositions independent.
+
 For industry detail pages, the established shared editorial family takes priority over bespoke domain compositions. Keep Education's broad schools, universities, networks and authorities narrative within that family rather than making it a separate microsite.
 
 Guardrails must also use the established methodology-page family, not a separate dashboard aesthetic. Compare against IDAO and the shared methodology hero before calling a design Pulse-compliant.
