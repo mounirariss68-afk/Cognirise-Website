@@ -1,6 +1,6 @@
 .continuous-panorama-shell .signal-journey--panorama .sj-panorama-stage {
   height: auto;
-  aspect-ratio: 1024 / 336;
+  aspect-ratio: 5 / 1;
   background: #252a32;
 }
 
@@ -65,6 +65,8 @@
 .continuous-panorama-shell .signal-journey--panorama .sj-panorama-rail .sj-stop {
   position: relative;
   z-index: 1;
+  isolation: isolate;
+  overflow: hidden;
   flex: .7 1 0;
   height: 100%;
   min-height: 0;
@@ -77,9 +79,38 @@
   transition: flex-grow .75s cubic-bezier(.19, 1, .22, 1), background-color .3s ease;
 }
 
+.continuous-panorama-shell .signal-journey--panorama .sj-panorama-rail .sj-stop::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background-image:
+    linear-gradient(180deg, rgba(8, 18, 37, .04) 15%, rgba(8, 18, 37, .25) 62%, rgba(8, 18, 37, .9) 100%),
+    url("/__mockup/images/continuous-panorama-journey-master.jpg");
+  background-repeat: no-repeat;
+  background-size: 100% 100%, 700% 100%;
+  background-position: center, 0% 50%;
+  content: "";
+  opacity: 0;
+  transition: opacity .26s ease;
+  pointer-events: none;
+}
+
+.continuous-panorama-shell .signal-journey--panorama .sj-panorama-rail .sj-stop:nth-child(2)::before { background-position: center, 16.6667% 50%; }
+.continuous-panorama-shell .signal-journey--panorama .sj-panorama-rail .sj-stop:nth-child(3)::before { background-position: center, 33.3333% 50%; }
+.continuous-panorama-shell .signal-journey--panorama .sj-panorama-rail .sj-stop:nth-child(4)::before { background-position: center, 50% 50%; }
+.continuous-panorama-shell .signal-journey--panorama .sj-panorama-rail .sj-stop:nth-child(5)::before { background-position: center, 66.6667% 50%; }
+.continuous-panorama-shell .signal-journey--panorama .sj-panorama-rail .sj-stop:nth-child(6)::before { background-position: center, 83.3333% 50%; }
+.continuous-panorama-shell .signal-journey--panorama .sj-panorama-rail .sj-stop:nth-child(7)::before { background-position: center, 100% 50%; }
+
 .continuous-panorama-shell .signal-journey--panorama .sj-panorama-rail .sj-stop.is-active {
   flex-grow: 1.8;
   background: linear-gradient(180deg, rgba(5, 14, 31, .20) 12%, rgba(5, 14, 31, .78) 100%);
+}
+
+.continuous-panorama-shell .signal-journey--panorama .sj-panorama-rail .sj-stop.is-active::before,
+.continuous-panorama-shell .signal-journey--panorama .sj-panorama-rail .sj-stop:hover::before,
+.continuous-panorama-shell .signal-journey--panorama .sj-panorama-rail .sj-stop:focus-visible::before {
+  opacity: 1;
 }
 
 .continuous-panorama-shell .signal-journey--panorama .sj-panorama:has(.sj-stop:hover) .sj-panorama-rail .sj-stop.is-active,
@@ -100,6 +131,11 @@
 .continuous-panorama-shell .signal-journey--panorama .sj-panorama-rail .sj-stop:hover,
 .continuous-panorama-shell .signal-journey--panorama .sj-panorama-rail .sj-stop:focus-visible {
   z-index: 5;
+}
+
+.continuous-panorama-shell .signal-journey--panorama .sj-panorama-rail .sj-stop:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, .96);
+  outline-offset: -4px;
 }
 
 .continuous-panorama-shell .signal-journey--panorama .sj-panorama-rail .sj-node {
@@ -141,8 +177,9 @@
   left: 12px;
   color: #fff;
   content: attr(aria-label);
-  font: 600 clamp(13px, 1.05vw, 16px)/1.35 "Inter", sans-serif;
-  letter-spacing: -.02em;
+  max-width: 26ch;
+  font: 600 clamp(14px, 1.15vw, 17px)/1.28 "Comfortaa", sans-serif;
+  letter-spacing: -.045em;
   opacity: 0;
   text-shadow: 0 1px 12px rgba(3, 13, 30, .96);
   transition: opacity .2s ease;
@@ -168,10 +205,59 @@
   max-width: 760px;
 }
 
+.continuous-panorama-shell .signal-journey--panorama .sj-intro {
+  margin-bottom: clamp(18px, 2vw, 26px);
+}
+
+.continuous-panorama-shell .signal-journey {
+  padding-top: clamp(28px, 3.4vw, 44px);
+}
+
+.continuous-panorama-shell .signal-journey--panorama .sj-intro > p {
+  color: #405777;
+}
+
+.continuous-panorama-shell .signal-journey--panorama .sj-overline {
+  color: #7657cb;
+}
+
+.continuous-panorama-shell .signal-journey--panorama .sj-journey {
+  padding-bottom: 8px;
+}
+
+.continuous-panorama-shell .signal-journey--panorama .sj-rail-footer {
+  margin-top: 12px;
+}
+
+.continuous-panorama-shell .signal-journey--panorama .sj-journey-head {
+  padding-top: 14px;
+}
+
+.continuous-panorama-shell .signal-journey--panorama .sj-detail {
+  padding-top: 12px;
+}
+
+.continuous-panorama-shell .signal-journey--panorama .sj-description {
+  max-width: none;
+  margin-top: 8px;
+  color: #263b5b;
+  font: 500 clamp(18px, 1.42vw, 19px)/1.43 "Inter", sans-serif;
+  letter-spacing: -.015em;
+}
+
 @media (max-width: 767px) {
   .continuous-panorama-shell .signal-journey--panorama .sj-panorama-stage {
     height: 218px;
     aspect-ratio: auto;
+  }
+
+  .continuous-panorama-shell .signal-journey {
+    padding-top: 34px;
+  }
+
+  .continuous-panorama-shell .signal-journey--panorama .sj-description {
+    font-size: 18px;
+    line-height: 1.5;
   }
 
   .continuous-panorama-shell .signal-journey--panorama .sj-panorama-stage::before {
@@ -263,6 +349,8 @@
   }
 
   .continuous-panorama-shell .signal-journey--panorama .sj-panorama-rail .sj-stop {
+    overflow: visible;
+    isolation: auto;
     flex: none;
     height: auto;
     min-height: 103px;
@@ -274,6 +362,10 @@
     text-shadow: none;
     scroll-snap-align: start;
     transform: none;
+  }
+
+  .continuous-panorama-shell .signal-journey--panorama .sj-panorama-rail .sj-stop::before {
+    display: none;
   }
 
   .continuous-panorama-shell .signal-journey--panorama .sj-panorama-rail .sj-stop.is-active {
