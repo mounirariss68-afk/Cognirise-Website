@@ -39,19 +39,22 @@
   gap: 12px;
 }
 .methodology-route-choice {
+  --choice-height: clamp(184px, 15vw, 210px);
   appearance: none;
   position: relative;
   isolation: isolate;
-  display: flex;
-  align-items: flex-end;
-  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 62%) minmax(0, 38%);
+  align-items: stretch;
+  justify-self: start;
+  width: calc(100% - clamp(22px, 2vw, 32px));
   min-width: 0;
-  min-height: clamp(148px, 13vw, 188px);
-  padding: clamp(17px, 1.8vw, 26px);
+  min-height: var(--choice-height);
+  padding: 0;
   overflow: hidden;
   border: 0;
   border-radius: 0;
-  background: #e6e0e9;
+  background: #fff;
   color: var(--route-ink);
   text-align: left;
   cursor: pointer;
@@ -64,18 +67,21 @@
 }
 .methodology-route-art,
 .methodology-route-art img {
-  position: absolute;
-  inset: 0;
   display: block;
   width: 100%;
   height: 100%;
 }
-.methodology-route-art { z-index: -2; }
+.methodology-route-art {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  background: #e6e0e9;
+}
 .methodology-route-art img {
+  position: absolute;
+  inset: 0;
   object-fit: cover;
   object-position: center;
-  transform: scale(1);
-  transform-origin: center;
 }
 .methodology-route-choice::after {
   content: "";
@@ -92,17 +98,16 @@
 .methodology-route-choice[data-committed="true"]::after { transform: scaleX(1); }
 .methodology-route-choice[data-preview="true"]::after { transform: scaleX(.55); opacity: .7; }
 .methodology-route-choice-content {
-  display: block;
-  width: 100%;
-  max-width: 30rem;
-  text-wrap: balance;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(14px, 1.5vw, 22px);
+  background: #fff;
 }
 .methodology-route-choice-index {
-  display: table;
-  width: fit-content;
-  margin: 0 0 8px -6px;
-  padding: 4px 6px;
-  background: rgba(253, 252, 251, .9);
+  display: block;
+  margin-bottom: 12px;
   color: #694c7a;
   font-size: 11px;
   font-weight: 700;
@@ -110,14 +115,10 @@
   text-transform: uppercase;
 }
 .methodology-route-choice-label {
-  display: inline;
-  margin-left: -7px;
-  padding: 4px 7px;
-  background: rgba(253, 252, 251, .9);
-  -webkit-box-decoration-break: clone;
-  box-decoration-break: clone;
+  display: block;
+  text-wrap: pretty;
   font-family: Comfortaa, sans-serif;
-  font-size: clamp(17px, 1.55vw, 22px);
+  font-size: clamp(16px, 1.45vw, 21px);
   font-weight: 600;
   line-height: 1.28;
   letter-spacing: -.055em;
@@ -203,18 +204,23 @@
   background: #f8f3f5;
 }
 
-.methodology-route-choice:hover img { transform: scale(1.18); }
-@media (hover: none) and (pointer: coarse) {
-  .methodology-route-choice:hover img { transform: scale(1); }
+.methodology-route-choice:focus-visible {
+  width: 100%;
+  min-height: calc(var(--choice-height) + 36px);
 }
 @media (hover: hover) and (pointer: fine) {
+  .methodology-route-choice:hover {
+    width: 100%;
+    min-height: calc(var(--choice-height) + 36px);
+  }
   .methodology-route-choice:hover::after { transform: scaleX(.55); }
   .methodology-route-choice[data-committed="true"]:hover::after { transform: scaleX(1); }
 }
 @media (max-width: 1023px) {
   .methodology-route-screen { grid-template-columns: minmax(260px, 36%) minmax(0, 1fr); gap: 24px; }
   .methodology-route-rail { padding-right: 20px; }
-  .methodology-route-choice { min-height: clamp(160px, 19vw, 188px); }
+  .methodology-route-choice { --choice-height: clamp(190px, 23vw, 220px); }
+  .methodology-route-choice-label { font-size: 16px; }
   .methodology-route-detail .route-detail-grid { grid-template-columns: 1fr; gap: 24px; }
   .methodology-route-detail .route-detail-grid > :not(:first-child) {
     grid-column: auto;
@@ -228,12 +234,12 @@
   .methodology-route-rail { padding: 0 0 36px; border-right: 0; border-bottom: 1px solid var(--route-rule); }
   .methodology-route-detail { position: static; max-height: none; overflow: visible; }
   .methodology-route-choices { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .methodology-route-choice { min-height: clamp(190px, 25vw, 260px); }
+  .methodology-route-choice { --choice-height: clamp(195px, 25vw, 230px); }
 }
 @media (max-width: 640px) {
   .methodology-route-choices { grid-template-columns: 1fr; gap: 10px; }
-  .methodology-route-choice { min-height: 190px; }
-  .methodology-route-choice-label { font-size: clamp(19px, 5.5vw, 26px); }
+  .methodology-route-choice { --choice-height: 210px; grid-template-columns: minmax(0, 64%) minmax(0, 36%); }
+  .methodology-route-choice-label { font-size: clamp(16px, 4.4vw, 20px); }
   .methodology-route-hero { grid-template-columns: 1fr; gap: 18px; }
   .methodology-route-hero-aside { max-width: 44ch; }
   .methodology-route-detail .route-detail-grid { grid-template-columns: 1fr; gap: 26px; }
@@ -246,10 +252,10 @@
   }
 }
 @media (prefers-reduced-motion: no-preference) {
-  .methodology-route-choice img { transition: transform .5s cubic-bezier(.2,.7,.2,1); }
+  .methodology-route-choice { transition: width .32s ease, min-height .32s ease; }
   .methodology-route-choice::after { transition: transform .24s ease, opacity .24s ease; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .methodology-route-choice img,
+  .methodology-route-choice,
   .methodology-route-choice::after { transition: none; }
 }

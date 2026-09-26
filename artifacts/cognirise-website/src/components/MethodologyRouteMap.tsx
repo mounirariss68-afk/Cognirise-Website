@@ -293,7 +293,7 @@ export function MethodologyRouteMap() {
       </section>
     </section>
     <div data-testid="methodology-route-map" className="methodology-route-screen [&_button]:scroll-mt-32 [&_a]:scroll-mt-32">
-       {/* The artwork is the choice, not a thumbnail beside the choice. */}
+        {/* Each complete text-and-art panel is one choice. */}
       <div className="methodology-route-rail" onPointerLeave={() => setPreviewSituation(null)}>
         <div className="methodology-route-rail-heading">
            <h3>Choose the decision in front of you</h3>
@@ -325,15 +325,15 @@ export function MethodologyRouteMap() {
                 onKeyDown={(event) => handleSituationKeyDown(event, index)}
                 className="methodology-route-choice"
               >
-                 <span className="methodology-route-art">
-                   <img src={assetUrl(SITUATION_ART[sit.id].src)} alt={SITUATION_ART[sit.id].alt} loading={index < 3 ? "eager" : "lazy"} data-pulse-image-resilient="true" />
-                </span>
                  <span className="methodology-route-choice-content">
                   <span className="methodology-route-choice-index">{String(index + 1).padStart(2, "0")} / 07{isActive ? " · Selected" : ""}</span>
                   <span className="methodology-route-choice-label">
                     {sit.label}
                   </span>
                 </span>
+                  <span className="methodology-route-art">
+                    <img src={assetUrl(SITUATION_ART[sit.id].src)} alt={SITUATION_ART[sit.id].alt} loading={index < 3 ? "eager" : "lazy"} data-pulse-image-resilient="true" />
+                  </span>
               </button>
             )
           })}

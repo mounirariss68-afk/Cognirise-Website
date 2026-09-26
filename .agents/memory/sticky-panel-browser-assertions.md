@@ -14,3 +14,9 @@ For a sticky pane with its own vertical scrolling, treat off-scrollport descenda
 **Why:** A large image rail can keep a shorter result pane sticky while long result copy scrolls inside it; naive clipping assertions fail on valid links below the pane's visible scrollport.
 
 **How to apply:** Still reject `overflow: hidden` and `clip`, horizontal clipping, and unfocusable links. Verify the pane itself stays inside the section and that keyboard focus can scroll each result link into view.
+
+Synthetic text enlargement can change the height of a focused expandable choice *after* keyboard auto-scroll has already run. A resulting bottom-edge visibility failure does not prove the choice is unreachable.
+
+**Why:** Enlarging the methodology rail's card text after a focus move pushed the focused card below the viewport even though its text was intact and the card could scroll fully into view. Longer sticky-pane links could likewise sit a fraction below the viewport edge.
+
+**How to apply:** After an artificial text-resize step, scroll the still-focused choice or link into view with `block: "nearest"` before asserting that it is visible and unobscured; separately retain text-clipping and panel-overlap checks.

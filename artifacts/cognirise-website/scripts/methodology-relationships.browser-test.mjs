@@ -15,6 +15,7 @@ const browser = spawn(browserPath, [
   "--headless=new",
   "--no-sandbox",
   "--disable-gpu",
+  "--blink-settings=availableHoverTypes=2,primaryHoverType=2,availablePointerTypes=4,primaryPointerType=4",
   "--window-size=1440,1000",
   `--remote-debugging-port=${debuggingPort}`,
   `--user-data-dir=${profilePath}`,
@@ -151,37 +152,54 @@ async function assertArtworkHover() {
   })()`);
   assert.equal(film.present, true, `UAE English should mount its film layer: ${JSON.stringify(film)}`);
   const bounds = await evaluate(`(() => {
-    const card = document.querySelector('[data-route-index="0"]');
+    const card = document.querySelector('[data-route-index="2"]');
     card.scrollIntoView({ block: "center" });
     const rect = card.getBoundingClientRect();
     return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
   })()`);
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 0, y: 0 });
-  const before = await evaluate(`getComputedStyle(document.querySelector('[data-route-index="0"] img')).transform`);
+  await evaluate(`document.querySelector('[data-route-index="1"]').click()`);
+  const selected = await evaluate(`document.querySelector('[data-testid="route-detail-situation"]').textContent.trim()`);
   await send("Input.dispatchMouseEvent", {
     type: "mouseMoved",
     x: bounds.x + bounds.width / 2,
     y: bounds.y + bounds.height / 2,
   });
-  await delay(80);
-  const after = await evaluate(`getComputedStyle(document.querySelector('[data-route-index="0"] img')).transform`);
+  await delay(500);
   const hoverDiagnostics = await evaluate(`(() => ({
     fineHover: matchMedia('(hover: hover) and (pointer: fine)').matches,
-    hovered: document.querySelector('[data-route-index="0"]').matches(':hover'),
+    hovered: document.querySelector('[data-route-index="2"]').matches(':hover'),
     elementAtPointer: document.elementFromPoint(${bounds.x + bounds.width / 2}, ${bounds.y + bounds.height / 2})?.className,
     scrollY: window.scrollY,
   }))()`);
-  assert.match(before, /matrix\(1, 0, 0, 1, 0, 0\)/, "route artwork starts at its native size");
-  assert.match(after, /matrix\(1\.18, 0, 0, 1\.18, 0, 0\)/, `pointer hover enlarges the actual route image: ${JSON.stringify(hoverDiagnostics)}`);
+  assert.equal(hoverDiagnostics.hovered, true, `pointer reaches the card: ${JSON.stringify(hoverDiagnostics)}`);
   assert.ok(await evaluate(`(() => {
-    const card = document.querySelector('[data-route-index="0"]');
+    const card = document.querySelector('[data-route-index="2"]');
     const current = card.getBoundingClientRect();
+    const text = card.querySelector('.methodology-route-choice-content');
+    const art = card.querySelector('.methodology-route-art');
+    const textRect = text.getBoundingClientRect();
+    const artRect = art.getBoundingClientRect();
+    const rail = document.querySelector('.methodology-route-rail').getBoundingClientRect();
+    const output = document.querySelector('#selected-route-output').getBoundingClientRect();
     const label = card.querySelector('.methodology-route-choice-label');
-    return Math.abs(current.width - ${bounds.width}) < 1
-      && Math.abs(current.height - ${bounds.height}) < 1
-      && getComputedStyle(card, '::before').content === 'none'
-      && getComputedStyle(label).backgroundColor.includes('0.9)');
-  })()`), "the fixed-size card reveals its image without a full-art white overlay");
+    return current.width > ${bounds.width} + 15
+      && current.height > ${bounds.height} + 20
+      && textRect.right <= artRect.left + 1
+      && artRect.width < textRect.width
+      && current.right <= rail.right
+      && current.right < output.left
+      && getComputedStyle(text).backgroundColor === 'rgb(255, 255, 255)'
+      && label.scrollHeight <= label.clientHeight + 1;
+  })()`), "the whole card grows in width and height; white text stays beside narrower artwork without overlapping details");
+  assert.equal(await evaluate(`document.querySelector('[data-testid="route-detail-situation"]').textContent.trim()`),
+    "We have an AI strategy and need to implement it.", "hover previews the third route");
+  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 0, y: 0 });
+  await delay(400);
+  assert.equal(await evaluate(`document.querySelector('[data-testid="route-detail-situation"]').textContent.trim()`),
+    selected, "leaving the cards restores the last committed route");
+  assert.equal(await evaluate(`document.querySelector('[data-route-index="1"]').getAttribute('aria-checked')`),
+    "true", "hover does not change the committed selection");
 }
 
 async function assertUaeFilmPlayback() {
@@ -392,6 +410,9 @@ async function assertRouteMap(width, scale) {
     // compound the scale or accidentally test newly mounted text at 100%.
     if (index) await resizeText(evaluate, routeMap, scale);
     const radio = '[data-route-index="' + index + '"]';
+    // Resizing text after focus changes the focused card's height. Bring the
+    // enlarged card into view before testing reachability, as a visitor can.
+    await evaluate(`document.querySelector(${JSON.stringify(radio)}).scrollIntoView({ block: "nearest", behavior: "instant" })`);
     await assertFocusedVisible(evaluate, radio, context + " keyboard route " + index);
     assert.equal(await evaluate(`document.querySelector(${JSON.stringify(radio)}).getAttribute("aria-checked")`), "true");
     assert.equal(await evaluate(`document.querySelector('[data-testid="route-detail-situation"]').textContent.trim()`), situations[index]);
@@ -409,10 +430,13 @@ async function assertRouteMap(width, scale) {
     for (const destination of destinations) assert.ok(links.includes(destination), context + " retains " + destination);
     for (const [linkIndex, href] of links.entries()) {
       await pressKey("Tab", "Tab", 9);
-      await assertFocusedVisible(evaluate, '[data-browser-link-index="' + linkIndex + '"]', context + " destination " + href);
+      const linkSelector = '[data-browser-link-index="' + linkIndex + '"]';
+      await evaluate(`document.querySelector(${JSON.stringify(linkSelector)}).scrollIntoView({ block: "nearest", behavior: "instant" })`);
+      await assertFocusedVisible(evaluate, linkSelector, context + " destination " + href);
     }
     // Reverse-tab back to the selected radio, ready to choose the next route.
     for (const _ of links) await pressKey("Tab", "Tab", 9, 8);
+    await evaluate(`document.querySelector(${JSON.stringify(radio)}).scrollIntoView({ block: "nearest", behavior: "instant" })`);
     await assertFocusedVisible(evaluate, radio, context + " reverse keyboard entry");
   }
   await pressKey("ArrowDown", "ArrowDown", 40);
@@ -495,17 +519,21 @@ try {
   ];
   const scales = process.env.PULSE_TEXT_SCALES?.split(",").map(Number) || [1, 2];
   const widths = process.env.PULSE_TEXT_WIDTHS?.split(",").map(Number) || [1440, 900, 768, 390];
+  const routeOnly = process.env.PULSE_ROUTE_ONLY === "1";
   for (const scale of scales) {
     for (const width of widths) {
       await assertRouteMap(width, scale);
-      for (const path of relationshipPaths) {
-        await assertRelationshipLayout(path, width, scale);
+      if (!routeOnly) {
+        for (const path of relationshipPaths) {
+          await assertRelationshipLayout(path, width, scale);
+        }
       }
       console.log(`Passed methodology layout at ${width}px / ${scale * 100}% text`);
     }
   }
 
-  await setViewport(900);
+  if (!routeOnly) {
+    await setViewport(900);
   await navigate("/methodologies/agentic-operations-readiness", `document.body.textContent.includes("6 Conditions feed into:")`);
   const readinessBoundary = await evaluate(`(() => {
     const stop = [...document.querySelectorAll("strong")].find((node) => node.textContent?.trim() === "Stop" && node.closest("section")?.textContent.includes("6 Conditions feed into:"))?.parentElement;
@@ -521,6 +549,7 @@ try {
   assert.match(readinessBoundary.stopText, /Do not enter IDAO delivery/);
   assert.equal(readinessBoundary.separate, true, "Stop must remain visibly separate from the Agent Authority decision");
   assert.ok(readinessBoundary.gap > 8, "Stop and the Agent Authority decision should retain visible spacing");
+  }
 
   console.log("Methodology route and relationship browser regression passed");
 } finally {

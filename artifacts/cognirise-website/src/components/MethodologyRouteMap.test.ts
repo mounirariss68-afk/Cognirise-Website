@@ -21,7 +21,7 @@ describe("illustrated methodology route navigator", () => {
       assert.ok(art.includes(`"/images/cognirise/situations/${id}.jpg"`));
     }
     assert.equal((art.match(/src: "\/images\/cognirise\/situations\//g) ?? []).length, 7);
-    assert.match(source, /<button[\s\S]*?className="methodology-route-choice"[\s\S]*?<span className="methodology-route-art">[\s\S]*?<img src=\{assetUrl\(SITUATION_ART\[sit\.id\]\.src\)\} alt=\{SITUATION_ART\[sit\.id\]\.alt\}/);
+    assert.match(source, /<button[\s\S]*?className="methodology-route-choice"[\s\S]*?<span className="methodology-route-choice-content">[\s\S]*?<span className="methodology-route-art">[\s\S]*?<img src=\{assetUrl\(SITUATION_ART\[sit\.id\]\.src\)\} alt=\{SITUATION_ART\[sit\.id\]\.alt\}/);
     assert.match(source, /<span className="methodology-route-choice-content">[\s\S]*?\{sit\.label\}/);
     assert.doesNotMatch(source, /methodology-route-thumb|route-detail-art|methodology-route-hero-figure|activeArt/);
     assert.match(styles, /\.methodology-route-screen \{[\s\S]*?grid-template-columns: minmax\(320px, 36%\) minmax\(0, 1fr\)/);
@@ -29,7 +29,9 @@ describe("illustrated methodology route navigator", () => {
     assert.match(styles, /\.methodology-route-choices \{[\s\S]*?grid-template-columns: minmax\(0, 1fr\)/);
     assert.match(styles, /\.methodology-route-art img \{[\s\S]*?object-fit: cover/);
     assert.doesNotMatch(styles, /\.methodology-route-choice:first-child \{ grid-column: span 2/);
-    assert.match(styles, /\.methodology-route-choice \{[\s\S]*?min-height: clamp\(148px, 13vw, 188px\)/);
+    assert.match(styles, /\.methodology-route-choice \{[\s\S]*?min-height: var\(--choice-height\)/);
+    assert.match(styles, /\.methodology-route-choice-content \{[\s\S]*?background: #fff/);
+    assert.match(styles, /\.methodology-route-choice \{[\s\S]*?grid-template-columns: minmax\(0, 62%\) minmax\(0, 38%\)/);
     assert.match(source, /<div className="methodology-route-rail"[\s\S]*?<div\s+id="selected-route-output"/);
     assert.match(styles, /\.methodology-route-detail \{[\s\S]*?position: sticky;[\s\S]*?max-height: calc\(100dvh - 48px\)/);
     assert.match(source, /outputRef\.current\?\.scrollTo\(\{ top: 0 \}\)/);
@@ -63,11 +65,10 @@ describe("illustrated methodology route navigator", () => {
     assert.match(source, /onClick=\{\(\) => handleRadioClick\(sit\.id as RouteSituation\)\}/);
     assert.match(styles, /\.methodology-route-choice\[data-preview="true"\]::after/);
     assert.match(styles, /\.methodology-route-choice:focus-visible/);
-    assert.match(styles, /\.methodology-route-choice:hover img \{ transform: scale\(1\.18\); \}/);
-    assert.match(styles, /@media \(hover: none\) and \(pointer: coarse\) \{[\s\S]*?\.methodology-route-choice:hover img \{ transform: scale\(1\); \}/);
+    assert.match(styles, /@media \(hover: hover\) and \(pointer: fine\) \{[\s\S]*?\.methodology-route-choice:hover \{[\s\S]*?width: 100%;[\s\S]*?min-height: calc\(var\(--choice-height\) \+ 36px\)/);
+    assert.match(styles, /\.methodology-route-choice:focus-visible \{[\s\S]*?min-height: calc\(var\(--choice-height\) \+ 36px\)/);
     assert.match(styles, /\.methodology-route-choice \{[\s\S]*?overflow: hidden/);
-    assert.match(styles, /\.methodology-route-choice-label \{[\s\S]*?background: rgba\(253, 252, 251, \.9\);[\s\S]*?box-decoration-break: clone/);
-    assert.match(styles, /\.methodology-route-choice-index \{[\s\S]*?background: rgba\(253, 252, 251, \.9\)/);
+    assert.doesNotMatch(styles, /box-decoration-break|\.methodology-route-choice:hover img/);
     assert.doesNotMatch(styles, /\.methodology-route-choice::before/);
     assert.match(styles, /@media \(max-width: 640px\)/);
     assert.match(styles, /@media \(prefers-reduced-motion: no-preference\)/);
