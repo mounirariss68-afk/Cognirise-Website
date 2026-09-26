@@ -1,4 +1,4 @@
-import { useState, useEffect, type KeyboardEvent, useRef } from "react";
+import { useState, useEffect, type KeyboardEvent, type CSSProperties, useRef } from "react";
 import { CornerDownRight } from "lucide-react";
 import { Link } from "wouter";
 import { BrandButton } from "@/components/ui/brand-button";
@@ -9,15 +9,8 @@ import "./MethodologyRouteMap.print.css";
 
 type RouteSituation = "investment" | "competing-ideas" | "existing-strategy" | "process-problem" | "pilot-release" | "proven-expansion" | "underperformance";
 
-const SITUATION_ART: Record<RouteSituation, { src: string; alt: string }> = {
-  investment: { src: "/images/cognirise/situations/investment.jpg", alt: "Several illuminated paths narrow toward a bounded architectural opening." },
-  "competing-ideas": { src: "/images/cognirise/situations/competing-ideas.jpg", alt: "Distinct illuminated passages meet at a central decision threshold." },
-  "existing-strategy": { src: "/images/cognirise/situations/existing-strategy.jpg", alt: "Translucent planning planes lead into a structured passage for delivery." },
-  "process-problem": { src: "/images/cognirise/situations/process-problem.jpg", alt: "A disrupted light path is deliberately rerouted through an architectural opening." },
-  "pilot-release": { src: "/images/cognirise/situations/pilot-release.jpg", alt: "An experimental module connects to a supported operating structure." },
-  "proven-expansion": { src: "/images/cognirise/situations/proven-expansion.jpg", alt: "A working structure connects by light paths to new contextual spaces." },
-  underperformance: { src: "/images/cognirise/situations/underperformance.jpg", alt: "A misaligned signal passes through a diagnostic loop toward a deliberate next decision." },
-};
+const STOP_CAPTIONS = ["Find value", "Choose the bets", "Put strategy to work", "Improve the work", "Release with confidence", "Expand what works", "Recover missing value"] as const;
+const MOBILE_SCENE_POSITIONS = [0, 12, 28, 45, 60, 78, 100] as const;
 
 const STORAGE_KEY_SELECTION = "cognirise-methodology-selection";
 const STORAGE_KEY_SCROLL = "cognirise-methodology-scroll";
@@ -245,11 +238,12 @@ export function MethodologyRouteMap() {
     }
   };
 
-  const displayedSituation = previewSituation ?? activeSituation;
-  const activeRoute = ROUTE_DATA.find(r => r.id === displayedSituation) || ROUTE_DATA[0];
+  const selectedIndex = ROUTE_DATA.findIndex(r => r.id === activeSituation);
+  const previewIndex = previewSituation ? ROUTE_DATA.findIndex(r => r.id === previewSituation) : selectedIndex;
+  const previewRoute = ROUTE_DATA[previewIndex];
+  const activeRoute = ROUTE_DATA[selectedIndex];
   const previewOnMouse = (id: RouteSituation, pointerType: string) => {
     if (pointerType === "mouse") {
-      outputRef.current?.scrollTo({ top: 0 });
       setPreviewSituation(id);
     }
   };
@@ -293,51 +287,79 @@ export function MethodologyRouteMap() {
       </section>
     </section>
     <div data-testid="methodology-route-map" className="methodology-route-screen [&_button]:scroll-mt-32 [&_a]:scroll-mt-32">
-        {/* Each complete text-and-art panel is one choice. */}
-      <div className="methodology-route-rail" onPointerLeave={() => setPreviewSituation(null)}>
-        <div className="methodology-route-rail-heading">
-           <h3>Choose the decision in front of you</h3>
-           <p>Seven starting points. One next decision.</p>
+      <div className="methodology-route-journey" aria-label="Choose the decision in front of you">
+        <div className="methodology-route-journey-heading">
+          <div><span className="methodology-route-overline">ONE CONTINUOUS VIEW</span><h3>Choose a threshold</h3></div>
+          <p className="methodology-route-position"><strong>{String(selectedIndex + 1).padStart(2, "0")}</strong> / 07</p>
         </div>
-        <div 
-          role="radiogroup" 
-          aria-label="Starting situation" 
-           className="methodology-route-choices"
-          data-testid="situation-radiogroup"
-        >
-          {ROUTE_DATA.map((sit, index) => {
-            const isActive = activeSituation === sit.id;
-            const isPreview = previewSituation === sit.id;
-            return (
-              <button
-                key={sit.id}
-                role="radio"
-                aria-checked={isActive}
-                aria-controls="selected-route-output"
-                data-route-index={index}
-                data-testid={`situation-radio-${sit.id}`}
-                data-committed={isActive}
-                data-preview={isPreview}
-                tabIndex={isActive ? 0 : -1}
-                onClick={() => handleRadioClick(sit.id as RouteSituation)}
-                onPointerEnter={(event) => previewOnMouse(sit.id as RouteSituation, event.pointerType)}
-                onFocus={() => setPreviewSituation(null)}
-                onKeyDown={(event) => handleSituationKeyDown(event, index)}
-                className="methodology-route-choice"
-              >
-                 <span className="methodology-route-choice-content">
-                  <span className="methodology-route-choice-index">{String(index + 1).padStart(2, "0")} / 07{isActive ? " · Selected" : ""}</span>
-                  <span className="methodology-route-choice-label">
-                    {sit.label}
-                  </span>
-                </span>
-                  <span className="methodology-route-art">
-                    <img src={assetUrl(SITUATION_ART[sit.id].src)} alt={SITUATION_ART[sit.id].alt} loading={index < 3 ? "eager" : "lazy"} data-pulse-image-resilient="true" />
-                  </span>
-              </button>
-            )
-          })}
+        <p className="methodology-route-journey-note">Seven real starting points <span>·</span> one practical next decision</p>
+        <div className="methodology-route-panorama">
+          <div
+            className="methodology-route-panorama-stage"
+            style={{
+              backgroundImage: `url("${assetUrl("/images/cognirise/methodology-journey-panorama.jpg")}")`,
+              "--scene-position": `${MOBILE_SCENE_POSITIONS[selectedIndex]}%`,
+            } as CSSProperties}
+          >
+            <div className="methodology-route-panorama-focus" style={{ left: `${previewIndex * 100 / ROUTE_DATA.length}%` }} aria-hidden="true" />
+            <div className="methodology-route-panorama-caption">
+              <span>{String(previewIndex + 1).padStart(2, "0")} / 07 · {previewSituation ? "PREVIEW STOP" : "CURRENT STOP"}</span>
+              <strong data-testid="route-panorama-caption">{previewRoute.label}</strong>
+            </div>
+            <div className="methodology-route-panorama-targets" onPointerLeave={() => setPreviewSituation(null)}>
+              {ROUTE_DATA.map((sit) => (
+                <button
+                  key={sit.id}
+                  type="button"
+                  aria-label={`Preview and select: ${sit.label}`}
+                  data-testid={`button-panorama-${sit.id}`}
+                  onPointerEnter={(event) => previewOnMouse(sit.id as RouteSituation, event.pointerType)}
+                  onFocus={() => setPreviewSituation(sit.id as RouteSituation)}
+                  onBlur={() => setPreviewSituation(null)}
+                  onClick={() => selectSituation(sit.id as RouteSituation)}
+                />
+              ))}
+            </div>
+          </div>
+          <div className="methodology-route-journey-rail" onPointerLeave={() => setPreviewSituation(null)}>
+            <div className="methodology-route-rail-inner">
+              <svg className="methodology-route-signal" viewBox="0 0 1000 100" preserveAspectRatio="none" aria-hidden="true">
+                <defs><linearGradient id="methodology-route-signal-gradient"><stop offset="0%" stopColor="#7657cb" /><stop offset="55%" stopColor="#c5388c" /><stop offset="100%" stopColor="#f07c67" /></linearGradient></defs>
+                <path className="methodology-route-signal-base" d="M 20 54 C 170 54 210 36 330 46 S 490 68 630 50 S 820 40 980 54" />
+                <path className="methodology-route-signal-progress" pathLength="1000" style={{ strokeDasharray: `${previewIndex / (ROUTE_DATA.length - 1) * 1000} 1000` }} d="M 20 54 C 170 54 210 36 330 46 S 490 68 630 50 S 820 40 980 54" />
+              </svg>
+              <div role="radiogroup" aria-label="Starting situation" className="methodology-route-choices" data-testid="situation-radiogroup">
+                {ROUTE_DATA.map((sit, index) => {
+                  const isActive = activeSituation === sit.id;
+                  const isPreview = previewSituation === sit.id;
+                  return <button
+                    key={sit.id}
+                    type="button"
+                    role="radio"
+                    aria-label={sit.label}
+                    aria-checked={isActive}
+                    aria-controls="selected-route-output"
+                    data-route-index={index}
+                    data-testid={`situation-radio-${sit.id}`}
+                    data-committed={isActive}
+                    data-preview={isPreview}
+                    tabIndex={isActive ? 0 : -1}
+                    onClick={() => handleRadioClick(sit.id as RouteSituation)}
+                    onPointerEnter={(event) => previewOnMouse(sit.id as RouteSituation, event.pointerType)}
+                    onFocus={() => setPreviewSituation(null)}
+                    onKeyDown={(event) => handleSituationKeyDown(event, index)}
+                    className="methodology-route-choice"
+                  >
+                    <span className="methodology-route-node"><span /></span>
+                    <span className="methodology-route-choice-index">{String(index + 1).padStart(2, "0")}</span>
+                    <span className="methodology-route-choice-label">{STOP_CAPTIONS[index]}</span>
+                  </button>;
+                })}
+              </div>
+            </div>
+          </div>
         </div>
+        <div className="methodology-route-journey-footer"><span>EXPLORING AI</span><i /><span>RECOVERING MISSING VALUE</span></div>
       </div>
 
        {/* Details remain editorial copy; no second copy of the selected scene. */}
@@ -351,16 +373,8 @@ export function MethodologyRouteMap() {
       >
         <span className="sr-only" role="status" aria-live="polite">Selected situation: {ROUTE_DATA.find(r => r.id === activeSituation)?.label}</span>
         <div>
-           {/* Decision-first output header */}
-            <div className="methodology-route-hero">
-             <div className="methodology-route-hero-copy">
-               <div className="methodology-route-hero-kicker">{previewSituation ? "Previewing" : "Selected route"} / {String(ROUTE_DATA.findIndex(r => r.id === displayedSituation) + 1).padStart(2, "0")}</div>
-             <h4 className="font-display text-[clamp(32px,5vw,52px)] font-semibold text-[#102957] tracking-[-.04em] leading-[1.05]" data-testid="route-detail-situation">
-               {activeRoute.label}
-              </h4>
-             </div>
-              <p className="methodology-route-hero-aside">The route below connects your current evidence to a practical next decision. Methods are selected for the question, not prescribed as a sequence.</p>
-          </div>
+            <h4 className="sr-only" data-testid="route-detail-situation">{activeRoute.label}</h4>
+            <p className="methodology-route-description" data-testid="route-detail-description">{activeRoute.description}</p>
 
           {/* Grid of details */}
             <div className="route-detail-grid mb-12">

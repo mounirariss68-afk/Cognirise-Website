@@ -6,6 +6,17 @@
   margin-bottom: clamp(18px, 2vw, 26px);
 }
 
+.continuous-panorama-shell .signal-journey--panorama .sj-intro h1,
+.continuous-panorama-shell .signal-journey--panorama .sj-intro h1 em,
+.continuous-panorama-shell .signal-journey--panorama .sj-journey-head h2 {
+  color: #102957;
+}
+
+.continuous-panorama-shell .signal-journey--panorama .sj-intro > p,
+.continuous-panorama-shell .signal-journey--panorama .sj-description {
+  color: #405777;
+}
+
 .continuous-panorama-shell .signal-journey--panorama .sj-panorama-stage {
   height: auto;
   aspect-ratio: 5 / 1;
@@ -134,7 +145,6 @@
 .continuous-panorama-shell .signal-journey--panorama .sj-description {
   max-width: none;
   margin-top: 8px;
-  color: #263b5b;
   font: 500 clamp(18px, 1.42vw, 19px)/1.43 "Inter", sans-serif;
   letter-spacing: -.015em;
 }

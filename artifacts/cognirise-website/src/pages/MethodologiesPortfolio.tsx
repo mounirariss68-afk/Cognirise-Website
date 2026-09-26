@@ -114,15 +114,16 @@ export default function MethodologiesPortfolio() {
 
       <section 
         id="route-navigator"
-        className="bg-white px-6 py-24 md:px-[4.8vw] min-h-[80vh]" 
+        className="bg-[#fdfcfb] px-6 pb-20 pt-12 md:px-[4.8vw] md:pt-14 min-h-[80vh]"
         aria-labelledby="roadmap-title"
       >
-        <div className="max-w-3xl mb-16">
-          <h2 id="roadmap-title" className="font-display text-[clamp(40px,5vw,72px)] font-semibold tracking-[-.08em] text-[#102957]">
-            Start with your situation
+        <div className="max-w-[790px] mb-12">
+          <p className="mb-5 text-[10px] font-bold tracking-[.15em] text-[#70419b]"><span className="mr-2 inline-block h-[7px] w-[7px] rounded-full bg-[#c5388c] align-middle" />COGNIRISE / DECISION ROUTER</p>
+          <h2 id="roadmap-title" className="font-display text-[clamp(40px,5.15vw,70px)] font-semibold leading-[1.05] tracking-[-.075em] text-[#102957]">
+            Start with your situation.
           </h2>
-          <p className="mt-6 text-[19px] leading-[1.58] text-[#536887]">
-            Select the decision in front of you. See what you may already have, the practical output to work toward, and which existing method fits. IDAO delivery and specialist authority decisions remain conditional on evidence.
+          <p className="mt-5 max-w-[680px] text-[clamp(15px,1.3vw,18px)] leading-[1.65] text-[#405777]">
+            Select the decision in front of you. Find a practical next move, the evidence to bring, and methods that fit the question—not a prescribed sequence.
           </p>
         </div>
         

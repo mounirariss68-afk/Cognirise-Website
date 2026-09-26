@@ -159,9 +159,9 @@ async function assertArtworkHover() {
   })()`);
   assert.equal(film.present, true, `UAE English should mount its film layer: ${JSON.stringify(film)}`);
   const bounds = await evaluate(`(() => {
-    const card = document.querySelector('[data-route-index="2"]');
-    card.scrollIntoView({ block: "center" });
-    const rect = card.getBoundingClientRect();
+    const target = document.querySelector('[data-testid="button-panorama-existing-strategy"]');
+    target.scrollIntoView({ block: "center" });
+    const rect = target.getBoundingClientRect();
     return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
   })()`);
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 0, y: 0 });
@@ -172,39 +172,28 @@ async function assertArtworkHover() {
     x: bounds.x + bounds.width / 2,
     y: bounds.y + bounds.height / 2,
   });
-  await delay(500);
+  await delay(300);
   const hoverDiagnostics = await evaluate(`(() => ({
-    fineHover: matchMedia('(hover: hover) and (pointer: fine)').matches,
-    hovered: document.querySelector('[data-route-index="2"]').matches(':hover'),
-    elementAtPointer: document.elementFromPoint(${bounds.x + bounds.width / 2}, ${bounds.y + bounds.height / 2})?.className,
-    scrollY: window.scrollY,
+    hovered: document.querySelector('[data-testid="button-panorama-existing-strategy"]').matches(':hover'),
+    caption: document.querySelector('[data-testid="route-panorama-caption"]').textContent.trim(),
+    highlighted: document.querySelector('[data-route-index="2"]').getAttribute('data-preview'),
+    progress: document.querySelector('.methodology-route-signal-progress').style.strokeDasharray,
+    focusWidth: document.querySelector('.methodology-route-panorama-focus').getBoundingClientRect().width,
+    stageWidth: document.querySelector('.methodology-route-panorama-stage').getBoundingClientRect().width,
   }))()`);
-  assert.equal(hoverDiagnostics.hovered, true, `pointer reaches the card: ${JSON.stringify(hoverDiagnostics)}`);
-  assert.ok(await evaluate(`(() => {
-    const card = document.querySelector('[data-route-index="2"]');
-    const current = card.getBoundingClientRect();
-    const text = card.querySelector('.methodology-route-choice-content');
-    const art = card.querySelector('.methodology-route-art');
-    const textRect = text.getBoundingClientRect();
-    const artRect = art.getBoundingClientRect();
-    const rail = document.querySelector('.methodology-route-rail').getBoundingClientRect();
-    const output = document.querySelector('#selected-route-output').getBoundingClientRect();
-    const label = card.querySelector('.methodology-route-choice-label');
-    return current.width > ${bounds.width} + 15
-      && current.height > ${bounds.height} + 20
-      && textRect.right <= artRect.left + 1
-      && artRect.width < textRect.width
-      && current.right <= rail.right
-      && current.right < output.left
-      && getComputedStyle(text).backgroundColor === 'rgb(255, 255, 255)'
-      && label.scrollHeight <= label.clientHeight + 1;
-  })()`), "the whole card grows in width and height; white text stays beside narrower artwork without overlapping details");
+  assert.equal(hoverDiagnostics.hovered, true, `pointer reaches the image region: ${JSON.stringify(hoverDiagnostics)}`);
+  assert.equal(hoverDiagnostics.caption, "We have an AI strategy and need to implement it.");
+  assert.equal(hoverDiagnostics.highlighted, "true", "image hover highlights its matching journey stop");
+  assert.ok(hoverDiagnostics.progress.startsWith("333"), "the journey signal previews the matching stop");
+  assert.ok(Math.abs(hoverDiagnostics.focusWidth * 7 - hoverDiagnostics.stageWidth) < 3, "hover highlight stays one-seventh wide rather than stretching artwork");
   assert.equal(await evaluate(`document.querySelector('[data-testid="route-detail-situation"]').textContent.trim()`),
-    "We have an AI strategy and need to implement it.", "hover previews the third route");
+    selected, "hover does not change the committed guidance");
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 0, y: 0 });
-  await delay(400);
+  await delay(100);
   assert.equal(await evaluate(`document.querySelector('[data-testid="route-detail-situation"]').textContent.trim()`),
-    selected, "leaving the cards restores the last committed route");
+    selected, "leaving the panorama restores the last committed route");
+  assert.equal(await evaluate(`document.querySelector('[data-route-index="2"]').getAttribute('data-preview')`),
+    "false", "leaving clears the journey preview");
   assert.equal(await evaluate(`document.querySelector('[data-route-index="1"]').getAttribute('aria-checked')`),
     "true", "hover does not change the committed selection");
 }
