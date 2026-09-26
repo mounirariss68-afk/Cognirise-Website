@@ -73,9 +73,9 @@ describe("Methodology Relationships and Boundaries", () => {
     assert.match(portfolio, /<NavigationBackControl embedded \/>/);
     assert.match(portfolio, /src: assetUrl\("\/images\/cognirise\/method-overview\.jpg"\)/);
     for (const file of [
-      "videos/cognirise/methodologies-pulse-hero.mp4",
-      "videos/cognirise/methodologies-pulse-hero.webm",
-      "images/cognirise/methodologies-pulse-hero-poster.jpg",
+      "videos/cognirise/methodologies-pulse-hero-forward.mp4",
+      "videos/cognirise/methodologies-pulse-hero-forward.webm",
+      "images/cognirise/methodologies-pulse-hero-forward-poster.jpg",
     ]) {
       assert.match(heroFilm, new RegExp(file.replaceAll(".", "\\.")));
       assert.ok(readFileSync(resolve(root, `public/${file}`)).byteLength > 1000);

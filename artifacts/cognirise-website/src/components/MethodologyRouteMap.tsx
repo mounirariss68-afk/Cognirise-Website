@@ -183,6 +183,8 @@ export function MethodologyRouteMap() {
   const selectSituation = (situation: RouteSituation) => {
     setPreviewSituation(null);
     setActiveSituation(situation);
+    // Keep the decision heading in view when the desktop detail pane has been scrolled.
+    outputRef.current?.scrollTo({ top: 0 });
     if (lastSelectedSituation.current === situation) return;
     lastSelectedSituation.current = situation;
     trackProjectEvent("methodology_route_selected", {
@@ -237,7 +239,7 @@ export function MethodologyRouteMap() {
 
   const handleRadioClick = (id: RouteSituation) => {
     selectSituation(id);
-    if (window.innerWidth < 1024 && outputRef.current) {
+    if (window.innerWidth < 768 && outputRef.current) {
        const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
        outputRef.current.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
     }
@@ -247,6 +249,7 @@ export function MethodologyRouteMap() {
   const activeRoute = ROUTE_DATA.find(r => r.id === displayedSituation) || ROUTE_DATA[0];
   const previewOnMouse = (id: RouteSituation, pointerType: string) => {
     if (pointerType === "mouse") {
+      outputRef.current?.scrollTo({ top: 0 });
       setPreviewSituation(id);
     }
   };

@@ -53,18 +53,24 @@ export async function assertNoClipping(evaluate, selector, context) {
     // Live announcements are intentionally clipped visually, not broken copy.
     const visible = el => !el.closest(".sr-only") && el.checkVisibility() && el.getBoundingClientRect().width > 0;
     const inside = (a, b) => a.left >= b.left - 2 && a.right <= b.right + 2 && a.top >= b.top - 2 && a.bottom <= b.bottom + 2;
+    // Descendants of an intentionally scrollable pane may have boxes outside
+    // its current scrollport. That is reachable content, not clipped text.
+    const inScrollableDetail = el => {
+      const pane = el.closest(".methodology-route-detail");
+      return pane && pane !== el && /(auto|scroll)/.test(getComputedStyle(pane).overflowY);
+    };
     const rootRect = root.getBoundingClientRect();
     if (document.documentElement.scrollWidth > innerWidth + 1) issues.push("horizontal page scrolling");
     for (const el of [root, ...root.querySelectorAll("*")]) {
       if (!(el instanceof HTMLElement) || !visible(el)) continue;
       const rect = el.getBoundingClientRect();
       const style = getComputedStyle(el);
-      if (!inside(rect, rootRect)) issues.push("outside component: " + describe(el));
+      if (!inScrollableDetail(el) && !inside(rect, rootRect)) issues.push("outside component: " + describe(el));
       if (style.display !== "inline" && el.clientWidth && el.scrollWidth > el.clientWidth + 2)
         issues.push("horizontal content overflow: " + describe(el));
-      // Tight display line-height can legitimately paint glyphs outside the line
-      // box; that is only clipping when overflow actually hides those glyphs.
-      if (/(hidden|clip|auto|scroll)/.test(style.overflowY) && style.display !== "inline" && el.clientHeight && el.scrollHeight > el.clientHeight + 2)
+      // A deliberately scrollable detail pane is not clipped copy: its
+      // contents remain reachable by scrolling. Hidden/clip still fail.
+      if (/(hidden|clip)/.test(style.overflowY) && style.display !== "inline" && el.clientHeight && el.scrollHeight > el.clientHeight + 2)
         issues.push("vertical content overflow: " + describe(el));
       // Bounding boxes alone miss glyphs clipped by an overflow-hidden ancestor.
       for (const node of el.childNodes) {
@@ -72,14 +78,14 @@ export async function assertNoClipping(evaluate, selector, context) {
         const range = document.createRange();
         range.selectNodeContents(node);
         for (const textRect of range.getClientRects()) {
-          if (!inside(textRect, rootRect)) issues.push("text outside component: " + describe(el));
+          if (!inScrollableDetail(el) && !inside(textRect, rootRect)) issues.push("text outside component: " + describe(el));
           for (let ancestor = el; ancestor && root.contains(ancestor); ancestor = ancestor.parentElement) {
             const ancestorStyle = getComputedStyle(ancestor);
             const bounds = ancestor.getBoundingClientRect();
             if (/(hidden|clip|auto|scroll)/.test(ancestorStyle.overflowX) &&
                 (textRect.left < bounds.left - 2 || textRect.right > bounds.right + 2))
               issues.push("text clipped horizontally: " + describe(el));
-            if (/(hidden|clip|auto|scroll)/.test(ancestorStyle.overflowY) &&
+            if (/(hidden|clip)/.test(ancestorStyle.overflowY) &&
                 (textRect.top < bounds.top - 2 || textRect.bottom > bounds.bottom + 2))
               issues.push("text clipped vertically: " + describe(el));
           }

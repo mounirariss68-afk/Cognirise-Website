@@ -24,9 +24,19 @@ describe("illustrated methodology route navigator", () => {
     assert.match(source, /<button[\s\S]*?className="methodology-route-choice"[\s\S]*?<span className="methodology-route-art">[\s\S]*?<img src=\{assetUrl\(SITUATION_ART\[sit\.id\]\.src\)\} alt=\{SITUATION_ART\[sit\.id\]\.alt\}/);
     assert.match(source, /<span className="methodology-route-choice-content">[\s\S]*?\{sit\.label\}/);
     assert.doesNotMatch(source, /methodology-route-thumb|route-detail-art|methodology-route-hero-figure|activeArt/);
-    assert.match(styles, /\.methodology-route-choices \{[\s\S]*?grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/);
+    assert.match(styles, /\.methodology-route-screen \{[\s\S]*?grid-template-columns: minmax\(320px, 36%\) minmax\(0, 1fr\)/);
+    assert.match(styles, /\.methodology-route-rail \{[\s\S]*?border-right: 1px solid var\(--route-rule\)/);
+    assert.match(styles, /\.methodology-route-choices \{[\s\S]*?grid-template-columns: minmax\(0, 1fr\)/);
     assert.match(styles, /\.methodology-route-art img \{ object-fit: cover/);
-    assert.match(styles, /\.methodology-route-choice:first-child \{ grid-column: span 2/);
+    assert.doesNotMatch(styles, /\.methodology-route-choice:first-child \{ grid-column: span 2/);
+    assert.match(styles, /\.methodology-route-choice \{[\s\S]*?min-height: clamp\(148px, 13vw, 188px\)/);
+    assert.match(source, /<div className="methodology-route-rail"[\s\S]*?<div\s+id="selected-route-output"/);
+    assert.match(styles, /\.methodology-route-detail \{[\s\S]*?position: sticky;[\s\S]*?max-height: calc\(100dvh - 48px\)/);
+    assert.match(source, /outputRef\.current\?\.scrollTo\(\{ top: 0 \}\)/);
+    assert.match(styles, /@media \(max-width: 1023px\) \{[\s\S]*?\.methodology-route-screen \{ grid-template-columns: minmax\(260px, 36%\) minmax\(0, 1fr\)/);
+    assert.match(styles, /@media \(max-width: 767px\) \{[\s\S]*?\.methodology-route-screen \{ grid-template-columns: minmax\(0, 1fr\)/);
+    assert.match(styles, /\.methodology-route-detail \{ position: static; max-height: none; overflow: visible; \}/);
+    assert.match(styles, /@media \(max-width: 640px\) \{[\s\S]*?\.methodology-route-choices \{ grid-template-columns: 1fr/);
   });
 
   it("retains description data for print but removes both repeated on-screen copies", () => {
