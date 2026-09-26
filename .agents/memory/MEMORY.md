@@ -27,7 +27,7 @@
 - [Governed landing parity](governed-landing-parity.md) — Generate required CMS slots from approved templates; configured delivery must fail closed rather than restore compiled content.
 - [Sticky panel browser assertions](sticky-panel-browser-assertions.md) — Activate sticky ranges before visibility checks; scrollable pane content is reachable, not clipped.
 - [Protected methodology anchors](protected-methodology-anchors.md) — Treat IDAO and Agent Authority as read-only canon; supporting methods connect to them without changing them.
-- [Methodology journey preference](methodology-journey-preference.md) — Explore seven situations as a continuous panorama with IDAO-like hover reveals; selection changes guidance below.
+- [Methodology journey preference](methodology-journey-preference.md) — Keep the panorama fixed; hover highlights its matching journey stop, while click selects guidance below.
 - [OpenAPI UUID generation](openapi-uuid-generation.md) — Avoid format: uuid while this workspace uses Zod 3; Orval 8 emits the Zod 4-only zod.uuid() helper.
 - [Saved assessment async consistency](saved-assessment-async-consistency.md) — Lock edits during save/reopen or revision-check responses so stable links always match displayed answers.
 - [Text resize verification](text-resize-verification.md) — Disable transitions fully before resampling fonts; reduced-motion rules can otherwise compound simulated text enlargement.

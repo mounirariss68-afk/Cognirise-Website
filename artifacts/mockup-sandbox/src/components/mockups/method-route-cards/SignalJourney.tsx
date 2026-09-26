@@ -154,11 +154,14 @@ const SignalLink = ({ href, children, className = "" }: { href: string; children
   <a href={href} className={className}>{children}</a>
 );
 
-export function SignalJourney({ presentation = "signal" }: { presentation?: "signal" | "panorama" | "threshold" }) {
+export function SignalJourney({ presentation = "signal", imageHighlight = false }: { presentation?: "signal" | "panorama" | "threshold"; imageHighlight?: boolean }) {
   const [selected, setSelected] = useState<SituationId>("investment");
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const radioRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const selectedIndex = ROUTES.findIndex((route) => route.id === selected);
   const route = ROUTES[selectedIndex];
+  const previewIndex = imageHighlight ? hoveredIndex ?? selectedIndex : selectedIndex;
+  const previewRoute = ROUTES[previewIndex];
 
   const choose = (id: SituationId) => setSelected(id);
   const onKeyDown = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
@@ -194,6 +197,10 @@ export function SignalJourney({ presentation = "signal" }: { presentation?: "sig
           className={`sj-stop${active ? " is-active" : ""}${index < selectedIndex ? " is-traveled" : ""}`}
           onClick={() => choose(item.id)}
           onKeyDown={(event) => onKeyDown(event, index)}
+          onMouseEnter={imageHighlight ? () => setHoveredIndex(index) : undefined}
+          onMouseLeave={imageHighlight ? () => setHoveredIndex(null) : undefined}
+          onFocus={imageHighlight ? () => setHoveredIndex(index) : undefined}
+          onBlur={imageHighlight ? () => setHoveredIndex(null) : undefined}
         >
           <span className="sj-node"><span /></span>
           <span className="sj-stop-index">{String(index + 1).padStart(2, "0")}</span>
@@ -222,15 +229,27 @@ export function SignalJourney({ presentation = "signal" }: { presentation?: "sig
             <div className="sj-panorama-stage">
               <img
                 src="/__mockup/images/method-journey-panorama-horizon.jpg"
-                alt="One continuous corridor of seven architectural thresholds, joined by a violet-to-coral light path."
+                alt={imageHighlight ? "" : "One continuous corridor of seven architectural thresholds, joined by a violet-to-coral light path."}
                 style={{ transform: `translateX(calc(-50% + ${29.167 - selectedIndex * (58.334 / 6)}%))` }}
               />
               <div className="sj-panorama-shade" />
-              <div className="sj-panorama-focus" aria-hidden="true" />
+              <div className="sj-panorama-focus" aria-hidden="true" style={imageHighlight ? { left: `${previewIndex * 100 / 7}%` } : undefined} />
               <div className="sj-panorama-caption" aria-live="polite">
-                <span>{String(selectedIndex + 1).padStart(2, "0")} / 07 · CURRENT STOP</span>
-                <strong>{route.caption}</strong>
+                <span>{String(previewIndex + 1).padStart(2, "0")} / 07 · {hoveredIndex === null ? "CURRENT STOP" : "PREVIEW STOP"}</span>
+                <strong>{imageHighlight ? previewRoute.label : route.caption}</strong>
               </div>
+              {imageHighlight && <div className="sj-panorama-targets" aria-label="Preview starting situations">
+                {ROUTES.map((item, index) => <button
+                  key={item.id}
+                  type="button"
+                  aria-label={`Preview and select: ${item.label}`}
+                  onMouseEnter={() => setHoveredIndex(index)}
+                  onMouseLeave={() => setHoveredIndex(null)}
+                  onFocus={() => setHoveredIndex(index)}
+                  onBlur={() => setHoveredIndex(null)}
+                  onClick={() => choose(item.id)}
+                />)}
+              </div>}
             </div>
             <div className="sj-panorama-rail">
               <div className="sj-rail-inner">{signalLine}{stopChoices}</div>
