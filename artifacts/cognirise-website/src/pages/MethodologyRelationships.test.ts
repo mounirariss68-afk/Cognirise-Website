@@ -73,9 +73,9 @@ describe("Methodology Relationships and Boundaries", () => {
     assert.match(portfolio, /<NavigationBackControl embedded \/>/);
     assert.match(portfolio, /src: assetUrl\("\/images\/cognirise\/method-overview\.jpg"\)/);
     for (const file of [
-      "videos/cognirise/methodologies-pulse-hero-forward.mp4",
-      "videos/cognirise/methodologies-pulse-hero-forward.webm",
-      "images/cognirise/methodologies-pulse-hero-forward-poster.jpg",
+      "videos/cognirise/methodologies-pulse-hero-journey.mp4",
+      "videos/cognirise/methodologies-pulse-hero-journey.webm",
+      "images/cognirise/methodologies-pulse-hero-journey-poster.jpg",
     ]) {
       assert.match(heroFilm, new RegExp(file.replaceAll(".", "\\.")));
       assert.ok(readFileSync(resolve(root, `public/${file}`)).byteLength > 1000);
@@ -83,6 +83,7 @@ describe("Methodology Relationships and Boundaries", () => {
     assert.match(heroFilm, /prefers-reduced-motion: reduce/);
     assert.match(heroFilm, /video\.play\(\)\.catch\(\(\) => setFailed\(true\)\)/);
     assert.match(heroFilm, /onError=\{\(\) => setFailed\(true\)\}/);
+    assert.match(heroFilm, /if \(failed\) return null/);
     assert.match(portfolio, /route-navigator/);
     assert.match(portfolio, /seven situations/);
     assert.match(portfolio, /Value Scan remains a separate optional facilitated enquiry/);

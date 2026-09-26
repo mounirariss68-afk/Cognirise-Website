@@ -60,3 +60,4 @@
 - [Release parity evidence](release-parity-evidence.md) — Bind commit-stamped CMS parity reports to immutable release receipts and expose only redacted evidence.
 - [UAE legacy page visibility](uae-legacy-page-visibility.md) — Owner-approved compiled pages may remain visible during CMS migration; do not confuse this with a CMS release.
 - [Interactive image reveals](interactive-image-reveals.md) — Fast-changing Pulse artwork needs immediate first visibility rather than the page-entry image reveal.
+- [Continuous camera films](continuous-camera-films.md) — Chain scene-matched shots by their final frames, then inspect decisions, accidental signage and motion across every transition.

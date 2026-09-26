@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { assetUrl } from "@/lib/assets";
 
 const FILM = {
-  mp4: assetUrl("/videos/cognirise/methodologies-pulse-hero-forward.mp4"),
-  webm: assetUrl("/videos/cognirise/methodologies-pulse-hero-forward.webm"),
-  poster: assetUrl("/images/cognirise/methodologies-pulse-hero-forward-poster.jpg"),
+  mp4: assetUrl("/videos/cognirise/methodologies-pulse-hero-journey.mp4"),
+  webm: assetUrl("/videos/cognirise/methodologies-pulse-hero-journey.webm"),
+  poster: assetUrl("/images/cognirise/methodologies-pulse-hero-journey-poster.jpg"),
 };
 
 /**
@@ -46,13 +46,23 @@ export function MethodologiesHeroFilm() {
     };
   }, [reducedMotion, failed]);
 
+  // On either media failure reveal the governed image already rendered by
+  // the parent, rather than leaving a poster-painted layer over that image.
+  if (failed) return null;
+
   return (
     <div
-      className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-      style={{ backgroundImage: `url("${FILM.poster}")` }}
+      className="absolute inset-0"
       aria-hidden="true"
       data-testid="methodologies-hero-film"
     >
+      <img
+        src={FILM.poster}
+        alt=""
+        draggable={false}
+        onError={() => setFailed(true)}
+        className="absolute inset-0 h-full w-full object-cover"
+      />
       {!reducedMotion && !failed && (
         <video
           ref={videoRef}

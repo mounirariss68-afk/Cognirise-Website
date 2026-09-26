@@ -27,7 +27,7 @@ describe("illustrated methodology route navigator", () => {
     assert.match(styles, /\.methodology-route-screen \{[\s\S]*?grid-template-columns: minmax\(320px, 36%\) minmax\(0, 1fr\)/);
     assert.match(styles, /\.methodology-route-rail \{[\s\S]*?border-right: 1px solid var\(--route-rule\)/);
     assert.match(styles, /\.methodology-route-choices \{[\s\S]*?grid-template-columns: minmax\(0, 1fr\)/);
-    assert.match(styles, /\.methodology-route-art img \{ object-fit: cover/);
+    assert.match(styles, /\.methodology-route-art img \{[\s\S]*?object-fit: cover/);
     assert.doesNotMatch(styles, /\.methodology-route-choice:first-child \{ grid-column: span 2/);
     assert.match(styles, /\.methodology-route-choice \{[\s\S]*?min-height: clamp\(148px, 13vw, 188px\)/);
     assert.match(source, /<div className="methodology-route-rail"[\s\S]*?<div\s+id="selected-route-output"/);
@@ -63,6 +63,12 @@ describe("illustrated methodology route navigator", () => {
     assert.match(source, /onClick=\{\(\) => handleRadioClick\(sit\.id as RouteSituation\)\}/);
     assert.match(styles, /\.methodology-route-choice\[data-preview="true"\]::after/);
     assert.match(styles, /\.methodology-route-choice:focus-visible/);
+    assert.match(styles, /\.methodology-route-choice:hover img \{ transform: scale\(1\.18\); \}/);
+    assert.match(styles, /@media \(hover: none\) and \(pointer: coarse\) \{[\s\S]*?\.methodology-route-choice:hover img \{ transform: scale\(1\); \}/);
+    assert.match(styles, /\.methodology-route-choice \{[\s\S]*?overflow: hidden/);
+    assert.match(styles, /\.methodology-route-choice-label \{[\s\S]*?background: rgba\(253, 252, 251, \.9\);[\s\S]*?box-decoration-break: clone/);
+    assert.match(styles, /\.methodology-route-choice-index \{[\s\S]*?background: rgba\(253, 252, 251, \.9\)/);
+    assert.doesNotMatch(styles, /\.methodology-route-choice::before/);
     assert.match(styles, /@media \(max-width: 640px\)/);
     assert.match(styles, /@media \(prefers-reduced-motion: no-preference\)/);
     assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/);

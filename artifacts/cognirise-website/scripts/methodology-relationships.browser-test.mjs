@@ -119,6 +119,87 @@ const routeMap = '[data-testid="methodology-route-map"]';
 const relationship = '[aria-label="Methodology boundaries and connections"]';
 const destinations = ["/methodologies/idao", "/methodologies/agent-authority-model"];
 
+async function assertArtworkHover() {
+  await setViewport(1440);
+  await navigate("/methodologies", `document.querySelectorAll('[data-route-index]').length === 7`);
+  const film = await evaluate(`(() => {
+    const layer = document.querySelector('[data-testid="methodologies-hero-film"]');
+    return {
+      present: Boolean(layer),
+      poster: layer?.querySelector('img')?.getAttribute('src'),
+      imageLoaded: layer?.querySelector('img')?.complete,
+      storedMarket: localStorage.getItem('cognirise-market'),
+      url: location.href,
+    };
+  })()`);
+  assert.equal(film.present, true, `UAE English should mount its film layer: ${JSON.stringify(film)}`);
+  const bounds = await evaluate(`(() => {
+    const card = document.querySelector('[data-route-index="0"]');
+    card.scrollIntoView({ block: "center" });
+    const rect = card.getBoundingClientRect();
+    return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+  })()`);
+  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 0, y: 0 });
+  const before = await evaluate(`getComputedStyle(document.querySelector('[data-route-index="0"] img')).transform`);
+  await send("Input.dispatchMouseEvent", {
+    type: "mouseMoved",
+    x: bounds.x + bounds.width / 2,
+    y: bounds.y + bounds.height / 2,
+  });
+  await delay(80);
+  const after = await evaluate(`getComputedStyle(document.querySelector('[data-route-index="0"] img')).transform`);
+  const hoverDiagnostics = await evaluate(`(() => ({
+    fineHover: matchMedia('(hover: hover) and (pointer: fine)').matches,
+    hovered: document.querySelector('[data-route-index="0"]').matches(':hover'),
+    elementAtPointer: document.elementFromPoint(${bounds.x + bounds.width / 2}, ${bounds.y + bounds.height / 2})?.className,
+    scrollY: window.scrollY,
+  }))()`);
+  assert.match(before, /matrix\(1, 0, 0, 1, 0, 0\)/, "route artwork starts at its native size");
+  assert.match(after, /matrix\(1\.18, 0, 0, 1\.18, 0, 0\)/, `pointer hover enlarges the actual route image: ${JSON.stringify(hoverDiagnostics)}`);
+  assert.ok(await evaluate(`(() => {
+    const card = document.querySelector('[data-route-index="0"]');
+    const current = card.getBoundingClientRect();
+    const label = card.querySelector('.methodology-route-choice-label');
+    return Math.abs(current.width - ${bounds.width}) < 1
+      && Math.abs(current.height - ${bounds.height}) < 1
+      && getComputedStyle(card, '::before').content === 'none'
+      && getComputedStyle(label).backgroundColor.includes('0.9)');
+  })()`), "the fixed-size card reveals its image without a full-art white overlay");
+}
+
+async function assertUaeFilmPlayback() {
+  await send("Emulation.setEmulatedMedia", {
+    media: "screen",
+    features: [{ name: "prefers-reduced-motion", value: "no-preference" }],
+  });
+  await navigate("/methodologies", `document.querySelectorAll('[data-route-index]').length === 7`);
+  await delay(1200);
+  const state = await evaluate(`(() => {
+    const layer = document.querySelector('[data-testid="methodologies-hero-film"]');
+    const poster = layer?.querySelector('img');
+    const video = layer?.querySelector('video');
+    return {
+      layer: Boolean(layer),
+      posterLoaded: Boolean(poster?.complete && poster.naturalWidth),
+      videoPresent: Boolean(video),
+      paused: video?.paused,
+      readyState: video?.readyState,
+      currentTime: video?.currentTime,
+      source: video?.querySelector('source')?.getAttribute('src'),
+    };
+  })()`);
+  assert.equal(state.layer, true, "UAE English mounts its route-owned film");
+  assert.equal(state.posterLoaded, true, "the reduced-motion poster is deliverable");
+  assert.equal(state.videoPresent, true, "normal-motion visitors receive the video");
+  assert.equal(state.paused, false, "the muted inline video starts playing");
+  assert.ok(state.readyState >= 2 && state.currentTime > 0.1, "the film decodes and moves beyond its opening frame");
+  assert.match(state.source, /methodologies-pulse-hero-journey\.mp4$/);
+  await send("Emulation.setEmulatedMedia", {
+    media: "screen",
+    features: [{ name: "prefers-reduced-motion", value: "reduce" }],
+  });
+}
+
 async function tabInto(selector) {
   await evaluate(`(() => {
     const entry = document.createElement("button");
@@ -270,6 +351,8 @@ try {
     });
   ` });
 
+  await assertArtworkHover();
+  await assertUaeFilmPlayback();
   // Print at native typography before any text-only overrides are introduced.
   await assertPrintRoutes();
   await send("Emulation.setEmulatedMedia", { media: "screen", features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
