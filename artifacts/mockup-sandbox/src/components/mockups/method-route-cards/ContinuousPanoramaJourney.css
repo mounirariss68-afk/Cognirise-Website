@@ -1,4 +1,5 @@
 .continuous-panorama-shell .signal-journey--panorama .sj-panorama-stage {
+  container-type: inline-size;
   height: auto;
   aspect-ratio: 5 / 1;
   background: #252a32;
@@ -15,7 +16,7 @@
   background-image: url("/__mockup/images/continuous-panorama-journey-master.jpg");
   background-position: 0 50%;
   background-repeat: no-repeat;
-  background-size: 100% 100%;
+  background-size: 100cqw auto;
   content: "";
 }
 
@@ -87,7 +88,9 @@
     linear-gradient(180deg, rgba(8, 18, 37, .04) 15%, rgba(8, 18, 37, .25) 62%, rgba(8, 18, 37, .9) 100%),
     url("/__mockup/images/continuous-panorama-journey-master.jpg");
   background-repeat: no-repeat;
-  background-size: 100% 100%, 700% 100%;
+  /* Lock every stop to the stage-sized source image. Flex growth reveals more
+     of the master instead of stretching a panel's copy of the panorama. */
+  background-size: 100% 100%, 100cqw auto;
   background-position: center, 0% 50%;
   content: "";
   opacity: 0;
@@ -95,12 +98,12 @@
   pointer-events: none;
 }
 
-.continuous-panorama-shell .signal-journey--panorama .sj-panorama-rail .sj-stop:nth-child(2)::before { background-position: center, 16.6667% 50%; }
-.continuous-panorama-shell .signal-journey--panorama .sj-panorama-rail .sj-stop:nth-child(3)::before { background-position: center, 33.3333% 50%; }
-.continuous-panorama-shell .signal-journey--panorama .sj-panorama-rail .sj-stop:nth-child(4)::before { background-position: center, 50% 50%; }
-.continuous-panorama-shell .signal-journey--panorama .sj-panorama-rail .sj-stop:nth-child(5)::before { background-position: center, 66.6667% 50%; }
-.continuous-panorama-shell .signal-journey--panorama .sj-panorama-rail .sj-stop:nth-child(6)::before { background-position: center, 83.3333% 50%; }
-.continuous-panorama-shell .signal-journey--panorama .sj-panorama-rail .sj-stop:nth-child(7)::before { background-position: center, 100% 50%; }
+.continuous-panorama-shell .signal-journey--panorama .sj-panorama-rail .sj-stop:nth-child(2)::before { background-position: center, -14.2857cqw 50%; }
+.continuous-panorama-shell .signal-journey--panorama .sj-panorama-rail .sj-stop:nth-child(3)::before { background-position: center, -28.5714cqw 50%; }
+.continuous-panorama-shell .signal-journey--panorama .sj-panorama-rail .sj-stop:nth-child(4)::before { background-position: center, -42.8571cqw 50%; }
+.continuous-panorama-shell .signal-journey--panorama .sj-panorama-rail .sj-stop:nth-child(5)::before { background-position: center, -57.1429cqw 50%; }
+.continuous-panorama-shell .signal-journey--panorama .sj-panorama-rail .sj-stop:nth-child(6)::before { background-position: center, -71.4286cqw 50%; }
+.continuous-panorama-shell .signal-journey--panorama .sj-panorama-rail .sj-stop:nth-child(7)::before { background-position: center, -85.7143cqw 50%; }
 
 .continuous-panorama-shell .signal-journey--panorama .sj-panorama-rail .sj-stop.is-active {
   flex-grow: 1.8;
