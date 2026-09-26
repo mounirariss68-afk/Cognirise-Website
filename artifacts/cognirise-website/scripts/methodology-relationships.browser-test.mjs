@@ -44,9 +44,17 @@ const pending = new Map();
 let commandId = 0;
 let filmIntercept = null;
 const filmWarnings = [];
+const filmResponses = [];
 
 socket.onmessage = ({ data }) => {
   const message = JSON.parse(data);
+  if (message.method === "Network.responseReceived" &&
+    message.params.response.url.includes("methodologies-pulse-hero-journey")) {
+    filmResponses.push({
+      status: message.params.response.status,
+      url: message.params.response.url,
+    });
+  }
   if (message.method === "Runtime.consoleAPICalled" && message.params.type === "warning") {
     filmWarnings.push(message.params.args.map(arg => arg.value ?? arg.description).join(" "));
   }
@@ -235,16 +243,97 @@ async function assertUaeFilmPlayback() {
   assert.equal(state.paused, false, "the muted inline video starts playing");
   assert.ok(state.readyState >= 2 && state.currentTime > 0.1, "the film decodes and moves beyond its opening frame");
   assert.match(state.source, /methodologies-pulse-hero-journey\.mp4$/);
+  assert.ok(filmResponses.some(response => response.status === 206 &&
+    /methodologies-pulse-hero-journey\.mp4$/.test(response.url)),
+    `the desktop film receives a byte-range response: ${JSON.stringify(filmResponses)}`);
+  await assertFilmContinuity("desktop");
   await setViewport(390, 844, true);
+  await send("Emulation.setTouchEmulationEnabled", { enabled: true });
   await navigate("/methodologies", `document.querySelectorAll('[data-route-index]').length === 7`);
   await waitForFilm(`document.querySelector('[data-testid="methodologies-hero-film"] video')?.currentTime > 0.1`, "mobile film playback");
   assert.match(await evaluate(`document.querySelector('[data-testid="methodologies-hero-film"] video')?.currentSrc`),
     /methodologies-pulse-hero-journey-720\.mp4$/, "mobile loads the compact rendition");
+  assert.ok(filmResponses.some(response => response.status === 206 &&
+    /methodologies-pulse-hero-journey-720\.mp4$/.test(response.url)),
+    `the mobile film receives a byte-range response: ${JSON.stringify(filmResponses)}`);
+  await assertFilmContinuity("mobile");
+  await send("Emulation.setTouchEmulationEnabled", { enabled: false });
   await setViewport(1440);
   await send("Emulation.setEmulatedMedia", {
     media: "screen",
     features: [{ name: "prefers-reduced-motion", value: "reduce" }],
   });
+}
+
+async function assertFilmContinuity(label) {
+  const initial = await evaluate(`(() => {
+    const video = document.querySelector('[data-testid="methodologies-hero-film"] video');
+    video.dataset.continuityProbe = ${JSON.stringify(label)};
+    return { time: video.currentTime, duration: video.duration };
+  })()`);
+  assert.ok(initial.duration > 30, `${label} receives the full journey, not a one-second clip`);
+  for (const checkpoint of [1, 2]) {
+    await delay(8000);
+    const state = await evaluate(`(() => {
+      const video = document.querySelector('[data-testid="methodologies-hero-film"] video');
+      return { time: video?.currentTime, paused: video?.paused, error: video?.error?.code,
+        marker: video?.dataset.continuityProbe, opacity: video && getComputedStyle(video).opacity,
+        events: window.__filmDiagnostics };
+    })()`);
+    assert.equal(state.marker, label, `${label} keeps the same video element at checkpoint ${checkpoint}`);
+    assert.equal(state.paused, false, `${label} continues playing after ${checkpoint * 8} seconds: ${JSON.stringify(state)}`);
+    assert.equal(state.error, undefined, `${label} has no media error`);
+    assert.equal(state.opacity, "1", `${label} keeps the film visible`);
+    assert.ok(state.time > initial.time + checkpoint * 6, `${label} advances steadily after startup: ${JSON.stringify(state)}`);
+  }
+  const beforePause = await evaluate(`(() => {
+    const video = document.querySelector('[data-testid="methodologies-hero-film"] video');
+    const current = video.currentTime;
+    video.pause();
+    return current;
+  })()`);
+  await waitForFilm(`(() => {
+    const video = document.querySelector('[data-testid="methodologies-hero-film"] video');
+    return video?.dataset.continuityProbe === ${JSON.stringify(label)} && !video.paused &&
+      video.currentTime > ${beforePause};
+  })()`, `${label} resumes from the paused position`);
+  await evaluate(`document.querySelector('[data-testid="methodologies-hero-film"] video').currentTime =
+    document.querySelector('[data-testid="methodologies-hero-film"] video').duration - 1.5`);
+  await waitForFilm(`(() => {
+    const video = document.querySelector('[data-testid="methodologies-hero-film"] video');
+    return video?.dataset.continuityProbe === ${JSON.stringify(label)} && !video.paused &&
+      video.currentTime < 1.2 && video.currentTime > 0.05;
+  })()`, `${label} loops back into motion`, 150);
+}
+
+async function assertEmbeddedFilmPlayback() {
+  await setViewport(1440);
+  await send("Emulation.setEmulatedMedia", {
+    media: "screen",
+    features: [{ name: "prefers-reduced-motion", value: "no-preference" }],
+  });
+  await navigate("/methodologies", `document.querySelectorAll('[data-route-index]').length === 7`);
+  await evaluate(`(() => {
+    const preview = document.createElement("iframe");
+    preview.id = "film-embedded-preview";
+    preview.allow = "autoplay";
+    preview.src = "/methodologies";
+    document.body.append(preview);
+  })()`);
+  const getEmbeddedTime = `document.querySelector('#film-embedded-preview')?.contentDocument
+    ?.querySelector('[data-testid="methodologies-hero-film"] video')?.currentTime`;
+  await waitForFilm(`${getEmbeddedTime} > 0.2`, "embedded preview film starts");
+  const start = await evaluate(getEmbeddedTime);
+  await delay(16000);
+  const state = await evaluate(`(() => {
+    const video = document.querySelector('#film-embedded-preview')?.contentDocument
+      ?.querySelector('[data-testid="methodologies-hero-film"] video');
+    return { time: video?.currentTime, paused: video?.paused, error: video?.error?.code };
+  })()`);
+  assert.equal(state.paused, false, `embedded preview remains playing: ${JSON.stringify(state)}`);
+  assert.equal(state.error, undefined);
+  assert.ok(state.time > start + 14, `embedded preview progresses beyond the first second: ${JSON.stringify(state)}`);
+  await evaluate(`document.querySelector('#film-embedded-preview').remove()`);
 }
 
 async function waitForFilm(expression, description, attempts = 80) {
@@ -291,7 +380,8 @@ async function assertDelayedFilmAndFallback() {
   assert.ok(await evaluate(`(() => {
     const layer = document.querySelector('[data-testid="methodologies-hero-film"]');
     return Boolean(layer?.querySelector('img')?.naturalWidth)
-      && layer.querySelector('video')?.currentTime === 0;
+      && layer.querySelector('video')?.currentTime === 0
+      && getComputedStyle(layer).backgroundColor === 'rgb(19, 32, 64)';
   })()`), "the film poster remains visible while the video response is delayed");
   filmIntercept.released = true;
   for (const requestId of filmIntercept.paused) {
@@ -480,6 +570,7 @@ async function assertPrintRoutes() {
 try {
   await send("Page.enable");
   await send("Runtime.enable");
+  await send("Network.enable");
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
   // Reduced-motion CSS still sets a nonzero transition duration on every element
   // (default property: all). Disable it fully so resampling sees baseline fonts,
@@ -497,6 +588,12 @@ try {
     document.addEventListener("playing", (event) => {
       if (event.target instanceof HTMLMediaElement) window.__filmDiagnostics.push({type: "playing", src: event.target.currentSrc});
     }, true);
+    for (const type of ["pause", "waiting", "ended", "seeking"]) {
+      document.addEventListener(type, (event) => {
+        if (event.target instanceof HTMLMediaElement)
+          window.__filmDiagnostics.push({type, time: event.target.currentTime, src: event.target.currentSrc});
+      }, true);
+    }
     document.addEventListener("DOMContentLoaded", () => {
       const style = document.createElement("style");
       style.textContent = "html, body, * { scroll-behavior: auto !important; overflow-anchor: none !important; transition: none !important; }";
@@ -504,9 +601,11 @@ try {
     });
   ` });
 
-  await assertArtworkHover();
+  if (process.env.PULSE_FILM_ONLY !== "1") await assertArtworkHover();
   await assertUaeFilmPlayback();
   await assertDelayedFilmAndFallback();
+  await assertEmbeddedFilmPlayback();
+  if (process.env.PULSE_FILM_ONLY !== "1") {
   // Print at native typography before any text-only overrides are introduced.
   await assertPrintRoutes();
   await send("Emulation.setEmulatedMedia", { media: "screen", features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
@@ -551,6 +650,7 @@ try {
   assert.ok(readinessBoundary.gap > 8, "Stop and the Agent Authority decision should retain visible spacing");
   }
 
+  }
   console.log("Methodology route and relationship browser regression passed");
 } finally {
   socket.close();

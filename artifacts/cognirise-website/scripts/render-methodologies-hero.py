@@ -88,10 +88,9 @@ def main():
             "-deadline", "realtime", "-cpu-used", "5", "-row-mt", "1",
             "-threads", "4", VIDEO / f"{STEM}.webm",
         )
-        ffmpeg(
-            "-ss", "4", "-i", assembled, "-frames:v", "1", "-q:v", "3",
-            IMAGES / f"{STEM}-poster.jpg",
-        )
+        # Match the first decoded film frame so the poster-to-video handoff
+        # cannot jump backward from an arbitrary later point in the camera move.
+        ffmpeg("-i", mp4, "-frames:v", "1", "-q:v", "3", IMAGES / f"{STEM}-poster.jpg")
     print(f"Saved {DURATION:.2f}s desktop MP4, 720p MP4/WebM and poster: {STEM}")
 
 

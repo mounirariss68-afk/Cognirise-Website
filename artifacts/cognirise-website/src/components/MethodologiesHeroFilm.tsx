@@ -33,26 +33,51 @@ export function MethodologiesHeroFilm() {
 
   useEffect(() => {
     if (reducedMotion || failed) return;
-    const attempt = window.setTimeout(() => {
+    let attempt: number | undefined;
+    const resume = () => {
+      attempt = undefined;
+      if (document.visibilityState !== "visible") return;
       const video = videoRef.current;
-      if (video?.paused) void video.play().catch((error: DOMException) => {
-        // A source change or unmount can abort play without a media failure.
-        if (error.name !== "AbortError" && videoRef.current === video) {
+      if (!video?.paused || video.ended || video.error) return;
+      void video.play().catch((error: DOMException) => {
+        // A source change, unmount or a hidden tab can abort play without a
+        // media failure. Do not discard a good film in those cases.
+        if (error.name !== "AbortError" && videoRef.current === video && document.visibilityState === "visible") {
           console.warn("Methodologies film could not play:", error.name, error.message);
           setFailed(true);
         }
       });
-    }, 250);
+    };
+    const scheduleResume = () => {
+      if (attempt !== undefined) window.clearTimeout(attempt);
+      attempt = window.setTimeout(resume, 250);
+    };
+    const video = videoRef.current;
+    const onVisible = () => {
+      if (document.visibilityState === "visible") scheduleResume();
+    };
+    scheduleResume();
+    video?.addEventListener("pause", scheduleResume);
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("pageshow", onVisible);
     // Slow delivery is not a broken film: the poster remains visible until
     // playback starts. Only actual media errors trigger the governed fallback.
-    return () => window.clearTimeout(attempt);
+    return () => {
+      if (attempt !== undefined) window.clearTimeout(attempt);
+      video?.removeEventListener("pause", scheduleResume);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("pageshow", onVisible);
+    };
   }, [reducedMotion, failed]);
 
   const checkSources = () => {
     // Chromium can report NETWORK_NO_SOURCE without setting video.error or
     // rejecting play() when every child <source> fails.
     window.setTimeout(() => {
-      if (videoRef.current?.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) {
+      const video = videoRef.current;
+      if (video?.networkState === HTMLMediaElement.NETWORK_NO_SOURCE
+        && video.readyState === HTMLMediaElement.HAVE_NOTHING
+        && video.currentTime === 0) {
         setFailed(true);
       }
     }, 250);
@@ -64,7 +89,7 @@ export function MethodologiesHeroFilm() {
 
   return (
     <div
-      className="absolute inset-0"
+      className="absolute inset-0 bg-[#132040]"
       aria-hidden="true"
       data-testid="methodologies-hero-film"
     >
@@ -72,6 +97,7 @@ export function MethodologiesHeroFilm() {
         src={FILM.poster}
         alt=""
         draggable={false}
+        fetchPriority="high"
         onError={() => setPosterFailed(true)}
         className="absolute inset-0 h-full w-full object-cover"
       />
