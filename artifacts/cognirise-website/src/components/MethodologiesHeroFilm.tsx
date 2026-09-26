@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { assetUrl } from "@/lib/assets";
 
 const FILM = {
-  mobileMp4: assetUrl("/videos/cognirise/methodologies-pulse-hero-journey-720.mp4"),
-  mp4: assetUrl("/videos/cognirise/methodologies-pulse-hero-journey.mp4"),
-  webm: assetUrl("/videos/cognirise/methodologies-pulse-hero-journey.webm"),
+  mobileMp4: assetUrl("/videos/cognirise/methodologies-hero-clean-cut-20260926/methodologies-pulse-hero-journey-720.mp4"),
+  mp4: assetUrl("/videos/cognirise/methodologies-hero-clean-cut-20260926/methodologies-pulse-hero-journey.mp4"),
+  webm: assetUrl("/videos/cognirise/methodologies-hero-clean-cut-20260926/methodologies-pulse-hero-journey.webm"),
   poster: assetUrl("/images/cognirise/methodologies-pulse-hero-journey-poster.jpg"),
 };
 

@@ -561,3 +561,31 @@ mtime_ms = 1790411360121
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/b2f82c9d-670f-4386-a687-0900f7a77215/92d833c9-324d-4572-916b-831228a9357f"
 storage_version_token = "1790412026565472"
 content_type = "video/mp4"
+
+[[outputs]]
+id = "rkWIaFg26hDQwgeb0Nc4y"
+uri = "file://artifacts/cognirise-website/public/videos/cognirise/methodologies-hero-clean-cut-20260926/methodologies-pulse-hero-journey.mp4"
+type = "video"
+title = "Edited methodologies hero film"
+description = "51-second film with the pink corridor removed and the doorway views blended."
+logical_id = "21c59f3c-cc49-4765-87cf-b54f180e0ca5"
+content_hash = "sha256:8707c68801ea0a85f36849186a1c968b747da4f775db105b3f401bb51718fe19"
+size = 25229208
+mtime_ms = 1790428115708
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/21c59f3c-cc49-4765-87cf-b54f180e0ca5/eac334d0-16f7-48ba-8302-a78c520a33e8"
+storage_version_token = "1790428216100654"
+content_type = "video/mp4"
+
+[[outputs]]
+id = "_bC-lPfSpQVwDTgk4kKif"
+uri = "file://attached_assets/original_methodologies_hero_2026-09-26/methodologies-pulse-hero-journey.mp4"
+type = "video"
+title = "Original methodologies hero film"
+description = "Untouched 60-second version, saved for restoration. Mobile, WebM, and poster originals are saved alongside it."
+logical_id = "fc486648-56b6-4461-b581-b8539dcc6e4e"
+content_hash = "sha256:4a6c0e0a44b835c255a8c46e6ea1d68639dc84b89866d1103bc3ffe1df2caca8"
+size = 18438985
+mtime_ms = 1790413913631
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/fc486648-56b6-4461-b581-b8539dcc6e4e/b8d8b70a-e808-4fdf-99f1-efdeb24bdd5f"
+storage_version_token = "1790428217651962"
+content_type = "video/mp4"
