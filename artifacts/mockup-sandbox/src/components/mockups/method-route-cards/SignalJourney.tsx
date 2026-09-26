@@ -154,7 +154,7 @@ const SignalLink = ({ href, children, className = "" }: { href: string; children
   <a href={href} className={className}>{children}</a>
 );
 
-export function SignalJourney() {
+export function SignalJourney({ presentation = "signal" }: { presentation?: "signal" | "panorama" | "threshold" }) {
   const [selected, setSelected] = useState<SituationId>("investment");
   const radioRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const selectedIndex = ROUTES.findIndex((route) => route.id === selected);
@@ -170,8 +170,41 @@ export function SignalJourney() {
     choose(ROUTES[next].id);
   };
 
+  const signalLine = (
+    <svg className="sj-signal-svg" viewBox="0 0 1000 100" preserveAspectRatio="none" aria-hidden="true">
+      <defs><linearGradient id="sj-signal-gradient" x1="0" x2="1"><stop offset="0%" stopColor="#7657cb" /><stop offset="55%" stopColor="#c5388c" /><stop offset="100%" stopColor="#f07c67" /></linearGradient></defs>
+      <path className="sj-signal-base" pathLength="1000" d="M 20 54 C 170 54 210 36 330 46 S 490 68 630 50 S 820 40 980 54" />
+      <path className="sj-signal-progress" pathLength="1000" style={{ strokeDasharray: `${selectedIndex / (ROUTES.length - 1) * 1000} 1000` }} d="M 20 54 C 170 54 210 36 330 46 S 490 68 630 50 S 820 40 980 54" />
+    </svg>
+  );
+  const stopChoices = (
+    <div className="sj-stops" role="radiogroup" aria-label="Starting situation">
+      {ROUTES.map((item, index) => {
+        const active = item.id === selected;
+        return <button
+          key={item.id}
+          ref={(node) => { radioRefs.current[index] = node; }}
+          type="button"
+          role="radio"
+          aria-label={item.label}
+          aria-checked={active}
+          aria-controls="sj-route-detail"
+          tabIndex={active ? 0 : -1}
+          data-testid={`situation-radio-${item.id}`}
+          className={`sj-stop${active ? " is-active" : ""}${index < selectedIndex ? " is-traveled" : ""}`}
+          onClick={() => choose(item.id)}
+          onKeyDown={(event) => onKeyDown(event, index)}
+        >
+          <span className="sj-node"><span /></span>
+          <span className="sj-stop-index">{String(index + 1).padStart(2, "0")}</span>
+          <span className="sj-stop-caption">{item.caption}</span>
+        </button>;
+      })}
+    </div>
+  );
+
   return (
-    <main className="signal-journey">
+    <main className={`signal-journey${presentation === "panorama" ? " signal-journey--panorama" : ""}`}>
       <header className="sj-intro">
         <div className="sj-eyebrow"><span className="sj-pulse-dot" /> COGNIRISE / DECISION ROUTER</div>
         <h1>Start with your <em>situation.</em></h1>
@@ -180,42 +213,34 @@ export function SignalJourney() {
 
       <section className="sj-journey" aria-label="Seven starting situations">
         <div className="sj-journey-head">
-          <div><span className="sj-overline">THE SIGNAL JOURNEY</span><h2>Where are you now?</h2></div>
+          <div><span className="sj-overline">{presentation === "panorama" ? "ONE CONTINUOUS VIEW" : "THE SIGNAL JOURNEY"}</span><h2>{presentation === "panorama" || presentation === "threshold" ? "Choose a threshold" : "Where are you now?"}</h2></div>
           <div className="sj-position" aria-live="polite"><span>{String(selectedIndex + 1).padStart(2, "0")}</span><i>/ 07</i></div>
         </div>
         <p className="sj-journey-note">Seven real starting points <span>·</span> one practical next decision</p>
-        <div className="sj-rail-scroll">
-          <div className="sj-rail-inner">
-            <svg className="sj-signal-svg" viewBox="0 0 1000 100" preserveAspectRatio="none" aria-hidden="true">
-              <defs><linearGradient id="sj-signal-gradient" x1="0" x2="1"><stop offset="0%" stopColor="#7657cb" /><stop offset="55%" stopColor="#c5388c" /><stop offset="100%" stopColor="#f07c67" /></linearGradient></defs>
-              <path className="sj-signal-base" pathLength="1000" d="M 20 54 C 170 54 210 36 330 46 S 490 68 630 50 S 820 40 980 54" />
-              <path className="sj-signal-progress" pathLength="1000" style={{ strokeDasharray: `${selectedIndex / (ROUTES.length - 1) * 1000} 1000` }} d="M 20 54 C 170 54 210 36 330 46 S 490 68 630 50 S 820 40 980 54" />
-            </svg>
-            <div className="sj-stops" role="radiogroup" aria-label="Starting situation">
-              {ROUTES.map((item, index) => {
-                const active = item.id === selected;
-                return <button
-                  key={item.id}
-                  ref={(node) => { radioRefs.current[index] = node; }}
-                  type="button"
-                  role="radio"
-                  aria-label={item.label}
-                  aria-checked={active}
-                  aria-controls="sj-route-detail"
-                  tabIndex={active ? 0 : -1}
-                  data-testid={`situation-radio-${item.id}`}
-                  className={`sj-stop${active ? " is-active" : ""}${index < selectedIndex ? " is-traveled" : ""}`}
-                  onClick={() => choose(item.id)}
-                  onKeyDown={(event) => onKeyDown(event, index)}
-                >
-                  <span className="sj-node"><span /></span>
-                  <span className="sj-stop-index">{String(index + 1).padStart(2, "0")}</span>
-                  <span className="sj-stop-caption">{item.caption}</span>
-                </button>;
-              })}
+        {presentation === "panorama" ? (
+          <div className="sj-panorama">
+            <div className="sj-panorama-stage">
+              <img
+                src="/__mockup/images/method-journey-panorama-horizon.jpg"
+                alt="One continuous corridor of seven architectural thresholds, joined by a violet-to-coral light path."
+                style={{ transform: `translateX(calc(-50% + ${29.167 - selectedIndex * (58.334 / 6)}%))` }}
+              />
+              <div className="sj-panorama-shade" />
+              <div className="sj-panorama-focus" aria-hidden="true" />
+              <div className="sj-panorama-caption" aria-live="polite">
+                <span>{String(selectedIndex + 1).padStart(2, "0")} / 07 · CURRENT STOP</span>
+                <strong>{route.caption}</strong>
+              </div>
+            </div>
+            <div className="sj-panorama-rail">
+              <div className="sj-rail-inner">{signalLine}{stopChoices}</div>
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="sj-rail-scroll">
+            <div className="sj-rail-inner">{signalLine}{stopChoices}</div>
+          </div>
+        )}
         <div className="sj-rail-footer"><span>EXPLORING AI</span><span className="sj-footer-line" /><span>RECOVERING MISSING VALUE</span></div>
       </section>
 

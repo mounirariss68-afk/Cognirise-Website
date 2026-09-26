@@ -75,6 +75,85 @@
 .sj-rail-footer { display: flex; align-items: center; gap: 14px; margin: 23px 0 0; color: #7b7281; font-size: 9px; }
 .sj-footer-line { height: 1px; flex: 1; background: linear-gradient(90deg, var(--sj-violet), var(--sj-magenta), var(--sj-coral)); }
 
+.signal-journey--panorama .sj-intro { margin-bottom: clamp(34px, 4vw, 56px); }
+.signal-journey--panorama .sj-panorama-stage {
+  position: relative;
+  height: clamp(255px, 27vw, 365px);
+  overflow: hidden;
+  background: #253353;
+  isolation: isolate;
+}
+.signal-journey--panorama .sj-panorama-stage > img {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 240%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  transition: transform .48s cubic-bezier(.2,.7,.2,1);
+}
+.signal-journey--panorama .sj-panorama-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(12,25,49,.52), rgba(14,26,52,.08) 54%, rgba(14,26,52,.28)), linear-gradient(0deg, rgba(12,25,49,.58), transparent 57%);
+}
+.signal-journey--panorama .sj-panorama-focus {
+  position: absolute;
+  top: 18%;
+  bottom: 17%;
+  left: 42.85%;
+  width: 14.3%;
+  border-right: 1px solid rgba(250,236,248,.7);
+  border-left: 1px solid rgba(250,236,248,.7);
+  background: linear-gradient(90deg, rgba(157,102,198,.09), rgba(215,75,151,.12), rgba(238,133,113,.08));
+  pointer-events: none;
+}
+.signal-journey--panorama .sj-panorama-focus::before,
+.signal-journey--panorama .sj-panorama-focus::after {
+  position: absolute;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  border: 1px solid rgba(255,255,255,.86);
+  border-radius: 50%;
+  background: #ce4a9a;
+  content: "";
+  transform: translateX(-50%);
+}
+.signal-journey--panorama .sj-panorama-focus::before { top: 8%; }
+.signal-journey--panorama .sj-panorama-focus::after { bottom: 8%; background: #e98c78; }
+.signal-journey--panorama .sj-panorama-caption {
+  position: absolute;
+  bottom: 24px;
+  left: clamp(22px, 4vw, 55px);
+  color: #fff;
+}
+.signal-journey--panorama .sj-panorama-caption span {
+  display: block;
+  margin-bottom: 9px;
+  color: #edb9d9;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .16em;
+}
+.signal-journey--panorama .sj-panorama-caption strong {
+  display: block;
+  font: 600 clamp(25px, 3vw, 40px)/1.1 "Comfortaa", sans-serif;
+  letter-spacing: -.055em;
+}
+.signal-journey--panorama .sj-panorama-rail {
+  overflow: visible;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--sj-rule);
+  background: rgba(244,239,236,.62);
+}
+.signal-journey--panorama .sj-panorama-rail .sj-rail-inner { min-height: 129px; }
+.signal-journey--panorama .sj-panorama-rail .sj-signal-svg { top: 17px; }
+.signal-journey--panorama .sj-panorama-rail .sj-stop { min-height: 116px; }
+.signal-journey--panorama .sj-panorama-rail .sj-node { margin-bottom: 10px; }
+.signal-journey--panorama .sj-panorama-rail .sj-stop-caption { max-width: 16ch; }
+
 .sj-detail { border-top: 1px solid var(--sj-rule); padding-top: clamp(32px, 4vw, 58px); }
 .sj-detail-top { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(240px, .7fr); gap: clamp(32px, 6vw, 90px); align-items: center; }
 .sj-detail-copy { max-width: 720px; }
@@ -143,6 +222,16 @@
   .sj-stop-index { font-size: 10px; }
   .sj-stop-caption { max-width: 19ch; margin-top: 6px; font-size: 16px; }
   .sj-rail-footer { margin: 10px 23px 0; font-size: 8px; }
+  .signal-journey--panorama .sj-intro { margin-bottom: 36px; }
+  .signal-journey--panorama .sj-panorama-stage { height: 218px; }
+  .signal-journey--panorama .sj-panorama-caption { bottom: 18px; left: 20px; }
+  .signal-journey--panorama .sj-panorama-caption strong { font-size: 25px; }
+  .signal-journey--panorama .sj-panorama-rail { overflow-x: auto; overflow-y: hidden; padding: 0 22px 8px; scroll-snap-type: x mandatory; scrollbar-width: thin; scrollbar-color: #b596bc transparent; overscroll-behavior-inline: contain; }
+  .signal-journey--panorama .sj-panorama-rail .sj-rail-inner { width: 1575px; min-height: 120px; }
+  .signal-journey--panorama .sj-panorama-rail .sj-signal-svg { width: 1575px; }
+  .signal-journey--panorama .sj-panorama-rail .sj-stops { width: 1575px; grid-template-columns: repeat(7, 225px); }
+  .signal-journey--panorama .sj-panorama-rail .sj-stop { min-height: 103px; scroll-snap-align: start; }
+  .signal-journey--panorama .sj-panorama-rail .sj-stop-caption { max-width: 19ch; font-size: 16px; }
   .sj-detail { padding: 31px 23px 0; }
   .sj-detail-top { grid-template-columns: 1fr; gap: 26px; }
   .sj-detail-copy h2 { font-size: clamp(30px, 8vw, 39px); }

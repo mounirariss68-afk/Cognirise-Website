@@ -1,0 +1,96 @@
+.continuous-panorama-shell .signal-journey--panorama .sj-panorama-stage {
+  height: auto;
+  aspect-ratio: 1024 / 336;
+  background: #252a32;
+}
+
+.continuous-panorama-shell .signal-journey--panorama .sj-panorama-stage::before {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  background-image: url("/__mockup/images/continuous-panorama-journey-master.jpg");
+  background-position: 0 50%;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  content: "";
+}
+
+.continuous-panorama-shell .signal-journey--panorama .sj-panorama-stage > img {
+  opacity: 0;
+}
+
+.continuous-panorama-shell .signal-journey--panorama .sj-panorama-focus {
+  top: 8%;
+  bottom: 8%;
+  left: 0;
+  width: 14.2858%;
+  border-right: 1px solid rgba(250, 236, 248, .88);
+  border-left: 1px solid rgba(250, 236, 248, .88);
+  background: linear-gradient(90deg, rgba(118, 87, 203, .10), rgba(197, 56, 140, .19), rgba(240, 124, 103, .10));
+  transform: translateX(0);
+  transition: transform .32s cubic-bezier(.2, .7, .2, 1);
+}
+
+.continuous-panorama-shell .signal-journey--panorama .sj-panorama-focus::before {
+  top: 8%;
+}
+
+.continuous-panorama-shell .signal-journey--panorama .sj-panorama-focus::after {
+  bottom: 8%;
+}
+
+.continuous-panorama-shell .signal-journey--panorama .sj-panorama:has(.sj-stop:nth-child(2).is-active) .sj-panorama-focus { transform: translateX(100%); }
+.continuous-panorama-shell .signal-journey--panorama .sj-panorama:has(.sj-stop:nth-child(3).is-active) .sj-panorama-focus { transform: translateX(200%); }
+.continuous-panorama-shell .signal-journey--panorama .sj-panorama:has(.sj-stop:nth-child(4).is-active) .sj-panorama-focus { transform: translateX(300%); }
+.continuous-panorama-shell .signal-journey--panorama .sj-panorama:has(.sj-stop:nth-child(5).is-active) .sj-panorama-focus { transform: translateX(400%); }
+.continuous-panorama-shell .signal-journey--panorama .sj-panorama:has(.sj-stop:nth-child(6).is-active) .sj-panorama-focus { transform: translateX(500%); }
+.continuous-panorama-shell .signal-journey--panorama .sj-panorama:has(.sj-stop:nth-child(7).is-active) .sj-panorama-focus { transform: translateX(600%); }
+
+.continuous-panorama-shell .signal-journey--panorama .sj-panorama-caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
+@media (max-width: 767px) {
+  .continuous-panorama-shell .signal-journey--panorama .sj-panorama-stage {
+    height: 220px;
+    aspect-ratio: auto;
+  }
+
+  .continuous-panorama-shell .signal-journey--panorama .sj-panorama-stage::before {
+    background-position: 0 50%;
+    background-size: auto 100%;
+  }
+
+  .continuous-panorama-shell .signal-journey--panorama .sj-panorama-focus {
+    top: 13%;
+    bottom: 13%;
+    width: 24.4%;
+    transform: translateX(0);
+  }
+
+  .continuous-panorama-shell .signal-journey--panorama .sj-panorama:has(.sj-stop:nth-child(2).is-active) .sj-panorama-focus { transform: translateX(100%); }
+  .continuous-panorama-shell .signal-journey--panorama .sj-panorama:has(.sj-stop:nth-child(3).is-active) .sj-panorama-focus { transform: translateX(150%); }
+  .continuous-panorama-shell .signal-journey--panorama .sj-panorama:has(.sj-stop:nth-child(4).is-active) .sj-panorama-focus { transform: translateX(150%); }
+  .continuous-panorama-shell .signal-journey--panorama .sj-panorama:has(.sj-stop:nth-child(5).is-active) .sj-panorama-focus { transform: translateX(150%); }
+  .continuous-panorama-shell .signal-journey--panorama .sj-panorama:has(.sj-stop:nth-child(6).is-active) .sj-panorama-focus { transform: translateX(212%); }
+  .continuous-panorama-shell .signal-journey--panorama .sj-panorama:has(.sj-stop:nth-child(7).is-active) .sj-panorama-focus { transform: translateX(312%); }
+
+  .continuous-panorama-shell .signal-journey--panorama .sj-panorama:has(.sj-stop:nth-child(2).is-active) .sj-panorama-stage::before { background-position: 0 50%; }
+  .continuous-panorama-shell .signal-journey--panorama .sj-panorama:has(.sj-stop:nth-child(3).is-active) .sj-panorama-stage::before { background-position: 15% 50%; }
+  .continuous-panorama-shell .signal-journey--panorama .sj-panorama:has(.sj-stop:nth-child(4).is-active) .sj-panorama-stage::before { background-position: 50% 50%; }
+  .continuous-panorama-shell .signal-journey--panorama .sj-panorama:has(.sj-stop:nth-child(5).is-active) .sj-panorama-stage::before { background-position: 85% 50%; }
+  .continuous-panorama-shell .signal-journey--panorama .sj-panorama:has(.sj-stop:nth-child(6).is-active) .sj-panorama-stage::before { background-position: 100% 50%; }
+  .continuous-panorama-shell .signal-journey--panorama .sj-panorama:has(.sj-stop:nth-child(7).is-active) .sj-panorama-stage::before { background-position: 100% 50%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .continuous-panorama-shell .signal-journey--panorama .sj-panorama-focus {
+    transition-duration: .01ms;
+  }
+}
