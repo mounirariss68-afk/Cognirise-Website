@@ -14,6 +14,7 @@ import MfaSetup from '@/pages/auth/MfaSetup';
 import PasswordSetup from '@/pages/auth/PasswordSetup';
 import Dashboard from '@/pages/Dashboard';
 import DocumentList from '@/pages/documents/DocumentList';
+import WebsitePages from '@/pages/documents/WebsitePages';
 import DocumentDetail from '@/pages/documents/DocumentDetail';
 import MediaLibrary from '@/pages/media/MediaLibrary';
 import MarketEditions from '@/pages/markets/MarketEditions';
@@ -48,6 +49,7 @@ function Router() {
        <Route path="/releases" component={() => <AppLayout administratorOnly><ReleaseCenter /></AppLayout>} />
       
       {/* Content routes */}
+      <Route path="/website-pages" component={() => <AppLayout contentTopic="landing-page"><WebsitePages /></AppLayout>} />
       <Route path="/people" component={() => <AppLayout contentTopic="person"><DocumentList kind="person" /></AppLayout>} />
       <Route path="/partners" component={() => <AppLayout contentTopic="partner"><DocumentList kind="partner" /></AppLayout>} />
       <Route path="/platforms" component={() => <AppLayout contentTopic="platform"><DocumentList kind="platform" /></AppLayout>} />

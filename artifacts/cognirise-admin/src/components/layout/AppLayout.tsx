@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Sidebar, SidebarContent, SidebarHeader, SidebarFooter, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarGroup, SidebarGroupLabel, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { Loader2, LayoutDashboard, Users, UserSquare2, Component, Newspaper, Briefcase, Factory, PanelsTopLeft, Image as ImageIcon, Globe, Inbox, ShieldAlert, LogOut, ChevronUp, Lock, ListTree, MapPin, Mail, UserRoundCheck, Rocket } from "lucide-react";
+import { Loader2, LayoutDashboard, Users, UserSquare2, Component, Newspaper, Briefcase, Factory, PanelsTopLeft, Image as ImageIcon, Globe, Inbox, ShieldAlert, LogOut, ChevronUp, Lock, ListTree, MapPin, Mail, UserRoundCheck, Rocket, Files } from "lucide-react";
 import { CogniriseBrand } from "@/components/brand/CogniriseBrand";
 import { canAccessAnyTopic, type ContentTopic } from "@/lib/content-capability";
 
@@ -38,6 +38,7 @@ function AppSidebar() {
         { title: "Partner page", url: "/partners", icon: Users },
         { title: "Case studies", url: "/case-studies", icon: Briefcase },
         { title: "Submission status", url: "/editorial-work", icon: UserRoundCheck },
+        ...(canViewTopic("landing-page") ? [{ title: "Website Pages", url: "/website-pages", icon: Files }] : []),
       ],
     },
   ] : [
@@ -53,6 +54,7 @@ function AppSidebar() {
     {
       title: "Content",
       items: [
+        ...(canViewTopic("landing-page") ? [{ title: "Website Pages", url: "/website-pages", icon: Files }] : []),
         ...(canViewTopic("publication") ? [{ title: "Publications", url: "/publications", icon: Newspaper }] : []),
         ...(canViewTopic("case-study") ? [{ title: "Case Studies", url: "/case-studies", icon: Briefcase }] : []),
         ...(canViewTopic("person") ? [{ title: "People", url: "/people", icon: UserSquare2 }] : []),

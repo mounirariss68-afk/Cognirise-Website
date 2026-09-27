@@ -84,7 +84,7 @@ function documentListPath(kind: CmsDocumentKind): string {
     case "framework": return "/frameworks";
     case "office": return "/offices";
     case "site-configuration": return "/contact-settings";
-    case "landing-page": return "/dashboard";
+    case "landing-page": return "/website-pages";
   }
 }
 
