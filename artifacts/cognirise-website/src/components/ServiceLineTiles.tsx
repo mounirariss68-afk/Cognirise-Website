@@ -31,6 +31,29 @@ const SERVICE_VISUALS: Record<string, { img: string; pos: string }> = {
   },
 };
 
+// The homepage is an editorial summary; these labels do not replace the
+// destination taxonomy used by the rest of the site.
+const HOMEPAGE_SERVICE_COPY: Record<string, { label: string; short: string; description: string; explore: string[] }> = {
+  "consulting-engineering": {
+    label: "Consulting & Engineering with AI",
+    short: "Human judgment and engineering, powered with AI, that carry priority work into production.",
+    description: "Senior experts and forward-deployed engineers connect the decision, architecture, data and delivery work in one accountable route.",
+    explore: ["Digital transformation", "AI strategy & roadmaps", "AI governance", "Change management & AI literacy", "AI value realization", "Digital platform build", "Engineering with AI"],
+  },
+  "sovereign-solutions": {
+    label: "Custom-made Sovereign AI Solutions",
+    short: "We build sovereign and on-premises AI solutions tailored to your organisation's requirements.",
+    description: "Purpose-built intelligence that respects your data, security and operating boundaries.",
+    explore: ["Agentic customer-facing workflows", "Agentic operation & admin workflows", "Digital AI workforce"],
+  },
+  "ai-platforms": {
+    label: "Market-leading AI Platforms",
+    short: "A connected ecosystem for knowledge, agents, integrations and accountable people.",
+    description: "Enterprise platforms and agents bring useful intelligence into everyday work.",
+    explore: ["Agentic operating system", "Voice agents & contact centers", "Human resources", "Data preparation & cleansing", "SDLC automation & application modernization"],
+  },
+};
+
 export function ServiceLineTiles({
   className = "",
   variant = "full",
@@ -82,7 +105,8 @@ export function ServiceLineTiles({
         .cps-tile[data-service="ai-platforms"] .cps-tile-dests{flex-direction:column;flex-wrap:nowrap;align-items:flex-start}
         .cps-tile-dest{display:inline-flex;align-items:center;gap:6px;width:max-content;max-width:100%;padding:2px 0;font-size:12px;line-height:1.35;font-weight:650;color:var(--ink);text-decoration:underline;text-decoration-color:rgba(220,80,159,.35);text-decoration-thickness:1px;text-underline-offset:4px;transition:color .2s ease,text-decoration-color .2s ease}
         .cps-tile-dest svg{flex:0 0 auto}
-        .cps-tile-dest:hover{color:var(--pink);text-decoration-color:var(--pink)}
+         .cps-tile-dest:hover{color:var(--pink);text-decoration-color:var(--pink)}
+         .cps-tile-explore-item{display:block;max-width:100%;font-size:12px;line-height:1.45;font-weight:600;color:var(--ink)}
         .cps-tile-methodologies{border-top:1px solid var(--line);padding-top:14px;margin-top:2px}
         .cps-tile-methodologies>strong{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--pink);display:block;margin-bottom:8px}
         .cps-tile-methodology-links{gap:5px 16px}
@@ -153,6 +177,7 @@ function SpatialDisclosureTiles({
     >
       {SERVICE_LINES.map((service, index) => {
         const visual = SERVICE_VISUALS[service.id];
+        const homepageCopy = HOMEPAGE_SERVICE_COPY[service.id];
         const id = String(index);
 
         return (
@@ -182,14 +207,16 @@ function SpatialDisclosureTiles({
                        <div className="cps-tile-meta">
                          <span className="cps-tile-no">0{index + 1}</span>
                        </div>
-                      <h3 data-testid={`service-title-${service.id}`}>{service.label}</h3>
-                       <p className="cps-tile-orientation">{service.short}</p>
+                       <h3 data-testid={`service-title-${service.id}`}>{variant === "summary" ? homepageCopy.label : service.label}</h3>
+                        <p className="cps-tile-orientation">{variant === "summary" ? homepageCopy.short : service.short}</p>
                     </div>
                   </SpatialDisclosureTrigger>
                   <div className="cps-tile-copy">
                     <SpatialDisclosurePanel id={id} className="cps-tile-copy-inner" data-testid={`service-panel-${service.id}`}>
-                      <p className="cps-tile-short">{service.short}</p>
-                      {service.id === "consulting-engineering" && methodologyCtas.length > 0 && (
+                       {variant === "summary"
+                         ? <p className="cps-tile-short">{homepageCopy.description}</p>
+                         : <p className="cps-tile-short">{service.short}</p>}
+                       {variant === "full" && service.id === "consulting-engineering" && methodologyCtas.length > 0 && (
                         <div className="cps-tile-methodologies" data-testid="service-methodologies" aria-label="Methodologies">
                           <strong>Methodologies</strong>
                           <div className="cps-tile-dests cps-tile-methodology-links">
@@ -240,27 +267,13 @@ function SpatialDisclosureTiles({
                         </>
                       ) : (
                         <>
-                          <div className="cps-tile-desc">
-                            <div>
-                              <strong>Outcome</strong>
-                              <p>{service.value}</p>
-                            </div>
-                          </div>
                           <div className="cps-tile-dests-wrap mt-auto">
                             <strong>Explore</strong>
                             <div className="cps-tile-dests">
-                               {service.destinations.map(([label, url], destinationIndex) => (
-                                 <Link
-                                   href={url}
-                                   key={label}
-                                   className="cps-tile-dest group"
-                                   tabIndex={isActive ? 0 : -1}
-                                   data-testid={`service-link-${service.id}-${destinationIndex}`}
-                                    onClick={() => trackDestinationClick(service.id, url)}
-                                 >
-                                   {label}
-                                   <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
-                                 </Link>
+                                {homepageCopy.explore.map((label) => (
+                                  <span key={label} className="cps-tile-explore-item">
+                                    {label}
+                                  </span>
                                ))}
                             </div>
                           </div>

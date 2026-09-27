@@ -186,7 +186,7 @@ function extractPage([slug, pagePath, title, filename, template, jsxFallbacks = 
   function visit(node) {
     if (ts.isCallExpression(node) && ts.isIdentifier(node.expression)) {
       const helper = node.expression.text;
-      if (helper === "landingText" || helper === "landingCta" || helper === "landingMedia") {
+      if (helper === "landingText" || helper === "landingList" || helper === "landingCta" || helper === "landingMedia") {
         for (const env of dynamicEnvironments(node, arrays, baseEnv)) {
           const id = evaluate(node.arguments[1], env);
           boundIds.add(id);
@@ -194,6 +194,12 @@ function extractPage([slug, pagePath, title, filename, template, jsxFallbacks = 
           if (helper === "landingText") {
             if (typeof fallback !== "string" || !fallback.trim()) fail(`Missing text fallback for "${id}"`, node);
             add({ type: "narrative", id, body: [{ type: "paragraph", text: fallback }] }, node);
+          } else if (helper === "landingList") {
+            if (!Array.isArray(fallback) || fallback.length === 0 ||
+                fallback.some((item) => typeof item !== "string" || !item.trim())) {
+              fail(`Missing ordered list fallback for "${id}"`, node);
+            }
+            add({ type: "narrative", id, body: [{ type: "list", style: "bullet", items: fallback }] }, node);
           } else if (helper === "landingCta") {
             if (!fallback?.label?.trim() || !fallback?.href?.trim()) fail(`Missing CTA fallback for "${id}"`, node);
             add({ type: "cta", id, label: fallback.label, href: fallback.href, style: fallback.style || "primary" }, node);

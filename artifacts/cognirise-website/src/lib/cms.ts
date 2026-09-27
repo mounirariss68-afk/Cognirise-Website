@@ -627,6 +627,24 @@ export function landingText(
   return delivered || landingSlotError(page, slot, "narrative slot is empty");
 }
 
+export function landingList(
+  page: LandingPageContent | null | undefined,
+  slot: string,
+  fallback: string[],
+): string[] {
+  if (!page) return fallback;
+  const section = landingSections(page).find((candidate) => candidate.id === slot);
+  if (!section) return landingSlotError(page, slot, "required ordered list slot is missing");
+  if (section.type !== "narrative" || section.body.length !== 1 || section.body[0].type !== "list") {
+    return landingSlotError(page, slot, "expected a single narrative list");
+  }
+  const items = section.body[0].items.map((item) => item.trim());
+  if (!items.length || items.some((item) => !item)) {
+    return landingSlotError(page, slot, "ordered list slot contains empty items");
+  }
+  return items;
+}
+
 function landingSlotError(page: LandingPageContent, slot: string, reason: string): never {
   throw new LandingSlotDeliveryError(page.pagePath, slot, reason);
 }

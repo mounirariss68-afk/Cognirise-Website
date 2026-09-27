@@ -19,6 +19,7 @@ type IndustryPickerProps = {
   introduction?: string;
   className?: string;
   compact?: boolean;
+  homepage?: boolean;
 };
 
 const pickerStyles = `
@@ -40,7 +41,10 @@ const pickerStyles = `
   .home-industry-visual:before{content:"";position:absolute;z-index:1;inset:0;background:linear-gradient(120deg,var(--hi-accent),transparent 54%);mix-blend-mode:color;opacity:.1;transition:opacity .45s ease}
   .home-industry-item.active .home-industry-visual:before{opacity:.18}
   .home-industry-visual:after{content:"";position:absolute;z-index:2;inset:0;background:linear-gradient(180deg,transparent 42%,rgba(253,252,251,.08) 57%,rgba(253,252,251,.72) 82%,rgba(253,252,251,.9) 100%);transition:background .45s ease}
+  .home-industry-disclosure--homepage .home-industry-visual:after{background:linear-gradient(180deg,transparent 46%,rgba(253,252,251,.04) 60%,rgba(253,252,251,.48) 83%,rgba(253,252,251,.72) 100%)}
+  .home-industry-disclosure--homepage .home-industry-trigger{grid-template-rows:1fr auto auto}
   .home-industry-item.active .home-industry-visual:after{background:radial-gradient(ellipse 70% 88% at 0% 64%,rgba(253,252,251,.94) 0%,rgba(253,252,251,.82) 34%,rgba(253,252,251,.36) 62%,transparent 100%),linear-gradient(180deg,transparent 56%,rgba(253,252,251,.12) 70%,rgba(253,252,251,.76) 100%)}
+  .home-industry-disclosure--homepage .home-industry-item.active .home-industry-visual:after{background:radial-gradient(ellipse 70% 88% at 0% 64%,rgba(253,252,251,.78) 0%,rgba(253,252,251,.62) 34%,rgba(253,252,251,.24) 62%,transparent 100%),linear-gradient(180deg,transparent 56%,rgba(253,252,251,.07) 70%,rgba(253,252,251,.60) 100%)}
   .home-industry-trigger{appearance:none;border:0;background:transparent;color:inherit;width:100%;min-width:0;padding:25px 27px 22px;display:grid;grid-template-columns:1fr;grid-template-rows:auto 1fr auto auto;gap:10px;text-align:left;cursor:pointer}
   .home-industry-trigger:focus-visible{outline:3px solid var(--hi-coral);outline-offset:-4px}
   .home-industry-number{font:700 10px/1 Inter,sans-serif;letter-spacing:.13em;color:rgba(16,41,87,.68)}
@@ -118,6 +122,7 @@ export function IndustryPicker({
   introduction = "We partner with organisations whose scale, regulatory burden and operating environments demand absolute precision.",
   className = "",
   compact = false,
+  homepage = false,
 }: IndustryPickerProps) {
   const releaseContext = useReleaseContext();
   const industryQuery = useCmsCollection("industry", [], (item) => ({
@@ -137,6 +142,8 @@ export function IndustryPicker({
     slug: industry.slug,
     name: industry.name,
     href: `/industries/${industry.slug}`,
+    // Both fields come from the same governed industry revision as its detail
+    // page, including Education and market-specific editions.
     orientation: industry.thesis,
     detail: industry.dek,
   })).filter((industry) => !releaseContext || releaseHrefAvailable(releaseContext.release.manifest, industry.href));
@@ -150,7 +157,7 @@ export function IndustryPicker({
   const empty = industryQuery.isAuthoritative && industryQuery.delivery === "intentional-empty";
 
   return (
-    <section id={id} className={`home-industry-disclosure ${compact ? "home-industry-disclosure--compact" : ""} px-6 md:px-[4.8vw] pb-[82px] lg:pb-[130px] pt-12 ${className}`}>
+    <section id={id} className={`home-industry-disclosure ${compact ? "home-industry-disclosure--compact" : ""} ${homepage ? "home-industry-disclosure--homepage" : ""} px-6 md:px-[4.8vw] pb-[82px] lg:pb-[130px] pt-12 ${className}`}>
       <style>{pickerStyles}</style>
       <div className="border-t border-[#102957] pt-6 flex flex-col lg:flex-row justify-between gap-8 items-start lg:items-end">
         <div>
@@ -162,7 +169,7 @@ export function IndustryPicker({
             {heading}
           </h2>
         </div>
-        <p className="text-[14px] leading-[1.5] max-w-[280px] text-[#536887]">{introduction}</p>
+        {!homepage && <p className="text-[14px] leading-[1.5] max-w-[280px] text-[#536887]">{introduction}</p>}
       </div>
 
       {loading && <div className="home-industry-status" role="status" data-testid="status-industry-picker">Loading industry points of view…</div>}
@@ -199,7 +206,7 @@ export function IndustryPicker({
                     <PulseImage src={assetUrl(industry.image)} alt={industry.imageAlt} className="w-full h-full object-cover" />
                   </figure>
                   <SpatialDisclosureTrigger id={industry.id} className="home-industry-trigger" data-testid={`home-industry-trigger-${industry.id}`}>
-                    <span className="home-industry-number">{industry.id}</span>
+                     {!homepage && <span className="home-industry-number">{industry.id}</span>}
                     <h3 className="home-industry-title">{industry.name}</h3>
                     <p className="home-industry-orientation">{industry.orientation}</p>
                   </SpatialDisclosureTrigger>

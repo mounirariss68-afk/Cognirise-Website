@@ -78,7 +78,7 @@ export function BlueprintJourney({ stageMedia }: { stageMedia?: BlueprintStageMe
             </em>
           </h2>
         </div>
-        <div className="self-end border-t border-[#cbd3e1] pt-6">
+        <div className="self-end">
           <p className="m-0 max-w-[470px] text-[16px] leading-[1.6] text-[#405777]">
             Four controlled stages turn intent into something leaders can see,
             test and own. The pivotal moment comes early: a decision-ready
@@ -150,22 +150,21 @@ export function BlueprintJourney({ stageMedia }: { stageMedia?: BlueprintStageMe
           }
           .blueprint-trigger:focus-visible { outline: 3px solid hsl(var(--brand-coral)); outline-offset: -4px; }
 
-          .blueprint-meta {
-            display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center;
-            gap: 8px; min-width: 0; margin-bottom: 4px;
-            font-family: Inter, sans-serif; text-transform: uppercase;
-            text-shadow: 0 1px 4px rgba(0,0,0,0.55);
-          }
-          .blueprint-num { font-size: 10px; font-weight: 700; line-height: 1; letter-spacing: 0.14em; }
+           .blueprint-meta {
+             position: absolute; top: 24px; left: 24px; right: 24px;
+             display: flex; align-items: baseline; flex-wrap: wrap;
+             gap: 7px; min-width: 0;
+             font-family: Inter, sans-serif;
+             text-shadow: 0 1px 6px rgba(0,0,0,0.85);
+           }
+           .blueprint-num { font-size: 14px; font-weight: 750; line-height: 1.25; letter-spacing: 0.04em; }
           .blueprint-time {
-            display: inline-flex; align-items: center; justify-self: start;
-            min-width: 0; max-width: 100%; color: rgba(255,255,255,0.78);
-            font-size: 10px; font-weight: 650; line-height: 1.25; letter-spacing: 0.1em;
-            white-space: normal; text-wrap: balance; overflow-wrap: normal;
+             display: inline; min-width: 0; max-width: 100%; color: white;
+             font-size: 14px; font-weight: 700; line-height: 1.25; letter-spacing: 0.01em;
+             white-space: normal; text-wrap: balance;
           }
           .blueprint-time:before {
-            content: ""; width: 14px; height: 1px; margin-right: 8px; flex: 0 0 auto;
-            background: var(--bp-accent, #7659df); opacity: 0.9;
+             content: "—"; margin-right: 7px; color: var(--bp-accent, #7659df);
           }
           .blueprint-time--highlight {
             color: white; font-weight: 750;
@@ -201,21 +200,15 @@ export function BlueprintJourney({ stageMedia }: { stageMedia?: BlueprintStageMe
             .blueprint-tagline { font-size: 21px; }
             .blueprint-description { font-size: 14.5px; }
             .blueprint-outcome { font-size: 13.5px; }
-             .blueprint-trigger { padding: 30px 28px 24px; }
+              .blueprint-trigger { padding: 30px 28px 24px; }
+              .blueprint-meta { top: 28px; left: 28px; right: 28px; }
             .blueprint-trigger > * { width: 100%; }
-            .blueprint-panel-content { width: calc(var(--blueprint-active-width) - 56px); padding: 0 28px 28px; }
-             .blueprint-row:has(.blueprint-item.active) .blueprint-item:not(.active) .blueprint-meta {
-               grid-template-columns: 1fr; gap: 7px;
-             }
-             .blueprint-row:has(.blueprint-item.active) .blueprint-item:not(.active) .blueprint-time:before {
-               width: 10px; margin-right: 6px;
-             }
+              .blueprint-panel-content { width: calc(var(--blueprint-active-width) - 56px); padding: 0 28px 28px; }
           }
           @media (max-width: 1023px) {
             .blueprint-item { min-height: 220px; grid-template-rows: minmax(220px, 1fr) 0fr; }
             .blueprint-row:has(.blueprint-item.active) .blueprint-item { flex-grow: 1; min-height: 140px; }
             .blueprint-row:has(.blueprint-item.active) .blueprint-item.active { grid-template-rows: minmax(140px, 1fr) auto; }
-            .blueprint-meta { grid-template-columns: auto minmax(0, 1fr); }
           }
           @media (prefers-reduced-motion: reduce) {
             .blueprint-item, .blueprint-panel, .blueprint-visual img, .blueprint-visual:after, .blueprint-visual:before { transition: none !important; }
@@ -276,7 +269,7 @@ export function BlueprintJourney({ stageMedia }: { stageMedia?: BlueprintStageMe
                             : ""
                         }`}
                       >
-                        {stage.time}
+                         {({ 1: "1 Day", 2: "48 hours", 3: "2–4 weeks", 4: "4–12 weeks" } as Record<number, string>)[stage.id]}
                       </span>
                     </div>
                     <h3 className="blueprint-title">{stage.title}</h3>

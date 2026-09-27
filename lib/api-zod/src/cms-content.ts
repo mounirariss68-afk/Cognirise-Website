@@ -73,6 +73,12 @@ const safeExternalUrl = z.string().url().regex(/^https?:\/\//i, "Only HTTP(S) li
 const safeInternalPath = z.string().regex(/^\/(?!\/)[a-z0-9/_-]*(?:\?[a-z0-9&=_-]+)?(?:#[a-z0-9_-]+)?$/i);
 const safeAssetPath = z.string().regex(/^\/(?!\/)[a-z0-9/_.-]+$/i);
 const safeLink = z.union([safeExternalUrl, safeInternalPath]);
+// Landing CTAs may open the visitor's email client; keep this allowance
+// separate from navigation, evidence, media, and other link contracts.
+const safeLandingCtaLink = z.union([
+  safeLink,
+  z.string().regex(/^mailto:[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i, "Use a plain email address for landing CTAs."),
+]);
 const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD.");
 const optionalDate = date.optional();
 const stringList = z.array(z.string().trim().min(1).max(240)).max(50).default([]);
@@ -1474,7 +1480,7 @@ export const cmsDraftMetadataSchema = z.object({
 }).strict();
 export const cmsPageSectionSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("narrative"), ...pageSectionIdentity, heading: z.string().trim().max(240).optional(), body: z.array(cmsRichBlockSchema).min(1).max(50) }).strict(),
-  z.object({ type: z.literal("cta"), ...pageSectionIdentity, label: z.string().trim().min(1).max(120), href: safeLink, style: z.enum(["primary", "secondary", "text"]).default("primary") }).strict(),
+  z.object({ type: z.literal("cta"), ...pageSectionIdentity, label: z.string().trim().min(1).max(120), href: safeLandingCtaLink, style: z.enum(["primary", "secondary", "text"]).default("primary") }).strict(),
   z.object({ type: z.literal("legal"), ...pageSectionIdentity, text: z.string().trim().min(1).max(2_000), required: z.boolean().default(false) }).strict(),
   z.object({ type: z.literal("media"), ...pageSectionIdentity, references: z.array(cmsMediaReferenceSchema).min(1).max(12) }).strict(),
   z.object({
@@ -1495,7 +1501,7 @@ const cmsLandingPageContentBaseSchema = z.object({
   // Compiled landing routes may expose many individually governed microcopy
   // slots (the Work proof ledger currently exceeds fifty).
   sections: z.array(cmsPageSectionSchema).min(1).max(100),
-  cta: z.object({ label: z.string().trim().min(1).max(120), href: safeLink, style: z.enum(["primary", "secondary", "text"]).default("primary") }).optional(),
+  cta: z.object({ label: z.string().trim().min(1).max(120), href: safeLandingCtaLink, style: z.enum(["primary", "secondary", "text"]).default("primary") }).optional(),
   seo: cmsSeoSchema.default({}),
   legal: z.object({ privacy: z.string().trim().max(2_000).optional(), terms: z.string().trim().max(2_000).optional(), disclaimer: z.string().trim().max(2_000).optional() }).strict().default({}),
   visualReferences: z.array(cmsMediaReferenceSchema).max(30).default([]),
@@ -1725,6 +1731,17 @@ function publishRuleIssues(kind: CmsDocumentKind, value: CmsContent): Publicatio
         // replace migration placeholders with their immutable media equivalent.
         const expectedType = inventoryType === "migration-media" ? "media" : inventoryType;
         const matches = sectionsById.get(slotId) ?? [];
+        // Existing published homepage revisions predate this optional editorial
+        // list. Keep them deliverable while a revision with the new list is
+        // reviewed; if the slot is present, it still receives normal cardinality
+        // and type validation below.
+        if (
+          landing.pagePath === "/"
+          && slotId === "home-office-cities"
+          && matches.length === 0
+        ) {
+          continue;
+        }
         if (matches.length === 0) {
           add("REQUIRED_SLOT_MISSING", "content.sections", `Landing page "${landing.pagePath}" is missing required slot "${slotId}" (${expectedType}).`);
         } else if (matches.length !== 1) {

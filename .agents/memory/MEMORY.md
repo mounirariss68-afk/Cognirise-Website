@@ -25,6 +25,7 @@
 - [Pulse artwork text hygiene](pulse-artwork-text-hygiene.md) — Blueprint-like raster scenes need semantic surface replacement, not simple text erasure, plus final visual inspection.
 - [Media stream listener cleanup](media-stream-listener-cleanup.md) — Node pipeline handles aborts but can retain listeners; clean only listeners added during delivery.
 - [Governed landing parity](governed-landing-parity.md) — Generate required CMS slots from approved templates; configured delivery must fail closed rather than restore compiled content.
+- [Homepage office list transition](homepage-office-list-transition.md) — New editorial list slots must not invalidate immutable published editions before authorized replacement is live.
 - [Sticky panel browser assertions](sticky-panel-browser-assertions.md) — Activate sticky ranges before visibility checks; scrollable pane content is reachable, not clipped.
 - [Protected methodology anchors](protected-methodology-anchors.md) — Treat IDAO and Agent Authority as read-only canon; supporting methods connect to them without changing them.
 - [Methodology journey preference](methodology-journey-preference.md) — Keep the panorama fixed; hover highlights its matching journey stop, while click selects guidance below.

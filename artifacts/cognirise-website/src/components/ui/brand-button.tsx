@@ -189,7 +189,7 @@ export const BrandButton = React.forwardRef<HTMLButtonElement | HTMLAnchorElemen
         style: { ...anchorProps.style, color: forcedTextColor },
       };
 
-      if (href.includes("#")) {
+       if (href.includes("#") || href.startsWith("mailto:")) {
         return (
           <a {...sharedAnchorProps}>
             {renderContent()}

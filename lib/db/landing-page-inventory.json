@@ -7,7 +7,7 @@
     "snapshot": {
       "slug": "homepage",
       "title": "Homepage",
-      "summary": "Cognirise is the AI-native advisory and engineering firm. Senior operators, forward-deployed engineers and governed agents move priority work from strategy into production.",
+      "summary": "Cognirise is the AI-native advisory and engineering firm. Senior experts, forward-deployed engineers and governed agents move priority work from strategy into production.",
       "markets": [
         "uae"
       ],
@@ -25,29 +25,18 @@
             "body": [
               {
                 "type": "paragraph",
-                "text": "Cognirise is the AI-native advisory and engineering firm. Senior operators, forward-deployed engineers and governed agents move priority work from strategy into production."
+                "text": "Cognirise is the AI-native advisory and engineering firm. Senior experts, forward-deployed engineers and governed agents move priority work from strategy into production."
               }
             ],
             "order": 0
           },
           {
-            "type": "narrative",
-            "id": "home-convergence-body",
-            "body": [
-              {
-                "type": "paragraph",
-                "text": "You don't need a strategy firm that can't code, or an engineering shop that doesn't understand governance. You need a team that takes the work all the way through."
-              }
-            ],
-            "order": 1
-          },
-          {
             "type": "cta",
             "id": "home-convergence-cta",
-            "label": "Meet the team",
-            "href": "/about",
+            "label": "Book a 48-hour prototype",
+            "href": "mailto:support@cognirise.ai",
             "style": "primary",
-            "order": 2
+            "order": 1
           },
           {
             "type": "narrative",
@@ -58,7 +47,7 @@
                 "text": "We deploy teams who bridge the entire operating gap."
               }
             ],
-            "order": 3
+            "order": 2
           },
           {
             "type": "narrative",
@@ -69,7 +58,7 @@
                 "text": "people + agents"
               }
             ],
-            "order": 4
+            "order": 3
           },
           {
             "type": "narrative",
@@ -80,7 +69,7 @@
                 "text": "Our capability"
               }
             ],
-            "order": 5
+            "order": 4
           },
           {
             "type": "narrative",
@@ -91,7 +80,7 @@
                 "text": "Strategy & operating model advisory"
               }
             ],
-            "order": 6
+            "order": 5
           },
           {
             "type": "narrative",
@@ -102,7 +91,7 @@
                 "text": "Forward-deployed enterprise engineering"
               }
             ],
-            "order": 7
+            "order": 6
           },
           {
             "type": "narrative",
@@ -113,7 +102,7 @@
                 "text": "Proprietary CogniOS operating system"
               }
             ],
-            "order": 8
+            "order": 7
           },
           {
             "type": "migration-media",
@@ -122,181 +111,26 @@
             "altText": "Depiction of convergence",
             "ownership": "compiled-landing",
             "resolution": "unresolved",
+            "order": 8
+          },
+          {
+            "type": "narrative",
+            "id": "home-office-cities",
+            "body": [
+              {
+                "type": "list",
+                "style": "bullet",
+                "items": [
+                  "Dubai",
+                  "Riyadh",
+                  "Istanbul",
+                  "Amsterdam",
+                  "London",
+                  "Vienna"
+                ]
+              }
+            ],
             "order": 9
-          },
-          {
-            "type": "cta",
-            "id": "home-framework-authority-cta",
-            "label": "Agent Authority Model",
-            "href": "/methodologies/agent-authority-model",
-            "style": "primary",
-            "order": 10
-          },
-          {
-            "type": "cta",
-            "id": "home-framework-idao-cta",
-            "label": "Explore IDAO",
-            "href": "/methodologies/idao",
-            "style": "primary",
-            "order": 11
-          },
-          {
-            "type": "cta",
-            "id": "home-framework-portfolio-cta",
-            "label": "View methodology portfolio",
-            "href": "/methodologies",
-            "style": "primary",
-            "order": 12
-          },
-          {
-            "type": "migration-media",
-            "id": "home-governance-visual",
-            "sourcePath": "/images/cognirise/cognirise-pulse-governance.jpg",
-            "altText": "Visual representation of operational boundaries.",
-            "ownership": "compiled-landing",
-            "resolution": "unresolved",
-            "order": 13
-          },
-          {
-            "type": "narrative",
-            "id": "home-image-ledger-body",
-            "body": [
-              {
-                "type": "paragraph",
-                "text": "We build the path, the controls and the capacity to keep the work moving after the first release."
-              }
-            ],
-            "order": 14
-          },
-          {
-            "type": "narrative",
-            "id": "home-image-ledger-first-caption",
-            "body": [
-              {
-                "type": "paragraph",
-                "text": "Boundaries you control."
-              }
-            ],
-            "order": 15
-          },
-          {
-            "type": "cta",
-            "id": "home-image-ledger-first-cta",
-            "label": "Agent Authority Model",
-            "href": "/methodologies/agent-authority-model",
-            "style": "primary",
-            "order": 16
-          },
-          {
-            "type": "narrative",
-            "id": "home-image-ledger-first-label",
-            "body": [
-              {
-                "type": "paragraph",
-                "text": "First condition"
-              }
-            ],
-            "order": 17
-          },
-          {
-            "type": "narrative",
-            "id": "home-image-ledger-heading",
-            "body": [
-              {
-                "type": "paragraph",
-                "text": "Three conditions for change that holds."
-              }
-            ],
-            "order": 18
-          },
-          {
-            "type": "narrative",
-            "id": "home-image-ledger-label",
-            "body": [
-              {
-                "type": "paragraph",
-                "text": "The system in motion"
-              }
-            ],
-            "order": 19
-          },
-          {
-            "type": "narrative",
-            "id": "home-image-ledger-second-caption",
-            "body": [
-              {
-                "type": "paragraph",
-                "text": "Work that flows."
-              }
-            ],
-            "order": 20
-          },
-          {
-            "type": "cta",
-            "id": "home-image-ledger-second-cta",
-            "label": "Human–Agent Operating Model",
-            "href": "/methodologies/human-agent-operating-model",
-            "style": "primary",
-            "order": 21
-          },
-          {
-            "type": "narrative",
-            "id": "home-image-ledger-second-label",
-            "body": [
-              {
-                "type": "paragraph",
-                "text": "Second condition"
-              }
-            ],
-            "order": 22
-          },
-          {
-            "type": "narrative",
-            "id": "home-image-ledger-third-caption",
-            "body": [
-              {
-                "type": "paragraph",
-                "text": "A platform that remembers."
-              }
-            ],
-            "order": 23
-          },
-          {
-            "type": "cta",
-            "id": "home-image-ledger-third-cta",
-            "label": "CogniOS architecture",
-            "href": "/platforms/cognios#architecture",
-            "style": "primary",
-            "order": 24
-          },
-          {
-            "type": "narrative",
-            "id": "home-image-ledger-third-label",
-            "body": [
-              {
-                "type": "paragraph",
-                "text": "Third condition"
-              }
-            ],
-            "order": 25
-          },
-          {
-            "type": "migration-media",
-            "id": "home-people-visual",
-            "sourcePath": "/images/cognirise/cognirise-pulse-people.jpg",
-            "altText": "Visual representation of people and agents in a shared architecture.",
-            "ownership": "compiled-landing",
-            "resolution": "unresolved",
-            "order": 26
-          },
-          {
-            "type": "migration-media",
-            "id": "home-platform-visual",
-            "sourcePath": "/images/cognirise/site-cognios.jpg",
-            "altText": "Visual representation of a durable system.",
-            "ownership": "compiled-landing",
-            "resolution": "unresolved",
-            "order": 27
           },
           {
             "type": "narrative",
@@ -304,21 +138,10 @@
             "body": [
               {
                 "type": "paragraph",
-                "text": "Complex enterprise & government"
+                "text": "We don’t bill mandays. We deliver outcomes."
               }
             ],
-            "order": 28
-          },
-          {
-            "type": "narrative",
-            "id": "home-proof-focus-label",
-            "body": [
-              {
-                "type": "paragraph",
-                "text": "Focus"
-              }
-            ],
-            "order": 29
+            "order": 10
           },
           {
             "type": "narrative",
@@ -326,21 +149,10 @@
             "body": [
               {
                 "type": "paragraph",
-                "text": "Advisory + Engineering"
+                "text": "No long pilots. Prototype in 48 hours."
               }
             ],
-            "order": 30
-          },
-          {
-            "type": "narrative",
-            "id": "home-proof-model-label",
-            "body": [
-              {
-                "type": "paragraph",
-                "text": "Model"
-              }
-            ],
-            "order": 31
+            "order": 11
           },
           {
             "type": "narrative",
@@ -348,21 +160,10 @@
             "body": [
               {
                 "type": "paragraph",
-                "text": "CogniOS (Four native engines)"
+                "text": "We don’t build Power Points. We build working solutions"
               }
             ],
-            "order": 32
-          },
-          {
-            "type": "narrative",
-            "id": "home-proof-platform-label",
-            "body": [
-              {
-                "type": "paragraph",
-                "text": "Platform"
-              }
-            ],
-            "order": 33
+            "order": 12
           },
           {
             "type": "narrative",
@@ -370,32 +171,10 @@
             "body": [
               {
                 "type": "paragraph",
-                "text": "Middle East & Europe"
+                "text": "No vendor lock-in. You own the platform."
               }
             ],
-            "order": 34
-          },
-          {
-            "type": "narrative",
-            "id": "home-proof-presence-label",
-            "body": [
-              {
-                "type": "paragraph",
-                "text": "Presence"
-              }
-            ],
-            "order": 35
-          },
-          {
-            "type": "narrative",
-            "id": "home-service-body",
-            "body": [
-              {
-                "type": "paragraph",
-                "text": "We don't hand over a presentation and wish you luck. We deploy senior teams who take accountability for the architecture, the code and the outcome."
-              }
-            ],
-            "order": 36
+            "order": 13
           },
           {
             "type": "narrative",
@@ -406,7 +185,7 @@
                 "text": "We combine strategy, engineering and platform."
               }
             ],
-            "order": 37
+            "order": 14
           },
           {
             "type": "narrative",
@@ -417,26 +196,15 @@
                 "text": "What we do"
               }
             ],
-            "order": 38
-          },
-          {
-            "type": "narrative",
-            "id": "home-start-body",
-            "body": [
-              {
-                "type": "paragraph",
-                "text": "Speak with a partner about deploying governed intelligence into your core workflows."
-              }
-            ],
-            "order": 39
+            "order": 15
           },
           {
             "type": "cta",
             "id": "home-start-cta",
-            "label": "Book a consultation",
-            "href": "/contact",
+            "label": "Talk to us",
+            "href": "mailto:support@cognirise.ai",
             "style": "primary",
-            "order": 40
+            "order": 16
           },
           {
             "type": "narrative",
@@ -444,10 +212,10 @@
             "body": [
               {
                 "type": "paragraph",
-                "text": "Ready for operational reality?"
+                "text": "Ready for a change?"
               }
             ],
-            "order": 41
+            "order": 17
           },
           {
             "type": "narrative",
@@ -458,7 +226,7 @@
                 "text": "Start"
               }
             ],
-            "order": 42
+            "order": 18
           },
           {
             "type": "cta",
@@ -466,12 +234,12 @@
             "label": "Explore our practice",
             "href": "/#service-lines",
             "style": "primary",
-            "order": 43
+            "order": 19
           }
         ],
         "cta": {
-          "label": "Meet the team",
-          "href": "/about",
+          "label": "Book a 48-hour prototype",
+          "href": "mailto:support@cognirise.ai",
           "style": "primary"
         },
         "seo": {
@@ -917,17 +685,6 @@
           },
           {
             "type": "narrative",
-            "id": "platforms-alliance-heading",
-            "body": [
-              {
-                "type": "paragraph",
-                "text": "Platform Alliances"
-              }
-            ],
-            "order": 1
-          },
-          {
-            "type": "narrative",
             "id": "platforms-closing-body",
             "body": [
               {
@@ -935,7 +692,7 @@
                 "text": "Start with the work where urgency, complexity and value have already collided. In a focused working session, we surface the opportunity, constraints and a practical route to production."
               }
             ],
-            "order": 2
+            "order": 1
           },
           {
             "type": "cta",
@@ -943,7 +700,7 @@
             "label": "Book a value scan",
             "href": "/value-scan",
             "style": "primary",
-            "order": 3
+            "order": 2
           },
           {
             "type": "narrative",
@@ -954,7 +711,7 @@
                 "text": "The first move"
               }
             ],
-            "order": 4
+            "order": 3
           },
           {
             "type": "narrative",
@@ -965,7 +722,7 @@
                 "text": "Bring one process. Leave with a route."
               }
             ],
-            "order": 5
+            "order": 4
           },
           {
             "type": "narrative",
@@ -976,7 +733,7 @@
                 "text": "One governed flow"
               }
             ],
-            "order": 6
+            "order": 5
           },
           {
             "type": "narrative",
@@ -987,7 +744,7 @@
                 "text": "CogniOS Ecosystem"
               }
             ],
-            "order": 7
+            "order": 6
           },
           {
             "type": "narrative",
@@ -998,7 +755,7 @@
                 "text": "system"
               }
             ],
-            "order": 8
+            "order": 7
           },
           {
             "type": "narrative",
@@ -1009,7 +766,7 @@
                 "text": "Cognirise combines AI-native advisory, forward-deployed engineering and governed agents to move consequential work into production. CogniOS connects enterprise knowledge, specialist agents and human accountability under one governed operating system."
               }
             ],
-            "order": 9
+            "order": 8
           },
           {
             "type": "narrative",
@@ -1020,7 +777,7 @@
                 "text": "Bring us one process"
               }
             ],
-            "order": 10
+            "order": 9
           },
           {
             "type": "narrative",
@@ -1031,7 +788,7 @@
                 "text": "Explore capability matrix"
               }
             ],
-            "order": 11
+            "order": 10
           },
           {
             "type": "narrative",
@@ -1042,7 +799,7 @@
                 "text": "Platforms / Dubai · UAE"
               }
             ],
-            "order": 12
+            "order": 11
           },
           {
             "type": "narrative",
@@ -1053,7 +810,7 @@
                 "text": "Ecosystem for execution."
               }
             ],
-            "order": 13
+            "order": 12
           },
           {
             "type": "migration-media",
@@ -1062,7 +819,7 @@
             "altText": "A layered CogniOS ecosystem connected by a luminous central spine.",
             "ownership": "compiled-landing",
             "resolution": "unresolved",
-            "order": 14
+            "order": 13
           },
           {
             "type": "narrative",
@@ -1073,7 +830,7 @@
                 "text": "Capability Matrix"
               }
             ],
-            "order": 15
+            "order": 14
           },
           {
             "type": "narrative",
@@ -1084,7 +841,7 @@
                 "text": "Connected capabilities."
               }
             ],
-            "order": 16
+            "order": 15
           }
         ],
         "cta": {

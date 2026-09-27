@@ -9,13 +9,14 @@ const target = args.find((argument) => argument.startsWith("--target="))?.slice(
 
 export const HOMEPAGE_PATH = "/";
 export const HOMEPAGE_SOURCE_KEY = "compiled:/";
-export const HOMEPAGE_RECEIPT = "cms-homepage-task-338-v2:draft";
+export const HOMEPAGE_RECEIPT = "cms-homepage-task-437-v1:draft";
 export const LEGACY_HOMEPAGE_RECEIPTS = [
   "cms-homepage-task-330-v1:draft",
   "cms-homepage-task-338-v1:draft",
+  "cms-homepage-task-338-v2:draft",
 ] as const;
 export const HOMEPAGE_REASON =
-  "Task 338 correction: staged the governed homepage copy delta without replacing published or regional editorial authority; normal editorial review and publication remain required.";
+  "Task 437 refresh: staged generated homepage copy only over exact prior generated values without replacing published or regional editorial authority; normal editorial review and publication remain required.";
 const SERVICE_EMAIL = "cms-reconciliation@system.invalid";
 export const HOMEPAGE_HEADLINE_SLOT = "hero";
 export const HOMEPAGE_SERVICE_LABEL_SLOT = "home-service-label";
@@ -24,7 +25,15 @@ export const HOMEPAGE_SERVICE_LABEL_TEXT = "What we do";
 export const HOMEPAGE_LEGACY_HEADLINE = "Intelligence becomes momentum.";
 export const HOMEPAGE_LEGACY_SERVICE_LABEL = "How we work";
 export const HOMEPAGE_NARRATIVE_FIELD = "content.narrative";
+export const HOMEPAGE_OFFICE_CITIES_SLOT = "home-office-cities";
 export const RETIRED_HOMEPAGE_TEXT_SLOTS = [
+  "home-service-body",
+  "home-convergence-body",
+  "home-start-body",
+  "home-proof-focus-label",
+  "home-proof-model-label",
+  "home-proof-platform-label",
+  "home-proof-presence-label",
   "home-framework-applications-label",
   "home-framework-authority-body",
   "home-framework-authority-title",
@@ -52,16 +61,25 @@ export const RETIRED_HOMEPAGE_TEXT_PREFIXES = [
   "home-firm-",
   "home-clarity-",
 ] as const;
-export const HOMEPAGE_OVERLAY_CTA_SLOTS = [
+export const RETIRED_HOMEPAGE_SECTION_IDS = [
+  "home-governance-visual",
+  "home-people-visual",
+  "home-platform-visual",
   "home-framework-authority-cta",
   "home-framework-idao-cta",
   "home-framework-portfolio-cta",
-  "home-image-ledger-first-cta",
-  "home-image-ledger-second-cta",
-  "home-image-ledger-third-cta",
 ] as const;
-export const HOMEPAGE_CAPTION_SLOT = "home-image-ledger-first-caption";
-export const HOMEPAGE_LEGACY_CAPTION = "Boundaries you can see.";
+export const RETIRED_HOMEPAGE_SECTION_PREFIXES = [
+  "home-image-ledger-",
+] as const;
+export const HOMEPAGE_OVERLAY_CTA_SLOTS = [
+  "home-convergence-cta",
+  "home-start-cta",
+] as const;
+const HOMEPAGE_LEGACY_CTA_VALUES: Record<string, { label: string; href: string }> = {
+  "home-convergence-cta": { label: "Meet the team", href: "/about" },
+  "home-start-cta": { label: "Book a consultation", href: "/contact" },
+};
 
 export interface SqlClient {
   query: (text: string, values?: unknown[]) => Promise<{
@@ -103,6 +121,17 @@ function sectionText(section: Record<string, any>) {
     : undefined;
 }
 
+function hasOrderedOfficeCityList(section: Record<string, any> | undefined) {
+  const body = section?.body;
+  const items = Array.isArray(body) && body.length === 1 && body[0]?.type === "list"
+    ? body[0].items
+    : undefined;
+  return section?.type === "narrative"
+    && Array.isArray(items)
+    && items.length > 0
+    && items.every((item: unknown) => typeof item === "string" && item.trim().length > 0);
+}
+
 export type HomepageSlotOverlay = {
   snapshot: HomepageSnapshot;
   customizedSlots: string[];
@@ -110,7 +139,7 @@ export type HomepageSlotOverlay = {
 };
 
 /**
- * Apply only the Task 338 slot delta to an approved/current homepage
+ * Apply only the governed homepage copy delta to an approved/current homepage
  * baseline. The baseline remains the authority for metadata, unrelated copy,
  * and immutable media references. A generated fallback is used only for a
  * missing governed slot or an exact legacy generated value. A prior generated
@@ -152,10 +181,17 @@ export function overlayHomepageSlots(
     }
   }
   const retired = new Set<string>(RETIRED_HOMEPAGE_TEXT_SLOTS);
+  // These omissions apply only to the staged copy returned below. The
+  // published revision remains immutable and its pointer is never changed by
+  // this reconciliation.
   const sections = baseline.content.sections
     .filter((section: Record<string, any>) =>
       !retired.has(section.id)
       && !RETIRED_HOMEPAGE_TEXT_PREFIXES.some((prefix) => String(section.id).startsWith(prefix)),
+    )
+    .filter((section: Record<string, any>) =>
+      !RETIRED_HOMEPAGE_SECTION_IDS.includes(section.id)
+      && !RETIRED_HOMEPAGE_SECTION_PREFIXES.some((prefix) => String(section.id).startsWith(prefix)),
     )
     .map((section: Record<string, any>) => structuredClone(section));
   const sectionById = new Map<string, Record<string, any>>(
@@ -204,6 +240,36 @@ export function overlayHomepageSlots(
       requestedText: HOMEPAGE_SERVICE_LABEL_TEXT,
       legacyText: HOMEPAGE_LEGACY_SERVICE_LABEL,
     },
+    {
+      id: HOMEPAGE_HEADLINE_SLOT,
+      field: "body",
+      legacyText: "Cognirise is the AI-native advisory and engineering firm. Senior operators, forward-deployed engineers and governed agents move priority work from strategy into production.",
+    },
+    {
+      id: "home-proof-model",
+      field: "body",
+      legacyText: "Advisory + Engineering",
+    },
+    {
+      id: "home-proof-focus",
+      field: "body",
+      legacyText: "Complex enterprise & government",
+    },
+    {
+      id: "home-proof-platform",
+      field: "body",
+      legacyText: "CogniOS (Four native engines)",
+    },
+    {
+      id: "home-proof-presence",
+      field: "body",
+      legacyText: "Middle East & Europe",
+    },
+    {
+      id: "home-start-heading",
+      field: "body",
+      legacyText: "Ready for operational reality?",
+    },
   ] as const;
   for (const slot of targetedTextSlots) {
     const generatedSection = generatedById.get(slot.id);
@@ -213,10 +279,10 @@ export function overlayHomepageSlots(
     const generatedText = slot.field === "heading"
       ? generatedSection.heading
       : sectionText(generatedSection);
-    if (typeof generatedText !== "string") {
+    if (typeof generatedText !== "string" || !generatedText.trim()) {
       throw new Error(`Generated homepage narrative slot "${slot.id}" has no targeted text.`);
     }
-    if (generatedText !== slot.requestedText) {
+    if ("requestedText" in slot && generatedText !== slot.requestedText) {
       throw new Error(
         `Generated homepage narrative slot "${slot.id}" does not match the Task 338 copy authority.`,
       );
@@ -226,15 +292,19 @@ export function overlayHomepageSlots(
       addGeneratedSection(generatedSection);
       continue;
     }
+    if (existing.type !== "narrative") {
+      customizedSlots.push(slot.id);
+      continue;
+    }
     const existingText = slot.field === "heading" ? existing.heading : sectionText(existing);
     if (existingText === generatedText) continue;
     const previousSection = generatedPreviousById.get(slot.id);
     const previousText = previousSection
       ? slot.field === "heading" ? previousSection.heading : sectionText(previousSection)
       : undefined;
-    // A value equal to the prior generated authority (or the known pre-Task
-    // 338 fallback) is not an editorial customization and may receive the
-    // requested copy. Any other value remains authoritative.
+    // A value equal to the prior generated authority (or a known exact legacy
+    // value) is not an editorial customization and may receive generated copy.
+    // Any other value remains authoritative.
     if (
       (existingText !== undefined && existingText === previousText)
       || existingText === slot.legacyText
@@ -260,27 +330,48 @@ export function overlayHomepageSlots(
     }
     const existing = sectionById.get(slotId);
     if (existing) {
-      if (
-        existing.label !== generatedSection.label
-        || existing.href !== generatedSection.href
-        || (existing.style ?? "primary") !== (generatedSection.style ?? "primary")
-      ) customizedSlots.push(slotId);
+      const legacy = HOMEPAGE_LEGACY_CTA_VALUES[slotId];
+      if (existing.type !== "cta") {
+        customizedSlots.push(slotId);
+        continue;
+      }
+      let customized = false;
+      for (const field of ["label", "href"] as const) {
+        const existingValue = existing[field];
+        const generatedValue = generatedSection[field];
+        const previousValue = generatedPreviousById.get(slotId)?.[field];
+        if (existingValue === generatedValue) continue;
+        if (
+          (previousValue !== undefined && existingValue === previousValue)
+          || existingValue === legacy?.[field]
+        ) {
+          existing[field] = generatedValue;
+        } else {
+          customized = true;
+        }
+      }
+      if ((existing.style ?? "primary") !== (generatedSection.style ?? "primary")) {
+        customized = true;
+      }
+      if (customized) customizedSlots.push(slotId);
       continue;
     }
     addGeneratedSection(generatedSection);
   }
 
-  const generatedCaption = generatedById.get(HOMEPAGE_CAPTION_SLOT);
-  if (!generatedCaption || generatedCaption.type !== "narrative") {
-    throw new Error(`Generated homepage is missing required caption slot "${HOMEPAGE_CAPTION_SLOT}".`);
+  const generatedOfficeCities = generatedById.get(HOMEPAGE_OFFICE_CITIES_SLOT);
+  if (!hasOrderedOfficeCityList(generatedOfficeCities)) {
+    throw new Error(
+      `Generated homepage is missing the ordered list slot "${HOMEPAGE_OFFICE_CITIES_SLOT}".`,
+    );
   }
-  const existingCaption = sectionById.get(HOMEPAGE_CAPTION_SLOT);
-  if (!existingCaption) {
-    addGeneratedSection(generatedCaption);
-  } else if (sectionText(existingCaption) === HOMEPAGE_LEGACY_CAPTION) {
-    existingCaption.body = structuredClone(generatedCaption.body);
-  } else if (sectionText(existingCaption) !== sectionText(generatedCaption)) {
-    customizedSlots.push(HOMEPAGE_CAPTION_SLOT);
+  const existingOfficeCities = sectionById.get(HOMEPAGE_OFFICE_CITIES_SLOT);
+  if (!existingOfficeCities) {
+    addGeneratedSection(generatedOfficeCities);
+  } else if (!hasOrderedOfficeCityList(existingOfficeCities)) {
+    throw new Error(
+      `Existing homepage slot "${HOMEPAGE_OFFICE_CITIES_SLOT}" is not a single ordered list; preserving it for editorial correction.`,
+    );
   }
 
   const result = structuredClone(baseline);
@@ -796,7 +887,7 @@ async function reconcileHomepage(
       (actor_user_id,actor_label,action,target_type,target_id,request_id,metadata)
      VALUES ($1,$2,'document.draft-reconciled','document',$3,$4,$5)`,
     [actor.id, actor.email, row.document_id, HOMEPAGE_RECEIPT, {
-      task: 338,
+      task: 437,
       sourceKey: HOMEPAGE_SOURCE_KEY,
       revisionId,
       publishedRevisionId: row.published_revision_id ?? null,
@@ -901,7 +992,7 @@ async function run() {
     await client.query("COMMIT");
     await verifyHomepagePostMerge(client, before, outcome);
     console.log(
-      `Task 338 homepage draft reconciliation: ${outcome.action}`
+      `Task 437 homepage draft reconciliation: ${outcome.action}`
       + `${outcome.revisionId ? ` revision=${outcome.revisionId}` : ""}.`
       + `${"reason" in outcome ? ` ${outcome.reason}` : ""}`
       + `${"customizedSlots" in outcome && outcome.customizedSlots?.length

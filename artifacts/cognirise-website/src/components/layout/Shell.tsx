@@ -1,7 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { Menu, X, ChevronDown, ChevronRight } from "lucide-react";
 import { Fragment, useState, useEffect, useRef } from "react";
-import { BrandButton } from "@/components/ui/brand-button";
 import { configurePublicMarkets, getMarketLocationLabel, useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
 import { PulseMotionPage } from "@/components/motion/PulseMotionPage";
@@ -587,16 +586,6 @@ export function Shell({
             </ul>
           </nav>
 
-          <div className="relative z-50 hidden shrink-0 items-center gap-3 2xl:gap-6 xl:flex">
-            {marketContext ? (
-              <span className="text-xs font-bold uppercase tracking-widest text-[hsl(var(--brand-deep))]">
-                Preview · {getMarketLocationLabel(market)}
-              </span>
-            ) : import.meta.env?.DEV && marketOptions.length > 0 ? (
-              <ReviewVersionSelect markets={marketOptions} market={market} onSelect={setMarket} />
-            ) : null}
-            <BrandButton href="/value-scan" className="shrink-0 px-4 2xl:px-6">Bring us one process</BrandButton>
-          </div>
 
           <button
             className="xl:hidden p-2 -mr-2 relative z-50 rounded-sm text-[hsl(var(--brand-deep))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-pink))]"
@@ -668,20 +657,7 @@ export function Shell({
                 )}
               </div>
             ))}
-            <div className="pt-8">
-              <BrandButton href="/value-scan" className="w-full justify-center">Bring us one process</BrandButton>
-            </div>
           </nav>
-          
-          {marketContext ? (
-            <div className="pb-12 border-t border-border pt-8 text-xs font-bold uppercase tracking-widest text-[hsl(var(--brand-deep))]">
-              Preview · {getMarketLocationLabel(market)}
-            </div>
-          ) : import.meta.env?.DEV && marketOptions.length > 0 ? (
-            <div className="pb-12 border-t border-border pt-8">
-              <ReviewVersionSelect markets={marketOptions} market={market} onSelect={setMarket} />
-            </div>
-          ) : null}
         </div>
       )}
 
@@ -732,8 +708,15 @@ export function Shell({
             </div>
 
             <div>
-              <h4 className="text-[10px] font-semibold uppercase tracking-widest text-white/40 mb-6">Action</h4>
-              <BrandButton href="/value-scan" variant="inverse" className="w-full">Bring us one process</BrandButton>
+              {marketContext ? (
+                <p className="text-xs font-bold uppercase tracking-widest text-white/80">
+                  Preview · {getMarketLocationLabel(market)}
+                </p>
+              ) : import.meta.env?.DEV && marketOptions.length > 0 ? (
+                <div className="[&_label]:text-white/80">
+                  <ReviewVersionSelect markets={marketOptions} market={market} onSelect={setMarket} />
+                </div>
+              ) : null}
             </div>
           </div>
           
