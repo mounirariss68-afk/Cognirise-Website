@@ -20,9 +20,9 @@ function statusLabel(status: Document["status"]) {
     case "in-review":
       return "Awaiting review";
     case "approved":
-      return "Ready for publication";
+      return "Approved revision; publish the exact edition and release scope";
     case "published":
-      return "Live; review successor changes in the editor";
+      return "Content edition published; check visibility and release scope";
     case "archived":
       return "Administrator action required";
     default:

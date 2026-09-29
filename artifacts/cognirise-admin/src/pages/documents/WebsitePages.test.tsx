@@ -95,7 +95,11 @@ if (typeof (mock as typeof mock & { module?: unknown }).module !== "function") {
       assert.equal(view.container.querySelector('a[href="/content/homepage-id"]')?.textContent, "Homepage");
       assert.match(view.container.querySelector('a[href="/content/homepage-id?market=uae&locale=en"]')?.textContent ?? "", /UAE · EN.*Live with pending changes/);
       assert.equal(view.container.querySelector('a[href*="market=ksa"]'), null);
-      assert.deepEqual([...view.container.querySelectorAll("button")].map((item) => item.textContent), ["Refresh"]);
+      assert.deepEqual([...view.container.querySelectorAll("button")].map((item) => item.textContent), ["Find Homepage", "Refresh"]);
+      await React.act(async () => {
+        view.container.querySelector<HTMLButtonElement>("button")!.click();
+      });
+      assert.equal((observedParams.at(-1) as { search: string }).search, "homepage");
       const search = view.container.querySelector<HTMLInputElement>('input[aria-label="Search website pages"]')!;
       const setValue = Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, "value")!.set!;
       await React.act(async () => {

@@ -26,7 +26,7 @@ test("People table exposes staged/live labels and locale details without colour-
   const checklist = await readFile(new URL("src/pages/documents/MarketAvailabilityChecklist.tsx", adminRoot), "utf8");
   const matrix = await readFile(new URL("src/pages/documents/PeopleMarketMatrix.tsx", adminRoot), "utf8");
 
-  assert.match(checklist, /Live shown/);
+  assert.match(checklist, /Visibility published/);
   assert.match(checklist, /Pending change/);
   assert.match(checklist, /Show locale exceptions|Inspect availability and publication/);
   assert.match(checklist, /aria-pressed=\{checked\}/);

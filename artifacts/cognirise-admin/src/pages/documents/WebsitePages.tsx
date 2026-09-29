@@ -92,8 +92,20 @@ export default function WebsitePages() {
     <main className="mx-auto flex min-h-full w-full max-w-5xl flex-col p-4 sm:p-8">
       <header className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Website Pages</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Find a governed page, then open the exact market and language edition to review or edit it.</p>
+        <p className="mt-1 text-sm text-muted-foreground">Find a page and open its exact market and language edition.</p>
       </header>
+      <section aria-label="How website pages go live" className="mb-6 rounded-xl border border-border bg-card p-4 text-sm sm:p-5">
+        <h2 className="font-semibold">Manage a website page</h2>
+        <ol className="mt-2 list-decimal space-y-1 pl-5 text-muted-foreground">
+          <li>Open a market/language edition below to edit its content. In <strong>Regions</strong>, reuse shared content, adapt only local differences, or make an independent edition for another market/language.</li>
+          <li>Save the exact revision, submit it for independent review, and have an authorized reviewer approve it.</li>
+          <li>Publish the approved edition and any required destination visibility; then build and publish a ready candidate in <strong>Release Center</strong> for that market/language.</li>
+        </ol>
+        <p className="mt-3 text-xs text-muted-foreground">A draft may coexist with an older published revision. Approval or a visibility check alone does not update the public website.</p>
+        <Button variant="outline" size="sm" className="mt-3" onClick={() => { setSearch("homepage"); setPage(1); }}>
+          Find Homepage
+        </Button>
+      </section>
       <div className="mb-6 flex flex-wrap items-center gap-3">
         <div className="relative w-full max-w-lg flex-1">
           <Search aria-hidden="true" className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />

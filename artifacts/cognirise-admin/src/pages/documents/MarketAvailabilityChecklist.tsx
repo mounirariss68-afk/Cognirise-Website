@@ -300,10 +300,10 @@ export function MarketAvailabilityChecklist({
               {pendingCount > 0 ? ` · ${pendingCount} pending review` : ""}
             </p>
           </div>
-          <span className="text-[10px] text-muted-foreground">Live and staged visibility</span>
+          <span className="text-[10px] text-muted-foreground">Published and staged visibility (not content)</span>
         </div>
         <div className="space-y-1">
-        <span className="sr-only">✓ Live shown; * Pending change</span>
+        <span className="sr-only">✓ Visibility published; * Pending change</span>
         <div className="flex flex-wrap gap-1" role="list" aria-label="Live and pending availability by market">
           {compactItems.map(({ configured, item, extraLocales, pending, liveChecked, pendingChecked }) => {
             if (!item) {

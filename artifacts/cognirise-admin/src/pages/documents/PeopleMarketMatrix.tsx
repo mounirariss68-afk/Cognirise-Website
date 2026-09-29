@@ -44,13 +44,14 @@ export function PeopleMarketMatrix({
         <div>
           <h2 id="people-market-heading" className="font-semibold">People</h2>
           <p className="mt-1 text-xs text-muted-foreground">
-            Live availability is checked. A dashed tick with an asterisk is a staged decision and is not public until its normal review or publication action completes.
+            A checked market means its visibility setting is published, not that the person's profile is live. Each person also needs an approved, published content edition for that market/language and a ready scoped release. A dashed tick with an asterisk is only a pending visibility change.
           </p>
           <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground" aria-label="Availability legend">
-            <span><strong aria-hidden="true">✓</strong> Live shown</span>
+            <span><strong aria-hidden="true">✓</strong> Visibility published</span>
             <span><strong aria-hidden="true">*</strong> Pending change</span>
             <span>Expand locale exceptions for non-default locales</span>
           </div>
+          <p className="mt-2 text-xs text-muted-foreground">Open a person's editor to check the exact edition status and submit it for review. Once content and visibility are published, {isAdministrator ? <a href={`${import.meta.env.BASE_URL.replace(/\/$/, "")}/releases`} className="underline underline-offset-2">build a release candidate</a> : "ask an administrator to build a release candidate"} for the matching market and language.</p>
           {!canManage && (
             <p className="mt-2 flex items-center gap-1 text-xs text-amber-700">
               <Lock className="h-3 w-3" aria-hidden="true" /> Editor, publisher, or administrator permission is required to stage availability.
