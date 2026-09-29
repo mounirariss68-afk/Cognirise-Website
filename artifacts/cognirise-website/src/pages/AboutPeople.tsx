@@ -15,6 +15,7 @@ import {
   useCmsCollection,
 } from "@/lib/cms";
 import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
+import { TeamHeroFilmPreview } from "@/components/TeamHeroFilmPreview";
 import { getMarketLocationLabel, useMarketStore } from "@/store/market";
 
 type TeamProfile = {
@@ -82,7 +83,12 @@ function PeopleDeliveryStatus({ delivery }: { delivery: CmsDeliveryState }) {
 }
 
 export default function AboutPeople({ previewPerson }: { previewPerson?: PreviewPersonRecord } = {}) {
-  const { market } = useMarketStore();
+  const { market, locale } = useMarketStore();
+  // Explicit design-mode preview for UAE English only. This does not change
+  // the approved image for other visitors, markets, or CMS revision previews.
+  const previewTeamFilm = !previewPerson && market === "uae" && locale === "en"
+    && typeof window !== "undefined"
+    && new URLSearchParams(window.location.search).get("teamFilm") === "preview";
   const marketLocation = getMarketLocationLabel(market);
   const governedLanding = useGovernedLanding();
   const heroEyebrow = cleanHeroIdentifier(
@@ -162,7 +168,8 @@ export default function AboutPeople({ previewPerson }: { previewPerson?: Preview
           </div>
           <figure className="clip-diagonal relative h-[390px] overflow-hidden lg:h-[520px]">
              <img className="h-full w-full object-cover" style={{ objectPosition: leadershipVisual.objectPosition }} src={leadershipVisual.src} alt={leadershipVisual.alt} />
-            <div className="absolute inset-0 bg-gradient-to-t from-[hsl(var(--brand-deep))]/80 via-transparent to-transparent" />
+             {previewTeamFilm && <TeamHeroFilmPreview />}
+             <div className={`pointer-events-none absolute inset-0 bg-gradient-to-t via-transparent to-transparent ${previewTeamFilm ? "from-[hsl(var(--brand-deep))]/25" : "from-[hsl(var(--brand-deep))]/80"}`} />
           </figure>
         </div>
       </section>

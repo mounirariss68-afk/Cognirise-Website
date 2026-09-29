@@ -38,6 +38,22 @@ test("uses the CMS person title and makes non-CMS delivery explicit", async () =
   assert.doesNotMatch(source, /\bsource(?:s)?\b|accessed August|Profile per/i);
 });
 
+test("Team film remains an opt-in UAE English preview over the approved landing visual", async () => {
+  const source = await readFile(new URL("src/pages/AboutPeople.tsx", websiteRoot), "utf8");
+  const film = await readFile(new URL("src/components/TeamHeroFilmPreview.tsx", websiteRoot), "utf8");
+  assert.match(source, /market === "uae" && locale === "en"/);
+  assert.match(source, /get\("teamFilm"\) === "preview"/);
+  assert.match(source, /!previewPerson/);
+  assert.match(source, /src=\{leadershipVisual\.src\}[\s\S]*\{previewTeamFilm && <TeamHeroFilmPreview \/>}/);
+  assert.match(film, /autoPlay[\s\S]*muted[\s\S]*loop[\s\S]*playsInline/);
+  assert.match(film, /team-living-portrait\.mp4/);
+  assert.match(film, /team-living-portrait-poster\.jpg/);
+  assert.doesNotMatch(film, /team-room-film/);
+  assert.match(film, /reducedMotion \|\| failed/);
+  assert.match(film, /onError=\{\(\) => setPosterFailed\(true\)\}/);
+  assert.doesNotMatch(film, /usePublishedHeroFilm/);
+});
+
 test("retires the advisors destination while retaining the board on Our Team", async () => {
   const [app, shell, aboutPeople, sitemap, publicSitemap] = await Promise.all([
     readFile(new URL("src/App.tsx", websiteRoot), "utf8"),

@@ -66,3 +66,5 @@
 - [Hero film loading failures](hero-film-loading-failures.md) — Slow downloads are not media errors; source-level errors need exhausted-source checks before revealing a governed image.
 - [Website page discovery](website-page-discovery.md) — Keep landing-page navigation as read-only discovery of authorized exact editions, separate from availability controls.
 - [Node UI test import boundaries](node-ui-test-import-boundaries.md) — Keep route helpers dependency-free and load styles from browser entrypoints so Node module mocks reach editor assertions.
+- [Partial generated video output](partial-generated-video-output.md) — A failed parallel generation can still leave a usable clip; inspect each output independently.
+- [Team film creative boundaries](team-film-creative-boundaries.md) — The living portrait needs a mixed UAE-based team, even gender balance, Pulse grammar, and no reverse-loop footage.

@@ -589,3 +589,31 @@ mtime_ms = 1790413913631
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/fc486648-56b6-4461-b581-b8539dcc6e4e/b8d8b70a-e808-4fdf-99f1-efdeb24bdd5f"
 storage_version_token = "1790428217651962"
 content_type = "video/mp4"
+
+[[outputs]]
+id = "bCvCIQqTiQIenO6ILNAjo"
+uri = "file://artifacts/cognirise-website/public/images/cognirise/team-room-film-poster.jpg"
+type = "image"
+title = "Our Team film poster"
+description = "Representative still for the Team hero concept preview."
+logical_id = "7d6f9e1e-c4b5-4418-8e4f-5024e5ec3317"
+content_hash = "sha256:17f0bf0b4b9d295c33e6186cdd9b5452f72a34ce081757f13292ccdae9aa379f"
+size = 59997
+mtime_ms = 1790703931818
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/7d6f9e1e-c4b5-4418-8e4f-5024e5ec3317/481d5b2c-97f3-4870-9b29-3fb343801c4e"
+storage_version_token = "1790704111745842"
+content_type = "image/jpeg"
+
+[[outputs]]
+id = "NEy9za00GiXUFPwmbIt46"
+uri = "file://artifacts/cognirise-website/public/images/cognirise/team-living-portrait-poster.jpg"
+type = "image"
+title = "The living team portrait — poster"
+description = "Concept 3 still: a UAE-based team of two women and two men around a shared workflow."
+logical_id = "8299ea1e-1924-4744-88c1-88dbbbfba315"
+content_hash = "sha256:9a3db5bde2aa04b9f32ca24a2febb219842b96718e253cfecfddeadf90c1affa"
+size = 164139
+mtime_ms = 1790706326218
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/8299ea1e-1924-4744-88c1-88dbbbfba315/26737059-3d38-40cb-9d11-2b61eb6f911b"
+storage_version_token = "1790706601349874"
+content_type = "image/jpeg"
