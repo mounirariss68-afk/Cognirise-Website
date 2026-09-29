@@ -33,7 +33,7 @@ test("retains service, Blueprint, convergence, industry, and start sections in o
   const serviceIndex = source.indexOf('<section id="service-lines"');
   const blueprintIndex = source.indexOf("<BlueprintJourney stageMedia=");
   const convergenceIndex = source.indexOf('className="bg-[#eef0f5]');
-  const industryIndex = source.indexOf('<IndustryPicker id="home-industries" homepage heading="Built on expertise." />');
+  const industryIndex = source.indexOf('<IndustryPicker');
   const startIndex = source.indexOf('landingText(governedLanding, "home-start-heading", "Ready for a change?")');
 
   assert.ok(serviceIndex >= 0);
@@ -89,9 +89,11 @@ test("retains Blueprint stage order and exact governed media resolution", () => 
 
 test("uses the shared CMS-backed homepage industry cards", () => {
   assert.match(source, /import \{ IndustryPicker \} from "@\/components\/IndustryPicker"/);
-  assert.match(source, /<IndustryPicker id="home-industries" homepage heading="Built on expertise\." \/>/);
+  assert.match(source, /id="home-industries"\s+homepage\s+heading=\{homepageIndustryNarrative\?\.heading \|\| "Built on expertise\."\}/);
+  assert.match(source, /industryIds=\{homepageIndustryNarrative\?\.industryIds\}/);
   assert.match(industryPickerSource, /const industryQuery = useCmsCollection\("industry", \[\]/);
-  assert.match(industryPickerSource, /industryQuery\.data\.map\(\(industry, index\)/);
+  assert.match(industryPickerSource, /industryIds\.includes\(industry\.slug\)/);
+  assert.match(industryPickerSource, /industryIds\.indexOf\(left\.slug\) - industryIds\.indexOf\(right\.slug\)/);
   assert.match(industryPickerSource, /data-testid=\{`home-industry-trigger-\$\{industry\.id\}`\}/);
   assert.match(industryPickerSource, /data-testid=\{`link-industry-picker-\$\{industry\.slug\}`\}/);
   assert.match(industryPickerSource, /industryQuery\.delivery === "intentional-empty"/);

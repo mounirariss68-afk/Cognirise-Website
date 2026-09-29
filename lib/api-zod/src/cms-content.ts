@@ -1478,8 +1478,24 @@ export const cmsDraftMetadataSchema = z.object({
   summary: z.string().trim().max(CMS_DRAFT_METADATA_LIMITS.summary).nullable().optional(),
   seo: cmsSeoSchema.optional(),
 }).strict();
+export const HOMEPAGE_INDUSTRY_IDS = [
+  "financial-services",
+  "telecoms",
+  "travel-hospitality",
+  "energy-resources",
+  "public-sector",
+  "education",
+] as const;
 export const cmsPageSectionSchema = z.discriminatedUnion("type", [
-  z.object({ type: z.literal("narrative"), ...pageSectionIdentity, heading: z.string().trim().max(240).optional(), body: z.array(cmsRichBlockSchema).min(1).max(50) }).strict(),
+  z.object({
+    type: z.literal("narrative"),
+    ...pageSectionIdentity,
+    heading: z.string().trim().max(240).optional(),
+    body: z.array(cmsRichBlockSchema).min(1).max(50),
+    // Optional on purpose: immutable homepage editions approved before this
+    // slot existed continue to render the established published-industry list.
+    industryIds: z.array(z.enum(HOMEPAGE_INDUSTRY_IDS)).min(1).max(6).optional(),
+  }).strict(),
   z.object({ type: z.literal("cta"), ...pageSectionIdentity, label: z.string().trim().min(1).max(120), href: safeLandingCtaLink, style: z.enum(["primary", "secondary", "text"]).default("primary") }).strict(),
   z.object({ type: z.literal("legal"), ...pageSectionIdentity, text: z.string().trim().min(1).max(2_000), required: z.boolean().default(false) }).strict(),
   z.object({ type: z.literal("media"), ...pageSectionIdentity, references: z.array(cmsMediaReferenceSchema).min(1).max(12) }).strict(),
@@ -1516,6 +1532,24 @@ export const cmsLandingPageContentSchema = cmsLandingPageContentBaseSchema.super
   const orders = value.sections.map((section) => section.order);
   if (new Set(orders).size !== orders.length) {
     context.addIssue({ code: "custom", path: ["sections"], message: "Section order values must be unique." });
+  }
+  for (const [index, section] of value.sections.entries()) {
+    if (section.type === "narrative" && section.industryIds) {
+      if (section.id !== "home-industries" || value.pagePath !== "/") {
+        context.addIssue({
+          code: "custom",
+          path: ["sections", index, "industryIds"],
+          message: "Industry selections are only supported by the homepage industries section.",
+        });
+      }
+      if (new Set(section.industryIds).size !== section.industryIds.length) {
+        context.addIssue({
+          code: "custom",
+          path: ["sections", index, "industryIds"],
+          message: "Homepage industry selections must be unique.",
+        });
+      }
+    }
   }
 });
 
@@ -1707,6 +1741,17 @@ function publishRuleIssues(kind: CmsDocumentKind, value: CmsContent): Publicatio
     }
     if (new Set(landing.sections.map((section) => section.order)).size !== landing.sections.length) {
       add("SECTION_ORDER_UNIQUE", "content.sections", "Landing page section order values must be unique.");
+    }
+    const homepageIndustrySection = landing.sections.find((section) => section.id === "home-industries");
+    if (homepageIndustrySection && (
+      landing.pagePath !== "/"
+      || homepageIndustrySection.type !== "narrative"
+    )) {
+      add(
+        "HOME_INDUSTRY_SLOT_INVALID",
+        "content.sections",
+        'The optional "home-industries" slot must be a narrative section on the homepage.',
+      );
     }
     if (!landing.sections.some((section) => section.type === "cta") && !landing.cta) {
       add("CTA_REQUIRED", "content.cta", "A landing page requires a governed call to action.");

@@ -10,6 +10,7 @@ import {
 } from "@workspace/api-zod";
 import { navigationCandidates } from "./navigation-policy";
 import type { Queryable } from "./cms";
+import { validateHomepageIndustrySelections } from "./homepage-industry-governance";
 import generatedParityReport from "../generated/cms-publication-parity.json";
 
 const digest = (value: unknown) => createHash("sha256")
@@ -96,10 +97,37 @@ export function validateReleaseManifestParity(
       ? registryRouteForReleasedPath(revision.route)
       : null,
   }));
+  const releasedIndustryRoutes = new Set(revisions.flatMap((revision) =>
+    revision.kind === "industry" && typeof revision.route === "string"
+      ? [revision.route]
+      : [],
+  ));
   const routeIds = new Set(representedRoutes.flatMap(({ route }) => route ? [route.destinationId] : []));
   for (const revision of revisions) {
     const route = representedRoutes.find((entry) => entry.revision === revision)?.route;
     const label = `${manifest.scope?.market ?? "?"}/${manifest.scope?.locale ?? "?"}/${String(revision.route ?? revision.documentId ?? "?")}`;
+    const sections = revision.route === "/" && revision.snapshot?.content?.pagePath === "/"
+      ? revision.snapshot?.content?.sections
+      : undefined;
+    if (Array.isArray(sections)) {
+      for (const [sectionIndex, section] of sections.entries()) {
+        if (
+          section?.type !== "narrative"
+          || section.id !== "home-industries"
+          || !Array.isArray(section.industryIds)
+        ) continue;
+        for (const [industryIndex, industryId] of section.industryIds.entries()) {
+          if (
+            typeof industryId === "string"
+            && !releasedIndustryRoutes.has(`/industries/${industryId}`)
+          ) {
+            errors.push(
+              `${label}: content.sections.${sectionIndex}.industryIds.${industryIndex}: Industry ${industryId} is not a member of the exact ${manifest.scope?.market ?? "?"}/${manifest.scope?.locale ?? "?"} release.`,
+            );
+          }
+        }
+      }
+    }
     if (!route) {
       const kindHasPublicRoute = typeof revision.kind === "string"
         && CMS_RELEASE_REGISTRY.routes.some((entry) => entry.kind === revision.kind);
@@ -277,6 +305,17 @@ export async function buildReleaseCandidate(
     if (!validation.success) {
       errors.push(...validation.errors.map((message) => `${row.kind}/${row.canonical_slug}: ${message}`));
       continue;
+    }
+    const homepageIndustryValidation = await validateHomepageIndustrySelections(
+      executor,
+      validation.data,
+      market,
+      locale,
+    );
+    if (!homepageIndustryValidation.success) {
+      errors.push(...homepageIndustryValidation.errors.map((message) =>
+        `${row.kind}/${row.canonical_slug}: ${message}`,
+      ));
     }
     const route = cmsPublicRoute(row.kind as CmsDocumentKind, row.payload.slug, row.payload.content);
     const destination = route ? registryRouteForReleasedPath(route) : null;

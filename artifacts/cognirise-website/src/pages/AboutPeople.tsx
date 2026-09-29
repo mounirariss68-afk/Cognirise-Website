@@ -28,7 +28,7 @@ type TeamProfile = {
 };
 type PreviewPersonRecord = CmsRecord<PersonContent> & { content: PersonContent };
 
-function ProfileList({ profiles, label, delivery }: { profiles: TeamProfile[]; label: string; delivery: CmsDeliveryState }) {
+function ProfileList({ profiles, label, delivery, previewPerson = false }: { profiles: TeamProfile[]; label: string; delivery: CmsDeliveryState; previewPerson?: boolean }) {
   if (delivery !== "cms" && delivery !== "intentional-empty") return null;
   if (!profiles.length) {
     return <p className="border-y border-border py-12 text-muted-foreground">No {label.toLowerCase()} profiles are currently published.</p>;
@@ -53,7 +53,7 @@ function ProfileList({ profiles, label, delivery }: { profiles: TeamProfile[]; l
               <span className="text-xs font-bold text-[hsl(var(--brand-coral))]">{String(index + 1).padStart(2, "0")} / {String(profiles.length).padStart(2, "0")}</span>
             </div>
             <p className="text-[10px] font-bold uppercase tracking-[.18em] text-[hsl(var(--brand-pink))]">{profile.title}</p>
-            <h3 className="mt-3 text-4xl font-semibold md:text-5xl" data-testid={`text-profile-name-${profile.initials.toLowerCase()}`}>{profile.name}</h3>
+            <h3 className="mt-3 text-4xl font-semibold md:text-5xl" data-testid={`text-profile-name-${profile.initials.toLowerCase()}`} data-cms-field={previewPerson ? "title" : undefined}>{profile.name}</h3>
           </header>
           <div className="grid gap-8 md:grid-cols-[1.15fr_.85fr]">
             <div>
@@ -157,8 +157,8 @@ export default function AboutPeople({ previewPerson }: { previewPerson?: Preview
         <div className="public-hero-shell relative grid gap-14 lg:grid-cols-[.92fr_1.08fr] lg:items-end">
           <div>
             <p data-hero-content-edge className="mb-8 text-[10px] font-bold uppercase tracking-[.2em] text-white/60">{heroEyebrow}</p>
-            <h1 data-governed-landing={governedLanding?.pagePath} className="max-w-[760px] text-5xl font-semibold leading-[.94] md:text-7xl lg:text-[104px]">{heroHeading}</h1>
-            <p className="mt-8 max-w-[590px] text-lg leading-8 text-white/70">{heroBody}</p>
+            <h1 data-governed-landing={governedLanding?.pagePath} data-cms-slot="about-hero-heading" className="max-w-[760px] text-5xl font-semibold leading-[.94] md:text-7xl lg:text-[104px]">{heroHeading}</h1>
+            <p data-cms-slot="about-hero-body" className="mt-8 max-w-[590px] text-lg leading-8 text-white/70">{heroBody}</p>
           </div>
           <figure className="clip-diagonal relative h-[390px] overflow-hidden lg:h-[520px]">
              <img className="h-full w-full object-cover" style={{ objectPosition: leadershipVisual.objectPosition }} src={leadershipVisual.src} alt={leadershipVisual.alt} />
@@ -170,10 +170,10 @@ export default function AboutPeople({ previewPerson }: { previewPerson?: Preview
       <section className="mx-auto max-w-[1440px] px-6 py-24 md:px-12 md:py-32" aria-labelledby="leadership-team">
         <div className="mb-14 grid gap-6 md:grid-cols-2">
           <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[hsl(var(--brand-pink))]">{leadershipEyebrow}</p>
-          <h2 id="leadership-team" className="text-4xl font-semibold md:text-6xl">{leadershipTitle}</h2>
+          <h2 id="leadership-team" data-cms-slot="about-leadership-title" className="text-4xl font-semibold md:text-6xl">{leadershipTitle}</h2>
         </div>
         <PeopleDeliveryStatus delivery={peopleDelivery} />
-        <ProfileList profiles={leadership} label="Leadership Team" delivery={peopleDelivery} />
+        <ProfileList profiles={leadership} label="Leadership Team" delivery={peopleDelivery} previewPerson={Boolean(previewProfile)} />
       </section>
 
       <section id="board-of-advisors" className="scroll-mt-24 bg-secondary px-6 py-24 md:px-12 md:py-32" aria-labelledby="board-of-advisors-heading">
@@ -185,7 +185,7 @@ export default function AboutPeople({ previewPerson }: { previewPerson?: Preview
               <p className="mt-5 max-w-[650px] leading-7 text-muted-foreground">{advisoryBody}</p>
             </div>
           </div>
-          <ProfileList profiles={advisors} label="Board of Advisors" delivery={peopleDelivery} />
+          <ProfileList profiles={advisors} label="Board of Advisors" delivery={peopleDelivery} previewPerson={Boolean(previewProfile)} />
         </div>
       </section>
 

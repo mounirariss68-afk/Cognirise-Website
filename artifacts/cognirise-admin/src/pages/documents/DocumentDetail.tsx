@@ -56,6 +56,8 @@ import { buildDraftSave, describeSaveFailure, isDraftSaveResponse, serverValidat
 import { describeActionError } from "./action-error";
 import { MarketAvailabilityChecklist, type AvailabilityDestination, type AvailabilitySelectionDraft } from "./MarketAvailabilityChecklist";
 import { IndustryVisualWorkspace } from "./IndustryVisualWorkspace";
+import { RegionalVisualWorkspace, type RegionalVisualTarget, type RegionalPageContext } from "./RegionalVisualWorkspace";
+import { regionalEditorHref } from "./regional-editor-routing";
 import { SharedEditionPanel } from "./SharedEditionPanel";
 import { SharedBaselineEditor } from "./SharedBaselineEditor";
 
@@ -812,6 +814,10 @@ export default function DocumentDetail() {
   const [previewRevisionId, setPreviewRevisionId] = useState<string | undefined>();
   const [previewFallback, setPreviewFallback] = useState<PreviewFallback | null>(null);
   const [previewFailure, setPreviewFailure] = useState<PreviewFailure | null>(null);
+  const [visualTarget, setVisualTarget] = useState<string | null>(null);
+  const [visualRefresh, setVisualRefresh] = useState(0);
+  const [visualPreview, setVisualPreview] = useState<{ key: string; url: string; expiresAt: string } | null>(null);
+  const [visualPreviewError, setVisualPreviewError] = useState<string | null>(null);
   const [reviewComment, setReviewComment] = useState("");
   const reviewCommentsParams = { revisionId: previewRevisionId };
   const { data: reviewComments } = useListDocumentReviewComments(id!, reviewCommentsParams, {
@@ -1072,6 +1078,32 @@ export default function DocumentDetail() {
     if (!marketParam || !localeParam) return undefined;
     return { marketParam, localeParam };
   }, [search]);
+  const requestedEditionSetup = useMemo(() => {
+    const query = new URLSearchParams(search);
+    const sourceMarket = query.get("sourceMarket");
+    const sourceLocale = query.get("sourceLocale");
+    return query.get("setup") === "1" && sourceMarket && sourceLocale
+      ? { sourceMarket, sourceLocale }
+      : undefined;
+  }, [search]);
+  const setupSourceParams = {
+    market: requestedEditionSetup?.sourceMarket ?? "",
+    locale: requestedEditionSetup?.sourceLocale ?? "",
+  };
+  const {
+    data: setupSourceDocument,
+    isLoading: isSetupSourceLoading,
+    isError: isSetupSourceError,
+  } = useGetDocument(id!, setupSourceParams, {
+    query: {
+      enabled: Boolean(id && requestedEditionSetup && editionMatrix?.items.some((edition) =>
+        edition.exact && edition.revisionId
+        && edition.market === requestedEditionSetup.sourceMarket
+        && edition.locale === requestedEditionSetup.sourceLocale)),
+      queryKey: getGetDocumentQueryKey(id!, setupSourceParams),
+      retry: false,
+    },
+  });
   const requestedSharedSource = requestedUrlTarget?.marketParam === "shared-source"
     && requestedUrlTarget.localeParam === "und";
   // Creation links use a neutral shared context, never the legacy
@@ -1107,8 +1139,32 @@ export default function DocumentDetail() {
     return editionMatrix?.items.find((edition) => edition.exact && edition.market === marketCode && edition.locale === localeParam);
   }, [editionMatrix?.items, marketData?.items, requestedSharedSource, requestedUrlTarget, sharedSource, urlTargetAwaitingCatalogues]);
   const requestedUrlTargetInvalid = Boolean(
-    requestedUrlTarget && !urlTargetAwaitingCatalogues && !requestedExactEdition,
+    requestedUrlTarget && !urlTargetAwaitingCatalogues && !requestedExactEdition
+    && !(requestedEditionSetup
+      && marketData?.items.some((market) =>
+        market.code === requestedUrlTarget.marketParam && market.enabled)
+      && editionMatrix?.items.some((edition) =>
+        edition.exact && edition.revisionId
+        && edition.market === requestedEditionSetup.sourceMarket
+        && edition.locale === requestedEditionSetup.sourceLocale)),
   );
+  useEffect(() => {
+    if (
+      !requestedEditionSetup || !requestedUrlTarget || requestedExactEdition
+      || requestedUrlTargetInvalid || urlTargetAwaitingCatalogues
+      || !setupSourceDocument?.kind
+    ) return;
+    const { marketParam: market, localeParam: locale } = requestedUrlTarget;
+    if (missingDestinationPreview?.market === market && missingDestinationPreview.locale === locale) return;
+    setMissingDestinationPreview({
+      kind: setupSourceDocument.kind as CmsDocumentKind,
+      market, locale,
+      previousMarket: requestedEditionSetup.sourceMarket,
+      previousLocale: requestedEditionSetup.sourceLocale,
+    });
+    setSelectedMarket(market);
+    setSelectedLocale(locale);
+  }, [missingDestinationPreview, requestedEditionSetup, requestedExactEdition, requestedUrlTarget, requestedUrlTargetInvalid, setupSourceDocument?.kind, urlTargetAwaitingCatalogues]);
   const sharedContextActive = Boolean(requestedSharedContext);
   // Only server-proven neutral rows are eligible for the shared context.
   // Unresolved legacy rows stay in the regional lineage controls so their
@@ -1372,6 +1428,37 @@ export default function DocumentDetail() {
     && selectedEdition.exact
     && (selectedBindingMode === "adapted" || (!selectedSharedBinding && !selectedIsSharedSource)),
   );
+  const visualContext: RegionalPageContext | null = doc?.kind === "person" ? "about"
+    : doc?.kind === "case-study" ? "case-studies"
+      : doc?.kind === "publication" ? "insights"
+        : doc?.kind === "landing-page" && content.pagePath === "/" ? "homepage"
+          : doc?.kind === "landing-page" && content.pagePath === "/about" ? "about"
+            : doc?.kind === "landing-page" && content.pagePath === "/work" ? "case-studies"
+              : doc?.kind === "landing-page" && content.pagePath === "/insights" ? "insights"
+            : null;
+  const visualPreviewKey = `${selectedMarket}:${selectedLocale}:${selectedEdition?.revisionId ?? ""}`;
+  useEffect(() => {
+    const revisionId = selectedEdition?.exact && selectedEdition.revisionId;
+    if (!id || !visualContext || sharedContextActive || !revisionId || !selectedMarket || !selectedLocale) {
+      setVisualPreview(null);
+      return;
+    }
+    const key = `${selectedMarket}:${selectedLocale}:${revisionId}`;
+    const target = { market: selectedMarket, locale: selectedLocale, revisionId };
+    let active = true;
+    setVisualPreview(null);
+    setVisualPreviewError(null);
+    void previewDocument(id, target).then((result) => {
+      if (!active) return;
+      if (!result?.previewUrl || !previewResponseMatchesTarget(result, target)) {
+        throw new Error("The protected preview did not match this exact saved revision.");
+      }
+      setVisualPreview({ key, url: result.previewUrl, expiresAt: result.expiresAt });
+    }).catch((error: unknown) => {
+      if (active) setVisualPreviewError(error instanceof Error ? error.message : "The protected preview could not be issued.");
+    });
+    return () => { active = false; };
+  }, [doc?.kind, id, selectedEdition?.exact, selectedEdition?.revisionId, selectedLocale, selectedMarket, sharedContextActive, visualContext, visualRefresh]);
   const accuracyConfirmationQueryKey = getGetDocumentRevisionAccuracyConfirmationQueryKey(
     id ?? "",
     selectedEdition?.revisionId ?? "",
@@ -1518,7 +1605,7 @@ export default function DocumentDetail() {
     // render and silently opening a different market.
     // An invalid explicit target must be shown as unavailable rather than
     // silently falling back to a different market.
-    if (requestedSharedContext || requestedExactEdition || urlTargetAwaitingCatalogues || requestedUrlTargetInvalid) return;
+    if (requestedSharedContext || requestedExactEdition || requestedEditionSetup || urlTargetAwaitingCatalogues || requestedUrlTargetInvalid) return;
     // The shared matrix loads independently from availability and editions.
     // Wait for it before choosing a regional fallback so a neutral baseline
     // can remain the canonical default on a bare document link.
@@ -1554,7 +1641,7 @@ export default function DocumentDetail() {
       setSelectedMarket(existingCustomization.market);
       setSelectedLocale(existingCustomization.locale);
     }
-  }, [accessibleRegionalEditions, canManageSharedDestinations, defaultNeutralContextLocale, legacyAdministratorContentAuthority, isSharedMatrixError, isSharedMatrixLoading, regionalFallbackEdition, requestedExactEdition, requestedSharedContext, requestedUrlTargetInvalid, selectedMarket, sharedMatrix, sharedSource, urlTargetAwaitingCatalogues]);
+  }, [accessibleRegionalEditions, canManageSharedDestinations, defaultNeutralContextLocale, legacyAdministratorContentAuthority, isSharedMatrixError, isSharedMatrixLoading, regionalFallbackEdition, requestedEditionSetup, requestedExactEdition, requestedSharedContext, requestedUrlTargetInvalid, selectedMarket, sharedMatrix, sharedSource, urlTargetAwaitingCatalogues]);
   // An internal shared-source edition deliberately has no assignable market
   // code. Its authority is the complete set of destinations it controls, not
   // the synthetic `shared-source` market identity.
@@ -1727,6 +1814,14 @@ export default function DocumentDetail() {
     // do not turn the absence of a source document into administrator-like
     // authority.
     const grants = session?.user?.capabilityGrants ?? [];
+    if (missingDestinationPreview?.kind && (session?.user?.capabilityMatrixConfigured || grants.length)) {
+      return grants.some((grant) =>
+        grant.topic === missingDestinationPreview.kind
+        && grant.capability === "edit"
+        && grant.scope === "regional"
+        && grant.marketCode === market
+      );
+    }
     if (session?.user?.capabilityMatrixConfigured || grants.length) {
       return grants.some((grant) =>
         grant.scope === "regional"
@@ -2279,7 +2374,6 @@ export default function DocumentDetail() {
 
   const canEditMissingDestination = Boolean(
     missingDestinationPreview
-    && hasAuthorRole
     && canEditDestinationMarket(missingDestinationPreview.market),
   );
   const sharedContextReadOnly = sharedContextActive && !canEditSharedContextBaseline;
@@ -2290,6 +2384,15 @@ export default function DocumentDetail() {
     setMissingDestinationPreview(null);
     setSelectedMarket(previousMarket);
     setSelectedLocale(previousLocale);
+    if (requestedEditionSetup) {
+      const query = new URLSearchParams(search);
+      query.delete("setup");
+      query.delete("sourceMarket");
+      query.delete("sourceLocale");
+      query.set("market", previousMarket);
+      query.set("locale", previousLocale);
+      setLocation(`${location.split("?")[0]}?${query.toString()}`);
+    }
   };
   const bindMissingDestination = (mode: "shared" | "adapted") => {
     const target = missingDestinationPreview;
@@ -2328,6 +2431,15 @@ export default function DocumentDetail() {
         setMissingDestinationPreview(null);
         setSelectedMarket(target.market);
         setSelectedLocale(target.locale);
+        if (requestedEditionSetup) {
+          const query = new URLSearchParams(search);
+          query.delete("setup");
+          query.delete("sourceMarket");
+          query.delete("sourceLocale");
+          query.set("market", target.market);
+          query.set("locale", target.locale);
+          setLocation(`${location.split("?")[0]}?${query.toString()}`);
+        }
         setPreviewRevisionId(createdBinding.materializedRevisionId ?? undefined);
         invalidateSharedEdition();
         queryClient.invalidateQueries({ queryKey: getListDocumentEditionsQueryKey(id!) });
@@ -2517,6 +2629,12 @@ export default function DocumentDetail() {
       `The requested ${requestedUrlTarget!.marketParam.toUpperCase()} · ${requestedUrlTarget!.localeParam} edition is unavailable or has no exact revision. No other market was opened.`,
     );
   }
+  if (requestedEditionSetup && !requestedExactEdition && (isSetupSourceLoading || !setupSourceDocument && !isSetupSourceError)) {
+    return navigationOnlyState("Loading the exact source for this new destination…", true);
+  }
+  if (requestedEditionSetup && !requestedExactEdition && isSetupSourceError) {
+    return navigationOnlyState("The saved source edition is unavailable to your account. No destination was created.");
+  }
   if (selectedMarket && isDocumentLoading) {
     return navigationOnlyState(`Loading ${selectedMarket.toUpperCase()} · ${selectedLocale}…`, true);
   }
@@ -2528,7 +2646,7 @@ export default function DocumentDetail() {
         : `This edition could not be loaded. ${(documentError as any)?.error ?? (documentError as Error)?.message ?? ""}`,
     );
   }
-  if (!doc && missingDestinationPreview) {
+  if (missingDestinationPreview && (!matrixSelectedEdition?.exact || !matrixSelectedEdition.revisionId)) {
     const destinationLabel = `${missingDestinationPreview.market.toUpperCase()} · ${missingDestinationPreview.locale}`;
     const canUseSharedContent = Boolean(
       missingDestinationBaseline
@@ -2585,9 +2703,19 @@ export default function DocumentDetail() {
             )}
           />
         ) : (
-          <p className="rounded border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
-            No neutral baseline is available for this language. Choose an explicit shared source or reuse a saved same-language edition before creating this destination.
-          </p>
+          <div className="space-y-2 rounded border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
+            <p>No neutral baseline is available for this language. No edition was created. Establish a same-language shared baseline or use the existing source-selection workflow first.</p>
+            {requestedEditionSetup && <Button type="button" size="sm" variant="outline" onClick={() => {
+              const query = new URLSearchParams(search);
+              query.delete("setup");
+              query.delete("sourceMarket");
+              query.delete("sourceLocale");
+              query.set("market", requestedEditionSetup.sourceMarket);
+              query.set("locale", requestedEditionSetup.sourceLocale);
+              query.set("focus", "editions");
+              setLocation(`${location.split("?")[0]}?${query.toString()}`);
+            }}>Open saved source and edition tools</Button>}
+          </div>
         )}
         {!canEditMissingDestination && (
           <p className="text-xs text-muted-foreground">You do not have permission to create content for this market.</p>
@@ -3074,6 +3202,42 @@ export default function DocumentDetail() {
   const compareRev1 = revisionsData?.items.find(r => r.id === selectedRevs[0]);
   const compareRev2 = revisionsData?.items.find(r => r.id === selectedRevs[1]);
   const [baseRev, targetRev] = [compareRev1, compareRev2].sort((a, b) => (a?.number || 0) - (b?.number || 0));
+  const visualFields = doc.kind === "person"
+    ? ["title", "biography", "contribution"]
+    : doc.kind === "publication" ? ["teaser", "author"]
+      : doc.kind === "case-study" ? ["organizationDescriptor", "impactStatement", "disclosureNote", "mandate"]
+        : ["narrative"];
+  const visualTargets: RegionalVisualTarget[] = [
+    { fieldPath: "title", label: doc.kind === "person" ? "Person name" : "Page title", owner: `${doc.kind} · ${selectedMarket.toUpperCase()} / ${selectedLocale}`, editable: !editorLocked, content: title, kind: "headline" },
+    { fieldPath: "summary", label: "Card summary", owner: `${doc.kind} · ${selectedMarket.toUpperCase()} / ${selectedLocale}`, editable: !editorLocked, content: summary, kind: "body" },
+    ...visualFields.map((field): RegionalVisualTarget => ({
+      fieldPath: `content.${field}`, label: field.replace(/([a-z])([A-Z])/g, "$1 $2"), owner: `${doc.kind} · ${selectedMarket.toUpperCase()} / ${selectedLocale}`,
+      editable: !editorLocked, content: typeof content[field] === "string" ? content[field] : "", kind: "body",
+    })),
+    ...(doc.kind === "landing-page" && Array.isArray(content.sections)
+      ? content.sections.map((section: any, index: number): RegionalVisualTarget => ({
+        fieldPath: `content.sections.${index}`,
+        slotId: typeof section?.id === "string" ? section.id : undefined,
+        label: typeof section?.heading === "string" ? section.heading : typeof section?.type === "string" ? section.type : `Section ${index + 1}`,
+        owner: `Homepage edition · ${selectedMarket.toUpperCase()} / ${selectedLocale}`,
+        editable: !editorLocked,
+        content: typeof section?.heading === "string" ? section.heading : "Open its governed section editor to change this block.",
+        kind: "collection",
+      })) : []),
+    ...((doc.kind === "person" || doc.kind === "publication" || doc.kind === "case-study") ? [{
+      fieldPath: doc.kind === "person" ? "content.identityMedia" : "content.heroMedia",
+      label: doc.kind === "person" ? "Identity image" : "Hero image",
+      owner: `${doc.kind} source record`, editable: !editorLocked, kind: "media" as const,
+    }] : []),
+  ];
+  const visualIssues = readiness.map((issue) => ({
+    id: issue.id, targetPath: visualTargets.find((target) => target.fieldPath === issue.path
+      || (target.fieldPath.startsWith("content.sections.") && issue.path.startsWith(`${target.fieldPath}.`)))?.fieldPath ?? issue.path,
+    label: issue.label, remedy: `${issue.detail} · ${issue.actionLabel}`,
+  }));
+  const matchingVisualIssue = (path: string) => readiness.filter((issue) => issue.path === path || (path.startsWith("content.sections.") && issue.path.startsWith(`${path}.`))).map((issue) => issue.id);
+  const visualContextId = visualContext === "homepage" ? "home" : visualContext === "about" ? "people" : visualContext === "case-studies" ? "work" : "insights";
+  const returnToRegionalEditor = (context = visualContextId) => leaveEditor(regionalEditorHref(context, selectedMarket, selectedLocale));
 
   return (
     <div className="flex h-full min-h-0 min-w-0 flex-col overflow-x-hidden bg-muted/10">
@@ -3295,7 +3459,47 @@ export default function DocumentDetail() {
        <div className={`min-h-0 min-w-0 flex-1 ${doc.kind === "industry" ? "overflow-y-auto flex flex-col" : "flex flex-col overflow-y-auto md:flex-row md:overflow-hidden"}`}>
         {/* Left Column: Editor */}
          <div className={`min-w-0 ${doc.kind === "industry" ? "w-full p-4 lg:p-8" : "flex-1 overflow-visible border-b border-border p-4 sm:p-6 md:overflow-y-auto md:border-b-0 md:border-r md:p-8 custom-scrollbar"}`}>
-          <div className={`${doc.kind === "industry" ? "w-full max-w-none" : "max-w-3xl mx-auto"} space-y-8`}>
+          <div className={`${doc.kind === "industry" || visualContext && !sharedContextActive ? "w-full max-w-none" : "max-w-3xl mx-auto"} space-y-8`}>
+            {visualContext && !sharedContextActive && <RegionalVisualWorkspace
+              edition={{
+                market: selectedMarket.toUpperCase(), locale: selectedLocale.toUpperCase(),
+                direction: selectedLocale.toLowerCase().startsWith("ar") ? "rtl" : "ltr",
+                status: selectedEdition?.exact ? `${selectedEdition.workflowState ?? doc.status} · ${selectedEdition.publicationState ?? "not published"}` : "No exact edition",
+                savedRevisionId: selectedEdition?.exact ? selectedEdition.revisionId : null,
+                hasUnsavedChanges: hasUnsaved,
+                lineage: { label: selectedBindingMode === "adapted" ? "Adapted from shared source" : selectedBindingMode === "shared" ? "Shared source binding" : "Independent edition" },
+              }}
+              pageContext={visualContext}
+              pageTitle={title}
+              savedPreviewUrl={visualPreview?.key === visualPreviewKey ? visualPreview.url : null}
+              previewExpiresAt={visualPreview?.key === visualPreviewKey ? visualPreview.expiresAt : null}
+              onRefreshPreview={() => setVisualRefresh((value) => value + 1)}
+              targets={visualTargets.map((target) => ({ ...target, issueIds: matchingVisualIssue(target.fieldPath) }))}
+              selectedTargetPath={visualTarget}
+              onSelect={setVisualTarget}
+              issues={visualIssues}
+              onIssue={(issue) => { const original = readiness.find((candidate) => candidate.id === issue.id); if (original) handleReadinessAction(original); }}
+              editingSlot={visualTarget === "title"
+                ? <label className="block text-xs">Display title<Input value={title} maxLength={240} disabled={editorLocked} onChange={(event) => { hasUnsavedRef.current = true; if (tracksSharedOverrides) setPendingOverridePaths((paths) => paths.includes("title") ? paths : [...paths, "title"]); setTitle(event.target.value); }} className="mt-2" /></label>
+                : visualTarget === "summary"
+                  ? <label className="block text-xs">Summary<Textarea value={summary} maxLength={2000} disabled={editorLocked} onChange={(event) => { hasUnsavedRef.current = true; if (tracksSharedOverrides) setPendingOverridePaths((paths) => paths.includes("summary") ? paths : [...paths, "summary"]); setSummary(event.target.value); }} className="mt-2" /></label>
+                  : visualTarget?.startsWith("content.") && visualFields.includes(visualTarget.slice("content.".length))
+                    ? <label className="block text-xs">{visualTarget.slice("content.".length)}<Textarea value={String(content[visualTarget.slice("content.".length)] ?? "")} disabled={editorLocked} onChange={(event) => handleContentChange({ ...content, [visualTarget.slice("content.".length)]: event.target.value })} className="mt-2" /></label>
+                    : <Button type="button" size="sm" variant="outline" onClick={() => focusReadinessTarget(contentFieldId(visualTarget ?? "content"), "document-content")}>Open governed section fields</Button>}
+              navigation={{
+                pages: [{ context: "homepage", label: "Homepage" }, { context: "about", label: "People & team" }, { context: "case-studies", label: "Case Studies" }, { context: "insights", label: "Insights" }],
+                onSelectPage: (context) => returnToRegionalEditor(context === "homepage" ? "home" : context === "about" ? "people" : context === "case-studies" ? "work" : "insights"),
+                onChangeEdition: () => focusReadinessTarget("regional-edition-selector"),
+                onOpenStructuredEditor: () => focusReadinessTarget("document-content"),
+                onBack: () => returnToRegionalEditor(),
+              }}
+              workflowControls={<>
+                <Button type="button" size="sm" variant="outline" onClick={() => focusReadinessTarget("save-draft")}>Save controls</Button>
+                <Button type="button" size="sm" variant="outline" onClick={() => focusReadinessTarget("submit-review")}>Review controls</Button>
+                {isAdministrator && <Button type="button" size="sm" variant="outline" onClick={() => leaveEditor("/releases")}>Release Center</Button>}
+              </>}
+            />}
+            {visualContext && !sharedContextActive && visualPreviewError && <p role="alert" className="rounded border border-amber-500/40 bg-amber-50 p-3 text-xs">Saved preview could not be issued: {visualPreviewError}. The content map and structured fields remain available. Refresh the preview link to try again.</p>}
             {actionError && (
               <div role="alert" className="rounded-md border border-destructive/40 bg-destructive/5 p-4" data-testid="action-error-summary">
                 <p className="text-sm font-semibold text-destructive">{actionError.message}</p>
@@ -3446,7 +3650,7 @@ export default function DocumentDetail() {
                onAction={handleReadinessAction}
                compact={isCompactMarketEditor}
              />
-             <DocumentGeographySelector
+              <div id="regional-edition-selector" tabIndex={-1}><DocumentGeographySelector
                markets={(marketData?.items ?? []).map((market) => ({
                  code: market.code,
                  displayName: market.displayName,
@@ -3553,7 +3757,7 @@ export default function DocumentDetail() {
                 ))}
                 canEdit={!editorLocked}
                 onResetToShared={() => resetSharedField("title")}
-              />
+              /></div>
               <Input
                 id="document-title"
                 value={title}

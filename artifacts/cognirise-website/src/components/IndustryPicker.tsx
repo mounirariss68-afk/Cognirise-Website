@@ -20,6 +20,7 @@ type IndustryPickerProps = {
   className?: string;
   compact?: boolean;
   homepage?: boolean;
+  industryIds?: string[];
 };
 
 const pickerStyles = `
@@ -123,6 +124,7 @@ export function IndustryPicker({
   className = "",
   compact = false,
   homepage = false,
+  industryIds,
 }: IndustryPickerProps) {
   const releaseContext = useReleaseContext();
   const industryQuery = useCmsCollection("industry", [], (item) => ({
@@ -130,7 +132,12 @@ export function IndustryPicker({
     slug: item.slug,
   }));
   const compiledIndustryBySlug = new Map(INDUSTRIES.map((industry) => [industry.slug, industry]));
-  const industries = industryQuery.data.map((industry, index) => ({
+  const publishedIndustries = homepage && industryIds
+    ? industryQuery.data
+      .filter((industry) => industryIds.includes(industry.slug))
+      .sort((left, right) => industryIds.indexOf(left.slug) - industryIds.indexOf(right.slug))
+    : industryQuery.data;
+  const industries = publishedIndustries.map((industry, index) => ({
     ...(() => {
       const compiled = compiledIndustryBySlug.get(industry.slug);
       return {
@@ -169,11 +176,16 @@ export function IndustryPicker({
             {heading}
           </h2>
         </div>
-        {!homepage && <p className="text-[14px] leading-[1.5] max-w-[280px] text-[#536887]">{introduction}</p>}
+        {(!homepage || introduction) && <p className="text-[14px] leading-[1.5] max-w-[280px] text-[#536887]">{introduction}</p>}
       </div>
 
       {loading && <div className="home-industry-status" role="status" data-testid="status-industry-picker">Loading industry points of view…</div>}
       {empty && <div className="home-industry-status" data-testid="status-industry-picker-empty">No industry points of view are currently published.</div>}
+      {homepage && industryIds && industryIds.length > industries.length && !loading && !unavailable && (
+        <div className="home-industry-status" role="status" data-testid="status-industry-picker-partial">
+          Some selected industries are not published or available in this edition and were omitted.
+        </div>
+      )}
       {unavailable && (
         <div className="home-industry-status" role="alert" data-testid="status-industry-picker-error">
           <span>Industry points of view are temporarily unavailable.</span>{" "}
@@ -183,7 +195,7 @@ export function IndustryPicker({
         </div>
       )}
 
-      {!loading && !empty && !unavailable && (
+      {!loading && !empty && !unavailable && industries.length > 0 && (
         <SpatialDisclosure
           mode="editorial"
           orientation="vertical"

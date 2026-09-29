@@ -1,4 +1,5 @@
 import {
+  HOMEPAGE_INDUSTRY_IDS,
   methodologyEditorialDefinition,
   type CmsDocumentKind,
   type MethodologySlot,
@@ -573,7 +574,7 @@ export function ContentEditor({ kind, value, onChange, errors, publicationErrors
           <Field label="Public page path" required error={fieldErrors.pagePath} path="content.pagePath" value={value.pagePath} onChange={(next) => set("pagePath", next)} placeholder="/about" />
         </div>
         <Area label="Opening narrative" required error={fieldErrors.narrative} path="content.narrative" value={value.narrative ?? ""} onChange={(next) => set("narrative", next)} rows={5} />
-        <LandingSections path="content.sections" value={value.sections} onChange={(sections) => set("sections", sections)} />
+        <LandingSections path="content.sections" pagePath={value.pagePath} value={value.sections} onChange={(sections) => set("sections", sections)} />
         <div className="grid gap-4 sm:grid-cols-2">
          <Field label="CTA label" path="content.cta.label" value={value.cta?.label} onChange={(next) => set("cta", next ? { label: next, href: value.cta?.href ?? "/value-scan", style: value.cta?.style ?? "primary" } : undefined)} />
           <SafeDestinationField label="CTA destination" path="content.cta.href" value={value.cta?.href} onChange={(next) => set("cta", next ? { label: value.cta?.label ?? "Learn more", href: next, style: value.cta?.style ?? "primary" } : undefined)} />
@@ -851,12 +852,14 @@ function EducationImageryEditor({ value, onChange }: { value: unknown; onChange:
   </section>;
 }
 
-function LandingSections({ value, onChange, path = "content.sections" }: {
+function LandingSections({ value, onChange, path = "content.sections", pagePath }: {
   value: unknown;
   onChange: (value: Array<Record<string, any>>) => void;
   path?: string;
+  pagePath?: unknown;
 }) {
   const sections = Array.isArray(value) ? value as Array<Record<string, any>> : [];
+  const isHomepage = pagePath === "/";
   const update = (index: number, patch: Record<string, unknown>) =>
     onChange(updateLandingSection(sections, index, patch));
   const replace = (index: number, section: Record<string, unknown>) =>
@@ -865,10 +868,13 @@ function LandingSections({ value, onChange, path = "content.sections" }: {
   return <section id={contentFieldId(path)} data-field-path={path} tabIndex={-1} className="space-y-4">
     <div className="flex items-center justify-between">
       <div><Label>Governed page sections <Requirement required /></Label><p className="text-xs text-muted-foreground">Sections render in numeric order; IDs and order values must be unique.</p></div>
-      <Button type="button" size="sm" variant="outline" onClick={add}>Add section</Button>
+      <div className="flex gap-2">
+        {isHomepage && !sections.some((section) => section.id === "home-industries") && <Button type="button" size="sm" variant="outline" onClick={() => onChange([...sections, { ...newLandingNarrativeSection(sections.length), id: "home-industries", order: sections.length }])}>Add Industries section</Button>}
+        <Button type="button" size="sm" variant="outline" onClick={add}>Add section</Button>
+      </div>
     </div>
     {sections.map((section, index) => {
-      const governedType = governedLandingSlotType((value as Record<string, unknown> & { pagePath?: unknown }).pagePath, section.id);
+       const governedType = governedLandingSlotType(pagePath, section.id);
       return <fieldset key={`${section.id}-${index}`} className="space-y-4 rounded-md border p-4">
        <legend className="px-1 text-sm font-medium">Section {index + 1}{governedType ? ` · governed ${governedType} slot` : ""}</legend>
       <div className="grid gap-4 sm:grid-cols-3">
@@ -883,8 +889,26 @@ function LandingSections({ value, onChange, path = "content.sections" }: {
          <Field label="Order" required path={`content.sections.${index}.order`} type="number" value={section.order ?? index} onChange={(order) => update(index, { order: Number(order) || 0 })} />
       </div>
       {section.type === "narrative" && <>
-         <Field label="Heading" path={`content.sections.${index}.heading`} value={section.heading} onChange={(heading) => update(index, { heading: heading || undefined })} />
-         <RichBlockEditor label="Structured narrative" path={`content.sections.${index}.body`} required value={section.body} onChange={(body) => update(index, { body })} />
+          <Field label={section.id === "home-industries" ? "Industries heading" : "Heading"} path={`content.sections.${index}.heading`} value={section.heading} onChange={(heading) => update(index, { heading: heading || undefined })} />
+          {section.id === "home-industries" && <>
+            <div className="space-y-3 rounded-md border p-3">
+              <div><Label>Published industries</Label><p className="text-xs text-muted-foreground">Choose up to six canonical Industry records. Their published titles and images remain authoritative; order here controls card order. Leave empty to retain the legacy default selection.</p></div>
+              {(Array.isArray(section.industryIds) ? section.industryIds : []).map((industryId: string, industryIndex: number) => (
+                <div key={`${industryId}-${industryIndex}`} className="flex items-center gap-2">
+                  <Select value={industryId} onValueChange={(next) => update(index, { industryIds: section.industryIds.map((id: string, current: number) => current === industryIndex ? next : id) })}>
+                    <SelectTrigger aria-label={`Homepage industry ${industryIndex + 1}`} data-field-path={`content.sections.${index}.industryIds.${industryIndex}`}><SelectValue /></SelectTrigger>
+                    <SelectContent>{HOMEPAGE_INDUSTRY_IDS.filter((id) => id === industryId || !section.industryIds.includes(id)).map((id) => <SelectItem value={id} key={id}>{id.replaceAll("-", " ")}</SelectItem>)}</SelectContent>
+                  </Select>
+                  <Button type="button" size="sm" variant="outline" disabled={industryIndex === 0} aria-label={`Move ${industryId} up`} onClick={() => update(index, { industryIds: section.industryIds.map((id: string, current: number, ids: string[]) => current === industryIndex ? ids[current - 1] : current === industryIndex - 1 ? ids[current + 1] : id) })}>↑</Button>
+                  <Button type="button" size="sm" variant="outline" disabled={industryIndex === section.industryIds.length - 1} aria-label={`Move ${industryId} down`} onClick={() => update(index, { industryIds: section.industryIds.map((id: string, current: number, ids: string[]) => current === industryIndex ? ids[current + 1] : current === industryIndex + 1 ? ids[current - 1] : id) })}>↓</Button>
+                  <Button type="button" variant="ghost" aria-label={`Remove ${industryId}`} onClick={() => update(index, { industryIds: section.industryIds.filter((_: string, current: number) => current !== industryIndex).length ? section.industryIds.filter((_: string, current: number) => current !== industryIndex) : undefined })}>Remove</Button>
+                </div>
+              ))}
+              <Button type="button" size="sm" variant="outline" disabled={(section.industryIds?.length ?? 0) >= HOMEPAGE_INDUSTRY_IDS.length} onClick={() => update(index, { industryIds: [...(section.industryIds ?? []), HOMEPAGE_INDUSTRY_IDS.find((id) => !(section.industryIds ?? []).includes(id))] })}>Add industry</Button>
+            </div>
+            <RichBlockEditor label="Industries subtitle" path={`content.sections.${index}.body`} required value={section.body} onChange={(body) => update(index, { body })} />
+          </>}
+          {section.id !== "home-industries" && <RichBlockEditor label="Structured narrative" path={`content.sections.${index}.body`} required value={section.body} onChange={(body) => update(index, { body })} />}
       </>}
       {section.type === "cta" && <div className="grid gap-4 sm:grid-cols-3">
          <Field label="Label" required path={`content.sections.${index}.label`} value={section.label} onChange={(label) => update(index, { label })} />

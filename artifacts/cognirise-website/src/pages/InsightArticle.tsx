@@ -187,7 +187,7 @@ export default function InsightArticle() {
           Perspective · {article.topic}
         </div>
         
-        <h1 className="text-4xl md:text-5xl lg:text-[64px] leading-[1.05] font-semibold mb-10 tracking-tight">
+        <h1 data-cms-field="title" className="text-4xl md:text-5xl lg:text-[64px] leading-[1.05] font-semibold mb-10 tracking-tight">
           {article.title}
         </h1>
         

@@ -59,6 +59,7 @@ const documentBase = {
   updatedAt: new Date("2026-01-01"),
 };
 let currentDocument: any = documentBase;
+let documentForAddress: ((params: { market: string; locale: string }, enabled?: boolean) => any) | undefined;
 let currentSession: any = { user: { role: "administrator", marketCodes: ["uae"], legacyAdministratorMarketCodes: ["uae"] } };
 let currentAvailability: any;
 let currentPersonAvailability: any = { items: [] };
@@ -413,13 +414,17 @@ mock.module("@workspace/api-client-react", {
       affectedEditions: [], items: [],
      })),
     getGetDocumentMarketAvailabilityQueryKey: () => ["person-availability"],
-    useGetDocument: () => {
+    useGetDocument: (_id: string, params: { market: string; locale: string }, options?: { query?: { enabled?: boolean } }) => {
       React.useSyncExternalStore(
         (listener) => { listeners.add(listener); return () => listeners.delete(listener); },
         () => currentDocument,
         () => currentDocument,
       );
-      return { data: currentDocument, isLoading: false, isError: false };
+      return {
+        data: documentForAddress ? documentForAddress(params, options?.query?.enabled) : currentDocument,
+        isLoading: false,
+        isError: false,
+      };
     },
     useListPublishedContent: () => ({
       data: { items: [], isConfigured: false, configuredPagePaths: [] },
@@ -3526,6 +3531,83 @@ test("valid market deep links win over shared/default selection for market code 
       } finally {
         await view.unmount();
       }
+    }
+  } finally {
+    currentLocation = "/content/document-1";
+    currentSearch = "";
+    currentMarkets = [{ id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+    currentEditions = [edition];
+  }
+});
+
+test("a missing regional edition setup opens the authorized source-backed creation controls without showing another edition", async () => {
+  currentLocation = "/content/document-1";
+  currentSearch = "?market=ksa&locale=fr&setup=1&sourceMarket=uae&sourceLocale=en-US";
+  currentMarkets = [
+    { id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true },
+    { id: "ksa-edition", code: "ksa", displayName: "KSA", defaultLocale: "en", enabled: true },
+  ];
+  currentSession = { user: { role: "administrator", marketCodes: ["uae", "ksa"] } };
+  currentEditions = [edition];
+  documentForAddress = (params, enabled) =>
+    enabled && params.market === "uae" && params.locale === "en-US" ? currentDocument : undefined;
+  currentSharedMatrix = {
+    baselines: [{
+      id: "neutral-fr", documentId: "document-1", locale: "fr", revisionId: "neutral-revision",
+      revisionNumber: 1, sourceRevisionId: null, snapshot: {
+        title: "Neutral content", summary: "Saved", content: documentBase.content,
+      }, mediaReferences: [],
+    }],
+    bindings: [],
+  };
+  try {
+    const view = await renderDetail();
+    try {
+      assert.match(view.container.textContent ?? "", /No exact KSA · fr edition exists yet/);
+      assert.ok([...view.container.querySelectorAll("button")].some((button) =>
+        button.textContent?.includes("Use shared content")));
+      assert.ok([...view.container.querySelectorAll("button")].some((button) =>
+        button.textContent?.includes("Customize for this market")));
+      assert.doesNotMatch(view.container.textContent ?? "", /requested KSA · fr edition is unavailable/);
+      assert.doesNotMatch(view.container.textContent ?? "", /Editing:.*UAE/);
+      const adopt = [...view.container.querySelectorAll("button")].find((button) =>
+        button.textContent?.includes("Use shared content"))!;
+      await React.act(async () => {
+        adopt.click();
+      });
+      assert.equal(bindSharedInput?.data?.marketEditionId, "ksa-edition");
+      assert.equal(bindSharedInput?.data?.locale, "fr");
+      assert.equal(bindSharedInput?.data?.expectedDestinationRevisionId, null);
+    } finally {
+      await view.unmount();
+    }
+  } finally {
+    documentForAddress = undefined;
+    currentLocation = "/content/document-1";
+    currentSearch = "";
+    currentSession = { user: { role: "administrator", marketCodes: ["uae"] } };
+    currentMarkets = [{ id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true }];
+    currentEditions = [edition];
+    currentSharedMatrix = { baselines: [], bindings: [] };
+  }
+});
+
+test("an existing non-default locale deep link selects its exact saved revision", async () => {
+  currentLocation = "/content/document-1";
+  currentSearch = "?market=ksa&locale=fr";
+  currentMarkets = [
+    { id: "uae-edition", code: "uae", displayName: "UAE", defaultLocale: "en-US", enabled: true },
+    { id: "ksa-edition", code: "ksa", displayName: "KSA", defaultLocale: "en", enabled: true },
+  ];
+  currentEditions = [edition, { ...edition, market: "ksa", locale: "fr", revisionId: "ksa-fr-revision" }];
+  try {
+    const view = await renderDetail();
+    try {
+      assert.match(view.container.querySelector('[data-testid="editing-context"]')?.textContent ?? "", /KSA/i);
+      assert.match(view.container.querySelector('[aria-label="Language"]')?.textContent ?? "", /fr/i);
+      assert.doesNotMatch(view.container.textContent ?? "", /requested KSA · fr edition is unavailable/);
+    } finally {
+      await view.unmount();
     }
   } finally {
     currentLocation = "/content/document-1";

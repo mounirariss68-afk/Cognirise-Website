@@ -76,6 +76,7 @@ import {
   synchronizeManagedMarketRevision,
 } from "../lib/managed-market-lifecycle";
 import { filterSharedMarketReadiness } from "../lib/shared-market-readiness";
+import { validateHomepageIndustrySelections } from "../lib/homepage-industry-governance";
 
 const router: IRouter = Router();
 export const previewMediaDelivery = {
@@ -4344,6 +4345,22 @@ router.post(
       String(revision.rows[0].id),
       String(revision.rows[0].content_digest),
     );
+    if (validation.success) {
+      const homepageIndustryValidation = await validateHomepageIndustrySelections(
+        client,
+        validation.data,
+        String(revision.rows[0].market),
+        String(revision.rows[0].locale),
+      );
+      if (!homepageIndustryValidation.success) {
+        await client.query("ROLLBACK");
+        res.status(422).json({
+          error: "Publication governance validation failed.",
+          ...validationErrorBody(homepageIndustryValidation),
+        });
+        return;
+      }
+    }
     if (!validation.success) {
       if (directAdministratorPublish && validation.errors.includes(
         "An explicit accuracy confirmation is required before review or publication.",

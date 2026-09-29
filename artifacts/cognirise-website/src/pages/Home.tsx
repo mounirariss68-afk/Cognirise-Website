@@ -43,6 +43,12 @@ export default function Home() {
     ? resolveBlueprintStageMedia(homepage)
     : null;
   const governedLanding = routeLanding ?? homepage;
+  const homepageIndustrySection = homepage?.sections.find((section) => section.id === "home-industries");
+  const homepageIndustryNarrative = homepageIndustrySection?.type === "narrative" ? homepageIndustrySection : undefined;
+  const homepageIndustrySubtitle = homepageIndustryNarrative?.body
+    .flatMap((block) => block.type === "list" ? block.items : [block.text])
+    .join(" ")
+    .trim();
   const heroNarrative = homepage ? landingNarrative(homepage, "hero") : null;
   const heroCta = homepage?.cta ?? homepage?.sections
     .slice()
@@ -117,6 +123,7 @@ export default function Home() {
             </div>
             <div className="mt-10 lg:mt-auto">
             <motion.h1
+              data-cms-slot="hero"
               className="max-w-[660px] xl:max-w-[820px] font-display font-semibold text-[clamp(40px,4.8vw,76px)] leading-[0.94] tracking-[-0.08em] mb-7 [overflow-wrap:anywhere]"
               initial={prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -126,6 +133,7 @@ export default function Home() {
             </motion.h1>
             
             <motion.p
+              data-cms-slot="hero"
               className="text-[16.5px] leading-[1.6] text-[#405777] max-w-[540px] xl:max-w-[680px] mb-8"
               initial={{ opacity: prefersReducedMotion ? 1 : 0 }}
               animate={{ opacity: 1 }}
@@ -238,7 +246,7 @@ export default function Home() {
         <div>
           <motion.div {...mConfig}>
             <Kicker>{landingText(governedLanding, "home-service-label", "What we do")}</Kicker>
-            <h2 className="font-display font-semibold text-[clamp(43px,5vw,72px)] leading-[0.97] tracking-[-0.08em] mt-5 max-w-[700px]">
+            <h2 data-cms-slot="home-service-heading" className="font-display font-semibold text-[clamp(43px,5vw,72px)] leading-[0.97] tracking-[-0.08em] mt-5 max-w-[700px]">
                {landingText(governedLanding, "home-service-heading", "We combine strategy, engineering and platform.")}
             </h2>
           </motion.div>
@@ -265,7 +273,7 @@ export default function Home() {
             transition={{ duration: prefersReducedMotion ? 0 : 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
             <Kicker>{landingText(governedLanding, "home-convergence-label", "Our capability")}</Kicker>
-            <h2 className="font-display font-semibold text-[43px] lg:text-[clamp(43px,5vw,76px)] leading-[0.97] tracking-[-0.08em] my-5 lg:my-7">
+            <h2 data-cms-slot="home-convergence-heading" className="font-display font-semibold text-[43px] lg:text-[clamp(43px,5vw,76px)] leading-[0.97] tracking-[-0.08em] my-5 lg:my-7">
               {landingText(governedLanding, "home-convergence-heading", "We deploy teams who bridge the entire operating gap.")}
             </h2>
             
@@ -297,7 +305,13 @@ export default function Home() {
       </section>
 
       {/* INDUSTRIES */}
-      <IndustryPicker id="home-industries" homepage heading="Built on expertise." />
+      <IndustryPicker
+        id="home-industries"
+        homepage
+        heading={homepageIndustryNarrative?.heading || "Built on expertise."}
+        introduction={homepageIndustrySubtitle || undefined}
+        industryIds={homepageIndustryNarrative?.industryIds}
+      />
 
       {/* START */}
       <section className="bg-[#102957] text-white px-6 md:px-[4.8vw] py-[77px] lg:py-[104px] pb-[82px] lg:pb-[112px] relative overflow-hidden">

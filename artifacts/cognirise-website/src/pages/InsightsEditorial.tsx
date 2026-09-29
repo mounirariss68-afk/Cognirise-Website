@@ -11,6 +11,7 @@ import { contentRecord, useCmsCollection } from "@/lib/cms";
 import { useDynamicMetadata } from "@/lib/metadata";
 import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
 import { useReleaseContext } from "@/lib/releases";
+import { releasedInsightHref, selectInsightArticles } from "./insights-publications";
 
 const approvedUaeArticles = [
   {
@@ -148,11 +149,20 @@ export default function InsightsEditorial() {
     },
   ];
 
-  const articles = !releaseContext && market === "uae" && locale === "en" && articlesQuery.data.length === 0
-    ? approvedUaeArticles
-    : articlesQuery.data;
+  const articles = selectInsightArticles({
+    market,
+    locale,
+    hasReleaseContext: Boolean(releaseContext),
+    isAuthoritative: articlesQuery.isAuthoritative,
+    delivery: articlesQuery.delivery,
+    published: articlesQuery.data,
+    approvedFallback: approvedUaeArticles,
+  });
 
   const filteredArticles = activeTopic === "all" ? articles : articles.filter(a => a.topics.includes(activeTopic));
+  const featureHref = releasedInsightHref(featuredCta.href, articles) ?? articles[0]?.url;
+  const foundationsHref = releasedInsightHref("/insights/foundations-for-production", articles);
+  const workforceHref = releasedInsightHref("/insights/governed-digital-workforce", articles);
 
   const handleTopicSelect = (topicId: string) => {
     if (topicId === "all") {
@@ -299,7 +309,7 @@ export default function InsightsEditorial() {
         <div className="ie-hero-top">
           <div>
             <div className="ie-kicker">{heroKicker}</div>
-            <h1 data-governed-landing={governedLanding?.pagePath}>{governedHero?.heading ?? <>Work, made <em>visible.</em></>}</h1>
+            <h1 data-governed-landing={governedLanding?.pagePath} data-cms-slot="hero">{governedHero?.heading ?? <>Work, made <em>visible.</em></>}</h1>
           </div>
           <p className="ie-intro">{governedHero?.text ?? "A reading room for leaders building AI-native organisations: the operating questions behind the strategy, architecture and deployment."}</p>
         </div>
@@ -313,7 +323,7 @@ export default function InsightsEditorial() {
             <div className="ie-meta">Perspective · Agentic enterprise</div>
             <h2>{landingText(governedLanding, "insights-featured-heading", "AI should move the business—not just assist it.")}</h2>
             <p>{landingText(governedLanding, "insights-featured-body", "AI transformation is not a portfolio of pilots. It is a decision to redesign priority work around people, data, controls and intelligent execution.")}</p>
-            <Link href={featuredCta.href} className="ie-text-link">{featuredCta.label} <ArrowRight size={15} /></Link>
+            {featureHref && <Link href={featureHref} className="ie-text-link">{featuredCta.label} <ArrowRight size={15} /></Link>}
           </div>
         </article>
       </section>
@@ -336,8 +346,14 @@ export default function InsightsEditorial() {
           </aside>
           
           <div className="ie-article-list">
-            {filteredArticles.length === 0 ? (
-              <p style={{ color: '#536887', paddingTop: '30px', fontSize: '14px' }}>No articles found for this topic.</p>
+            {articlesQuery.delivery === "loading" ? (
+              <p role="status" style={{ color: '#536887', paddingTop: '30px', fontSize: '14px' }}>Loading published insights…</p>
+            ) : articlesQuery.delivery === "api-error" || articlesQuery.delivery === "contract-error" ? (
+              <p role="alert" style={{ color: '#536887', paddingTop: '30px', fontSize: '14px' }}>Published insights are temporarily unavailable. Please try again later.</p>
+            ) : filteredArticles.length === 0 ? (
+              <p style={{ color: '#536887', paddingTop: '30px', fontSize: '14px' }}>
+                {articles.length === 0 ? "No published insights are available yet." : "No articles found for this topic."}
+              </p>
             ) : (
               filteredArticles.map(({ number, title, copy, url }) => (
                 <Link href={url} key={number} className="ie-route">
@@ -367,18 +383,20 @@ export default function InsightsEditorial() {
           <p>{landingText(governedLanding, "insights-thematic-body", "Essays and practical signals for the people accountable for making the work change.")}</p>
         </div>
         <div className="ie-collection-grid">
-          <Link href="/insights/foundations-for-production" className="ie-collection">
+          <div className="ie-collection">
             <img src={foundationsVisual.src} alt={foundationsVisual.alt} style={{ objectPosition: foundationsVisual.objectPosition }} />
             <div className="ie-meta">{landingText(governedLanding, "insights-collection-foundations-label", "Collection / foundations")}</div>
             <h3>{landingText(governedLanding, "insights-collection-foundations-heading", "The conditions for AI that can hold up in production.")}</h3>
             <p>{landingText(governedLanding, "insights-collection-foundations-body", "Data, security, governance and architecture are not the preamble. They are the work.")}</p>
-          </Link>
-          <Link href="/insights/governed-digital-workforce" className="ie-collection">
+            {foundationsHref && <Link href={foundationsHref} aria-label="Read the foundations collection" style={{ position: "absolute", inset: 0, zIndex: 2 }} />}
+          </div>
+          <div className="ie-collection">
             <img src={workforceVisual.src} alt={workforceVisual.alt} style={{ objectPosition: workforceVisual.objectPosition }} />
             <div className="ie-meta">{landingText(governedLanding, "insights-collection-workforce-label", "Collection / platforms")}</div>
             <h3>{landingText(governedLanding, "insights-collection-workforce-heading", "From agent experiments to a governed digital workforce.")}</h3>
             <p>{landingText(governedLanding, "insights-collection-workforce-body", "What it takes to deploy agents into real operating environments—with people accountable at every decision point.")}</p>
-          </Link>
+            {workforceHref && <Link href={workforceHref} aria-label="Read the digital workforce collection" style={{ position: "absolute", inset: 0, zIndex: 2 }} />}
+          </div>
         </div>
       </section>
       

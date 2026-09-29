@@ -54,6 +54,7 @@ function AppSidebar() {
     {
       title: "Content",
       items: [
+        ...(["landing-page", "person", "case-study", "publication"] as ContentTopic[]).some(canViewTopic) ? [{ title: "Regional Editor", url: "/regional-editor", icon: PanelsTopLeft }] : [],
         ...(canViewTopic("landing-page") ? [{ title: "Website Pages", url: "/website-pages", icon: Files }] : []),
         ...(canViewTopic("publication") ? [{ title: "Publications", url: "/publications", icon: Newspaper }] : []),
         ...(canViewTopic("case-study") ? [{ title: "Case Studies", url: "/case-studies", icon: Briefcase }] : []),

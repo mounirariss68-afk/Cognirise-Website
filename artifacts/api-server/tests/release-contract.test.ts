@@ -61,6 +61,57 @@ test("manifest parity validates exact renderer identity, required slots, link cl
   assert.match(invalid.errors.join("\n"), /media pin is mutable/);
 });
 
+test("release parity requires selected homepage industries to be exact release members", () => {
+  const base = {
+    scope: { market: "ksa", locale: "ar" },
+    registryVersion: CMS_RELEASE_REGISTRY.version,
+    resolvedLinks: [],
+    mediaPins: [],
+  };
+  const homepage = {
+    documentId: "home",
+    kind: "landing-page",
+    route: "/",
+    destinationId: "home",
+    rendererKey: "home",
+    snapshot: {
+      title: "Home",
+      content: {
+        pagePath: "/",
+        sections: [{
+          type: "narrative",
+          id: "home-industries",
+          industryIds: ["education", "telecoms"],
+        }],
+      },
+    },
+  };
+  const education = {
+    documentId: "education",
+    kind: "industry",
+    route: "/industries/education",
+    destinationId: "industry.education",
+    rendererKey: "industry-detail",
+    snapshot: { title: "Education", content: {} },
+  };
+  const validation = validateReleaseManifestParity({
+    ...base,
+    revisions: [homepage, education],
+  });
+  assert.equal(validation.ready, false);
+  assert.match(validation.errors.join("\n"), /content\.sections\.0\.industryIds\.1/);
+  assert.match(validation.errors.join("\n"), /exact ksa\/ar release/);
+
+  const legacy = validateReleaseManifestParity({
+    ...base,
+    revisions: [{ ...homepage, snapshot: {
+      title: "Home",
+      content: { pagePath: "/", sections: [{ type: "narrative", id: "home-industries" }] },
+    } }],
+  });
+  assert.equal(legacy.ready, true);
+});
+
 test("supporting release records remain valid while route-bearing records must resolve a renderer", () => {
   const base = {
     scope: { market: "uae", locale: "en" },

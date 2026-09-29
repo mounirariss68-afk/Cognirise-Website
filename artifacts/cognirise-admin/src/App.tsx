@@ -1,3 +1,4 @@
+import "./pages/documents/RegionalVisualWorkspace.css";
 import { type ReactNode, useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from '@/components/error-boundary';
@@ -16,6 +17,7 @@ import Dashboard from '@/pages/Dashboard';
 import DocumentList from '@/pages/documents/DocumentList';
 import WebsitePages from '@/pages/documents/WebsitePages';
 import DocumentDetail from '@/pages/documents/DocumentDetail';
+import RegionalEditorHub from '@/pages/documents/RegionalEditorHub';
 import MediaLibrary from '@/pages/media/MediaLibrary';
 import MarketEditions from '@/pages/markets/MarketEditions';
 import Inbox from '@/pages/submissions/Inbox';
@@ -49,6 +51,7 @@ function Router() {
        <Route path="/releases" component={() => <AppLayout administratorOnly><ReleaseCenter /></AppLayout>} />
       
       {/* Content routes */}
+      <Route path="/regional-editor" component={() => <AppLayout><RegionalEditorHub /></AppLayout>} />
       <Route path="/website-pages" component={() => <AppLayout contentTopic="landing-page"><WebsitePages /></AppLayout>} />
       <Route path="/people" component={() => <AppLayout contentTopic="person"><DocumentList kind="person" /></AppLayout>} />
       <Route path="/partners" component={() => <AppLayout contentTopic="partner"><DocumentList kind="partner" /></AppLayout>} />
