@@ -32,8 +32,8 @@ export default function Home() {
   const prefersReducedMotion = useReducedMotion();
   const heroRef = useRef<HTMLElement>(null);
   const landingQuery = useCmsCollection("landing-page", [], (item) => contentRecord(item, "landing-page"));
-  const homepage = landingQuery.data.find((page) => page.pagePath === "/" && page.template === "landing");
-  const homepageDelivery = governedLandingDelivery(
+  const homepage = routeLanding ?? landingQuery.data.find((page) => page.pagePath === "/" && page.template === "landing");
+  const homepageDelivery = routeLanding ? "cms" : governedLandingDelivery(
     landingQuery.delivery,
     landingQuery.configuredPagePaths,
     "/",
@@ -42,7 +42,7 @@ export default function Home() {
   const blueprintStageMedia = homepageDelivery === "cms" && homepage
     ? resolveBlueprintStageMedia(homepage)
     : null;
-  const governedLanding = routeLanding ?? homepage;
+  const governedLanding = homepage;
   const homepageIndustrySection = homepage?.sections.find((section) => section.id === "home-industries");
   const homepageIndustryNarrative = homepageIndustrySection?.type === "narrative" ? homepageIndustrySection : undefined;
   const homepageIndustrySubtitle = homepageIndustryNarrative?.body
@@ -311,6 +311,7 @@ export default function Home() {
         heading={homepageIndustryNarrative?.heading || "Built on expertise."}
         introduction={homepageIndustrySubtitle || undefined}
         industryIds={homepageIndustryNarrative?.industryIds}
+        protectedPreview={Boolean(routeLanding)}
       />
 
       {/* START */}

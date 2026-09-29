@@ -15,6 +15,12 @@ Draft media must never rely on the public publication media route, even when the
 
 **How to apply:** Serve preview media through the authenticated, MFA-protected, expiring/revocable capability and retain no-store/no-index headers.
 
+For a protected landing-page preview, its saved revision must own the page selection and layout decisions. Related collection cards may use a clearly non-authoritative, canonical visual scaffold when no separately authorized related revisions are supplied; never fill a draft preview with a public collection or another market's CMS edition.
+
+**Why:** A public-collection query inside a protected Homepage preview can show a different set of industry cards than the saved draft, or misrepresent another region as the selected edition. The preview request boundary deliberately disables public collection reads.
+
+**How to apply:** Derive ordered IDs and headings from the exact preview payload. If full related-record content is required, extend protected delivery to carry those exact authorized revisions rather than lifting the request boundary or silently substituting published data.
+
 Preview metadata must bypass draft SEO entirely, force `noindex,nofollow` on rerenders, and remove canonical links rather than defaulting them to the capability URL.
 
 **Why:** Shared metadata helpers can otherwise reapply draft indexing settings or turn an omitted canonical into the sensitive preview path after interactive rerenders.

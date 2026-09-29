@@ -21,6 +21,7 @@ type IndustryPickerProps = {
   compact?: boolean;
   homepage?: boolean;
   industryIds?: string[];
+  protectedPreview?: boolean;
 };
 
 const pickerStyles = `
@@ -125,6 +126,7 @@ export function IndustryPicker({
   compact = false,
   homepage = false,
   industryIds,
+  protectedPreview = false,
 }: IndustryPickerProps) {
   const releaseContext = useReleaseContext();
   const industryQuery = useCmsCollection("industry", [], (item) => ({
@@ -132,7 +134,20 @@ export function IndustryPicker({
     slug: item.slug,
   }));
   const compiledIndustryBySlug = new Map(INDUSTRIES.map((industry) => [industry.slug, industry]));
-  const publishedIndustries = homepage && industryIds
+  // Protected landing previews do not fetch the public collection. Display
+  // only the saved selection in its saved order, using the canonical card
+  // presentation as a visual scaffold, never another market's CMS records.
+  const previewIndustries = protectedPreview
+    ? (industryIds ?? []).flatMap((slug) => {
+        const compiled = INDUSTRIES.find((industry) => industry.slug === slug);
+        return compiled ? [{
+          ...compiled,
+          thesis: compiled.thesis,
+          dek: compiled.dek,
+        }] : [];
+      })
+    : [];
+  const publishedIndustries = protectedPreview ? previewIndustries : homepage && industryIds
     ? industryQuery.data
       .filter((industry) => industryIds.includes(industry.slug))
       .sort((left, right) => industryIds.indexOf(left.slug) - industryIds.indexOf(right.slug))
@@ -158,10 +173,10 @@ export function IndustryPicker({
     { length: Math.ceil(industries.length / 3) },
     (_, index) => industries.slice(index * 3, index * 3 + 3),
   );
-  const unavailable = industryQuery.isAuthoritative
+  const unavailable = !protectedPreview && industryQuery.isAuthoritative
     && ["api-error", "contract-error"].includes(industryQuery.delivery);
-  const loading = industryQuery.isAuthoritative && industryQuery.delivery === "loading";
-  const empty = industryQuery.isAuthoritative && industryQuery.delivery === "intentional-empty";
+  const loading = !protectedPreview && industryQuery.isAuthoritative && industryQuery.delivery === "loading";
+  const empty = !protectedPreview && industryQuery.isAuthoritative && industryQuery.delivery === "intentional-empty";
 
   return (
     <section id={id} className={`home-industry-disclosure ${compact ? "home-industry-disclosure--compact" : ""} ${homepage ? "home-industry-disclosure--homepage" : ""} px-6 md:px-[4.8vw] pb-[82px] lg:pb-[130px] pt-12 ${className}`}>

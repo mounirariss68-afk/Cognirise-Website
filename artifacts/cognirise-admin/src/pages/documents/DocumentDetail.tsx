@@ -3302,6 +3302,21 @@ export default function DocumentDetail() {
             {updateDoc.isPending ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin"/> : <Save className="w-3.5 h-3.5 mr-2" />}
             {selectedEdition?.workflowState === "approved" ? "Start New Draft" : "Save Draft"}
            </Button>}
+           {!sharedContextActive && doc.kind === "landing-page"
+             && selectedEdition?.workflowState === "draft" && !hasUnsaved
+             && canEditSelectedEdition && (
+               <Button
+                 type="button"
+                 variant="outline"
+                 size="sm"
+                 onClick={() => handleSave()}
+                 disabled={editorLocked || saveBlocked || previewingRevisionId !== null}
+                 title="Creates a new unpublished draft and reattaches its exact saved media versions. The public page and release are unchanged."
+                 className="h-auto min-h-8 whitespace-normal px-2 py-1 font-mono text-[11px] uppercase sm:text-xs"
+               >
+                 Re-save draft media
+               </Button>
+             )}
             {sharedContextActive ? <>
                <Button type="button" variant="outline" size="sm" onClick={() => leaveSharedContextForTarget("review")} disabled={sharedContextReadOnly || previewingRevisionId !== null} className="h-auto min-h-8 w-full min-w-0 max-w-full whitespace-normal px-2 py-1 text-center font-mono text-[11px] uppercase leading-tight tracking-wider sm:w-auto sm:flex-none sm:whitespace-nowrap sm:px-3 sm:text-xs">
                 <Send className="w-3.5 h-3.5 mr-2" /> Review target

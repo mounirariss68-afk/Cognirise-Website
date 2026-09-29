@@ -31,6 +31,7 @@ import { BankingEditorial } from "@/components/industries/BankingEditorial";
 import { Shell, type PreviewMarketContext, type PreviewNavigationSnapshot } from "@/components/layout/Shell";
 import { GovernedLandingRoute } from "@/components/GovernedLandingRoute";
 import AboutPeople from "@/pages/AboutPeople";
+import Home from "@/pages/Home";
 import InsightsEditorial from "@/pages/InsightsEditorial";
 import MethodologiesPortfolio from "@/pages/MethodologiesPortfolio";
 import Partners from "@/pages/Partners";
@@ -69,6 +70,7 @@ const previewMarkets = ["uae", "ksa", "turkiye", "europe"] as const;
 type IndustryPreviewStatus = "ready" | "unavailable" | "expired" | "revoked";
 
 const landingCompiledRoutes = {
+  "/": Home,
   "/about": AboutPeople,
   "/partners": Partners,
   "/platforms": PlatformsOverview,
@@ -263,7 +265,11 @@ function DraftPreviewContent({ preview, warnings }: { preview: Preview; warnings
   const content = validation.data.content as Record<string, unknown>;
   const media = preview.media ?? [];
   const unresolvedMedia = unresolvedPinnedMedia(content, media);
-  const missingMedia = [...new Set([...preview.missingMediaIds, ...unresolvedMedia])];
+  const missingAssetIds = new Set(preview.missingMediaIds);
+  const missingMedia = [...new Set([
+    ...preview.missingMediaIds,
+    ...unresolvedMedia.filter((reference) => !missingAssetIds.has(reference.split("@")[0])),
+  ])];
 
   if (missingMedia.length) {
     // A protected preview is an exact revision, not a best-effort public
@@ -274,7 +280,7 @@ function DraftPreviewContent({ preview, warnings }: { preview: Preview; warnings
         <PreviewWarningPanel warnings={warnings} missingMedia={missingMedia} />
         <ProtectedPreviewError error={{
           kind: "invalid-response",
-          message: "This saved revision references draft media that is unavailable. It has not been completed with public media.",
+          message: "This saved revision has media that is not attached to its exact revision. The published page has not been changed. Reattach the missing assets and save a new draft before previewing it.",
         }} />
       </>
     );
@@ -318,7 +324,7 @@ function DraftPreviewContent({ preview, warnings }: { preview: Preview; warnings
       <>
         <PreviewWarningPanel warnings={warnings} missingMedia={missingMedia} />
         <GovernedLandingRoute
-          pagePath={pagePath as "/about" | "/partners" | "/platforms" | "/insights" | "/methodologies"}
+          pagePath={pagePath as "/" | "/about" | "/partners" | "/platforms" | "/insights" | "/methodologies"}
           compiled={compiled}
           pageOverride={page}
         />

@@ -9,6 +9,23 @@ const guardrailsLayoutUrl = new URL("./GuardrailsFramework.tsx", import.meta.url
 const cmsUrl = new URL("../lib/cms.ts", import.meta.url);
 const presentationsUrl = new URL("../components/cms/PublicCmsPresentations.tsx", import.meta.url);
 
+test("Homepage protected preview uses the saved edition and its saved industry selection", async () => {
+  const [preview, home, picker, route] = await Promise.all([
+    readFile(pageUrl, "utf8"),
+    readFile(new URL("./Home.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../components/IndustryPicker.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../components/GovernedLandingRoute.tsx", import.meta.url), "utf8"),
+  ]);
+  assert.match(preview, /"\/": Home/);
+  assert.match(preview, /pageOverride=\{page\}/);
+  assert.match(route, /CmsPreviewRequestBoundary/);
+  assert.match(home, /const homepage = routeLanding \?\? landingQuery\.data\.find/);
+  assert.match(home, /const homepageDelivery = routeLanding \? "cms" : governedLandingDelivery/);
+  assert.match(home, /protectedPreview=\{Boolean\(routeLanding\)\}/);
+  assert.match(picker, /const publishedIndustries = protectedPreview \? previewIndustries/);
+  assert.match(picker, /industryIds \?\? \[\]/);
+});
+
 test("sparse saved people show exact identity and summary without published collection fallback", async () => {
   const preview = await readFile(pageUrl, "utf8");
   const person = preview.slice(preview.indexOf('if (preview.kind === "person")'), preview.indexOf('if (preview.kind === "partner")'));
