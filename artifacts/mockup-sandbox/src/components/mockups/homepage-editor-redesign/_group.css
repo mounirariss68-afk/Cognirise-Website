@@ -1,0 +1,48 @@
+@import url("https://fonts.googleapis.com/css2?family=Comfortaa:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap");
+
+.homepage-editor-redesign {
+  --background: 30 40% 96%;
+  --foreground: 219 69% 20%;
+  --border: 218 28% 84%;
+  --input: 218 28% 84%;
+  --ring: 253 66% 61%;
+  --card: 0 0% 100%;
+  --card-foreground: 219 69% 20%;
+  --card-border: 218 28% 88%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 219 69% 20%;
+  --primary: 219 69% 20%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 220 33% 95%;
+  --secondary-foreground: 219 69% 20%;
+  --muted: 220 33% 95%;
+  --muted-foreground: 218 25% 42%;
+  --accent: 326 64% 59%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 10 100% 68%;
+  --destructive-foreground: 0 0% 100%;
+  --brand-violet: 253 66% 61%;
+  --brand-pink: 326 64% 59%;
+  --brand-coral: 10 100% 68%;
+  --brand-deep: 217 76% 12%;
+  --app-font-sans: "Inter", sans-serif;
+  --app-font-display: "Comfortaa", sans-serif;
+  --app-font-mono: "JetBrains Mono", monospace;
+  --font-sans: var(--app-font-sans);
+  --font-display: var(--app-font-display);
+  --font-mono: var(--app-font-mono);
+  --radius: 0.25rem;
+  min-height: 100vh;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: var(--app-font-sans);
+  letter-spacing: -0.015em;
+}
+
+.homepage-editor-redesign h1,
+.homepage-editor-redesign h2,
+.homepage-editor-redesign h3,
+.homepage-editor-redesign h4 {
+  font-family: var(--app-font-display);
+  letter-spacing: -0.04em;
+}
