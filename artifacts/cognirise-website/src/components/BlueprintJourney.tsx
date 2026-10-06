@@ -219,9 +219,7 @@ export function BlueprintJourney({ stageMedia }: { stageMedia?: BlueprintStageMe
           mode="editorial"
           orientation="horizontal"
           allowCollapse
-          preview
-          previewOverridesSelection
-          previewExpands
+          preview={false}
           defaultValue={null}
           className="blueprint-disclosure blueprint-row"
         >

@@ -30,9 +30,16 @@ test("BlueprintJourney uses a controlled gradient for readability without hiding
   assert.match(source, /linear-gradient\(0deg, rgba\(7,25,54,0\.98\) 0%, rgba\(7,25,54,0\.85\) 55%, transparent 90%\)/);
 });
 
-test("BlueprintJourney makes the full image card a hover and click target", () => {
+test("BlueprintJourney makes the full image card a click target", () => {
   assert.match(source, /\.blueprint-trigger:before\s*\{[\s\S]*position: absolute; inset: 0;/);
   assert.match(source, /\.blueprint-panel\s*\{[\s\S]*pointer-events: none;/);
+});
+
+test("BlueprintJourney starts with every stage collapsed and requires activation to open", () => {
+  assert.match(source, /defaultValue=\{null\}/);
+  assert.match(source, /preview=\{false\}/);
+  assert.doesNotMatch(source, /previewExpands|previewOverridesSelection/);
+  assert.match(source, /allowCollapse/);
 });
 
 test("BlueprintJourney presents durations as compact stage metadata rather than pills", () => {
@@ -81,10 +88,10 @@ test("BlueprintJourney preserves the IDAO stage order and timing commitments", (
   assert.match(source, /prototype in 48 hours/);
 });
 
-test("homepage blueprint starts equally collapsed while retaining previews and explicit disclosure", () => {
+test("homepage blueprint starts equally collapsed with explicit disclosure", () => {
   assert.match(source, /defaultValue=\{null\}/);
   assert.match(source, /allowCollapse/);
-  assert.match(source, /previewExpands/);
+  assert.match(source, /preview=\{false\}/);
   assert.match(source, /flex: 1 1 0/);
   assert.doesNotMatch(source, /defaultValue="2"/);
 });
