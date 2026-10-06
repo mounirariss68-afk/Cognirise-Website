@@ -9,6 +9,7 @@ import { assetUrl } from "@/lib/assets";
 import { cmsMediaObjectPosition, type CmsRecord, cmsEntryRenderPolicy, contentRecord, resolveCmsMedia, text, useCmsEntry } from "@/lib/cms";
 import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
 import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
+import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
 import { marketAwareDestination } from "@/lib/marketDestination";
 import { useMarketStore } from "@/store/market";
 import {
@@ -473,13 +474,18 @@ export function AgentAuthorityLayout({
   return (
     <article className="overflow-hidden bg-[#fdfcfb] font-sans text-[#102957] selection:bg-[hsl(var(--brand-pink))] selection:text-white">
       <header className="public-hero-shell px-6 pb-16 pt-9 md:px-[4.8vw] lg:pb-24">
-         <Kicker>{cleanHeroIdentifier("Methodologies & frameworks / 01")}</Kicker>
-        <div className="mt-8 grid gap-10 lg:grid-cols-[0.82fr_1.18fr] lg:items-end">
+        <div className="grid gap-10 lg:grid-cols-[0.82fr_1.18fr] lg:items-start">
           <motion.div
+            className="flex flex-col lg:min-h-[650px]"
             initial={reducedMotion ? false : { opacity: 0, x: -24 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: reducedMotion ? 0 : 0.65 }}
           >
+            <div className="flex flex-col gap-7">
+              <NavigationBackControl embedded />
+              <div data-hero-content-edge><Kicker>{cleanHeroIdentifier("Methodologies & frameworks / 01")}</Kicker></div>
+            </div>
+            <div className="mt-14 lg:mt-auto">
             <h1 className="font-display text-[clamp(50px,6.5vw,98px)] font-semibold leading-[0.92] tracking-[-0.085em]">
               {title}
             </h1>
@@ -487,6 +493,7 @@ export function AgentAuthorityLayout({
             <a href="#assessment" className="mt-8 inline-flex items-center gap-3 border-b border-[#102957] pb-2 text-sm font-bold hover:text-[hsl(var(--brand-pink))]">
               Assess one handover <ArrowRight size={16} />
             </a>
+            </div>
           </motion.div>
           <motion.div
             initial={reducedMotion ? false : { opacity: 0, clipPath: "inset(0 100% 0 0)" }}

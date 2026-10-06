@@ -113,6 +113,7 @@ export function Router() {
     || path === "/methodologies/ai-value-to-scale"
     || path === "/methodologies/agentic-operations-readiness"
     || path === "/methodologies/idao"
+    || path === "/methodologies/agent-authority-model"
     || path === "/methodologies/guardrails-framework"
     || path === "/methodologies/human-agent-operating-model"
     || path === "/industries/financial-services"
