@@ -6,6 +6,8 @@ import { assetUrl } from "@/lib/assets";
 import { PulseMotionPage } from "@/components/motion/PulseMotionPage";
 import { setAnalyticsConsent, useAnalyticsConsent } from "@/lib/analytics";
 import { ALLIANCE_PLATFORMS } from "@/lib/alliancePlatforms";
+import { LAUNCH_POLICY, launchHrefAllowed } from "@workspace/api-zod";
+import { LaunchLinkGuard } from "@/components/LaunchLinkGuard";
 import { useGetPublicConfiguration, useGetPublicNavigationSettings } from "@workspace/api-client-react";
 import { releaseHrefAvailable, useReleaseContext } from "@/lib/releases";
 import { handleSamePageHashNavigation } from "@/lib/hashNavigation";
@@ -350,19 +352,25 @@ export function Shell({
     : compiledNavigation);
   const availabilityManifest = releaseContext?.release.manifest;
   const filterAvailable = (items: NavigationItem[]): NavigationItem[] => items.flatMap((item) => {
+    if (!navigationOverride && !launchHrefAllowed(item.href)) return [];
     const children = item.items ? filterAvailable(item.items) : undefined;
     if (availabilityManifest && !releaseHrefAvailable(availabilityManifest, item.href)) return [];
     return [{ ...item, items: children?.length ? children : undefined }];
   });
-  const visibleNavigation = groupPlatformNavigation(filterAvailable(rawVisibleNavigation));
+  const visibleNavigation = groupPlatformNavigation(filterAvailable(rawVisibleNavigation)).map((item) =>
+    !navigationOverride && LAUNCH_POLICY.enabled && item.id === "methodologies"
+      ? { ...item, href: "/methodologies", items: undefined } : item);
   const footerLinks = (items: Array<{ href: string; label: string }>) =>
-    availabilityManifest ? items.filter((item) => releaseHrefAvailable(availabilityManifest, item.href)) : items;
+    items.filter((item) => (navigationOverride || launchHrefAllowed(item.href)) &&
+      (!availabilityManifest || releaseHrefAvailable(availabilityManifest, item.href)));
   const capabilityFooterLinks = footerLinks([
     { href: "/#service-lines", label: "What we do" },
     { href: "/platforms", label: "Platforms" },
     { href: "/industries", label: "Industries" },
-    { href: "/methodologies/idao", label: "IDAO methodology" },
-    { href: "/methodologies/agent-authority-model", label: "Agent Authority Model" },
+    ...(LAUNCH_POLICY.enabled ? [{ href: "/methodologies", label: "How we do it" }] : [
+      { href: "/methodologies/idao", label: "IDAO methodology" },
+      { href: "/methodologies/agent-authority-model", label: "Agent Authority Model" },
+    ]),
   ]);
   const companyFooterLinks = footerLinks([
     { href: "/about", label: "About & Leadership" },
@@ -452,7 +460,13 @@ export function Shell({
     setMeta('meta[property="og:url"]', "content", canonical, true);
     setMeta('meta[property="og:image"]', "content", socialImage, true);
     setMeta('meta[name="twitter:image"]', "content", socialImage, true);
-    setLink("canonical", canonical);
+    if (!launchHrefAllowed(currentPath)) {
+      setMeta('meta[name="robots"]', "content", "noindex,nofollow", true);
+      document.head.querySelector('link[rel="canonical"]')?.remove();
+    } else {
+      setMeta('meta[name="robots"]', "content", "index,follow", true);
+      setLink("canonical", canonical);
+    }
   }, [currentPath]);
 
   useEffect(() => {
@@ -598,6 +612,7 @@ export function Shell({
         </div>
       </header>
 
+      {!navigationOverride && <LaunchLinkGuard />}
       {/* Main content offset so it doesn't hide behind fixed header */}
       <div className="h-[72px] md:h-[82px] shrink-0" />
 
@@ -724,6 +739,9 @@ export function Shell({
             <p>© {new Date().getFullYear()} Cognirise. All rights reserved.</p>
             <AnalyticsPreference />
           </div>
+          {LAUNCH_POLICY.enabled && <p className="mt-4 text-xs text-white/50">
+            Regional imagery uses a country-level IP lookup by country.is. No precise location is requested.
+          </p>}
         </div>
       </footer>
     </div>

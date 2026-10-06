@@ -3,6 +3,7 @@ import { pipeline } from "node:stream/promises";
 import { pool } from "@workspace/db";
 import {
   CMS_CONTACT_EMAIL_DOCUMENT_SLUG,
+  launchHrefAllowed,
   CMS_HERO_DOCUMENT_SLUGS,
   CMS_HERO_FILM_SLOTS,
   collectCmsMediaReferences,
@@ -946,7 +947,7 @@ router.get(
         snapshot.slug,
         snapshot.content as CmsContent,
       );
-      if (!route) return [];
+      if (!route || !launchHrefAllowed(route)) return [];
       const suffix = row.market === "uae" ? "" : `?market=${encodeURIComponent(row.market)}`;
       return [{
         url: `${route}${suffix}`,

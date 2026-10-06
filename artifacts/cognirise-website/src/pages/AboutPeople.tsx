@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { ArrowRight } from "lucide-react";
 import * as React from "react";
-import type { PersonContent } from "@workspace/api-zod";
+import { LAUNCH_POLICY, type PersonContent } from "@workspace/api-zod";
 import { assetUrl } from "@/lib/assets";
 import { useGovernedLanding } from "@/components/GovernedLandingRoute";
 import {
@@ -56,7 +56,7 @@ function ProfileList({ profiles, label, delivery, previewPerson = false }: { pro
             <p className="text-[10px] font-bold uppercase tracking-[.18em] text-[hsl(var(--brand-pink))]">{profile.title}</p>
             <h3 className="mt-3 text-4xl font-semibold md:text-5xl" data-testid={`text-profile-name-${profile.initials.toLowerCase()}`} data-cms-field={previewPerson ? "title" : undefined}>{profile.name}</h3>
           </header>
-          <div className="grid gap-8 md:grid-cols-[1.15fr_.85fr]">
+          {(profile.background || profile.contribution) && <div className="grid gap-8 md:grid-cols-[1.15fr_.85fr]">
             <div>
               <h4 className="mb-5 text-[10px] font-bold uppercase tracking-[.2em] text-muted-foreground">Background</h4>
               <p className="text-base leading-8 text-muted-foreground">{profile.background}</p>
@@ -65,7 +65,7 @@ function ProfileList({ profiles, label, delivery, previewPerson = false }: { pro
               <h4 className="text-sm font-bold">What {profile.name.split(" ")[0]} brings to Cognirise</h4>
               <p className="mt-4 text-sm leading-7 text-muted-foreground">{profile.contribution}</p>
             </aside>
-          </div>
+          </div>}
         </article>
       ))}
     </div>
@@ -150,9 +150,12 @@ export default function AboutPeople({ previewPerson }: { previewPerson?: Preview
         };
       })()
     : undefined;
-  const visiblePeople = peopleQuery.delivery === "cms" ? peopleQuery.data : [];
+  const visiblePeople = LAUNCH_POLICY.enabled && LAUNCH_POLICY.foundersOnly ? [
+    { initials: "MA", name: "Mounir Ariss", title: "CEO & Co-founder", group: "leadership" as const, background: "", contribution: "" },
+    { initials: "BE", name: "Bülent Eğrilmez", title: "CTO & Co-founder", group: "leadership" as const, background: "", contribution: "" },
+  ] : peopleQuery.delivery === "cms" ? peopleQuery.data : [];
   const renderedPeople = previewProfile ? [previewProfile] : visiblePeople;
-  const peopleDelivery = previewPerson ? "cms" as const : peopleQuery.delivery;
+  const peopleDelivery = previewPerson || (LAUNCH_POLICY.enabled && LAUNCH_POLICY.foundersOnly) ? "cms" as const : peopleQuery.delivery;
   const leadership = renderedPeople.filter((profile) => profile.group === "leadership");
   const advisors = renderedPeople.filter((profile) => profile.group === "advisor");
 
@@ -183,7 +186,7 @@ export default function AboutPeople({ previewPerson }: { previewPerson?: Preview
         <ProfileList profiles={leadership} label="Leadership Team" delivery={peopleDelivery} previewPerson={Boolean(previewProfile)} />
       </section>
 
-      <section id="board-of-advisors" className="scroll-mt-24 bg-secondary px-6 py-24 md:px-12 md:py-32" aria-labelledby="board-of-advisors-heading">
+      {advisors.length > 0 && <section id="board-of-advisors" className="scroll-mt-24 bg-secondary px-6 py-24 md:px-12 md:py-32" aria-labelledby="board-of-advisors-heading">
         <div className="mx-auto max-w-[1440px]">
           <div className="mb-14 grid gap-6 md:grid-cols-2">
             <p className="text-[10px] font-bold uppercase tracking-[.2em] text-[hsl(var(--brand-pink))]">{advisoryEyebrow}</p>
@@ -194,7 +197,7 @@ export default function AboutPeople({ previewPerson }: { previewPerson?: Preview
           </div>
           <ProfileList profiles={advisors} label="Board of Advisors" delivery={peopleDelivery} previewPerson={Boolean(previewProfile)} />
         </div>
-      </section>
+      </section>}
 
       <section className="bg-[hsl(var(--brand-deep))] px-6 py-24 text-white md:px-12">
         <div className="mx-auto flex max-w-[1440px] flex-col items-start justify-between gap-8 md:flex-row md:items-end">

@@ -2,6 +2,7 @@ import { createContext, createElement, useContext, type ReactNode } from "react"
 import { useQuery } from "@tanstack/react-query";
 import { customFetch, type PublishedContent } from "@workspace/api-client-react";
 import { CMS_RELEASE_REGISTRY, type CmsDocumentKind } from "@workspace/api-zod";
+import { launchHrefAllowed } from "@workspace/api-zod";
 
 export type ReleaseRevision = {
   documentId: string;
@@ -127,6 +128,7 @@ export function releaseRedirectForPath(manifest: ReleaseManifest, pathname: stri
 }
 
 export function releaseHrefAvailable(manifest: ReleaseManifest, href: string): boolean {
+  if (!launchHrefAllowed(href)) return false;
   if (!href.startsWith("/")) return true;
   const url = new URL(href, "https://release.invalid");
   return releaseHasPath(manifest, url.pathname)

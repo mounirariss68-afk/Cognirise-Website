@@ -12,6 +12,7 @@ import { IndustryPicker } from "@/components/IndustryPicker";
 import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
 import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
 import { BlueprintJourney, resolveBlueprintStageMedia } from "@/components/BlueprintJourney";
+import { useLaunchImageRegion, launchAudienceEnabled, launchStageImage } from "@/lib/launch-region";
 
 const Kicker = ({ children, className = "text-[#102957]" }: { children: React.ReactNode, className?: string }) => (
   <div className={`flex items-center gap-3 text-[10px] tracking-[0.12em] uppercase font-semibold ${className}`}>
@@ -28,6 +29,8 @@ const SectionHeading = ({ children, className = "" }: { children: React.ReactNod
 
 export default function Home() {
   const routeLanding = useGovernedLanding();
+  const imageRegion = useLaunchImageRegion();
+  const launchImages = launchAudienceEnabled();
   const { market } = useMarketStore();
   const prefersReducedMotion = useReducedMotion();
   const heroRef = useRef<HTMLElement>(null);
@@ -80,6 +83,7 @@ export default function Home() {
   });
   const yHeroImage = useTransform(heroScrollProgress, [0, 1], [0, prefersReducedMotion ? 0 : 24]);
 
+  if (launchImages && !imageRegion) return <main className="min-h-[70vh] px-6 py-24" aria-busy="true">Loading website…</main>;
   if (homepageDelivery === "loading") {
     return <main className="min-h-[70vh] bg-[#fdfcfb] px-6 py-24 text-[#102957]" aria-busy="true">Loading published homepage…</main>;
   }
@@ -260,7 +264,11 @@ export default function Home() {
       </section>
 
       {/* BLUEPRINT */}
-      <BlueprintJourney stageMedia={blueprintStageMedia ?? undefined} />
+      <BlueprintJourney stageMedia={launchImages && imageRegion
+        ? Object.fromEntries(["innovate", "demonstrate", "activate", "operate"].map((stage, index) => [
+            index + 1, { src: launchStageImage(imageRegion, stage), alt: `${stage} — ${imageRegion} IDAO delivery team` },
+          ]))
+        : blueprintStageMedia ?? undefined} />
 
       {/* CONVERGE */}
       <section className="bg-[#eef0f5] px-6 md:px-[4.8vw] pb-[80px] lg:pb-[126px]">

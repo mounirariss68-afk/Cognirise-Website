@@ -1,4 +1,5 @@
 - [Market content architecture](market-content-architecture.md) — UAE launches first; other markets use governed content overrides, explicit fallbacks, and independent publishing.
+- [Visitor region authority](visitor-region-authority.md) — Analytics must not turn an implicit editorial default into an explicit region choice before country detection.
 - [Cognirise Pulse direction](cognirise-pulse-direction.md) — Approved brand system for future Cognirise website, presentation, and campaign design.
 - [Slide export fidelity](slide-export-fidelity.md) — PowerPoint conversion isolates slide roots; preserve export-safe typography there and verify with a real renderer.
 - [CogniOS reference architecture](cognios-reference-architecture.md) — Stack six L0 layers between A/B columns; show L1 boxes side by side and L2 full-width below.

@@ -3,6 +3,7 @@ import { recordAnalyticsConsent, recordAnalyticsEvent } from "@workspace/api-cli
 import type { AnalyticsEventInputName } from "@workspace/api-client-react";
 import { useLocation } from "wouter";
 import { useMarketStore, type Market } from "@/store/market";
+import { LAUNCH_POLICY } from "@workspace/api-zod";
 
 type ProjectAnalyticsData = Record<string, string | number | boolean>;
 
@@ -93,7 +94,9 @@ export function AnalyticsBridge() {
   useEffect(() => {
     if (location.startsWith("/preview/")) return;
     const url = new URL(window.location.href);
-    if (url.searchParams.get("market") !== market) {
+    // Do not turn the implicit UAE content default into an explicit visitor
+    // preference before the launch country lookup has completed.
+    if (!LAUNCH_POLICY.enabled && url.searchParams.get("market") !== market) {
       url.searchParams.set("market", market);
       window.history.replaceState(window.history.state, "", url);
     }

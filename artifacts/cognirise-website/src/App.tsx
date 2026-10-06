@@ -98,6 +98,8 @@ import AIValueToScale from "@/pages/AIValueToScale";
 import HumanAgentOperatingModel from "@/pages/HumanAgentOperatingModel";
 import AgenticOperationsReadiness from "@/pages/AgenticOperationsReadiness";
 import AIUseCasePrioritization from "@/pages/AIUseCasePrioritization";
+import { LAUNCH_POLICY, launchHrefAllowed } from "@workspace/api-zod";
+import { useLaunchImageRegion } from "@/lib/launch-region";
 
 export function Router() {
   const [location] = useLocation();
@@ -120,11 +122,14 @@ export function Router() {
     || path === "/industries/public-sector"
     || path === "/industries/education";
   const isPreview = path.startsWith("/preview/");
-  const release = useActiveRelease(market, locale, !isPreview);
+  const imageRegion = useLaunchImageRegion();
+  const release = useActiveRelease(LAUNCH_POLICY.enabled ? "uae" : market, LAUNCH_POLICY.enabled ? "en" : locale, !isPreview);
   // A preview is a capability-scoped composition. CmsPreview fetches its
   // immutable navigation snapshot and supplies it to Shell; do not consult
   // the live public policy or page availability for this route.
   if (isPreview) return <CmsPreview />;
+  if (LAUNCH_POLICY.enabled && !imageRegion) return <main aria-busy="true" className="min-h-screen bg-[#fdfcfb] px-6 py-24 text-[#102957]">Loading website…</main>;
+  if (!launchHrefAllowed(path)) return <Shell><NotFound /></Shell>;
   if (release.isPending) return <Shell><NavigationBackControl /><div aria-busy="true" className="min-h-[60vh]" /></Shell>;
   if (release.isError && (release.error as { status?: number } | undefined)?.status !== 404) {
     return (
@@ -157,7 +162,7 @@ export function Router() {
   // viewing. Restore their compiled routes while the separate CMS release
   // migration is incomplete; never use this exception for other editions or
   // for unknown URLs. Released pages still use their immutable CMS snapshot.
-  const ownerApprovedLegacyRoute = market === "uae" && locale === "en"
+  const ownerApprovedLegacyRoute = (LAUNCH_POLICY.enabled || (market === "uae" && locale === "en"))
     && Boolean(registryRouteForPath(path));
   const unavailable = !released && !ownerApprovedLegacyRoute;
   const routedPage = (

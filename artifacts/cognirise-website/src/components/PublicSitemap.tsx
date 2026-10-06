@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { launchHrefAllowed } from "@workspace/api-zod";
 import { useMarketStore } from "@/store/market";
 import { useLocation } from "wouter";
 import { useReleaseContext } from "@/lib/releases";
@@ -19,6 +20,7 @@ export function mergeSitemapItems(items: Array<{ url: string }>, origin: string,
     ...STATIC_SITEMAP_PATHS.filter((path) => !unavailablePaths.has(path)).map((path) => ({ url: `${origin}${path}` })),
   ];
   return merged.filter((entry, index) => {
+    if (!launchHrefAllowed(entry.url)) return false;
     const path = new URL(entry.url, origin).pathname;
     return merged.findIndex((candidate) => new URL(candidate.url, origin).pathname === path) === index;
   });

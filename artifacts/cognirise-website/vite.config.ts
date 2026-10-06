@@ -7,6 +7,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 
 import runtimeErrorOverlay from '@replit/vite-plugin-runtime-error-modal';
 import { ALLIANCE_PLATFORM_LIST } from './src/lib/alliancePlatforms';
+import { launchHrefAllowed } from '../../lib/api-zod/src/launch-policy';
 
 const siteOrigin = 'https://cognirise.ai';
 
@@ -159,8 +160,11 @@ function alliancePrerenderPlugin(): Plugin {
     async closeBundle() {
       const outputRoot = path.resolve(import.meta.dirname, 'dist/public');
       const shell = await readFile(path.join(outputRoot, 'index.html'), 'utf8');
+      const sitemapPath = path.join(outputRoot, 'sitemap.xml');
+      await writeFile(sitemapPath, filterLaunchSitemap(await readFile(sitemapPath, 'utf8')));
 
       for (const platform of ALLIANCE_PLATFORM_LIST) {
+        if (!launchHrefAllowed(`/platforms/${platform.slug}`)) continue;
         const route = `/platforms/${platform.slug}`;
         const html = renderAllianceHtml(shell, platform);
         const routeDirectory = path.join(outputRoot, route.slice(1));
@@ -169,6 +173,28 @@ function alliancePrerenderPlugin(): Plugin {
         await writeFile(outputFile, html);
         assertAllianceHtml(await readFile(outputFile, 'utf8'), platform);
       }
+    },
+  };
+}
+
+function filterLaunchSitemap(xml: string) {
+  return xml.replace(/<url>[\s\S]*?<\/url>/g, (entry) => {
+    const href = entry.match(/<loc>(.*?)<\/loc>/)?.[1];
+    return href && launchHrefAllowed(href) ? entry : '';
+  });
+}
+
+function launchSitemapPlugin(): Plugin {
+  return {
+    name: 'cognirise-launch-sitemap',
+    configureServer(server) {
+      server.middlewares.use('/sitemap.xml', async (_req, res, next) => {
+        try {
+          const xml = await readFile(path.resolve(import.meta.dirname, 'public/sitemap.xml'), 'utf8');
+          res.setHeader('Content-Type', 'application/xml');
+          res.end(filterLaunchSitemap(xml));
+        } catch (error) { next(error); }
+      });
     },
   };
 }
@@ -202,6 +228,7 @@ export default defineConfig({
     tailwindcss(),
     runtimeErrorOverlay(),
     alliancePrerenderPlugin(),
+    launchSitemapPlugin(),
     ...(process.env.NODE_ENV !== 'production' &&
     process.env.REPL_ID !== undefined
       ? [

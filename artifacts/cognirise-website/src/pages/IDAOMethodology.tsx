@@ -4,6 +4,7 @@ import { useState } from "react";
 import { BrandButton } from "@/components/ui/brand-button";
 import { PulseImage } from "@/components/ui/pulse-image";
 import { IDAO_CANON_LAYERS, IDAO_STAGES } from "@/content/idao";
+import { useLaunchImageRegion, launchAudienceEnabled } from "@/lib/launch-region";
 import { assetUrl } from "@/lib/assets";
 import { idaoEditorial, idaoHeroSeed, methodologySeoSeed } from "@workspace/api-zod";
 import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
@@ -50,7 +51,9 @@ function Kicker({ children, inverse = false }: { children: React.ReactNode; inve
 }
 
 function IDAOMethodologyContent() {
-  const { market } = useMarketStore();
+  const { market: editorialMarket } = useMarketStore();
+  const imageRegion = useLaunchImageRegion();
+  const market = launchAudienceEnabled() ? imageRegion ?? "europe" : editorialMarket;
   const cms = useMethodologyCmsContent("idao");
   useMethodologyCmsSeo(cms, methodologySeoSeed("idao"));
   const editorial = methodologyEditorial<"idao", typeof idaoEditorial>("idao", cms, idaoEditorial.seed);
@@ -75,6 +78,7 @@ function IDAOMethodologyContent() {
   const [expandedCanonLayers, setExpandedCanonLayers] = useState<Set<string>>(() => new Set());
   const activeTeamDetail = editorial.deliveryTeam.find((item) => item.id === activeTeamMember) ?? editorial.deliveryTeam[0];
 
+  if (launchAudienceEnabled() && !imageRegion) return <main aria-busy="true" className="min-h-[70vh] px-6 py-24">Loading website…</main>;
   return (
     <article className="overflow-hidden bg-[#fdfcfb] font-sans text-[#102957] selection:bg-[hsl(var(--brand-pink))] selection:text-white">
       <header className="public-hero-shell px-6 pb-16 pt-9 md:px-[4.8vw] lg:pb-24">
