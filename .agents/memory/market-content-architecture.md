@@ -9,6 +9,12 @@ The UAE edition is the canonical launch version, but the content model must supp
 
 **How to apply:** Model shared content separately from market overrides, provision every switcher market through the governed reconciliation baseline, use explicit locale fallbacks, preserve a visible market switcher, and let editors preview and publish each market independently.
 
+For the first website launch, country-specific IDAO imagery is the required regional difference: UAE, Saudi Arabia, Türkiye and Europe each have a distinct approved set; countries outside these groups use Europe's images. Do not assume choosing an image region implies a published regional content edition.
+
+**Why:** The owner set image localization as the immediate launch requirement while other market content and CMS publication are still incomplete. A Europe visual fallback should not silently switch users to an absent or unapproved CMS release.
+
+**How to apply:** Resolve the visual region independently from editorial market; allow an explicit user region choice to take priority over automatic country detection. Revisit the shared-content launch bridge only when exact regional content releases are ready.
+
 ## Exact editions versus fallback enrichment
 
 Treat an exact-market published edition as editorial authority even when its copy is deliberately neutral. Regional fallback enrichment must not append evidence or convictions just because the approved text omits the country's name.
