@@ -14,8 +14,8 @@ export const heroSeed = {
   breadcrumb: "Methodologies / 04",
   title: "Redesign the work, not just the technology.",
   description: "Turn an AI-enabled workflow into a clear operating agreement between people and agents—who owns the outcome, who may decide, how handovers work and what proves the model is taking hold.",
-  imageSrc: "/images/cognirise/method-haom-v2.jpg",
-  imageAlt: "Cinematic raster composition showing human-agent interaction and handovers",
+  imageSrc: "/images/cognirise/human-agent-shared-judgment.jpg",
+  imageAlt: "Coral and violet forms converge at a shared decision point within ivory and deep navy architecture, representing human–AI collaboration.",
   imageCaptionSubtitle: "Human-Agent Operating Model Playbook",
   imageCaptionTitle: "Collaboration without shadow coordination.",
 } as const;

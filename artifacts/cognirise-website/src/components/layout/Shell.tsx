@@ -360,12 +360,20 @@ export function Shell({
   const visibleNavigation = groupPlatformNavigation(filterAvailable(rawVisibleNavigation)).map((item) =>
     !navigationOverride && LAUNCH_POLICY.enabled && item.id === "methodologies"
       ? { ...item, href: "/methodologies", items: undefined } : item);
+  if (!navigationOverride && LAUNCH_POLICY.enabled && LAUNCH_POLICY.cognios) {
+    const existing = visibleNavigation.findIndex((item) => item.id === "platforms");
+    if (existing >= 0) visibleNavigation.splice(existing, 1);
+    const methodsIndex = visibleNavigation.findIndex((item) => item.id === "methodologies");
+    visibleNavigation.splice(methodsIndex >= 0 ? methodsIndex + 1 : 1, 0, {
+      id: "platforms", label: "Platforms", href: "/platforms/cognios",
+    });
+  }
   const footerLinks = (items: Array<{ href: string; label: string }>) =>
     items.filter((item) => (navigationOverride || launchHrefAllowed(item.href)) &&
       (!availabilityManifest || releaseHrefAvailable(availabilityManifest, item.href)));
   const capabilityFooterLinks = footerLinks([
     { href: "/#service-lines", label: "What we do" },
-    { href: "/platforms", label: "Platforms" },
+    { href: LAUNCH_POLICY.enabled && LAUNCH_POLICY.cognios ? "/platforms/cognios" : "/platforms", label: "Platforms" },
     { href: "/industries", label: "Industries" },
     ...(LAUNCH_POLICY.enabled ? [{ href: "/methodologies", label: "How we do it" }] : [
       { href: "/methodologies/idao", label: "IDAO methodology" },

@@ -4,6 +4,7 @@ export const LAUNCH_POLICY = {
   enabled: true,
   insights: false,
   platforms: false,
+  cognios: true,
   partnerLinks: false,
   foundersOnly: true,
 } as const;
@@ -14,6 +15,7 @@ export function launchHrefAllowed(href: string): boolean {
   try { url = new URL(href, "https://cognirise.ai"); } catch { return false; }
   let path: string;
   try { path = decodeURIComponent(url.pathname).replace(/\/+$/, "") || "/"; } catch { return false; }
+  if (LAUNCH_POLICY.cognios && (path === "/platforms/cognios" || path === "/platforms/cognios/architecture")) return true;
   if (!LAUNCH_POLICY.insights && /^\/insights(?:\/|$)/i.test(path)) return false;
   if (!LAUNCH_POLICY.platforms && (/^\/platforms(?:\/|$)/i.test(path)
     || /^\/(?:cognitalk|cogniware|cognios|cogniagents|cognidocs|cognibase|ai-platforms)(?:\/|$)/i.test(path))) return false;

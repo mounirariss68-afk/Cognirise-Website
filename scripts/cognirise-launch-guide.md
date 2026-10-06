@@ -13,7 +13,9 @@ No draft revisions, approvals or active release pointers were changed.
   2.5 seconds selects Europe. VPNs can affect country detection.
 - Explicit `?market=uae`, `?market=ksa`, `?market=turkiye`, or `?market=europe`
   overrides detection. Old implicit local-storage defaults do not override it.
-- Insights, platforms and partner organization links are suspended.
+- Insights, other platform pages and partner organization links are suspended.
+- Platforms is a direct menu link to CogniOS, with no submenu. CogniOS alone is
+  enabled by the separate `cognios` launch switch.
 - Team names and titles are the two founder identities supplied by the owner;
   unpublished biographies and other people are not exposed.
 
