@@ -1,4 +1,5 @@
 - [Market content architecture](market-content-architecture.md) — UAE launches first; other markets use governed content overrides, explicit fallbacks, and independent publishing.
+- [Financial Services editorial direction](financial-services-editorial-direction.md) — Rebuild from slides 8–14 with concrete banking work, clear claims and explanatory visuals, not governance slogans.
 - [Visitor region authority](visitor-region-authority.md) — Analytics must not turn an implicit editorial default into an explicit region choice before country detection.
 - [Cognirise Pulse direction](cognirise-pulse-direction.md) — Approved brand system for future Cognirise website, presentation, and campaign design.
 - [Slide export fidelity](slide-export-fidelity.md) — PowerPoint conversion isolates slide roots; preserve export-safe typography there and verify with a real renderer.
