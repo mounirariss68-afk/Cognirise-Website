@@ -7,21 +7,27 @@ import { MethodologyRouteMap } from "@/components/MethodologyRouteMap";
 import { MethodologiesHeroFilm } from "@/components/MethodologiesHeroFilm";
 import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
 import { useGovernedLanding } from "@/components/GovernedLandingRoute";
-import { landingCta, landingMedia, landingNarrative } from "@/lib/cms";
+import { landingCta, landingMedia, landingNarrative, useCmsPreviewRequestDisabled } from "@/lib/cms";
 import { useMarketStore } from "@/store/market";
+import { useReleaseContext } from "@/lib/releases";
+import { LAUNCH_POLICY } from "@workspace/api-zod";
 
 export default function MethodologiesPortfolio() {
   const [location] = useLocation();
   const { market, locale } = useMarketStore();
+  const releaseContext = useReleaseContext();
+  const cmsPreview = useCmsPreviewRequestDisabled();
   const governedLanding = useGovernedLanding();
   const governedHero = governedLanding ? landingNarrative(governedLanding, "hero") : null;
   const primaryAction = landingCta(governedLanding, "primary-action", {
     label: "Find your situation",
     href: "/methodologies#route-navigator",
   });
-  // Only the UAE English edition has this route-owned film. Other markets
-  // retain their governed hero image; UAE never paints the retired still.
-  const showFilm = market === "uae" && locale === "en";
+  // Public launch content uses the UAE English edition in every visitor region.
+  // Region detection controls IDAO artwork, not this edition-owned film.
+  // Protected previews retain their original edition-specific media.
+  const sharedLaunchEdition = LAUNCH_POLICY.enabled && !releaseContext?.preview && !cmsPreview;
+  const showFilm = sharedLaunchEdition || (market === "uae" && locale === "en");
   const heroMedia = landingMedia(governedLanding, "methodologies-hero-media", {
     src: assetUrl("/images/cognirise/method-overview.jpg"),
     alt: "Architectural intersection representing connected methods",

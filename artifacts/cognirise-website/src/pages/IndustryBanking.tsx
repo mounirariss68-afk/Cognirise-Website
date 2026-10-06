@@ -1,3 +1,4 @@
+import React from "react";
 import { IndustryEditorial } from "@/components/industries/IndustryEditorial";
 import { BankingEditorial } from "@/components/industries/BankingEditorial";
 import { INDUSTRIES, type IndustryContent } from "@/content/industries";
@@ -5,8 +6,32 @@ import { contentRecord, useCmsEntry, type CmsRecord } from "@/lib/cms";
 import { metadataFromSeo, useDynamicMetadata } from "@/lib/metadata";
 import type { IndustryContent as CmsIndustryContent } from "@workspace/api-zod";
 import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
+import { FinancialServicesPage } from "@/components/industries/financial-services/FinancialServicesPage";
+import { FINANCIAL_SERVICES_LAUNCH_OVERRIDE, fsHero } from "@/content/financial-services-launch";
+import { useCmsPreviewRequestDisabled } from "@/lib/cms";
+import { useReleaseContext } from "@/lib/releases";
+
+/** Public launch override applies only outside protected CMS previews. */
+export function financialServicesOverrideActive(enabled: boolean, inPreview: boolean) {
+  return enabled && !inPreview;
+}
 
 export default function IndustryBanking() {
+  const releaseContext = useReleaseContext();
+  const previewDisabled = useCmsPreviewRequestDisabled();
+  const inPreview = Boolean(releaseContext?.preview) || previewDisabled;
+  if (financialServicesOverrideActive(FINANCIAL_SERVICES_LAUNCH_OVERRIDE, inPreview)) {
+    return <FinancialServicesLaunch />;
+  }
+  return <IndustryBankingCms />;
+}
+
+function FinancialServicesLaunch() {
+  useDynamicMetadata({ title: fsHero.metaTitle, description: fsHero.metaDescription, imageUrl: fsHero.image });
+  return <FinancialServicesPage />;
+}
+
+function IndustryBankingCms() {
   const baseIndustry = INDUSTRIES.find(i => i.slug === "financial-services") || INDUSTRIES[0];
   const cms = useCmsEntry("industry", baseIndustry.slug);
   const published = cms.data ? contentRecord(cms.data, "industry") : null;

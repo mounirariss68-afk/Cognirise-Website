@@ -89,6 +89,10 @@ export function cmsMediaObjectPosition(
 }
 
 const CmsPreviewRequestContext = createContext(false);
+/** True inside protected CMS preview renderers that must not request live data. */
+export function useCmsPreviewRequestDisabled() {
+  return useContext(CmsPreviewRequestContext);
+}
 
 /** Render a compiled public route against an issued preview snapshot without
  * making a second public CMS request for the route's related collections. */

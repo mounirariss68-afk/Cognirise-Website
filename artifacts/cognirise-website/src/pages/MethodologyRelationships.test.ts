@@ -64,11 +64,13 @@ describe("Methodology Relationships and Boundaries", () => {
     assert.match(routeMap, /#guardrails-and-authority/);
   });
 
-  it("plays the UAE film without mounting the retired image, leaving governed images to other markets", () => {
+  it("plays the UAE film for shared public launch content while preserving region-specific previews", () => {
     assert.match(portfolio, /landingMedia\(governedLanding, "methodologies-hero-media"/);
     assert.match(portfolio, /src=\{heroMedia\.src\}/);
     assert.match(portfolio, /alt=\{heroMedia\.alt\}/);
     assert.match(portfolio, /market === "uae" && locale === "en"/);
+    assert.match(portfolio, /LAUNCH_POLICY\.enabled && !releaseContext\?\.preview && !cmsPreview/);
+    assert.match(portfolio, /showFilm = sharedLaunchEdition \|\|/);
     assert.match(portfolio, /showFilm \? <MethodologiesHeroFilm/);
     assert.match(portfolio, /<NavigationBackControl embedded \/>/);
     assert.match(portfolio, /src: assetUrl\("\/images\/cognirise\/method-overview\.jpg"\)/);

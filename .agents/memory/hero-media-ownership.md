@@ -14,3 +14,9 @@ For an image-governed landing route gaining a compiled motion layer, keep the ex
 **Why:** An image slot can already pin a reviewed immutable revision while other markets have different approvals. Reusing or silently superseding that authority makes poster failures, rollback and cross-market delivery misleading.
 
 **How to apply:** Treat the route-owned film as presentation for the intended edition, retain the governed image as the last fallback, and add CMS film authoring only with separate immutable poster/encode pins and explicit market selection.
+
+During the shared UAE-English public launch, edition-owned films must follow the served edition, not the visitor's detected region. Keep protected previews edition-specific.
+
+**Why:** Visitor geolocation is used for regional IDAO artwork, while the rest of the launch content is shared. Applying the old UAE-only visitor check made the approved methodologies film disappear for other regions.
+
+**How to apply:** Distinguish visitor image-region selection from effective content-edition authority whenever gating hero media. Do not interpret this launch exception as approval to replace regional CMS preview media.
