@@ -1,0 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+.credit-workflow-preview {
+  --ink: #102957;
+  --deep: #071936;
+  --paper: #fdfbf7;
+  --ivory: #f7f2ea;
+  --lilac: #f1edfb;
+  --line: #cbd3e1;
+  --muted: #4a5f80;
+  --violet: #7659df;
+  --pink: #db509e;
+  --coral: #ff775d;
+  color: var(--ink);
+  background: var(--ivory);
+  font-family: Inter, sans-serif;
+}

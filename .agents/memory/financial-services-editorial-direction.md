@@ -14,3 +14,9 @@ For the initial launch, treat the replacement page as a bounded public content o
 **Why:** The urgent website launch must not depend on migrating the complete new editorial structure into the unfinished CMS, nor overwrite unpublished edits.
 
 **How to apply:** Keep protected editorial previews on their true CMS content. When returning this page to CMS ownership, migrate and validate the complete replacement before removing the override.
+
+Present the credit-decision example as a genuinely connected workflow, not separate rows of boxes. Hover/focus should explain relationships; click/tap should reveal the work at each step. Make the exception loop and the human decision before execution explicit.
+
+**Why:** On 7 October 2026 the owner rejected the static boxed workflow and asked to rethink its design completely with hover and click interaction.
+
+**How to apply:** Preserve the original task ownership and audit evidence while changing the visual structure. Keep controls usable on keyboard and touch, and retain the illustrative, bank-specific nature of the example.
