@@ -673,3 +673,17 @@ mtime_ms = 1791361454342
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/c7155400-bff3-43fb-b060-c9a55ca1a5bf/f630b5e2-f0cd-47c6-aa3b-043f764158e3"
 storage_version_token = "1791361485175066"
 content_type = "image/png"
+
+[[outputs]]
+id = "aUkzOoXYchE3bHsi046jR"
+uri = "file://attached_assets/generated_images/team-gokhan-omer-conversation-soft-review.png"
+type = "image"
+title = "Gokhan and Omer talking — revised preview"
+description = "Both face each other in conversation, farther back and softly out of focus. Gokhan’s head proportions were revised using his portrait reference. Website unchanged pending approval."
+logical_id = "85f99fdb-9249-47dd-9bbe-28ab5ecd9ff7"
+content_hash = "sha256:a968ce8f4f052f1b0a5a2aac0e1437005dda9894819da0017a00c5cedaeabb0f"
+size = 1423515
+mtime_ms = 1791361776102
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/85f99fdb-9249-47dd-9bbe-28ab5ecd9ff7/7e79f1d3-1b39-435a-b0c5-18e6aa7fc603"
+storage_version_token = "1791361805297192"
+content_type = "image/png"
