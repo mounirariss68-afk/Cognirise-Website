@@ -85,7 +85,6 @@ import InsightsEditorial from "@/pages/InsightsEditorial";
 import InsightArticle from "@/pages/InsightArticle";
 import AboutPeople from "@/pages/AboutPeople";
 import Partners from "@/pages/Partners";
-import FAQ from "@/pages/FAQ";
 import Contact from "@/pages/Contact";
 import ValueScan from "@/pages/ValueScan";
 import CmsPreview from "@/pages/CmsPreview";
@@ -107,6 +106,7 @@ export function Router() {
   const rawPath = location.split(/[?#]/)[0];
   const path = rawPath === "/" ? rawPath : rawPath.replace(/\/+$/, "");
   const embedsBackInHero = path === "/"
+    || path === "/about"
     || path === "/platforms"
     || path === "/methodologies"
     || path === "/methodologies/ai-use-case-prioritization"
@@ -268,8 +268,9 @@ export function Router() {
             ? <GovernedLandingRoute pagePath="/partners" compiled={Partners} />
             : <Partners />}
         </Route>
-        <Route path="/faq" component={FAQ} />
         <Route path="/contact" component={Contact} />
+        {/* Explicit retirement keeps old release destinations safely unreachable. */}
+        <Route path="/faq" component={NotFound} />
         <Route path="/value-scan" component={ValueScan} />
         <Route path="/preview/:token" component={CmsPreview} />
         

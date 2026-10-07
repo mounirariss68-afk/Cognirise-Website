@@ -11,11 +11,12 @@ import AboutPeople from "./AboutPeople";
 
 const websiteRoot = new URL("../../", import.meta.url);
 
-test("uses the CMS people collection in API order without a compiled roster", async () => {
+test("preserves CMS order and uses the owner-approved roster only outside previews", async () => {
   const source = await readFile(new URL("src/pages/AboutPeople.tsx", websiteRoot), "utf8");
   assert.match(source, /useCmsCollection\("person", \[\],/);
   assert.doesNotMatch(source, /\bpeopleFallback\b|\bprofileOrder\b/);
-  assert.match(source, /const visiblePeople = peopleQuery\.delivery === "cms" \? peopleQuery\.data : \[\]/);
+  assert.match(source, /const visiblePeople = launchPublic \? launchTeam : peopleQuery\.delivery === "cms" \? peopleQuery\.data : \[\]/);
+  assert.match(source, /!previewPerson && !releaseContext\?\.preview && !cmsPreview/);
   assert.doesNotMatch(source, /\.sort\(/);
   assert.match(source, /const renderedPeople = previewProfile \? \[previewProfile\] : visiblePeople/);
   assert.match(source, /const leadership = renderedPeople\.filter/);
@@ -66,7 +67,8 @@ test("retires the advisors destination while retaining the board on Our Team", a
   assert.doesNotMatch(app, /path="\/advisors"/);
   assert.match(app, /<Route component=\{NotFound\} \/>/);
   assert.doesNotMatch(shell, /about\.advisors|href: "\/advisors"|href: "\/about#board-of-advisors"/);
-  assert.match(shell, /about\.leadership[\s\S]*about\.partners[\s\S]*about\.faq[\s\S]*about\.contact/);
+  assert.match(shell, /about\.leadership[\s\S]*about\.partners[\s\S]*about\.contact/);
+  assert.doesNotMatch(shell, /about\.faq/);
   assert.match(aboutPeople, /id="board-of-advisors"[\s\S]*<ProfileList profiles=\{advisors\}/);
   assert.doesNotMatch(sitemap, /\/advisors/);
   assert.match(publicSitemap, /path !== "\/advisors"/);

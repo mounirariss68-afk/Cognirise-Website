@@ -225,7 +225,6 @@ const compiledNavigation: NavigationItem[] = [
     items: [
       { id: "about.leadership", label: "Our Team", href: "/about" },
       { id: "about.partners", label: "Partners", href: "/partners" },
-      { id: "about.faq", label: "FAQ", href: "/faq" },
       { id: "about.contact", label: "Contact", href: "/contact" },
     ]
   },

@@ -16,16 +16,19 @@ No draft revisions, approvals or active release pointers were changed.
 - Insights, other platform pages and partner organization links are suspended.
 - Platforms is a direct menu link to CogniOS, with no submenu. CogniOS alone is
   enabled by the separate `cognios` launch switch.
-- Team names and titles are the two founder identities supplied by the owner;
-  unpublished biographies and other people are not exposed.
+- Team profiles use the owner-approved two founders and two advisors, with
+  founder summaries and portraits from the supplied bios. The Team hero uses
+  regional companion images while keeping the UAE original unchanged.
+- FAQ is retired from the public route, navigation and destination filters.
 
 ## Restore later
 The centralized switches are in `lib/api-zod/src/launch-policy.ts`. Re-enable
 the desired surfaces, verify their CMS/release readiness and republish. Do not
 delete CMS records or rewrite release history. Turning off launch mode also
 restores exact-market release selection; first make sure all required regional
-releases exist. Restoring CMS-driven founders requires approved person revisions
-and a release that includes them.
+releases exist. Restoring CMS-driven team profiles requires approved person
+revisions and a release that includes them. See the website's
+`docs/team-launch-content.md` for source and handover notes.
 
 ## Before clicking Publish
 For this first publication, there is no production database yet. In Publishing,

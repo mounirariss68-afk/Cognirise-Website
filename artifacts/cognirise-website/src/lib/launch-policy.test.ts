@@ -18,3 +18,9 @@ test("launch keeps methodology pathways, contact and industry routes", () => {
     assert.equal(launchHrefAllowed(href), true, href);
   }
 });
+
+test("FAQ is retired from direct, regional, encoded and nested destinations", () => {
+  for (const href of ["/faq", "/faq/", "/faq?market=ksa", "/faq/question", "/%66aq", "/FAQ"]) {
+    assert.equal(launchHrefAllowed(href), false, href);
+  }
+});

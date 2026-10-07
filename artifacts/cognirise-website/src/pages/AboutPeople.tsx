@@ -17,16 +17,11 @@ import {
 import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
 import { TeamHeroFilmPreview } from "@/components/TeamHeroFilmPreview";
 import { getMarketLocationLabel, useMarketStore } from "@/store/market";
+import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
+import { useReleaseContext } from "@/lib/releases";
+import { useCmsPreviewRequestDisabled } from "@/lib/cms";
+import { launchTeam, teamHeroForRegion, type TeamProfile } from "@/content/team-launch";
 
-type TeamProfile = {
-  initials: string;
-  name: string;
-  group: "leadership" | "advisor";
-  title: string;
-  background: string;
-  contribution: string;
-  identityImage?: { src: string; alt: string; objectPosition?: string };
-};
 type PreviewPersonRecord = CmsRecord<PersonContent> & { content: PersonContent };
 
 function ProfileList({ profiles, label, delivery, previewPerson = false }: { profiles: TeamProfile[]; label: string; delivery: CmsDeliveryState; previewPerson?: boolean }) {
@@ -43,7 +38,8 @@ function ProfileList({ profiles, label, delivery, previewPerson = false }: { pro
             <div className="mb-8 flex items-start justify-between">
               {profile.identityImage ? (
                 <img
-                  className="h-24 w-24 object-cover [clip-path:polygon(0_0,100%_10%,88%_100%,10%_88%)]"
+                  data-pulse-image-resilient="true"
+                  className="h-48 w-40 object-cover [clip-path:polygon(0_0,100%_10%,88%_100%,10%_88%)]"
                   src={profile.identityImage.src}
                   alt={profile.identityImage.alt}
                   style={{ objectPosition: profile.identityImage.objectPosition }}
@@ -84,6 +80,10 @@ function PeopleDeliveryStatus({ delivery }: { delivery: CmsDeliveryState }) {
 
 export default function AboutPeople({ previewPerson }: { previewPerson?: PreviewPersonRecord } = {}) {
   const { market, locale } = useMarketStore();
+  const releaseContext = useReleaseContext();
+  const cmsPreview = useCmsPreviewRequestDisabled();
+  const launchPublic = LAUNCH_POLICY.enabled && LAUNCH_POLICY.teamProfiles
+    && !previewPerson && !releaseContext?.preview && !cmsPreview;
   // Explicit design-mode preview for UAE English only. This does not change
   // the approved image for other visitors, markets, or CMS revision previews.
   const previewTeamFilm = !previewPerson && market === "uae" && locale === "en"
@@ -97,7 +97,8 @@ export default function AboutPeople({ previewPerson }: { previewPerson?: Preview
   );
   const heroHeading = landingText(governedLanding, "about-hero-heading", "Judgment stays close to the work.");
   const heroBody = landingText(governedLanding, "about-hero-body", "The people who frame the decision stay close enough to make it real. Leadership, engineering and accountability belong in the same room.");
-  const leadershipVisual = landingMedia(governedLanding, "about-hero-visual", { src: assetUrl("/images/cognirise/site-leadership.jpg"), alt: "Senior colleagues working together around a detailed physical model." });
+  const governedLeadershipVisual = landingMedia(governedLanding, "about-hero-visual", { src: assetUrl("/images/cognirise/site-leadership.jpg"), alt: "Senior colleagues working together around a detailed physical model." });
+  const leadershipVisual = launchPublic && market !== "uae" ? teamHeroForRegion(market) : governedLeadershipVisual;
   const leadershipEyebrow = landingText(governedLanding, "about-leadership-eyebrow", "01 / Our Team");
   const leadershipTitle = landingText(governedLanding, "about-leadership-title", "Leadership Team");
   const advisoryEyebrow = landingText(governedLanding, "about-advisory-eyebrow", "02 / Counsel at scale");
@@ -150,26 +151,28 @@ export default function AboutPeople({ previewPerson }: { previewPerson?: Preview
         };
       })()
     : undefined;
-  const visiblePeople = LAUNCH_POLICY.enabled && LAUNCH_POLICY.foundersOnly ? [
-    { initials: "MA", name: "Mounir Ariss", title: "CEO & Co-founder", group: "leadership" as const, background: "", contribution: "" },
-    { initials: "BE", name: "Bülent Eğrilmez", title: "CTO & Co-founder", group: "leadership" as const, background: "", contribution: "" },
-  ] : peopleQuery.delivery === "cms" ? peopleQuery.data : [];
+  const visiblePeople = launchPublic ? launchTeam : peopleQuery.delivery === "cms" ? peopleQuery.data : [];
   const renderedPeople = previewProfile ? [previewProfile] : visiblePeople;
-  const peopleDelivery = previewPerson || (LAUNCH_POLICY.enabled && LAUNCH_POLICY.foundersOnly) ? "cms" as const : peopleQuery.delivery;
+  const peopleDelivery = previewPerson || launchPublic ? "cms" as const : peopleQuery.delivery;
   const leadership = renderedPeople.filter((profile) => profile.group === "leadership");
   const advisors = renderedPeople.filter((profile) => profile.group === "advisor");
 
   return (
     <main className="overflow-hidden bg-background">
-      <section className="relative min-h-[650px] bg-[hsl(var(--brand-deep))] py-20 text-white md:py-28">
+      <section className="relative min-h-[650px] bg-[hsl(var(--brand-deep))] pb-20 pt-8 text-white md:pb-28">
         <div className="absolute -right-32 top-0 h-[520px] w-[520px] rounded-full bg-[hsl(var(--brand-pink))]/25 blur-3xl" />
-        <div className="public-hero-shell relative grid gap-14 lg:grid-cols-[.92fr_1.08fr] lg:items-end">
-          <div>
-            <p data-hero-content-edge className="mb-8 text-[10px] font-bold uppercase tracking-[.2em] text-white/60">{heroEyebrow}</p>
+        <div className="public-hero-shell relative grid gap-14 lg:grid-cols-[.92fr_1.08fr] lg:items-stretch">
+          <div className="flex flex-col lg:min-h-[520px]">
+            <div>
+              <NavigationBackControl embedded className="mb-5 [&_button]:text-white/70 [&_button:hover]:text-white" />
+              <p data-hero-content-edge className="mb-8 text-[10px] font-bold uppercase tracking-[.2em] text-white/60">{heroEyebrow}</p>
+            </div>
+            <div className="lg:mt-auto">
             <h1 data-governed-landing={governedLanding?.pagePath} data-cms-slot="about-hero-heading" className="max-w-[760px] text-5xl font-semibold leading-[.94] md:text-7xl lg:text-[104px]">{heroHeading}</h1>
             <p data-cms-slot="about-hero-body" className="mt-8 max-w-[590px] text-lg leading-8 text-white/70">{heroBody}</p>
+            </div>
           </div>
-          <figure className="clip-diagonal relative h-[390px] overflow-hidden lg:h-[520px]">
+          <figure className="clip-diagonal relative h-[390px] overflow-hidden lg:h-full lg:min-h-[520px]">
              <img className="h-full w-full object-cover" style={{ objectPosition: leadershipVisual.objectPosition }} src={leadershipVisual.src} alt={leadershipVisual.alt} />
              {previewTeamFilm && <TeamHeroFilmPreview />}
              <div className={`pointer-events-none absolute inset-0 bg-gradient-to-t via-transparent to-transparent ${previewTeamFilm ? "from-[hsl(var(--brand-deep))]/25" : "from-[hsl(var(--brand-deep))]/80"}`} />
