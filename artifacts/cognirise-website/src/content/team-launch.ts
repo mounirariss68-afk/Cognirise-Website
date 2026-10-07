@@ -45,6 +45,7 @@ export const launchTeam: TeamProfile[] = [
   },
   {
     initials: "DP", name: "Don Peppers", title: "Advisory Board", group: "advisor",
+    identityImage: { src: assetUrl("/images/cognirise/people/don-peppers-20261007.jpg"), alt: "Don Peppers, Cognirise Advisory Board", objectPosition: "20% 50%" },
     background: "Co-founder of Peppers & Rogers Group and CX Speakers. Co-author with Martha Rogers of The One to One Future (1993), which helped establish one-to-one marketing and customer relationship management. Their nine books together have sold more than a million copies in 18 languages. Included in The Times of London’s “Top 50 Business Brains” and Accenture’s list of the world’s 50 “most important living business thinkers”. Earlier, CEO of Chiat/Day’s direct marketing unit. BSc in astronautical engineering, US Air Force Academy; Master’s in Public Affairs, Princeton.",
     contribution: "The customer’s seat: whether AI makes a service more useful, earns trust and gives customers a reason to stay — plus decades of experience connecting customer relationships to business value, so we measure more than efficiency alone.",
   },
