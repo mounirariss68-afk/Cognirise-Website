@@ -1,12 +1,12 @@
 {
   "formatVersion": 1,
   "generatedBy": "pnpm run audit:cms-publication-parity",
-  "generatedAt": "2026-10-07T08:40:29.562Z",
-  "sourceCommit": "964a39cc8322596af0afb428b47d397e8e508ea1",
+  "generatedAt": "2026-10-07T10:48:32.950Z",
+  "sourceCommit": "c4570fecf4cae28015f669a89fe1e45d71d80959",
   "registryVersion": "2026-09-19.2",
   "status": "pass",
   "summary": {
-    "routes": 64,
+    "routes": 65,
     "kinds": 10,
     "compiledPublicationAuthority": 0,
     "unexplained": 0
@@ -1093,6 +1093,36 @@
       "compiledPublicationAuthority": false
     },
     {
+      "destinationId": "core-values",
+      "path": "/about/core-values",
+      "routeType": "page",
+      "registryRecord": "2026-09-19.2:core-values",
+      "cmsSource": "immutable manifest.revisions[kind=landing-page]",
+      "renderer": "core-values",
+      "dispatchEvidence": "App.tsx Route /about/core-values",
+      "marketLocalePolicy": {
+        "atomicity": "market-locale",
+        "canonicalMarketFallback": false,
+        "exactRequiredLocale": true
+      },
+      "slots": {
+        "content": [
+          "title",
+          "content"
+        ],
+        "links": [],
+        "media": []
+      },
+      "closureEvidence": {
+        "links": "manifest.resolvedLinks contains typed destination IDs resolved against the candidate",
+        "media": "manifest.mediaPins contains immutable media version IDs for released revisions",
+        "unavailable": "omit-before-layout"
+      },
+      "failureSemantics": "absent",
+      "compiledRendererShell": true,
+      "compiledPublicationAuthority": false
+    },
+    {
       "destinationId": "partners",
       "path": "/partners",
       "routeType": "page",
@@ -1879,5 +1909,5 @@
     "registry contains no compiled publication authority": true
   },
   "errors": [],
-  "reportDigest": "2223fa761446e629b58c229f544663c934cb4ed6f61be18a44b0c37bf8d298e0"
+  "reportDigest": "144764eec570c3df6b7e3d4c5d27c82b58f1dfb98e0f54f9af620cae163b6796"
 }
