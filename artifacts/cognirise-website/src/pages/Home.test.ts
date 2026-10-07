@@ -7,6 +7,16 @@ const blueprintSource = readFileSync(new URL("../components/BlueprintJourney.tsx
 const serviceTilesSource = readFileSync(new URL("../components/ServiceLineTiles.tsx", import.meta.url), "utf8");
 const industryPickerSource = readFileSync(new URL("../components/IndustryPicker.tsx", import.meta.url), "utf8");
 
+test("public launch commitments use the approved contrasts without changing CMS previews", () => {
+  const commitments = readFileSync(new URL("../components/HomeCommitments.tsx", import.meta.url), "utf8");
+  for (const text of ["No man-days", "Outcomes", "No long pilots", "Prototypes in 48 hours", "No PowerPoints", "Working solutions", "No vendor lock-in", "You own the code"]) {
+    assert.ok(commitments.includes(`"${text}"`));
+  }
+  assert.match(source, /launchImages && !releaseContext\?\.preview && !cmsPreview/);
+  assert.match(source, /launchCommitments \? <HomeCommitments \/>/);
+  assert.match(commitments, /grid-cols-2 lg:grid-cols-4/);
+});
+
 test("keeps the agent-era hero and Senior experts homepage copy", () => {
   assert.match(source, /heroNarrative\?\.heading \?\? <>Professional services built for the age of <em[^>]*>agents\.<\/em><\/>/);
   assert.match(source, /Senior experts, forward-deployed engineers and governed agents move priority work from strategy into production\./);

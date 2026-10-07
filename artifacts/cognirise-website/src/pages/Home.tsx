@@ -13,6 +13,9 @@ import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
 import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
 import { BlueprintJourney, resolveBlueprintStageMedia } from "@/components/BlueprintJourney";
 import { useLaunchImageRegion, launchAudienceEnabled, launchStageImage } from "@/lib/launch-region";
+import { HomeCommitments } from "@/components/HomeCommitments";
+import { useReleaseContext } from "@/lib/releases";
+import { useCmsPreviewRequestDisabled } from "@/lib/cms";
 
 const Kicker = ({ children, className = "text-[#102957]" }: { children: React.ReactNode, className?: string }) => (
   <div className={`flex items-center gap-3 text-[10px] tracking-[0.12em] uppercase font-semibold ${className}`}>
@@ -31,6 +34,9 @@ export default function Home() {
   const routeLanding = useGovernedLanding();
   const imageRegion = useLaunchImageRegion();
   const launchImages = launchAudienceEnabled();
+  const releaseContext = useReleaseContext();
+  const cmsPreview = useCmsPreviewRequestDisabled();
+  const launchCommitments = launchImages && !releaseContext?.preview && !cmsPreview;
   const { market } = useMarketStore();
   const prefersReducedMotion = useReducedMotion();
   const heroRef = useRef<HTMLElement>(null);
@@ -227,6 +233,7 @@ export default function Home() {
       )}
 
       {/* PROOF LEDGER */}
+      {launchCommitments ? <HomeCommitments /> : (
       <section className="home-layout-frame" aria-label="Cognirise company qualities">
         <div className="border-y border-[#102957] grid grid-cols-2 lg:grid-cols-4">
          {[
@@ -244,6 +251,7 @@ export default function Home() {
         ))}
         </div>
       </section>
+      )}
 
       {/* MODEL */}
       <section id="service-lines" className="px-6 md:px-[4.8vw] py-[82px] lg:py-[125px]">

@@ -47,3 +47,9 @@ absent and contact paths still work.
 
 The existing CMS publishing workflow remains unchanged. This MVP does not require
 publishing the incomplete regional Homepage/IDAO or person drafts.
+
+The public homepage's four-part proof strip also uses owner-approved launch
+copy (No man-days → Outcomes; No long pilots → Prototypes in 48 hours;
+No PowerPoints → Working solutions; No vendor lock-in → You own the code).
+CMS previews retain their actual governed proof fields. The public override is
+controlled by the shared launch policy, not an unapproved CMS publication.
