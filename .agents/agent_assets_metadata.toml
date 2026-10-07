@@ -743,3 +743,17 @@ mtime_ms = 1791374137906
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/4f2bb1f2-a6f4-4a4e-afb2-4a20869c690a/88639cbb-f7a1-4c65-a4f2-5b62ac6982b0"
 storage_version_token = "1791374154518492"
 content_type = "application/octet-stream"
+
+[[outputs]]
+id = "v0UJQx96ubmN9-Vd0WyFh"
+uri = "file://attached_assets/cognirise-website-launch/cognirise-linkedin-website-launch.png"
+type = "image"
+title = "Cognirise Website Launch — LinkedIn Post"
+description = "1600 × 1600 PNG using original Cognirise Pulse artwork, the official logo and the headline “Built in practice. Now online.” Ready to upload alongside your announcement."
+logical_id = "d05615fc-6ec7-4ee0-aa7e-6b2ef7ec0a80"
+content_hash = "sha256:fdf287ac61b7819c51d1432359cbe032d27684b15bd5505b89ac664893f648f8"
+size = 1092588
+mtime_ms = 1791391400493
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/d05615fc-6ec7-4ee0-aa7e-6b2ef7ec0a80/1bbfbdb0-7df5-4b31-b9c3-c65ab4aa2079"
+storage_version_token = "1791391427235088"
+content_type = "image/png"
