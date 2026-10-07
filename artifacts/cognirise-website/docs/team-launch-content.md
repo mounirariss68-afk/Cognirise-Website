@@ -5,6 +5,8 @@ The public launch roster is code-owned temporarily; CMS drafts and immutable edi
 ## Founder sources
 Summaries and original portraits were extracted from the owner-supplied `Cognirise_Bio_Bulent_Egrilmez_1791346900099.pptx` and `Mounir_Ariss_-_Speaker_Bio_1791346938283.pptx`. Use the owner's requested titles, CEO & Co-founder and CTO & Co-founder, and Turkish spelling Bülent Eğrilmez. Do not expose contact details from the slide files.
 
+The owner subsequently supplied `Bulent_Egrilmez_-_Cognirise_Portrait_1791348609959.png`, replacing Bülent's slide portrait. The web derivative crops around him without altering his appearance, retains the irregular frame and uses a versioned asset URL.
+
 ## Advisors
 Membership is authorized by the owner's request, not inferred from external sources. Public career facts checked 7 October 2026:
 - Don Peppers: https://www.linkedin.com/in/donpeppers and https://www.inc.com/author/don-peppers

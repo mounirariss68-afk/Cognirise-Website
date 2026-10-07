@@ -23,7 +23,7 @@ export const launchTeam: TeamProfile[] = [
     initials: "BE", name: "Bülent Eğrilmez", title: "CTO & Co-founder", group: "leadership",
     background: "Bülent has more than 25 years of experience building and running technology in payments, banking, insurance and enterprise software. His career includes Aktif Bank, Peppers & Rogers Group, Pegasystems, STMicroelectronics and SAP. He has led technology engagements across Europe, the Middle East and North Africa, Africa and the CIS, from scoping and architecture through hands-on delivery.",
     contribution: "Bülent turns the business plan into systems that work in production. He brings hands-on experience in sovereign AI infrastructure, enterprise knowledge retrieval, agent workflows and voice AI, alongside payments and large-scale enterprise transformation. He leads architecture, integration and engineering, with clear controls over data access and what agents are allowed to do.",
-    identityImage: { src: assetUrl("/images/cognirise/people/bulent-egrilmez.jpg"), alt: "Bülent Eğrilmez, CTO and Co-founder of Cognirise", objectPosition: "50% 40%" },
+    identityImage: { src: assetUrl("/images/cognirise/people/bulent-egrilmez-20261007.jpg"), alt: "Bülent Eğrilmez, CTO and Co-founder of Cognirise", objectPosition: "50% 50%" },
   },
   {
     initials: "DP", name: "Don Peppers", title: "Advisory Board", group: "advisor",
