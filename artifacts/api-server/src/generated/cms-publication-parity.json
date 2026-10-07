@@ -1,8 +1,8 @@
 {
   "formatVersion": 1,
   "generatedBy": "pnpm run audit:cms-publication-parity",
-  "generatedAt": "2026-10-07T08:23:39.667Z",
-  "sourceCommit": "b45628c7ace4858e803cbb2b721fb207f60c9894",
+  "generatedAt": "2026-10-07T08:40:29.562Z",
+  "sourceCommit": "964a39cc8322596af0afb428b47d397e8e508ea1",
   "registryVersion": "2026-09-19.2",
   "status": "pass",
   "summary": {
@@ -1879,5 +1879,5 @@
     "registry contains no compiled publication authority": true
   },
   "errors": [],
-  "reportDigest": "c441247630653c75cc3e2c7bdb136f08b6f02fd9b950188f2e224a78f8d841b7"
+  "reportDigest": "2223fa761446e629b58c229f544663c934cb4ed6f61be18a44b0c37bf8d298e0"
 }
