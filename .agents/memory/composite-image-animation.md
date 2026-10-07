@@ -14,3 +14,9 @@ For still-photo revisions, also locate the original image rather than regenerati
 **Why:** The user rejected a screenshot-derived replacement for degraded detail and an unnatural blurred insertion, requesting a clean redraw from the original.
 
 **How to apply:** Deliver the clean, full-frame redraw for review first. Do not apply it to the website when the user has requested approval before replacement.
+
+For changes to the number or placement of people, use an explicit visual composition guide if text-only edits preserve the old arrangement.
+
+**Why:** Repeated identity-reference prompts retained one background person despite a request for two; a guide showing both at their intended scale allowed the image model to render both.
+
+**How to apply:** Treat any rough placement composite as an intermediate guide only. Regenerate a coherent scene from it and inspect the final person count, depth, likeness and foreground preservation before delivery.

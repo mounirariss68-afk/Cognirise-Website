@@ -645,3 +645,31 @@ mtime_ms = 1791361082406
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/2d680f03-9f1a-426f-9f2b-9194986da998/c36cacb5-e4ae-4d70-9a9a-c25e4751c018"
 storage_version_token = "1791361127993537"
 content_type = "image/png"
+
+[[outputs]]
+id = "PciH93_PAL60vfTfRNJ8q"
+uri = "file://attached_assets/generated_images/team-gokhan-likeness-review.png"
+type = "image"
+title = "Revised Gokhan likeness — for review"
+description = "Closer matching to his portrait, with his face turned slightly toward the camera and lighter background softness to retain his distinctive features. Website unchanged."
+logical_id = "cfa70076-0162-4d80-84f1-d6c0cb0584ea"
+content_hash = "sha256:3e30081b946d149620ba87b54723a80b2449d1d927b60fc08b16630842a32475"
+size = 1429438
+mtime_ms = 1791361249978
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/cfa70076-0162-4d80-84f1-d6c0cb0584ea/c12c012e-bd5a-4266-b102-8e885b62b6b8"
+storage_version_token = "1791361268590095"
+content_type = "image/png"
+
+[[outputs]]
+id = "d7IbMUL3YMniGd-_UaWIK"
+uri = "file://attached_assets/generated_images/team-gokhan-omer-soft-depth-review.png"
+type = "image"
+title = "Gokhan and Omer in the background — for review"
+description = "Gokhan is smaller and farther back, with Omer beside him. Both are softly out of focus behind the four foreground people. Website unchanged."
+logical_id = "c7155400-bff3-43fb-b060-c9a55ca1a5bf"
+content_hash = "sha256:639241711c2993a53491491b376c351860fe2240f442259a693d1e1c7f521340"
+size = 1408841
+mtime_ms = 1791361454342
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/c7155400-bff3-43fb-b060-c9a55ca1a5bf/f630b5e2-f0cd-47c6-aa3b-043f764158e3"
+storage_version_token = "1791361485175066"
+content_type = "image/png"
