@@ -14,3 +14,9 @@ External SVG diagrams must embed complete valid font bytes; page font loading do
 **Why:** A base64 font declaration can look correct in source yet fail the browser's OpenType sanitizer, silently replacing Comfortaa with a fallback.
 
 **How to apply:** Verify the rendered external image and browser font warnings, not only the font-family string or file parser. After font repairs, recheck geometry and palette so rebuilding from source does not restore off-brand rounded shapes.
+
+For LinkedIn headers, use the original image-led LinkedIn designs and their Pulse source artwork as the visual baseline, not just the brand colours.
+
+**Why:** The user rejected newly generated futuristic cityscapes and split-image header layouts as far from Cognirise Pulse, and asked to return to the initial LinkedIn designs.
+
+**How to apply:** Start from the original header and post compositions. Preserve the deep navy and ivory monumental structures and fine violet–magenta–coral currents. For text-free variants, remove editorial copy without introducing a different architectural style or added split-image dividers.

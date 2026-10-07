@@ -687,3 +687,59 @@ mtime_ms = 1791361776102
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/85f99fdb-9249-47dd-9bbe-28ab5ecd9ff7/7e79f1d3-1b39-435a-b0c5-18e6aa7fc603"
 storage_version_token = "1791361805297192"
 content_type = "image/png"
+
+[[outputs]]
+id = "kgL_urmbPj9nYqAMLSo3R"
+uri = "file://attached_assets/Cognirise-Pulse-LinkedIn-Headers-10-Images.zip"
+type = "unspecified"
+title = "Download all 10 Cognirise LinkedIn headers"
+description = "Five text-free Pulse designs plus five matching versions with the official Cognirise logo at the top right. All PNGs are 1584 × 396 pixels. Includes a paired preview sheet."
+logical_id = "67130b17-95d5-4e35-92c5-59e00b9f251b"
+content_hash = "sha256:dd3874d95c6ed9c81db0f0e62ca869c812994bb6a70fbe8da73c8384d8bd3595"
+size = 10400077
+mtime_ms = 1791373837637
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/67130b17-95d5-4e35-92c5-59e00b9f251b/b47fcff3-f4dc-4624-8342-a33a5d44a30d"
+storage_version_token = "1791373850895322"
+content_type = "application/octet-stream"
+
+[[outputs]]
+id = "R33QpcZphQnQHUuUfQxHf"
+uri = "file://attached_assets/linkedin-header-downloads/preview.jpg"
+type = "image"
+title = "Preview all five designs"
+description = "Text-free versions on the left; matching logo versions on the right."
+logical_id = "6acad56f-86de-4436-8029-239b79cdded0"
+content_hash = "sha256:776349ea6218d735601699ee465a09113b37ad26b6b05d3ba10d150d14008bbc"
+size = 674464
+mtime_ms = 1791373781637
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/6acad56f-86de-4436-8029-239b79cdded0/0bd15357-7f30-4e40-b774-c7acd9b0123c"
+storage_version_token = "1791373852221618"
+content_type = "image/jpeg"
+
+[[outputs]]
+id = "_NId7Ktw7INxF6tLHK93Q"
+uri = "file://attached_assets/linkedin-pulse-original-header-set/preview.jpg"
+type = "image"
+title = "Revised headers — original Cognirise Pulse artwork"
+description = "Five headers rebuilt from the initial LinkedIn source artwork. Clean versions on the left; matching official-logo versions on the right."
+logical_id = "3faf76dd-7c69-41ab-9faf-19f2032a9ace"
+content_hash = "sha256:dbeceb32968de668ae8f8b97367cb509340840e7ae4268cca74d40e27b293360"
+size = 625859
+mtime_ms = 1791374076333
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/3faf76dd-7c69-41ab-9faf-19f2032a9ace/85b61470-e951-41a9-a2cb-56375ff62dea"
+storage_version_token = "1791374153019687"
+content_type = "image/jpeg"
+
+[[outputs]]
+id = "9zLrWe8_dxOqhbLFVd7gu"
+uri = "file://attached_assets/Cognirise-Original-Pulse-LinkedIn-Headers.zip"
+type = "unspecified"
+title = "Download the revised 10-header ZIP"
+description = "Five text-free headers and five matching versions with the Cognirise logo at the top right. All PNGs are 1584 × 396. Includes the preview sheet."
+logical_id = "4f2bb1f2-a6f4-4a4e-afb2-4a20869c690a"
+content_hash = "sha256:03e5ed68e897a18b0d7df51dd6dd395da31535b0c50cd59720b780e4a84171f4"
+size = 7636771
+mtime_ms = 1791374137906
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/4f2bb1f2-a6f4-4a4e-afb2-4a20869c690a/88639cbb-f7a1-4c65-a4f2-5b62ac6982b0"
+storage_version_token = "1791374154518492"
+content_type = "application/octet-stream"
