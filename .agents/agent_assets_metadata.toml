@@ -631,3 +631,17 @@ mtime_ms = 1791360601394
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/ed4d07ba-8390-4db4-9d9a-ad3cd829cc0a/7c03ca7c-3ab5-41f4-b866-d34162171817"
 storage_version_token = "1791360640182686"
 content_type = "image/png"
+
+[[outputs]]
+id = "StNLANHnSMcxeigTmNc9i"
+uri = "file://attached_assets/generated_images/team-founders-original-redraw-review.png"
+type = "image"
+title = "Redrawn team photo — for approval"
+description = "Redrawn from the original image, with Bülent on the far left, Mounir third from the left, and Gokhan softly out of focus in the background. Not applied to the website."
+logical_id = "2d680f03-9f1a-426f-9f2b-9194986da998"
+content_hash = "sha256:17a564da11af6fd2104b25070ab8b7b6781511a44d103d876144fa151c417741"
+size = 1426780
+mtime_ms = 1791361082406
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/2d680f03-9f1a-426f-9f2b-9194986da998/c36cacb5-e4ae-4d70-9a9a-c25e4751c018"
+storage_version_token = "1791361127993537"
+content_type = "image/png"
