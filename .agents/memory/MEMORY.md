@@ -1,3 +1,4 @@
+- [Telecom editorial policy](telecom-editorial-policy.md) — Separate reported operator outcomes from illustrative targets; preserve network authority and governed review.
 - [Market content architecture](market-content-architecture.md) — UAE launches first; other markets use governed content overrides, explicit fallbacks, and independent publishing.
 - [Financial Services editorial direction](financial-services-editorial-direction.md) — Rebuild from slides 8–14 with concrete banking work, clear claims and explanatory visuals, not governance slogans.
 - [Visitor region authority](visitor-region-authority.md) — Analytics must not turn an implicit editorial default into an explicit region choice before country detection.

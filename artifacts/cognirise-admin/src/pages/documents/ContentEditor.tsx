@@ -6,6 +6,7 @@ import {
 } from "@workspace/api-zod";
 import type { ReactNode } from "react";
 import { useState } from "react";
+import { TelecomPovEditor } from "./TelecomPovEditor";
 import { belongsToIndustrySection, isIndustrySectionId } from "@workspace/api-zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -513,6 +514,7 @@ export function ContentEditor({ kind, value, onChange, errors, publicationErrors
           {showIndustryPath("educationPov.roadmap") && <RecordList label="Roadmap" path="content.educationPov.roadmap" value={educationPov.roadmap} minimum={3} columns={[{ key: "horizon", label: "Horizon" }, { key: "title", label: "Title" }, { key: "body", label: "Description" }]} onChange={(next) => set("educationPov", { ...educationPov, roadmap: next })} />}
           {showIndustryPath("educationPov.leadershipTest") && <Area label="Leadership test" path="content.educationPov.leadershipTest" value={educationPov.leadershipTest} onChange={(next) => set("educationPov", { ...educationPov, leadershipTest: next })} />}
         </section>}
+        {value.legacyPath === "/industries/telecoms" && value.telecomPov && <TelecomPovEditor value={value.telecomPov} onChange={(telecomPov) => set("telecomPov", telecomPov)} section={industrySection} />}
         {(value.bankingPov || value.legacyPath === "/industries/banking") && <BankingPovEditor
           value={value.bankingPov}
           onChange={(bankingPov) => set("bankingPov", bankingPov)}

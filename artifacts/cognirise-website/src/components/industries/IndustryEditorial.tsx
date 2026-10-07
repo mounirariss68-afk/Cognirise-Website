@@ -9,6 +9,7 @@ import type { IndustryContent } from "@/content/industries";
 import { contentRecord, useCmsEntry } from "@/lib/cms";
 import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
 import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
+import { TelecomEditorial } from "@/components/industries/TelecomEditorial";
 import {
   SpatialDisclosure,
   SpatialDisclosureItem,
@@ -71,6 +72,9 @@ export function IndustryEditorialView({ view: baseView, marketOverride }: { view
       : projectIndustrySnapshotForMarket({ content: baseView }, market).content as IndustryContent,
     [baseView, market, publicSectorMarketMismatch],
   );
+  if (baseView.slug === "telecoms" && view.telecomPov) {
+    return <TelecomEditorial view={view} marketOverride={marketOverride} />;
+  }
   if (publicSectorMarketMismatch) {
     return <main className="min-h-[70vh] bg-[#fdfbf7] px-6 py-24 text-[#102957]"><div className="mx-auto max-w-3xl"><NavigationBackControl embedded className="mb-7" /><h1 className="font-display text-5xl font-semibold">This industry perspective is under review.</h1><p className="mt-6 max-w-xl text-lg text-[#506583]">It will return when an approved edition is published for this market.</p><Link className="mt-8 inline-flex font-bold text-[#db509e]" href="/industries">Explore all industries <ArrowRight size={16} /></Link></div></main>;
   }
@@ -233,7 +237,7 @@ function SourceTable({ sources }: { sources: IndustryContent["sources"] }) {
   </table>;
 }
 
-const industryStyles = `
+export const industryStyles = `
   .industry{--ink:#102957;--deep:#071936;--paper:#fdfbf7;--soft:#eef0f5;--line:#cbd3e1;--violet:#7659df;--pink:#db509e;--coral:#ff775d;background:var(--paper);color:var(--ink);font-family:Inter,sans-serif;overflow-x:hidden}.industry *{box-sizing:border-box}.industry h1,.industry h2,.industry h3,.industry h4{font-family:Comfortaa,sans-serif}.industry a{color:inherit}.industry :focus-visible{outline:3px solid var(--coral);outline-offset:4px}.ind-kicker{font-size:10px;letter-spacing:.13em;text-transform:uppercase;font-weight:700;display:flex;align-items:center;gap:10px}.ind-kicker:before{content:"";width:25px;height:2px;background:linear-gradient(90deg,var(--violet),var(--pink),var(--coral))}
   .ind-hero{padding:34px 4.8vw 50px;display:grid;grid-template-columns:.88fr 1.12fr;gap:5vw;align-items:end;min-height:690px}.ind-copy{padding-bottom:25px}.ind-copy h1{font-size:clamp(50px,6.2vw,96px);line-height:.94;letter-spacing:-.075em;margin:32px 0 28px}.ind-thesis-dash{display:inline-block;letter-spacing:0;margin-inline:.06em}.ind-copy p{max-width:570px;color:#405677;font-size:17px;line-height:1.65}.ind-image{height:610px;position:relative;overflow:hidden;clip-path:polygon(10% 0,100% 0,100% 91%,0 100%,0 12%);background:var(--deep)}.ind-image img{width:100%;height:100%;object-fit:cover;animation:ind-reveal 1s ease both}.ind-image:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(7,25,54,.46),transparent 50%),linear-gradient(0deg,rgba(7,25,54,.5),transparent 48%)}.ind-image span{position:absolute;z-index:1;left:32px;bottom:30px;color:white;text-transform:uppercase;font-size:10px;letter-spacing:.13em}
    .ind-opportunity{margin:0 4.8vw;padding:90px 6vw;background:var(--deep);color:white;display:grid;grid-template-columns:.72fr 1.28fr;gap:8vw;align-items:start;position:relative;overflow:hidden}.ind-opportunity:after{content:"OPPORTUNITY";position:absolute;right:-10px;bottom:-12px;font:600 9vw/.8 Comfortaa;color:#ffffff0b}.ind-opportunity>*{position:relative;z-index:1}.ind-opportunity h2,.ind-pressure>div>h2,.ind-capabilities h2,.ind-evidence h2,.ind-gcc h2,.ind-sources h2{font-size:clamp(42px,5vw,72px);line-height:.98;letter-spacing:-.07em;margin:22px 0}.ind-opportunity p{font-size:clamp(20px,2vw,28px);line-height:1.55;color:#d7dfed;margin:0}.ind-opportunity-detail{display:block;margin-top:40px;padding-top:35px;border-top:1px solid #ffffff30}.ind-opportunity-detail strong{display:block;font-size:22px;line-height:1.45;color:#fff}.ind-opportunity-detail em{font-size:19px}.ind-opportunity-rich p{font-size:clamp(20px,2vw,28px)}.ind-opportunity-rich h2,.ind-opportunity-rich h3{margin:0 0 18px;color:#fff}.ind-opportunity-rich ul,.ind-opportunity-rich ol{margin:24px 0 0;padding-left:24px;color:#d7dfed;font-size:18px;line-height:1.6}.ind-opportunity-rich li+li{margin-top:10px}

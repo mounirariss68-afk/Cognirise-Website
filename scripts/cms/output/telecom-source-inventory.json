@@ -1,0 +1,1345 @@
+{
+  "supplied": {
+    "categories": {
+      "business": {
+        "label": "Business-Facing",
+        "icon": "briefcase",
+        "note": "Customer, revenue, and growth agents that touch subscribers and the top line directly.",
+        "agents": [
+          {
+            "nm": "Customer Service Agent",
+            "dept": "Customer Service",
+            "fns": [
+              {
+                "n": "Self-Service Agent",
+                "d": "Resolves routine voice & chat inquiries 24/7"
+              },
+              {
+                "n": "Triage & Routing Agent",
+                "d": "Correlates tickets with usage and history"
+              },
+              {
+                "n": "Agent-Assist Agent",
+                "d": "Real-time next-best-action for human reps"
+              },
+              {
+                "n": "Proactive Care Agent",
+                "d": "Detects at-risk accounts and intervenes"
+              },
+              {
+                "n": "Quality Monitoring Agent",
+                "d": "Scores 100% of interactions automatically"
+              },
+              {
+                "n": "Complaint Resolution Agent",
+                "d": "Owns the end-to-end complaint lifecycle"
+              },
+              {
+                "n": "Voice-of-Customer Agent",
+                "d": "Turns feedback into product and CX signals"
+              }
+            ],
+            "rl": "Contact centres",
+            "ic": "headset",
+            "live": [
+              "Resolving billing query",
+              "Summarising call",
+              "Triaging to Tier 2",
+              "Sending retention offer"
+            ],
+            "desc": "Resolves 60–85% of routine inquiries across voice and chat, triages complex cases, and assists human agents with next-best-action prompts and auto-summaries.",
+            "chips": [
+              "−30–50% cost/contact",
+              "+25–40% FCR",
+              "+15–25% NPS"
+            ],
+            "ch": "High call volumes, long waits, and repetitive queries strain contact centres and inflate cost per contact.",
+            "so": "24/7 self-service bots, intelligent triage that correlates tickets with usage and history, real-time agent assist, proactive churn detection, and 100% automated quality monitoring.",
+            "ou": "30–50% lower cost per contact, 25–40% better first-contact resolution, 15–25% NPS improvement."
+          },
+          {
+            "nm": "Sales Qualifier Agent",
+            "dept": "Sales",
+            "fns": [
+              {
+                "n": "Lead Qualification Agent",
+                "d": "Engages and scores inbound leads on intent"
+              },
+              {
+                "n": "Quote & Deal Agent",
+                "d": "Generates complex B2B/B2C quotes to rules"
+              },
+              {
+                "n": "Cross-sell / Upsell Agent",
+                "d": "Surfaces next-best-offer in real time"
+              },
+              {
+                "n": "CRM Enrichment Agent",
+                "d": "Keeps records complete and current"
+              },
+              {
+                "n": "Contract Renewal Agent",
+                "d": "Drives timely B2B renewals and upsell"
+              },
+              {
+                "n": "Channel Partner Agent",
+                "d": "Enables and scores indirect sales partners"
+              }
+            ],
+            "rl": "B2C & B2B sales",
+            "ic": "trending-up",
+            "live": [
+              "Qualifying inbound lead",
+              "Generating SD-WAN quote",
+              "Booking AE demo",
+              "Enriching CRM"
+            ],
+            "desc": "Engages visitors 24/7, answers technical BSS/AAA questions, qualifies buyers on intent, generates complex quotes, and books meetings with account executives.",
+            "chips": [
+              "3× lead→meeting",
+              "+1–5% ARPU",
+              "−20–30% cycle"
+            ],
+            "ch": "Manual lead qualification, slow quotes, and missed cross-sell opportunities cap revenue growth.",
+            "so": "Automated lead qualification, quote & deal automation with business rules, real-time cross-sell/upsell, and CRM enrichment — for both consumer and enterprise motions.",
+            "ou": "3× lead-to-meeting conversion, 1–5% ARPU uplift, 20–30% faster sales cycles."
+          },
+          {
+            "nm": "Marketing / CVM Agent",
+            "dept": "Marketing & CVM",
+            "fns": [
+              {
+                "n": "Segmentation Agent",
+                "d": "Builds behaviour-based micro-cohorts"
+              },
+              {
+                "n": "Dynamic Pricing Agent",
+                "d": "Optimises plans and price points"
+              },
+              {
+                "n": "Content Automation Agent",
+                "d": "Generates campaign creative at scale"
+              },
+              {
+                "n": "Churn-Prevention Agent",
+                "d": "Triggers win-back journeys early"
+              },
+              {
+                "n": "Offer Optimisation Agent",
+                "d": "Runs multi-armed bandit experiments"
+              },
+              {
+                "n": "Next-Best-Action Agent",
+                "d": "Chooses the best action per subscriber"
+              },
+              {
+                "n": "Loyalty & Rewards Agent",
+                "d": "Runs points, tiers and win-back rewards"
+              }
+            ],
+            "rl": "Campaigns & value mgmt",
+            "ic": "megaphone",
+            "live": [
+              "Segmenting micro-cohort",
+              "Pushing data top-up",
+              "Updating offer bandit",
+              "Triggering win-back"
+            ],
+            "desc": "Runs hyper-personalised campaigns across SMS, app, email and USSD, optimises pricing and plans, and orchestrates churn-prevention journeys with multi-armed bandits.",
+            "chips": [
+              "+22% conversion",
+              "−10–25% churn",
+              "+20–30% ROI"
+            ],
+            "ch": "Generic campaigns, suboptimal pricing, and reactive churn management limit marketing ROI.",
+            "so": "Behaviour-based segmentation, dynamic pricing and plan design, content automation at scale, early churn detection, and continuous offer optimisation.",
+            "ou": "22% higher offer conversion, 10–25% churn reduction, 20–30% better marketing ROI."
+          },
+          {
+            "nm": "Billing & Revenue Ops Agent",
+            "dept": "Billing",
+            "fns": [
+              {
+                "n": "Dispute Resolution Agent",
+                "d": "Investigates and settles disputes autonomously"
+              },
+              {
+                "n": "Leakage Detection Agent",
+                "d": "Flags rating and charging errors"
+              },
+              {
+                "n": "Compliance Reporting Agent",
+                "d": "Drafts regulatory reports on schedule"
+              },
+              {
+                "n": "Self-Healing Billing Agent",
+                "d": "Corrects billing faults automatically"
+              },
+              {
+                "n": "Invoice Explanation Agent",
+                "d": "Answers bill questions in plain language"
+              },
+              {
+                "n": "Payment Optimisation Agent",
+                "d": "Smooths payments and cuts failed charges"
+              }
+            ],
+            "rl": "Billing operations",
+            "ic": "receipt-text",
+            "live": [
+              "Investigating dispute #4821",
+              "Flagging rating anomaly",
+              "Drafting compliance report",
+              "Applying billing patch"
+            ],
+            "desc": "Centralises billing data across systems to resolve disputes autonomously, detects revenue leakage and fraud patterns, and automates compliance reporting.",
+            "chips": [
+              "70% auto-resolved",
+              "−40–60% leakage",
+              "−50% report time"
+            ],
+            "ch": "Billing disputes, revenue leakage, and compliance reporting consume large teams.",
+            "so": "Automated dispute resolution, leakage detection across charging and rating, fraud pattern recognition, automated compliance reporting, and self-healing billing.",
+            "ou": "70% autonomous dispute resolution, 40–60% less leakage, 50% faster compliance reporting."
+          },
+          {
+            "nm": "Back Office Agent",
+            "dept": "Back Office",
+            "fns": [
+              {
+                "n": "HR & IT Support Agent",
+                "d": "Answers policy queries, closes tickets"
+              },
+              {
+                "n": "Finance Ops Agent",
+                "d": "Reconciles invoices and expenses"
+              },
+              {
+                "n": "Legal Drafting Agent",
+                "d": "Drafts and reviews contract clauses"
+              },
+              {
+                "n": "Workflow Orchestration Agent",
+                "d": "Connects siloed internal systems"
+              },
+              {
+                "n": "Procurement Agent",
+                "d": "Automates sourcing and vendor onboarding"
+              },
+              {
+                "n": "Knowledge Management Agent",
+                "d": "Keeps internal policies current"
+              }
+            ],
+            "rl": "HR · Finance · Legal · IT",
+            "ic": "briefcase",
+            "live": [
+              "Answering HR policy query",
+              "Reconciling invoice batch",
+              "Reviewing contract clause",
+              "Closing IT ticket"
+            ],
+            "desc": "Handles employee HR/IT requests, processes invoices and expenses, drafts and reviews contracts, and orchestrates workflows across siloed internal systems.",
+            "chips": [
+              "−50% internal tickets",
+              "+30–50% productivity",
+              "−40% data entry"
+            ],
+            "ch": "Repetitive administrative work drains employee time across internal functions.",
+            "so": "HR & IT support automation, finance workflow automation, legal drafting and review, and cross-system orchestration end-to-end.",
+            "ou": "50% fewer internal tickets, 30–50% productivity gains, 40% less manual data entry."
+          },
+          {
+            "nm": "Digital & Self-Care Agent",
+            "dept": "Digital & Self-Care",
+            "fns": [
+              {
+                "n": "Conversational Commerce Agent",
+                "d": "Sells and upgrades in chat and app"
+              },
+              {
+                "n": "Self-Care Journey Agent",
+                "d": "Guides subscribers through app self-service"
+              },
+              {
+                "n": "Digital Onboarding Agent",
+                "d": "Activates and eSIM-provisions new users"
+              },
+              {
+                "n": "App Personalisation Agent",
+                "d": "Tailors the app home and offers per user"
+              },
+              {
+                "n": "Channel Deflection Agent",
+                "d": "Shifts calls to digital self-serve"
+              }
+            ],
+            "rl": "App · web · chatbot channels",
+            "ic": "smartphone",
+            "live": [
+              "Upgrading plan in app",
+              "Guiding eSIM setup",
+              "Personalising app home",
+              "Deflecting call to chat"
+            ],
+            "desc": "Runs the digital storefront and self-care journeys across app, web and chat — selling, onboarding and resolving without a human in the loop.",
+            "chips": [
+              "+30–50% digital sales",
+              "−25–40% call volume",
+              "+15–25% app NPS"
+            ],
+            "ch": "Customers want to buy and self-serve digitally, but fragmented app and web journeys push them back to costly assisted channels.",
+            "so": "Conversational commerce in app and chat, guided self-care journeys, digital onboarding and eSIM activation, app personalisation, and intelligent channel deflection.",
+            "ou": "30–50% more digital sales, 25–40% lower call volume, 15–25% higher app satisfaction."
+          }
+        ]
+      },
+      "operations": {
+        "label": "Operations-Facing",
+        "icon": "shield",
+        "note": "Assurance, fraud, experience, and partner agents that protect margin and quality at scale.",
+        "agents": [
+          {
+            "nm": "Revenue Assurance Agent",
+            "dept": "Revenue Assurance",
+            "fns": [
+              {
+                "n": "Anomaly Detection Agent",
+                "d": "Continuously scans for leakage signals"
+              },
+              {
+                "n": "Reconciliation Agent",
+                "d": "Matches switch, billing and usage records"
+              },
+              {
+                "n": "Margin Assurance Agent",
+                "d": "Protects B2B and wholesale margins"
+              },
+              {
+                "n": "Offer Assurance Agent",
+                "d": "Validates new tariffs before launch"
+              },
+              {
+                "n": "Usage Metering Agent",
+                "d": "Validates mediation and usage records"
+              },
+              {
+                "n": "Partner Settlement Agent",
+                "d": "Assures inbound and outbound partner charges"
+              }
+            ],
+            "rl": "Leakage & reconciliation",
+            "ic": "shield-check",
+            "live": [
+              "Cross-referencing switch data",
+              "Flagging $10K+ leak",
+              "Validating wholesale margin",
+              "Assuring new tariff"
+            ],
+            "desc": "Continuously reconciles switch, billing and usage data in real time, assures margins on B2B and wholesale contracts, and validates new offers before launch.",
+            "chips": [
+              "−40–60% leakage",
+              "70% faster disputes",
+              "+10–20% WS margin"
+            ],
+            "ch": "Leakage from unbilled usage, rating errors and partner disputes costs telcos 1–3% of annual revenue.",
+            "so": "Continuous anomaly detection, end-to-end lead-to-cash reconciliation, margin assurance, product & offer assurance, and self-healing billing.",
+            "ou": "40–60% less leakage, 70% faster dispute resolution, 10–20% better wholesale margins."
+          },
+          {
+            "nm": "Fraud Management Agent",
+            "dept": "Fraud Management",
+            "fns": [
+              {
+                "n": "Real-Time Scoring Agent",
+                "d": "Scores voice, data and roaming traffic"
+              },
+              {
+                "n": "Investigation Agent",
+                "d": "Correlates alerts and builds cases"
+              },
+              {
+                "n": "Response Agent",
+                "d": "Blocks fraudulent routes in milliseconds"
+              },
+              {
+                "n": "IRSF & SIM-Box Agent",
+                "d": "Specialised interconnect-fraud coverage"
+              },
+              {
+                "n": "Identity Fraud Agent",
+                "d": "Detects subscription and identity abuse"
+              },
+              {
+                "n": "Wangiri & Robocall Agent",
+                "d": "Blocks callback and nuisance-call fraud"
+              },
+              {
+                "n": "Account Takeover Agent",
+                "d": "Detects credential and SIM-swap abuse"
+              }
+            ],
+            "rl": "Real-time fraud defence",
+            "ic": "shield-alert",
+            "live": [
+              "Scoring roaming traffic",
+              "Detecting SIM-box cluster",
+              "Blocking IRSF route",
+              "Verifying subscriber"
+            ],
+            "desc": "Detects fraud across voice, data, roaming and messaging 24/7, investigates alerts autonomously, and blocks fraudulent traffic in milliseconds.",
+            "chips": [
+              "75% faster detection",
+              "−30–50% losses",
+              "−50% analyst load"
+            ],
+            "ch": "IRSF, SIM boxing, Wangiri, subscription and identity fraud cost the industry $38B+ annually.",
+            "so": "Real-time ML detection, autonomous investigation and correlation, automated response, plus specialised coverage for IRSF, SIM boxing, Wangiri, 5G slice abuse and OTT/tethering fraud.",
+            "ou": "75% faster detection, 30–50% fraud-loss reduction, 40–60% less roaming fraud."
+          },
+          {
+            "nm": "Customer Experience Agent",
+            "dept": "Customer Experience",
+            "fns": [
+              {
+                "n": "360° View Agent",
+                "d": "Unifies CRM, billing, usage and QoS"
+              },
+              {
+                "n": "Proactive Experience Agent",
+                "d": "Detects degradation pre-complaint"
+              },
+              {
+                "n": "Journey Orchestration Agent",
+                "d": "Personalises lifecycle journeys"
+              },
+              {
+                "n": "Sentiment Agent",
+                "d": "Scans channels for emerging issues"
+              },
+              {
+                "n": "Effort Reduction Agent",
+                "d": "Removes friction across journeys"
+              },
+              {
+                "n": "NPS Recovery Agent",
+                "d": "Closes the loop on detractors automatically"
+              }
+            ],
+            "rl": "CEM · journeys",
+            "ic": "heart-handshake",
+            "live": [
+              "Building 360° view",
+              "Detecting QoS degradation",
+              "Sending pre-emptive credit",
+              "Scanning sentiment"
+            ],
+            "desc": "Unifies CRM, billing, usage and network QoS into a 360° view, detects service degradation before customers complain, and orchestrates personalised journeys.",
+            "chips": [
+              "+15–25% NPS",
+              "−20–30% complaints",
+              "+20–35% cross-sell"
+            ],
+            "ch": "Subscribers expect proactive, seamless experiences, but legacy silos create inconsistent service.",
+            "so": "360° customer view, proactive experience management, personalised journey orchestration, sentiment analysis, and self-service empowerment.",
+            "ou": "15–25% NPS improvement, 20–30% fewer complaints, 20–35% more cross-sell revenue."
+          },
+          {
+            "nm": "Roaming Agent",
+            "dept": "Roaming",
+            "fns": [
+              {
+                "n": "Roaming Fraud Agent",
+                "d": "Monitors inbound/outbound roamer risk"
+              },
+              {
+                "n": "Settlement Agent",
+                "d": "Reconciles hundreds of agreements"
+              },
+              {
+                "n": "Partner Analytics Agent",
+                "d": "Scores partner quality and cost"
+              },
+              {
+                "n": "Traveller Experience Agent",
+                "d": "Nudges local packs and support"
+              },
+              {
+                "n": "Steering-of-Roaming Agent",
+                "d": "Directs roamers to best-value partners"
+              },
+              {
+                "n": "Roaming Deal Agent",
+                "d": "Optimises wholesale roaming agreements"
+              }
+            ],
+            "rl": "International roaming",
+            "ic": "globe",
+            "live": [
+              "Monitoring roamer spike",
+              "Reconciling settlements",
+              "Nudging local data-pack",
+              "Scoring partner quality"
+            ],
+            "desc": "Monitors roaming traffic for fraud, automates settlement reconciliation across hundreds of agreements, and improves the traveller experience abroad.",
+            "chips": [
+              "−40–60% roam fraud",
+              "−20–30% settle time",
+              "+15–20% CSAT"
+            ],
+            "ch": "Roaming means complex settlements, fraud risk, and cross-border experience challenges.",
+            "so": "Roaming fraud prevention, automated billing & settlements, partner performance analytics, proactive traveller experience, and roaming-intelligence APIs.",
+            "ou": "40–60% less roaming fraud, 20–30% faster settlements, 15–20% higher roaming satisfaction."
+          },
+          {
+            "nm": "Wholesale & Interconnect Agent",
+            "dept": "Wholesale & Interconnect",
+            "fns": [
+              {
+                "n": "Interconnect Billing Agent",
+                "d": "Validates usage against contracts"
+              },
+              {
+                "n": "Route Optimisation Agent",
+                "d": "Minimises interconnect cost"
+              },
+              {
+                "n": "Traffic-Pumping Agent",
+                "d": "Detects bypass and pumping fraud"
+              },
+              {
+                "n": "Settlement Agent",
+                "d": "Automates multi-partner settlements"
+              },
+              {
+                "n": "Least-Cost Routing Agent",
+                "d": "Continuously routes for lowest cost"
+              },
+              {
+                "n": "Rate Management Agent",
+                "d": "Keeps rate cards and deals current"
+              }
+            ],
+            "rl": "Partner traffic",
+            "ic": "git-branch",
+            "live": [
+              "Validating interconnect usage",
+              "Detecting traffic pumping",
+              "Optimising route cost",
+              "Generating settlement"
+            ],
+            "desc": "Validates interconnect usage against contracts, detects bypass and pumping fraud, optimises routing, and automates multi-partner settlements.",
+            "chips": [
+              "+10–20% margin",
+              "−50% disputes",
+              "−25% onboarding"
+            ],
+            "ch": "Wholesale involves high-volume exchanges, complex pricing, margin pressure and partner fraud.",
+            "so": "Wholesale billing accuracy, margin optimisation, fraud detection, automated settlements, and contract-compliance monitoring.",
+            "ou": "10–20% better wholesale margins, 50% fewer billing disputes, 15–25% faster partner onboarding."
+          },
+          {
+            "nm": "Collections & Credit Risk Agent",
+            "dept": "Collections & Credit Risk",
+            "fns": [
+              {
+                "n": "Credit Scoring Agent",
+                "d": "Scores applicants and sets limits in real time"
+              },
+              {
+                "n": "Dunning Agent",
+                "d": "Runs adaptive payment-reminder journeys"
+              },
+              {
+                "n": "Payment Recovery Agent",
+                "d": "Negotiates and recovers overdue balances"
+              },
+              {
+                "n": "Bad-Debt Prediction Agent",
+                "d": "Flags accounts likely to default early"
+              },
+              {
+                "n": "Collections Compliance Agent",
+                "d": "Keeps recovery within regulatory limits"
+              }
+            ],
+            "rl": "Credit · dunning · recovery",
+            "ic": "wallet",
+            "live": [
+              "Scoring new applicant",
+              "Running dunning journey",
+              "Recovering overdue balance",
+              "Flagging default risk"
+            ],
+            "desc": "Scores credit at onboarding, runs adaptive dunning, and recovers overdue balances — cutting bad debt while keeping collections compliant and customer-friendly.",
+            "chips": [
+              "−20–35% bad debt",
+              "+15–25% recovery",
+              "−30% DSO"
+            ],
+            "ch": "Rising bad debt and blunt, one-size-fits-all dunning erode margin and frustrate otherwise good customers.",
+            "so": "Real-time credit scoring, adaptive dunning journeys, automated payment recovery and negotiation, early default prediction, and compliant collections.",
+            "ou": "20–35% less bad debt, 15–25% higher recovery rates, 30% lower days-sales-outstanding."
+          }
+        ]
+      },
+      "foundational": {
+        "label": "Foundational",
+        "icon": "database",
+        "note": "The data, integration, and platform agents every other agent is built on.",
+        "agents": [
+          {
+            "nm": "Data Platform Agent",
+            "dept": "Data Platform",
+            "fns": [
+              {
+                "n": "Ingestion Agent",
+                "d": "Streams 50+ batch and real-time sources"
+              },
+              {
+                "n": "Semantic Modelling Agent",
+                "d": "Applies TM Forum ontologies"
+              },
+              {
+                "n": "Data Quality Agent",
+                "d": "Profiles and repairs data continuously"
+              },
+              {
+                "n": "Feature Store Agent",
+                "d": "Serves ML-ready features to every agent"
+              },
+              {
+                "n": "NL Analytics Agent",
+                "d": "Translates plain English to SQL"
+              },
+              {
+                "n": "Streaming Pipeline Agent",
+                "d": "Manages real-time event streams"
+              },
+              {
+                "n": "Data Contract Agent",
+                "d": "Enforces schemas and data contracts"
+              }
+            ],
+            "rl": "Data lakes & pipelines",
+            "ic": "database",
+            "live": [
+              "Ingesting 50+ sources",
+              "Profiling data quality",
+              "Serving churn features",
+              "Translating NL → SQL"
+            ],
+            "desc": "Orchestrates real-time and batch ingestion from 50+ sources, applies telecom ontologies, automates data quality, and serves ML-ready features to every agent.",
+            "chips": [
+              "−60–80% to insight",
+              "−40–50% eng cost",
+              "3× models live"
+            ],
+            "ch": "Operators generate petabytes daily, but data stays siloed, unstructured and underutilised.",
+            "so": "Unified ingestion, semantic modelling on TM Forum standards, automated data quality, feature-engineering automation, governed access, and NL self-service analytics.",
+            "ou": "60–80% faster time-to-insight, 40–50% lower data-engineering cost, 3× more models deployed."
+          },
+          {
+            "nm": "MDM / CDP Agent",
+            "dept": "Master Data & CDP",
+            "fns": [
+              {
+                "n": "Identity Resolution Agent",
+                "d": "Merges records across every system"
+              },
+              {
+                "n": "Golden Record Agent",
+                "d": "Maintains the single customer view"
+              },
+              {
+                "n": "Stewardship Agent",
+                "d": "Automates data-quality remediation"
+              },
+              {
+                "n": "Activation Agent",
+                "d": "Pushes enriched segments to channels"
+              },
+              {
+                "n": "Consent Agent",
+                "d": "Manages privacy and consent gaps"
+              },
+              {
+                "n": "Household Graph Agent",
+                "d": "Links accounts into household graphs"
+              },
+              {
+                "n": "Suppression Agent",
+                "d": "Manages do-not-contact and preferences"
+              }
+            ],
+            "rl": "Identity & profiles",
+            "ic": "users-round",
+            "live": [
+              "Merging duplicate records",
+              "Building golden record",
+              "Flagging consent gap",
+              "Activating segment"
+            ],
+            "desc": "Resolves customer identities across systems, maintains a real-time golden record, automates stewardship, and activates enriched segments for marketing.",
+            "chips": [
+              "+30–40% quality",
+              "+20–25% conversion",
+              "−50% data complaints"
+            ],
+            "ch": "Fragmented identities across CRM, billing and marketing create inconsistent experiences and missed cross-sell.",
+            "so": "Deterministic and probabilistic identity resolution, golden-record creation, stewardship automation, CDP activation, and consent & privacy management.",
+            "ou": "30–40% better data quality, 20–25% higher campaign conversion, 50% fewer data-error complaints."
+          },
+          {
+            "nm": "AIOps Agent",
+            "dept": "IT Operations",
+            "fns": [
+              {
+                "n": "Incident Detection Agent",
+                "d": "Predicts failures before impact"
+              },
+              {
+                "n": "Root-Cause Agent",
+                "d": "Correlates across BSS/OSS domains"
+              },
+              {
+                "n": "Remediation Agent",
+                "d": "Executes self-healing runbooks"
+              },
+              {
+                "n": "Change Management Agent",
+                "d": "Automates safe changes"
+              },
+              {
+                "n": "Service Desk Agent",
+                "d": "Resolves and closes IT tickets"
+              },
+              {
+                "n": "Capacity Planning Agent",
+                "d": "Forecasts and right-sizes capacity"
+              },
+              {
+                "n": "Telemetry Correlation Agent",
+                "d": "Correlates signals across systems"
+              }
+            ],
+            "rl": "IT operations",
+            "ic": "activity",
+            "live": [
+              "Predicting DB failure",
+              "Correlating incident",
+              "Auto-scaling service",
+              "Closing service ticket"
+            ],
+            "desc": "Monitors BSS/OSS infrastructure, predicts failures, performs root-cause analysis, and executes self-healing remediation across IT and network.",
+            "chips": [
+              "−50–70% incidents",
+              "−60–80% MTTR",
+              "−40% IT opex"
+            ],
+            "ch": "The IT systems behind BSS/OSS are complex, distributed, and outage-prone.",
+            "so": "Proactive incident detection, cross-domain root-cause analysis, autonomous remediation, change-management automation, and service-desk automation on a unified AIOps plane.",
+            "ou": "50–70% fewer IT incidents, 60–80% faster MTTR, 40% lower IT operations cost."
+          },
+          {
+            "nm": "Integration Agent",
+            "dept": "Integration & Architecture",
+            "fns": [
+              {
+                "n": "API Orchestration Agent",
+                "d": "Exposes TM Forum Open APIs"
+              },
+              {
+                "n": "Legacy Adapter Agent",
+                "d": "Wraps legacy systems in MCP"
+              },
+              {
+                "n": "Semantic Layer Agent",
+                "d": "Maps the enterprise entity graph"
+              },
+              {
+                "n": "Modernisation Agent",
+                "d": "Guides the path to ODA"
+              },
+              {
+                "n": "Integration Monitor Agent",
+                "d": "Watches 1000+ live links"
+              },
+              {
+                "n": "Event Mesh Agent",
+                "d": "Routes events across the enterprise"
+              },
+              {
+                "n": "API Governance Agent",
+                "d": "Enforces API standards and versioning"
+              }
+            ],
+            "rl": "Enterprise architecture",
+            "ic": "plug",
+            "live": [
+              "Exposing TMF Open API",
+              "Wrapping legacy in MCP",
+              "Mapping entity graph",
+              "Monitoring 1000+ links"
+            ],
+            "desc": "Connects 100+ legacy systems through TM Forum Open APIs and MCP adapters, builds a semantic integration layer, and guides modernisation to ODA.",
+            "chips": [
+              "−50% integration time",
+              "−40% tech debt",
+              "3× agents deployed"
+            ],
+            "ch": "Operators run 100+ legacy systems with fragile point-to-point integrations that slow innovation.",
+            "so": "API orchestration, MCP adapters for legacy, a semantic integration layer, governed AI execution, ODA modernisation guidance, and continuous integration monitoring.",
+            "ou": "50% faster integration projects, 40% less technical debt, 3× more agents deployed."
+          },
+          {
+            "nm": "DevOps & Platform Agent",
+            "dept": "DevOps & Platform",
+            "fns": [
+              {
+                "n": "CI/CD Agent",
+                "d": "Runs build, test and deploy pipelines"
+              },
+              {
+                "n": "IaC Provisioning Agent",
+                "d": "Provisions infrastructure as code"
+              },
+              {
+                "n": "Observability Agent",
+                "d": "Instruments metrics, logs and traces"
+              },
+              {
+                "n": "Security Scanning Agent",
+                "d": "Scans for CVEs and misconfig"
+              },
+              {
+                "n": "Release Agent",
+                "d": "Manages flags and automated rollback"
+              },
+              {
+                "n": "FinOps Agent",
+                "d": "Right-sizes cloud spend and cost"
+              },
+              {
+                "n": "Resilience Testing Agent",
+                "d": "Tests failure and hardens services"
+              }
+            ],
+            "rl": "Delivery & reliability",
+            "ic": "git-commit-horizontal",
+            "live": [
+              "Running CI/CD pipeline",
+              "Provisioning via IaC",
+              "Scanning for CVEs",
+              "Rolling back flag"
+            ],
+            "desc": "Automates CI/CD, provisions infrastructure as code, instruments observability, scans for vulnerabilities, and manages safe feature rollouts.",
+            "chips": [
+              "+70% faster releases",
+              "−50% prod incidents",
+              "−60% deploy failures"
+            ],
+            "ch": "Slow releases, manual deployments and inconsistent environments delay agent rollouts.",
+            "so": "CI/CD automation, infrastructure as code, observability, security & compliance scanning, and feature-flag management with automated rollback.",
+            "ou": "70% faster release cycles, 50% fewer production incidents, 60% fewer deployment failures."
+          },
+          {
+            "nm": "Business Intelligence Agent",
+            "dept": "Business Intelligence",
+            "fns": [
+              {
+                "n": "Reporting Agent",
+                "d": "Generates executive reports automatically"
+              },
+              {
+                "n": "NL Query Agent",
+                "d": "Answers plain-English questions"
+              },
+              {
+                "n": "Anomaly Alert Agent",
+                "d": "Flags KPI deviations"
+              },
+              {
+                "n": "Forecasting Agent",
+                "d": "Produces predictive forecasts"
+              },
+              {
+                "n": "Dashboard Agent",
+                "d": "Builds self-service dashboards"
+              },
+              {
+                "n": "Data Storytelling Agent",
+                "d": "Turns analysis into executive narratives"
+              },
+              {
+                "n": "Metric Governance Agent",
+                "d": "Maintains a single KPI source of truth"
+              }
+            ],
+            "rl": "Analytics & reporting",
+            "ic": "bar-chart-3",
+            "live": [
+              "Generating exec report",
+              "Answering NL query",
+              "Alerting KPI anomaly",
+              "Forecasting demand"
+            ],
+            "desc": "Generates reports automatically, answers plain-English questions with visualisations, detects KPI anomalies, and produces predictive forecasts.",
+            "chips": [
+              "−80% report time",
+              "3× decisions",
+              "−50% to insight"
+            ],
+            "ch": "Executives struggle to access timely insight through fragmented tools and manual prep.",
+            "so": "Automated report generation, natural-language querying, anomaly detection, predictive analytics, and self-service dashboards.",
+            "ou": "80% less report-generation time, 3× more data-driven decisions, 50% faster time-to-insight."
+          }
+        ]
+      }
+    },
+    "useCases": [
+      {
+        "tag": "Billing",
+        "ic": "receipt-text",
+        "big": "70%",
+        "bigl": "of billing disputes resolved autonomously",
+        "ch": "40% of contact-centre calls are billing disputes needing manual investigation across 5+ systems.",
+        "so": "Centralises billing data, correlates usage records, identifies rating errors, and writes plain-language explanations for customers."
+      },
+      {
+        "tag": "Sales",
+        "ic": "trending-up",
+        "big": "3×",
+        "bigl": "lead-to-meeting conversion",
+        "ch": "B2B teams spend 60% of their time on unqualified leads and repetitive product questions.",
+        "so": "Engages visitors, answers technical BSS/AAA questions, qualifies on firmographics and intent, and books AE meetings."
+      },
+      {
+        "tag": "Marketing · CVM",
+        "ic": "megaphone",
+        "big": "22%",
+        "bigl": "offer conversion rate",
+        "ch": "Generic mass-market campaigns deliver <5% conversion and high discount costs.",
+        "so": "Segments on real-time usage, spend and lifecycle data, then delivers personalised recharge offers by propensity to buy."
+      },
+      {
+        "tag": "Roaming · Fraud",
+        "ic": "globe",
+        "big": "60%",
+        "bigl": "reduction in roaming fraud losses",
+        "ch": "Roaming fraud losses exceed $5M annually, with detection taking 24–48 hours.",
+        "so": "Monitors roaming traffic in real time, detects suspicious usage, and blocks fraudulent SIMs within milliseconds."
+      },
+      {
+        "tag": "Revenue Assurance",
+        "ic": "shield-check",
+        "big": "$10M+",
+        "bigl": "annual revenue recovered",
+        "ch": "Leakage from unbilled usage and rating errors costs 2% of annual revenue.",
+        "so": "Continuously cross-references switch, billing and usage pipelines, correcting leakages above $10K per cycle."
+      },
+      {
+        "tag": "Ad-Tech Innovation",
+        "ic": "gavel",
+        "big": "35%",
+        "bigl": "higher offer conversion",
+        "ch": "Campaigns deliver inconsistent ROI from generic offers and poor timing.",
+        "so": "Agents \"bid\" in real-time auctions for the right to present offers, optimising for conversion probability and lifetime value."
+      },
+      {
+        "tag": "Airline Innovation",
+        "ic": "plane",
+        "big": "8%",
+        "bigl": "ARPU uplift",
+        "ch": "Static plan pricing fails to capture willingness-to-pay across segments and time.",
+        "so": "Adjusts plan prices, bundles and promotions in real time on demand forecasting, competitor moves and inventory."
+      },
+      {
+        "tag": "HR · IT",
+        "ic": "users-round",
+        "big": "80%",
+        "bigl": "of employee queries handled",
+        "ch": "Internal IT and HR teams are overwhelmed by repetitive employee requests.",
+        "so": "Handles most queries via chat, integrating with HRIS, ITSM and procurement to fulfil requests autonomously."
+      }
+    ],
+    "adaptations": [
+      {
+        "cat": "Customer Lifecycle",
+        "ic": "gavel",
+        "to": "Real-time offer auctions for CLM",
+        "desc": "Auction every retention and growth offer in real time to the highest-intent segment.",
+        "imp": "25–40% higher conversion · 20–30% better ROI"
+      },
+      {
+        "cat": "Dynamic Pricing",
+        "ic": "plane",
+        "to": "Continuous plan & add-on optimisation",
+        "desc": "Continuously reprice plans, bundles and add-ons to real willingness-to-pay.",
+        "imp": "5–12% ARPU uplift · 10–18% margin"
+      },
+      {
+        "cat": "Bundling & Revenue",
+        "ic": "bed-double",
+        "to": "Multi-product bundle optimisation",
+        "desc": "Optimise total revenue across connectivity, content and services as one basket.",
+        "imp": "15–25% attachment · 10–15% bundle margin"
+      },
+      {
+        "cat": "Personalisation",
+        "ic": "shopping-cart",
+        "to": "Next-best-offer & next-best-action",
+        "desc": "Recommend the next best offer and action for every subscriber, continuously.",
+        "imp": "30–50% NBO acceptance · 20–35% cross-sell"
+      },
+      {
+        "cat": "New Revenue",
+        "ic": "landmark",
+        "to": "Telco-fintech convergence & BNPL",
+        "desc": "Embed personalised financial products and BNPL into the telco relationship.",
+        "imp": "10–20% new revenue · 25–35% approvals"
+      },
+      {
+        "cat": "Devices & Retail",
+        "ic": "tag",
+        "to": "Device-led promotions & flash sales",
+        "desc": "Run inventory-aware device promotions and flash sales that clear stock profitably.",
+        "imp": "20–30% lower inventory cost · 15–25% ROI"
+      },
+      {
+        "cat": "Content & Media",
+        "ic": "play",
+        "to": "Content + connectivity bundles",
+        "desc": "Package content and connectivity into personalised media bundles.",
+        "imp": "25–40% engagement · 15–20% attachment"
+      },
+      {
+        "cat": "Network Monetisation",
+        "ic": "car-front",
+        "to": "Network congestion & QoS-tier pricing",
+        "desc": "Price QoS tiers dynamically to balance demand and monetise the network.",
+        "imp": "10–15% utilisation · 5–10% ARPU"
+      }
+    ],
+    "outcomes": [
+      {
+        "d": "Revenue Assurance",
+        "ic": "shield-check",
+        "cases": "Continuous anomaly detection, automated reconciliation, margin assurance",
+        "out": "<span>40–60%</span> less leakage · 70% faster disputes"
+      },
+      {
+        "d": "Fraud Management",
+        "ic": "shield-alert",
+        "cases": "Real-time detection, autonomous investigation, IRSF / SIM-box / Wangiri coverage",
+        "out": "<span>75%</span> faster detection · 30–50% loss cut"
+      },
+      {
+        "d": "Customer Experience",
+        "ic": "heart-handshake",
+        "cases": "360° view, proactive care, personalised journeys, sentiment analysis",
+        "out": "<span>15–25%</span> NPS · 20–30% fewer complaints"
+      },
+      {
+        "d": "Contact Centres",
+        "ic": "headset",
+        "cases": "Voice/chat bots, intelligent routing, agent assist, quality monitoring",
+        "out": "<span>30–50%</span> lower cost/contact · 25–40% FCR"
+      },
+      {
+        "d": "International Roaming",
+        "ic": "globe",
+        "cases": "Fraud prevention, settlements, partner analytics, traveller experience",
+        "out": "<span>40–60%</span> less roam fraud · 20–30% faster settle"
+      },
+      {
+        "d": "Wholesale & Interconnect",
+        "ic": "git-branch",
+        "cases": "Billing accuracy, margin optimisation, fraud detection, settlements",
+        "out": "<span>10–20%</span> margin · 50% fewer disputes"
+      },
+      {
+        "d": "Sales",
+        "ic": "trending-up",
+        "cases": "Lead qualification, quote automation, cross-sell/upsell, CRM enrichment",
+        "out": "<span>3×</span> lead→meeting · 1–5% ARPU"
+      },
+      {
+        "d": "Marketing & CVM",
+        "ic": "megaphone",
+        "cases": "Hyper-personalised campaigns, dynamic pricing, churn prevention",
+        "out": "<span>22%</span> conversion · 10–25% churn cut"
+      },
+      {
+        "d": "Billing",
+        "ic": "receipt-text",
+        "cases": "Dispute resolution, leakage detection, compliance, self-healing",
+        "out": "<span>70%</span> auto-resolved · 40–60% less leakage"
+      },
+      {
+        "d": "Data Platforms",
+        "ic": "database",
+        "cases": "Unified ingestion, semantic modelling, data quality, feature engineering",
+        "out": "<span>60–80%</span> faster insight · 40–50% lower cost"
+      },
+      {
+        "d": "MDM & CDP",
+        "ic": "users-round",
+        "cases": "Identity resolution, golden record, consent management",
+        "out": "<span>30–40%</span> data quality · 20–25% conversion"
+      },
+      {
+        "d": "IT Operations / AIOps",
+        "ic": "activity",
+        "cases": "Proactive detection, root-cause analysis, autonomous remediation",
+        "out": "<span>50–70%</span> fewer incidents · 60–80% MTTR"
+      },
+      {
+        "d": "Enterprise Architecture",
+        "ic": "plug",
+        "cases": "API orchestration, semantic integration, governed execution",
+        "out": "<span>50%</span> faster integration · 40% less debt"
+      },
+      {
+        "d": "DevOps / Platform",
+        "ic": "git-commit-horizontal",
+        "cases": "CI/CD, IaC, observability, security scanning",
+        "out": "<span>70%</span> faster releases · 50% fewer incidents"
+      },
+      {
+        "d": "Business Intelligence",
+        "ic": "bar-chart-3",
+        "cases": "Automated reporting, NL querying, anomaly detection, forecasting",
+        "out": "<span>80%</span> faster reports · 3× decisions"
+      },
+      {
+        "d": "Back Office",
+        "ic": "briefcase",
+        "cases": "Employee support, invoice processing, contract drafting, IT tickets",
+        "out": "<span>50%</span> fewer tickets · 30–50% productivity"
+      },
+      {
+        "d": "Digital & Self-Care",
+        "ic": "smartphone",
+        "cases": "Conversational commerce, self-care journeys, digital onboarding, channel deflection",
+        "out": "<span>30–50%</span> more digital sales · 25–40% fewer calls"
+      },
+      {
+        "d": "Collections & Credit Risk",
+        "ic": "wallet",
+        "cases": "Credit scoring, adaptive dunning, payment recovery, default prediction",
+        "out": "<span>20–35%</span> less bad debt · +15–25% recovery"
+      }
+    ]
+  },
+  "metrics": [
+    {
+      "id": "cost-contact",
+      "name": "Cost per resolved contact",
+      "definition": "Total scoped service cost divided by resolved contacts; relative reduction versus the same channel mix and baseline period.",
+      "classification": "target",
+      "value": "30–50% relative reduction",
+      "context": "Illustrative KPI target. Agree the target during discovery against the operator's baseline and validate in a scoped pilot; not an achieved result, forecast or guarantee."
+    },
+    {
+      "id": "sales-cycle",
+      "name": "Sales cycle duration",
+      "definition": "Median days from accepted qualified lead to signed contract for comparable products; relative reduction versus the operator baseline.",
+      "classification": "target",
+      "value": "20–30% relative reduction",
+      "context": "Illustrative KPI target. Agree the target during discovery against the operator's baseline and validate in a scoped pilot; not an achieved result, forecast or guarantee."
+    },
+    {
+      "id": "churn",
+      "name": "Subscriber churn rate",
+      "definition": "Subscribers leaving in the measurement period divided by subscribers at period start; relative reduction versus a comparable untreated cohort.",
+      "classification": "target",
+      "value": "10–25% relative reduction",
+      "context": "Illustrative KPI target. Agree the target during discovery against the operator's baseline and validate in a scoped pilot; not an achieved result, forecast or guarantee."
+    },
+    {
+      "id": "dispute-resolution",
+      "name": "Disputes resolved within approved authority",
+      "definition": "Disputes fully resolved without repeat contact in the agreed observation window divided by eligible disputes; approval-required decisions remain excluded.",
+      "classification": "unresolved",
+      "context": "Metric definition is proposed for discovery. The supplied figure is withheld pending clarification of baseline, scope and measurement."
+    },
+    {
+      "id": "data-entry",
+      "name": "Manual data-entry effort",
+      "definition": "Staff minutes spent entering scoped records at matched volume and accuracy; relative reduction versus operator baseline.",
+      "classification": "target",
+      "value": "40% relative reduction",
+      "context": "Illustrative KPI target. Agree the target during discovery against the operator's baseline and validate in a scoped pilot; not an achieved result, forecast or guarantee."
+    },
+    {
+      "id": "digital-sales",
+      "name": "Digital sales completions",
+      "definition": "Completed digital purchases in matched periods, with cancellations and channel displacement reported separately; relative increase versus baseline.",
+      "classification": "target",
+      "value": "30–50% relative increase",
+      "context": "Illustrative KPI target. Agree the target during discovery against the operator's baseline and validate in a scoped pilot; not an achieved result, forecast or guarantee."
+    },
+    {
+      "id": "leakage",
+      "name": "Confirmed revenue leakage rate",
+      "definition": "Confirmed unbilled or misrated eligible usage value divided by total eligible usage value; relative reduction versus operator baseline, excluding fraud overlap.",
+      "classification": "target",
+      "value": "40–60% relative reduction",
+      "context": "Illustrative KPI target. Agree the target during discovery against the operator's baseline and validate in a scoped pilot; not an achieved result, forecast or guarantee."
+    },
+    {
+      "id": "fraud-loss",
+      "name": "Confirmed fraud loss rate",
+      "definition": "Confirmed fraud losses net of recovery divided by scoped revenue, with false positives and customer harm reported separately; relative reduction.",
+      "classification": "target",
+      "value": "30–50% relative reduction",
+      "context": "Illustrative KPI target. Agree the target during discovery against the operator's baseline and validate in a scoped pilot; not an achieved result, forecast or guarantee."
+    },
+    {
+      "id": "nps",
+      "name": "Net Promoter Score",
+      "definition": "Percentage of promoters minus percentage of detractors on the same survey population. Changes are percentage points, not relative percent.",
+      "classification": "unresolved",
+      "context": "Metric definition is proposed for discovery. The supplied figure is withheld pending clarification of baseline, scope and measurement."
+    },
+    {
+      "id": "settlement-time",
+      "name": "Roaming settlement duration",
+      "definition": "Median elapsed time from period close to agreed settlement for comparable partners; relative reduction versus operator baseline.",
+      "classification": "target",
+      "value": "20–30% relative reduction",
+      "context": "Illustrative KPI target. Agree the target during discovery against the operator's baseline and validate in a scoped pilot; not an achieved result, forecast or guarantee."
+    },
+    {
+      "id": "wholesale-disputes",
+      "name": "Wholesale billing dispute rate",
+      "definition": "Disputed invoices divided by invoices issued in comparable periods and partner scope; relative reduction.",
+      "classification": "target",
+      "value": "50% relative reduction",
+      "context": "Illustrative KPI target. Agree the target during discovery against the operator's baseline and validate in a scoped pilot; not an achieved result, forecast or guarantee."
+    },
+    {
+      "id": "bad-debt",
+      "name": "Bad debt rate",
+      "definition": "Written-off receivables divided by billed revenue for matched cohorts and observation windows; relative reduction, monitored alongside fairness and hardship outcomes.",
+      "classification": "target",
+      "value": "20–35% relative reduction",
+      "context": "Illustrative KPI target. Agree the target during discovery against the operator's baseline and validate in a scoped pilot; not an achieved result, forecast or guarantee."
+    },
+    {
+      "id": "insight-time",
+      "name": "Time to approved insight",
+      "definition": "Median elapsed time from accepted analytical request to validated result at matched complexity; relative reduction.",
+      "classification": "target",
+      "value": "60–80% relative reduction",
+      "context": "Illustrative KPI target. Agree the target during discovery against the operator's baseline and validate in a scoped pilot; not an achieved result, forecast or guarantee."
+    },
+    {
+      "id": "data-quality",
+      "name": "Customer record quality",
+      "definition": "Share of sampled records passing agreed completeness, accuracy and uniqueness checks; no compound quality score without agreed weights.",
+      "classification": "unresolved",
+      "context": "Metric definition is proposed for discovery. The supplied figure is withheld pending clarification of baseline, scope and measurement."
+    },
+    {
+      "id": "mttr",
+      "name": "IT service restoration time",
+      "definition": "Median elapsed time from confirmed scoped IT incident to verified service restoration; relative reduction, excluding network control.",
+      "classification": "target",
+      "value": "60–80% relative reduction",
+      "context": "Illustrative KPI target. Agree the target during discovery against the operator's baseline and validate in a scoped pilot; not an achieved result, forecast or guarantee."
+    },
+    {
+      "id": "integration-time",
+      "name": "Integration delivery duration",
+      "definition": "Median elapsed time from approved interface design to accepted integration at matched complexity; relative reduction.",
+      "classification": "target",
+      "value": "50% relative reduction",
+      "context": "Illustrative KPI target. Agree the target during discovery against the operator's baseline and validate in a scoped pilot; not an achieved result, forecast or guarantee."
+    },
+    {
+      "id": "release-cycle",
+      "name": "Release cycle duration",
+      "definition": "Median elapsed time from approved change to verified release for comparable change classes; relative reduction with failure rate held within agreed limits.",
+      "classification": "target",
+      "value": "70% relative reduction",
+      "context": "Illustrative KPI target. Agree the target during discovery against the operator's baseline and validate in a scoped pilot; not an achieved result, forecast or guarantee."
+    },
+    {
+      "id": "report-time",
+      "name": "Report preparation effort",
+      "definition": "Staff minutes from available approved data to checked report at matched scope and quality; relative reduction.",
+      "classification": "target",
+      "value": "80% relative reduction",
+      "context": "Illustrative KPI target. Agree the target during discovery against the operator's baseline and validate in a scoped pilot; not an achieved result, forecast or guarantee."
+    },
+    {
+      "id": "offer-conversion",
+      "name": "Offer conversion rate",
+      "definition": "Accepted eligible offers divided by delivered eligible offers within an agreed attribution window. Absolute rate and relative uplift are different measurements.",
+      "classification": "unresolved",
+      "context": "Metric definition is proposed for discovery. The supplied figure is withheld pending clarification of baseline, scope and measurement."
+    },
+    {
+      "id": "lead-meeting",
+      "name": "Lead-to-meeting conversion",
+      "definition": "Qualified meetings held divided by eligible leads contacted in an agreed cohort. Supplied multiple needs baseline and qualification consistency.",
+      "classification": "unresolved",
+      "context": "Metric definition is proposed for discovery. The supplied figure is withheld pending clarification of baseline, scope and measurement."
+    },
+    {
+      "id": "recovery-value",
+      "name": "Verified recovered revenue",
+      "definition": "Revenue actually recovered, net of recovery costs and reversals, in a defined operator and billing period. No universal monetary promise.",
+      "classification": "unresolved",
+      "context": "Metric definition is proposed for discovery. The supplied figure is withheld pending clarification of baseline, scope and measurement."
+    },
+    {
+      "id": "arpu",
+      "name": "Average revenue per user",
+      "definition": "Scoped recognised service revenue divided by average active subscribers in a matched period; relative increase, controlling mix and tariff effects.",
+      "classification": "target",
+      "value": "5–12% relative increase",
+      "context": "Illustrative KPI target. Agree the target during discovery against the operator's baseline and validate in a scoped pilot; not an achieved result, forecast or guarantee."
+    },
+    {
+      "id": "bundle-attachment",
+      "name": "Bundle attachment rate",
+      "definition": "Eligible customers adding the specified bundle divided by customers offered it in an agreed period; relative increase versus baseline.",
+      "classification": "target",
+      "value": "15–25% relative increase",
+      "context": "Illustrative KPI target. Agree the target during discovery against the operator's baseline and validate in a scoped pilot; not an achieved result, forecast or guarantee."
+    },
+    {
+      "id": "inventory-cost",
+      "name": "Device inventory carrying cost",
+      "definition": "Carrying cost for matched inventory volume and service availability over the agreed period; relative reduction.",
+      "classification": "target",
+      "value": "20–30% relative reduction",
+      "context": "Illustrative KPI target. Agree the target during discovery against the operator's baseline and validate in a scoped pilot; not an achieved result, forecast or guarantee."
+    },
+    {
+      "id": "employee-query",
+      "name": "Employee query resolution",
+      "definition": "Eligible employee queries fully resolved with verified answers and no repeat contact in the agreed window divided by eligible queries.",
+      "classification": "unresolved",
+      "context": "Metric definition is proposed for discovery. The supplied figure is withheld pending clarification of baseline, scope and measurement."
+    },
+    {
+      "id": "ra-cycle",
+      "name": "RA/fraud case resolution duration",
+      "definition": "Median time from validated alert to verified closure, reported separately for revenue leakage and fraud cases.",
+      "classification": "unresolved",
+      "context": "Metric definition is proposed for discovery. The supplied figure is withheld pending clarification of baseline, scope and measurement."
+    },
+    {
+      "id": "ra-opex",
+      "name": "RA/fraud operating cost",
+      "definition": "Cost of the scoped control process per reviewed case, with accuracy and customer-harm guardrails.",
+      "classification": "unresolved",
+      "context": "Metric definition is proposed for discovery. The supplied figure is withheld pending clarification of baseline, scope and measurement."
+    }
+  ],
+  "policy": "Original numbers not present in classified metrics remain unresolved. No reported outcomes substantiated; all public figures are illustrative targets. Original source inventories are private review material, not public proof."
+}

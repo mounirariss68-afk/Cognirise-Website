@@ -42,29 +42,36 @@ export const INDUSTRY_SECTION_CONTENT_PATHS: Readonly<Record<IndustrySectionId, 
     "educationPov.introduction", "publicSectorPov.marketLabel",
   ],
   opportunity: [
+    "telecomPov.valuePools", "telecomPov.note",
     "opportunity", "educationPov.strategicShift", "bankingPov.valueOutcomes", "publicSectorPov.opportunity",
   ],
   pressures: [
+    "telecomPov.candidates",
     "pressures", "educationPov.convictions", "bankingPov.adoptionLevels", "publicSectorPov.pressuresHeading",
   ],
   capabilities: [
+    "telecomPov.departments", "telecomPov.architecture",
     "capabilities", "educationPov.valueDomains", "educationPov.targetState", "educationPov.imagery",
     "bankingPov.valueDomains", "bankingPov.startingPoints", "publicSectorPov.capabilitiesIntroduction",
   ],
   applications: [
+    "telecomPov.scenarios", "telecomPov.rafm", "telecomPov.adaptations",
     "uses", "educationPov.applications", "educationPov.signals", "bankingPov.voiceBanking", "publicSectorPov.applicationsDisclaimer",
   ],
   perspective: [
+    "telecomPov.capabilityRange", "telecomPov.delivery",
     "reversal", "myth", "educationPov.patternQuote", "educationPov.globalDirection", "educationPov.roadmap",
     "bankingPov.productionReadiness", "bankingPov.deliveryPath",
   ],
   market: [
+    "telecomPov.marketConstraints",
     "gcc", "educationPov.leadershipTest", "bankingPov.market", "publicSectorPov.marketHeading", "publicSectorPov.marketContext",
   ],
   sources: [
+    "telecomPov.metrics", "telecomPov.reviewBlockers",
     "sources", "bankingPov.evidenceSignals", "bankingPov.partners", "bankingPov.caseMembershipSnapshot", "publicSectorPov.sourcesIntroduction", "publicSectorPov.reviewBlockers",
   ],
-  cta: ["selectedWork", "service", "bankingPov.cta", "publicSectorPov.nextAction"],
+  cta: ["selectedWork", "service", "bankingPov.cta", "publicSectorPov.nextAction", "telecomPov.entryPoints"],
 };
 
 export function belongsToIndustrySection(path: string, section: IndustrySectionId) {

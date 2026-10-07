@@ -241,7 +241,7 @@ function IndustryPreview({ preview, content }: { preview: Preview; content: Indu
       {media.content.bankingPov
         ? <BankingEditorial view={{ ...media.content, slug: "financial-services", media: preview.media } as Parameters<typeof BankingEditorial>[0]["view"]} />
         : <IndustryEditorialView
-            view={media.content as Parameters<typeof IndustryEditorialView>[0]["view"]}
+            view={{ ...media.content, slug: preview.document.slug } as Parameters<typeof IndustryEditorialView>[0]["view"]}
             marketOverride={previewMarket}
           />}
     </>

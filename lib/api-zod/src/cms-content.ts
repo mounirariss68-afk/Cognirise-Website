@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { telecomPovSchema } from "./telecom-pov";
 import {
   type HScore,
   type Oversight,
@@ -672,6 +673,7 @@ export const industryContentSchema = z.object({
   educationPov: educationPovSchema.optional(),
   bankingPov: z.lazy(() => bankingPovSchema).optional(),
   publicSectorPov: publicSectorPovSchema.optional(),
+  telecomPov: telecomPovSchema.optional(),
   heroMedia: optionalMediaReference,
   heroMediaId: legacyMediaId,
   supportingMedia: z.array(cmsMediaReferenceSchema).max(8).optional(),
@@ -694,6 +696,9 @@ export const industryContentSchema = z.object({
       path: ["publicSectorPov"],
       message: "The Public Sector POV is available only to Public Sector.",
     });
+  }
+  if (value.telecomPov && value.legacyPath !== "/industries/telecoms") {
+    context.addIssue({ code: "custom", path: ["telecomPov"], message: "Telecom POV belongs only to Telecoms." });
   }
   const sourceTrail = new Set(value.sources.map((source) => source.url));
   if (value.bankingPov) {
@@ -1669,6 +1674,9 @@ function publishRuleIssues(kind: CmsDocumentKind, value: CmsContent): Publicatio
   }
   if (kind === "industry") {
     const industry = value as IndustryContent;
+    if (industry.telecomPov?.reviewBlockers.length) {
+      add("TELECOM_REVIEW_BLOCKERS", "content.telecomPov.reviewBlockers", "Telecom review blockers must be resolved before publication.");
+    }
     if (industry.pressures.length < 3) add("PRESSURES_REQUIRED", "content.pressures", "At least three operating pressures are required.");
     if (industry.capabilities.length < 2) add("CAPABILITIES_REQUIRED", "content.capabilities", "At least two build capabilities are required.");
     if (!industry.imageAlt) add("HERO_ALT_TEXT_REQUIRED", "content.imageAlt", "Industry hero imagery requires alternative text.");

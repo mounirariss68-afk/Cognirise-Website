@@ -1,0 +1,1461 @@
+{
+  "seo": {
+    "noIndex": false,
+    "title": "Telecom enterprise workflows | Cognirise",
+    "description": "Explore bounded telecom workflows across customer, commercial and operational teams, with evidence, accountable authority and network ownership."
+  },
+  "slug": "telecoms",
+  "title": "Telecoms — enterprise around the network",
+  "content": {
+    "dek": "Connect customer, commercial and operational work through bounded, evidence-tested workflows. Keep network control with your NEP and NOC, and give every consequential action a clear owner.",
+    "gcc": "Gulf operators combine sovereign-cloud investment, national AI programmes and advanced mobile infrastructure. Data residency and operating ownership remain the binding constraints.",
+    "myth": {
+      "claim": "“One master agent can run the enterprise.”",
+      "verdict": "No. Domain-limited orchestration coordinates approved work; business owners, network teams and partners retain their responsibilities."
+    },
+    "name": "Telecoms",
+    "uses": [
+      {
+        "use": "Incident triage",
+        "boundary": "Named domain and human override",
+        "evidence": "Company-reported operational results"
+      },
+      {
+        "use": "Agent assistance",
+        "boundary": "Resolution and repeat-contact measures",
+        "evidence": "Company and vendor metrics"
+      },
+      {
+        "use": "Energy optimisation",
+        "boundary": "Network quality guardrails",
+        "evidence": "Controlled trials"
+      }
+    ],
+    "image": "/images/cognirise/industries/pulse-industry-telecoms.jpg",
+    "order": 2,
+    "accent": "closed loop",
+    "thesis": "Transform the enterprise around the network.",
+    "service": {
+      "label": "Digital & AI Workforce",
+      "href": "/what-we-do/digital-ai-workforce",
+      "firstMove": "Choose one workflow worth proving."
+    },
+    "sources": [
+      {
+        "url": "https://www.ericsson.com/en/news/2025/6/tdc-net-and-ericsson-achieves-industry-first-certification-from-tm-forum-of-level-4-autonomy",
+        "kind": "Company-reported",
+        "label": "Autonomous-network certification",
+        "publisher": "Ericsson / TM Forum"
+      },
+      {
+        "url": "https://www.ericsson.com/en/press-releases/3/2025/vodafone-uk-and-ericsson-trial-ai-solutions-for-improved-5g-energy-efficiency",
+        "kind": "Vendor claim",
+        "label": "5G energy-efficiency trial",
+        "publisher": "Ericsson and Vodafone UK"
+      },
+      {
+        "url": "https://news.virginmediao2.co.uk/ai-helps-virgin-media-o2-avoid-over-one-million-call-transfers-as-it-saves-customers-more-than-400000-hours-of-time-on-the-phone/",
+        "kind": "Company-reported",
+        "label": "Customer-service operating result",
+        "publisher": "Virgin Media O2"
+      }
+    ],
+    "variant": "network",
+    "imageAlt": "A cinematic telecommunications network carrying luminous signals across an operating landscape.",
+    "reversal": {
+      "title": "More autonomy is not the objective.",
+      "body": "Exposure sets the ceiling and evidence earns authority within it. Choose the least authority that achieves the intended outcome with accountable intervention and recovery."
+    },
+    "pressures": [
+      {
+        "title": "Margin needs resolved work",
+        "body": "Reducing service effort matters only when resolution quality, repeat contact and customer harm remain visible."
+      },
+      {
+        "title": "Fragmented context slows decisions",
+        "body": "Connect permitted records across existing systems without making a new data lake a prerequisite."
+      },
+      {
+        "title": "Integration is not authority",
+        "body": "An available API is not permission to issue credits, suspend a SIM, change tariffs or alter infrastructure."
+      }
+    ],
+    "shortName": "Telecoms",
+    "legacyPath": "/industries/telecoms",
+    "relatedIds": [],
+    "reviewDate": "2027-03-06",
+    "visibility": "public",
+    "heroMediaId": "216128b4-dca4-43f5-b326-dbdcd1850a99",
+    "opportunity": "The enterprise around the network contains recurring decisions across service, sales, billing, assurance and internal operations. Start with a measurable workflow, not a promise of universal autonomy.",
+    "capabilities": [
+      {
+        "body": "Build observe-decide-act loops for named incident, assurance and optimisation domains.",
+        "title": "Agentic network operations"
+      },
+      {
+        "body": "Equip teams with connected customer, network and policy context for higher-quality resolution.",
+        "title": "Service intelligence"
+      },
+      {
+        "body": "Design model, data and orchestration layers around residency, resilience and unit economics.",
+        "title": "Sovereign AI infrastructure"
+      }
+    ],
+    "selectedWork": {
+      "description": "Bring the workflow, its current baseline and the people accountable for decisions. Agree a bounded evidence plan before expanding authority."
+    },
+    "schemaVersion": 1,
+    "verificationDate": "2026-09-06",
+    "telecomPov": {
+      "version": 1,
+      "note": "Figures are sourced outcomes reported at other operators or illustrative KPI targets. They are not Cognirise delivery results or guarantees; applicability depends on operator context.",
+      "valuePools": [
+        {
+          "title": "Revenue integrity",
+          "body": "Reconcile leakage, investigate fraud and separate recovery from overlapping savings.",
+          "metricIds": [
+            "leakage"
+          ]
+        },
+        {
+          "title": "Service & customer experience",
+          "body": "Improve resolved service, not containment or call avoidance alone.",
+          "metricIds": [
+            "cost-contact"
+          ]
+        },
+        {
+          "title": "Growth — marketing & CVM",
+          "body": "Test relevant offers and retention with consent and fair treatment.",
+          "metricIds": [
+            "churn"
+          ]
+        },
+        {
+          "title": "Roaming & wholesale",
+          "body": "Improve settlements and partner decisions while preserving network ownership.",
+          "metricIds": [
+            "settlement-time"
+          ]
+        },
+        {
+          "title": "Billing & disputes",
+          "body": "Explain charges and prepare corrections within financial and change-control limits.",
+          "metricIds": [
+            "dispute-resolution"
+          ]
+        },
+        {
+          "title": "Sales acceleration",
+          "body": "Prepare timely, qualified commercial handoffs rather than optimise low-quality lead volume.",
+          "metricIds": [
+            "sales-cycle"
+          ]
+        }
+      ],
+      "candidates": [
+        {
+          "id": "ra-fraud",
+          "title": "RA & Fraud",
+          "valueHypothesis": "Investigate whether revenue assurance can improve its defined KPI without transferring cost or harm elsewhere.",
+          "readiness": "Unknown until operator data access, quality, consent and baseline are assessed. Position is an illustrative hypothesis, not readiness evidence.",
+          "dependencies": "Read-only usage and telemetry, billing ledgers, contracts and partner settlements; approved cases handed to accountable operational teams.",
+          "authority": "Action-specific permissions limit reach and reversibility. Obtain owner approval for consequential changes; retain evidence, intervention controls and a tested recovery path.",
+          "validation": "Validate first: agree eligible population, comparison period, stop conditions and owner. Test against the operator baseline in a bounded pilot.",
+          "valuePosition": 82,
+          "feasibilityPosition": 68
+        },
+        {
+          "id": "customer-service",
+          "title": "Customer Service",
+          "valueHypothesis": "Investigate whether customer service can improve its defined KPI without transferring cost or harm elsewhere.",
+          "readiness": "Unknown until operator data access, quality, consent and baseline are assessed. Position is an illustrative hypothesis, not readiness evidence.",
+          "dependencies": "Permissioned CRM, product catalogue, billing, customer channels and internal case systems; minimum necessary records only.",
+          "authority": "Action-specific permissions limit reach and reversibility. Obtain owner approval for consequential changes; retain evidence, intervention controls and a tested recovery path.",
+          "validation": "Validate first: agree eligible population, comparison period, stop conditions and owner. Test against the operator baseline in a bounded pilot.",
+          "valuePosition": 75,
+          "feasibilityPosition": 80
+        },
+        {
+          "id": "churn-cvm",
+          "title": "Churn & CVM",
+          "valueHypothesis": "Investigate whether marketing & cvm can improve its defined KPI without transferring cost or harm elsewhere.",
+          "readiness": "Unknown until operator data access, quality, consent and baseline are assessed. Position is an illustrative hypothesis, not readiness evidence.",
+          "dependencies": "Permissioned CRM, product catalogue, billing, customer channels and internal case systems; minimum necessary records only.",
+          "authority": "Tariff and offer changes need commercial approval, consent, fairness and applicable consumer-protection review. No unrestricted repricing.",
+          "validation": "Validate first: agree eligible population, comparison period, stop conditions and owner. Test against the operator baseline in a bounded pilot.",
+          "valuePosition": 72,
+          "feasibilityPosition": 44
+        },
+        {
+          "id": "billing",
+          "title": "Billing",
+          "valueHypothesis": "Investigate whether billing can improve its defined KPI without transferring cost or harm elsewhere.",
+          "readiness": "Unknown until operator data access, quality, consent and baseline are assessed. Position is an illustrative hypothesis, not readiness evidence.",
+          "dependencies": "Permissioned CRM, product catalogue, billing, customer channels and internal case systems; minimum necessary records only.",
+          "authority": "Credits and dispute settlements require financial limits and named approval. Rating-engine patches require tested change control and rollback; never silently change charging.",
+          "validation": "Validate first: agree eligible population, comparison period, stop conditions and owner. Test against the operator baseline in a bounded pilot.",
+          "valuePosition": 67,
+          "feasibilityPosition": 70
+        },
+        {
+          "id": "data-platform",
+          "title": "Data Platform",
+          "valueHypothesis": "Investigate whether data platforms can improve its defined KPI without transferring cost or harm elsewhere.",
+          "readiness": "Unknown until operator data access, quality, consent and baseline are assessed. Position is an illustrative hypothesis, not readiness evidence.",
+          "dependencies": "Existing data platforms, identity, metadata, ITSM, API gateway and deployment tooling; no new unified lake required.",
+          "authority": "Action-specific permissions limit reach and reversibility. Obtain owner approval for consequential changes; retain evidence, intervention controls and a tested recovery path.",
+          "validation": "Validate first: agree eligible population, comparison period, stop conditions and owner. Test against the operator baseline in a bounded pilot.",
+          "valuePosition": 58,
+          "feasibilityPosition": 25
+        },
+        {
+          "id": "roaming-wholesale",
+          "title": "Roaming & Wholesale",
+          "valueHypothesis": "Investigate whether roaming can improve its defined KPI without transferring cost or harm elsewhere.",
+          "readiness": "Unknown until operator data access, quality, consent and baseline are assessed. Position is an illustrative hypothesis, not readiness evidence.",
+          "dependencies": "Read-only usage and telemetry, billing ledgers, contracts and partner settlements; approved cases handed to accountable operational teams.",
+          "authority": "Partner steering is an authorised NEP/NOC handoff. Fraud restrictions and settlements require owner approval and a documented reversal path.",
+          "validation": "Validate first: agree eligible population, comparison period, stop conditions and owner. Test against the operator baseline in a bounded pilot.",
+          "valuePosition": 53,
+          "feasibilityPosition": 38
+        },
+        {
+          "id": "back-office",
+          "title": "Back Office",
+          "valueHypothesis": "Investigate whether back office can improve its defined KPI without transferring cost or harm elsewhere.",
+          "readiness": "Unknown until operator data access, quality, consent and baseline are assessed. Position is an illustrative hypothesis, not readiness evidence.",
+          "dependencies": "Permissioned CRM, product catalogue, billing, customer channels and internal case systems; minimum necessary records only.",
+          "authority": "Action-specific permissions limit reach and reversibility. Obtain owner approval for consequential changes; retain evidence, intervention controls and a tested recovery path.",
+          "validation": "Validate first: agree eligible population, comparison period, stop conditions and owner. Test against the operator baseline in a bounded pilot.",
+          "valuePosition": 35,
+          "feasibilityPosition": 76
+        },
+        {
+          "id": "bi-reporting",
+          "title": "BI Reporting",
+          "valueHypothesis": "Investigate whether business intelligence can improve its defined KPI without transferring cost or harm elsewhere.",
+          "readiness": "Unknown until operator data access, quality, consent and baseline are assessed. Position is an illustrative hypothesis, not readiness evidence.",
+          "dependencies": "Existing data platforms, identity, metadata, ITSM, API gateway and deployment tooling; no new unified lake required.",
+          "authority": "Action-specific permissions limit reach and reversibility. Obtain owner approval for consequential changes; retain evidence, intervention controls and a tested recovery path.",
+          "validation": "Validate first: agree eligible population, comparison period, stop conditions and owner. Test against the operator baseline in a bounded pilot.",
+          "valuePosition": 26,
+          "feasibilityPosition": 84
+        }
+      ],
+      "departments": [
+        {
+          "id": "customer-service",
+          "title": "Customer Service",
+          "domain": "Business",
+          "challenge": "High call volumes, long waits, and repetitive queries strain contact centres and inflate cost per contact.",
+          "roles": [
+            {
+              "title": "Self-Service",
+              "body": "Illustrative support pattern: Resolves routine voice & chat inquiries . Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Triage & Routing",
+              "body": "Illustrative support pattern: Correlates tickets with usage and history. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Agent-Assist",
+              "body": "Illustrative support pattern: Real-time next-best-action for human reps. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Proactive Care",
+              "body": "Illustrative support pattern: Detects at-risk accounts and intervenes. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Quality Monitoring",
+              "body": "Reviews authorised interaction samples against approved quality criteria; coverage and accuracy are validated."
+            },
+            {
+              "title": "Complaint Resolution",
+              "body": "Illustrative support pattern: Owns the end-to-end complaint lifecycle. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Voice-of-Customer",
+              "body": "Illustrative support pattern: Turns feedback into product and CX signals. Any write action remains subject to this department's controls."
+            }
+          ],
+          "systems": "Permissioned CRM, product catalogue, billing, customer channels and internal case systems; minimum necessary records only.",
+          "actions": "Assemble evidence and propose the next step across customer service workflows. Execute only explicitly authorised, tested actions; escalate exceptions to the named owner.",
+          "controls": "Action-specific permissions limit reach and reversibility. Obtain owner approval for consequential changes; retain evidence, intervention controls and a tested recovery path.",
+          "metricIds": [
+            "cost-contact"
+          ]
+        },
+        {
+          "id": "sales",
+          "title": "Sales",
+          "domain": "Business",
+          "challenge": "Manual lead qualification, slow quotes, and missed cross-sell opportunities cap revenue growth.",
+          "roles": [
+            {
+              "title": "Lead Qualification",
+              "body": "Illustrative support pattern: Engages and scores inbound leads on intent. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Quote & Deal",
+              "body": "Illustrative support pattern: Generates complex B2B/B2C quotes to rules. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Cross-sell / Upsell",
+              "body": "Illustrative support pattern: Surfaces next-best-offer in real time. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "CRM Enrichment",
+              "body": "Illustrative support pattern: Keeps records complete and current. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Contract Renewal",
+              "body": "Illustrative support pattern: Drives timely B2B renewals and upsell. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Channel Partner",
+              "body": "Illustrative support pattern: Enables and scores indirect sales partners. Any write action remains subject to this department's controls."
+            }
+          ],
+          "systems": "Permissioned CRM, product catalogue, billing, customer channels and internal case systems; minimum necessary records only.",
+          "actions": "Assemble evidence and propose the next step across sales workflows. Execute only explicitly authorised, tested actions; escalate exceptions to the named owner.",
+          "controls": "Action-specific permissions limit reach and reversibility. Obtain owner approval for consequential changes; retain evidence, intervention controls and a tested recovery path.",
+          "metricIds": [
+            "sales-cycle"
+          ]
+        },
+        {
+          "id": "marketing-cvm",
+          "title": "Marketing & CVM",
+          "domain": "Business",
+          "challenge": "Generic campaigns, suboptimal pricing, and reactive churn management limit marketing ROI.",
+          "roles": [
+            {
+              "title": "Segmentation",
+              "body": "Illustrative support pattern: Builds behaviour-based micro-cohorts. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Dynamic Pricing",
+              "body": "Proposes permitted tariff and offer changes for commercial and regulatory review."
+            },
+            {
+              "title": "Content Automation",
+              "body": "Illustrative support pattern: Generates campaign creative at scale. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Churn-Prevention",
+              "body": "Illustrative support pattern: Triggers win-back journeys early. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Offer Optimisation",
+              "body": "Illustrative support pattern: Runs multi-armed bandit experiments. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Next-Best-Action",
+              "body": "Illustrative support pattern: Chooses the best action per subscriber. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Loyalty & Rewards",
+              "body": "Illustrative support pattern: Runs points, tiers and win-back rewards. Any write action remains subject to this department's controls."
+            }
+          ],
+          "systems": "Permissioned CRM, product catalogue, billing, customer channels and internal case systems; minimum necessary records only.",
+          "actions": "Assemble evidence and propose the next step across marketing & cvm workflows. Execute only explicitly authorised, tested actions; escalate exceptions to the named owner.",
+          "controls": "Tariff and offer changes need commercial approval, consent, fairness and applicable consumer-protection review. No unrestricted repricing.",
+          "metricIds": [
+            "churn"
+          ]
+        },
+        {
+          "id": "billing",
+          "title": "Billing",
+          "domain": "Business",
+          "challenge": "Billing disputes, revenue leakage, and compliance reporting consume large teams.",
+          "roles": [
+            {
+              "title": "Dispute Resolution",
+              "body": "Assembles dispute evidence and proposes a settlement within approval policy."
+            },
+            {
+              "title": "Leakage Detection",
+              "body": "Illustrative support pattern: Flags rating and charging errors. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Compliance Reporting",
+              "body": "Illustrative support pattern: Drafts regulatory reports on schedule. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Self-Healing Billing",
+              "body": "Identifies billing faults and prepares a tested correction for change approval."
+            },
+            {
+              "title": "Invoice Explanation",
+              "body": "Illustrative support pattern: Answers bill questions in plain language. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Payment Optimisation",
+              "body": "Illustrative support pattern: Smooths payments and cuts failed charges. Any write action remains subject to this department's controls."
+            }
+          ],
+          "systems": "Permissioned CRM, product catalogue, billing, customer channels and internal case systems; minimum necessary records only.",
+          "actions": "Assemble evidence and propose the next step across billing workflows. Execute only explicitly authorised, tested actions; escalate exceptions to the named owner.",
+          "controls": "Credits and dispute settlements require financial limits and named approval. Rating-engine patches require tested change control and rollback; never silently change charging.",
+          "metricIds": [
+            "dispute-resolution"
+          ]
+        },
+        {
+          "id": "back-office",
+          "title": "Back Office",
+          "domain": "Business",
+          "challenge": "Repetitive administrative work drains employee time across internal functions.",
+          "roles": [
+            {
+              "title": "HR & IT Support",
+              "body": "Illustrative support pattern: Answers policy queries, closes tickets. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Finance Ops",
+              "body": "Illustrative support pattern: Reconciles invoices and expenses. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Legal Drafting",
+              "body": "Illustrative support pattern: Drafts and reviews contract clauses. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Workflow Orchestration",
+              "body": "Illustrative support pattern: Connects siloed internal systems. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Procurement",
+              "body": "Illustrative support pattern: Automates sourcing and vendor onboarding. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Knowledge Management",
+              "body": "Illustrative support pattern: Keeps internal policies current. Any write action remains subject to this department's controls."
+            }
+          ],
+          "systems": "Permissioned CRM, product catalogue, billing, customer channels and internal case systems; minimum necessary records only.",
+          "actions": "Assemble evidence and propose the next step across back office workflows. Execute only explicitly authorised, tested actions; escalate exceptions to the named owner.",
+          "controls": "Action-specific permissions limit reach and reversibility. Obtain owner approval for consequential changes; retain evidence, intervention controls and a tested recovery path.",
+          "metricIds": [
+            "data-entry"
+          ]
+        },
+        {
+          "id": "digital-self-care",
+          "title": "Digital & Self-Care",
+          "domain": "Business",
+          "challenge": "Customers want to buy and self-serve digitally, but fragmented app and web journeys push them back to costly assisted channels.",
+          "roles": [
+            {
+              "title": "Conversational Commerce",
+              "body": "Illustrative support pattern: Sells and upgrades in chat and app. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Self-Care Journey",
+              "body": "Illustrative support pattern: Guides subscribers through app self-service. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Digital Onboarding",
+              "body": "Illustrative support pattern: Activates and eSIM-provisions new users. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "App Personalisation",
+              "body": "Illustrative support pattern: Tailors the app home and offers per user. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Channel Deflection",
+              "body": "Illustrative support pattern: Shifts calls to digital self-serve. Any write action remains subject to this department's controls."
+            }
+          ],
+          "systems": "Permissioned CRM, product catalogue, billing, customer channels and internal case systems; minimum necessary records only.",
+          "actions": "Assemble evidence and propose the next step across digital & self-care workflows. Execute only explicitly authorised, tested actions; escalate exceptions to the named owner.",
+          "controls": "Action-specific permissions limit reach and reversibility. Obtain owner approval for consequential changes; retain evidence, intervention controls and a tested recovery path.",
+          "metricIds": [
+            "digital-sales"
+          ]
+        },
+        {
+          "id": "revenue-assurance",
+          "title": "Revenue Assurance",
+          "domain": "Operations",
+          "challenge": "Unbilled usage, rating errors and partner disputes can hide leakage until reconciliation.",
+          "roles": [
+            {
+              "title": "Anomaly Detection",
+              "body": "Illustrative support pattern: within approved scope scans for leakage signals. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Reconciliation",
+              "body": "Illustrative support pattern: Matches switch, billing and usage records. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Margin Assurance",
+              "body": "Illustrative support pattern: Protects B2B and wholesale margins. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Offer Assurance",
+              "body": "Illustrative support pattern: Validates new tariffs before launch. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Usage Metering",
+              "body": "Illustrative support pattern: Validates mediation and usage records. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Partner Settlement",
+              "body": "Illustrative support pattern: Assures inbound and outbound partner charges. Any write action remains subject to this department's controls."
+            }
+          ],
+          "systems": "Read-only usage and telemetry, billing ledgers, contracts and partner settlements; approved cases handed to accountable operational teams.",
+          "actions": "Assemble evidence and propose the next step across revenue assurance workflows. Execute only explicitly authorised, tested actions; escalate exceptions to the named owner.",
+          "controls": "Action-specific permissions limit reach and reversibility. Obtain owner approval for consequential changes; retain evidence, intervention controls and a tested recovery path.",
+          "metricIds": [
+            "leakage"
+          ]
+        },
+        {
+          "id": "fraud-management",
+          "title": "Fraud Management",
+          "domain": "Operations",
+          "challenge": "Fraud patterns cross voice, data, roaming and identity records; weak evidence and false positives can harm customers.",
+          "roles": [
+            {
+              "title": "Real-Time Scoring",
+              "body": "Illustrative support pattern: Scores voice, data and roaming traffic. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Investigation",
+              "body": "Illustrative support pattern: Correlates alerts and builds cases. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Response",
+              "body": "Prepares a response and hands network restrictions to authorised fraud/NOC owners."
+            },
+            {
+              "title": "IRSF & SIM-Box",
+              "body": "Illustrative support pattern: Specialised interconnect-fraud coverage. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Identity Fraud",
+              "body": "Illustrative support pattern: Detects subscription and identity abuse. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Wangiri & Robocall",
+              "body": "Flags suspicious patterns and proposes restrictions to authorised owners."
+            },
+            {
+              "title": "Account Takeover",
+              "body": "Illustrative support pattern: Detects credential and SIM-swap abuse. Any write action remains subject to this department's controls."
+            }
+          ],
+          "systems": "Read-only usage and telemetry, billing ledgers, contracts and partner settlements; approved cases handed to accountable operational teams.",
+          "actions": "Assemble evidence and propose the next step across fraud management workflows. Execute only explicitly authorised, tested actions; escalate exceptions to the named owner.",
+          "controls": "SIM suspension, traffic blocking and route changes require authorised fraud/NOC handoff, subscriber impact checks, intervention and recovery. No millisecond blocking promise.",
+          "metricIds": [
+            "fraud-loss"
+          ]
+        },
+        {
+          "id": "customer-experience",
+          "title": "Customer Experience",
+          "domain": "Operations",
+          "challenge": "Subscribers expect proactive, seamless experiences, but legacy silos create inconsistent service.",
+          "roles": [
+            {
+              "title": "360° View",
+              "body": "Illustrative support pattern: Unifies CRM, billing, usage and QoS. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Proactive Experience",
+              "body": "Illustrative support pattern: Detects degradation pre-complaint. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Journey Orchestration",
+              "body": "Illustrative support pattern: Personalises lifecycle journeys. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Sentiment",
+              "body": "Illustrative support pattern: Scans channels for emerging issues. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Effort Reduction",
+              "body": "Illustrative support pattern: Removes friction across journeys. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "NPS Recovery",
+              "body": "Prepares an accountable follow-up for detractors with consent and escalation."
+            }
+          ],
+          "systems": "Read-only usage and telemetry, billing ledgers, contracts and partner settlements; approved cases handed to accountable operational teams.",
+          "actions": "Assemble evidence and propose the next step across customer experience workflows. Execute only explicitly authorised, tested actions; escalate exceptions to the named owner.",
+          "controls": "Action-specific permissions limit reach and reversibility. Obtain owner approval for consequential changes; retain evidence, intervention controls and a tested recovery path.",
+          "metricIds": [
+            "nps"
+          ]
+        },
+        {
+          "id": "roaming",
+          "title": "Roaming",
+          "domain": "Operations",
+          "challenge": "Roaming means complex settlements, fraud risk, and cross-border experience challenges.",
+          "roles": [
+            {
+              "title": "Roaming Fraud",
+              "body": "Illustrative support pattern: Monitors inbound/outbound roamer risk. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Settlement",
+              "body": "Illustrative support pattern: Reconciles hundreds of agreements. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Partner Analytics",
+              "body": "Illustrative support pattern: Scores partner quality and cost. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Traveller Experience",
+              "body": "Illustrative support pattern: Nudges local packs and support. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Steering-of-Roaming",
+              "body": "Proposes partner steering under contract and service-quality constraints for NEP/NOC approval."
+            },
+            {
+              "title": "Roaming Deal",
+              "body": "Illustrative support pattern: Optimises wholesale roaming agreements. Any write action remains subject to this department's controls."
+            }
+          ],
+          "systems": "Read-only usage and telemetry, billing ledgers, contracts and partner settlements; approved cases handed to accountable operational teams.",
+          "actions": "Assemble evidence and propose the next step across roaming workflows. Execute only explicitly authorised, tested actions; escalate exceptions to the named owner.",
+          "controls": "Partner steering is an authorised NEP/NOC handoff. Fraud restrictions and settlements require owner approval and a documented reversal path.",
+          "metricIds": [
+            "settlement-time"
+          ]
+        },
+        {
+          "id": "wholesale-interconnect",
+          "title": "Wholesale & Interconnect",
+          "domain": "Operations",
+          "challenge": "Wholesale involves high-volume exchanges, complex pricing, margin pressure and partner fraud.",
+          "roles": [
+            {
+              "title": "Interconnect Billing",
+              "body": "Illustrative support pattern: Validates usage against contracts. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Route Optimisation",
+              "body": "Illustrative support pattern: Minimises interconnect cost. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Traffic-Pumping",
+              "body": "Illustrative support pattern: Detects bypass and pumping fraud. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Settlement",
+              "body": "Illustrative support pattern: Automates multi-partner settlements. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Least-Cost Routing",
+              "body": "Compares routing costs and recommends changes to NEP/NOC; does not control routes."
+            },
+            {
+              "title": "Rate Management",
+              "body": "Illustrative support pattern: Keeps rate cards and deals current. Any write action remains subject to this department's controls."
+            }
+          ],
+          "systems": "Read-only usage and telemetry, billing ledgers, contracts and partner settlements; approved cases handed to accountable operational teams.",
+          "actions": "Assemble evidence and propose the next step across wholesale & interconnect workflows. Execute only explicitly authorised, tested actions; escalate exceptions to the named owner.",
+          "controls": "Optimise recommendations, not network routing. NEP/NOC owners authorise route changes; settlements remain subject to contract and finance approval.",
+          "metricIds": [
+            "wholesale-disputes"
+          ]
+        },
+        {
+          "id": "collections-credit-risk",
+          "title": "Collections & Credit Risk",
+          "domain": "Operations",
+          "challenge": "Rising bad debt and blunt, one-size-fits-all dunning erode margin and frustrate otherwise good customers.",
+          "roles": [
+            {
+              "title": "Credit Scoring",
+              "body": "Illustrative support pattern: Scores applicants and sets limits in real time. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Dunning",
+              "body": "Illustrative support pattern: Runs adaptive payment-reminder journeys. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Payment Recovery",
+              "body": "Illustrative support pattern: Negotiates and recovers overdue balances. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Bad-Debt Prediction",
+              "body": "Illustrative support pattern: Flags accounts likely to default early. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Collections Compliance",
+              "body": "Illustrative support pattern: Keeps recovery within regulatory limits. Any write action remains subject to this department's controls."
+            }
+          ],
+          "systems": "Read-only usage and telemetry, billing ledgers, contracts and partner settlements; approved cases handed to accountable operational teams.",
+          "actions": "Assemble evidence and propose the next step across collections & credit risk workflows. Execute only explicitly authorised, tested actions; escalate exceptions to the named owner.",
+          "controls": "Credit and collections decisions require approved policy, fairness checks, hardship routes and accountable review. No independent adverse credit decision.",
+          "metricIds": [
+            "bad-debt"
+          ]
+        },
+        {
+          "id": "data-platforms",
+          "title": "Data Platforms",
+          "domain": "Foundations",
+          "challenge": "Operators generate petabytes daily, but data stays siloed, unstructured and underutilised.",
+          "roles": [
+            {
+              "title": "Ingestion",
+              "body": "Illustrative support pattern: Streams 50+ batch and real-time sources. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Semantic Modelling",
+              "body": "Illustrative support pattern: Applies TM Forum ontologies. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Data Quality",
+              "body": "Illustrative support pattern: Profiles and repairs data within approved scope. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Feature Store",
+              "body": "Illustrative support pattern: Serves ML-ready features to every agent. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "NL Analytics",
+              "body": "Illustrative support pattern: Translates plain English to SQL. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Streaming Pipeline",
+              "body": "Illustrative support pattern: Manages real-time event streams. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Data Contract",
+              "body": "Illustrative support pattern: Enforces schemas and data contracts. Any write action remains subject to this department's controls."
+            }
+          ],
+          "systems": "Existing data platforms, identity, metadata, ITSM, API gateway and deployment tooling; no new unified lake required.",
+          "actions": "Assemble evidence and propose the next step across data platforms workflows. Execute only explicitly authorised, tested actions; escalate exceptions to the named owner.",
+          "controls": "Action-specific permissions limit reach and reversibility. Obtain owner approval for consequential changes; retain evidence, intervention controls and a tested recovery path.",
+          "metricIds": [
+            "insight-time"
+          ]
+        },
+        {
+          "id": "mdm-cdp",
+          "title": "MDM & CDP",
+          "domain": "Foundations",
+          "challenge": "Fragmented identities across CRM, billing and marketing create inconsistent experiences and missed cross-sell.",
+          "roles": [
+            {
+              "title": "Identity Resolution",
+              "body": "Illustrative support pattern: Merges records across every system. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Golden Record",
+              "body": "Illustrative support pattern: Maintains the single customer view. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Stewardship",
+              "body": "Illustrative support pattern: Automates data-quality remediation. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Activation",
+              "body": "Illustrative support pattern: Pushes enriched segments to channels. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Consent",
+              "body": "Illustrative support pattern: Manages privacy and consent gaps. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Household Graph",
+              "body": "Illustrative support pattern: Links accounts into household graphs. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Suppression",
+              "body": "Illustrative support pattern: Manages do-not-contact and preferences. Any write action remains subject to this department's controls."
+            }
+          ],
+          "systems": "Existing data platforms, identity, metadata, ITSM, API gateway and deployment tooling; no new unified lake required.",
+          "actions": "Assemble evidence and propose the next step across mdm & cdp workflows. Execute only explicitly authorised, tested actions; escalate exceptions to the named owner.",
+          "controls": "Action-specific permissions limit reach and reversibility. Obtain owner approval for consequential changes; retain evidence, intervention controls and a tested recovery path.",
+          "metricIds": [
+            "data-quality"
+          ]
+        },
+        {
+          "id": "it-operations",
+          "title": "IT Operations",
+          "domain": "Foundations",
+          "challenge": "The IT systems behind BSS/OSS are complex, distributed, and outage-prone.",
+          "roles": [
+            {
+              "title": "Incident Detection",
+              "body": "Illustrative support pattern: Predicts failures before impact. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Root-Cause",
+              "body": "Illustrative support pattern: Correlates across BSS/OSS domains. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Remediation",
+              "body": "Prepares approved IT runbooks and hands network changes to NEP/NOC."
+            },
+            {
+              "title": "Change Management",
+              "body": "Illustrative support pattern: Automates safe changes. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Service Desk",
+              "body": "Illustrative support pattern: Resolves and closes IT tickets. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Capacity Planning",
+              "body": "Illustrative support pattern: Forecasts and right-sizes capacity. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Telemetry Correlation",
+              "body": "Illustrative support pattern: Correlates signals across systems. Any write action remains subject to this department's controls."
+            }
+          ],
+          "systems": "Existing data platforms, identity, metadata, ITSM, API gateway and deployment tooling; no new unified lake required.",
+          "actions": "Assemble evidence and propose the next step across it operations workflows. Execute only explicitly authorised, tested actions; escalate exceptions to the named owner.",
+          "controls": "Use approved IT runbooks only within a named change envelope. Network remediation stays with NEP/NOC; infrastructure changes require change approval and recovery rehearsal.",
+          "metricIds": [
+            "mttr"
+          ]
+        },
+        {
+          "id": "integration-architecture",
+          "title": "Integration & Architecture",
+          "domain": "Foundations",
+          "challenge": "Fragmented legacy interfaces and point-to-point dependencies slow safe change.",
+          "roles": [
+            {
+              "title": "API Orchestration",
+              "body": "Coordinates supported interfaces after access, specification and conformance review."
+            },
+            {
+              "title": "Legacy Adapter",
+              "body": "Illustrative support pattern: Wraps legacy systems in MCP. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Semantic Layer",
+              "body": "Illustrative support pattern: Maps the enterprise entity graph. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Modernisation",
+              "body": "Assesses modernisation options; no ODA certification or alignment is asserted."
+            },
+            {
+              "title": "Integration Monitor",
+              "body": "Checks approved integration health and raises traceable exceptions."
+            },
+            {
+              "title": "Event Mesh",
+              "body": "Illustrative support pattern: Routes events across the enterprise. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "API Governance",
+              "body": "Illustrative support pattern: Enforces API standards and versioning. Any write action remains subject to this department's controls."
+            }
+          ],
+          "systems": "Existing data platforms, identity, metadata, ITSM, API gateway and deployment tooling; no new unified lake required.",
+          "actions": "Assemble evidence and propose the next step across integration & architecture workflows. Execute only explicitly authorised, tested actions; escalate exceptions to the named owner.",
+          "controls": "Action-specific permissions limit reach and reversibility. Obtain owner approval for consequential changes; retain evidence, intervention controls and a tested recovery path.",
+          "metricIds": [
+            "integration-time"
+          ]
+        },
+        {
+          "id": "devops-platform",
+          "title": "DevOps & Platform",
+          "domain": "Foundations",
+          "challenge": "Slow releases, manual deployments and inconsistent environments delay agent rollouts.",
+          "roles": [
+            {
+              "title": "CI/CD",
+              "body": "Illustrative support pattern: Runs build, test and deploy pipelines. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "IaC Provisioning",
+              "body": "Illustrative support pattern: Provisions infrastructure as code. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Observability",
+              "body": "Illustrative support pattern: Instruments metrics, logs and traces. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Security Scanning",
+              "body": "Illustrative support pattern: Scans for CVEs and misconfig. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Release",
+              "body": "Illustrative support pattern: Manages flags and automated rollback. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "FinOps",
+              "body": "Illustrative support pattern: Right-sizes cloud spend and cost. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Resilience Testing",
+              "body": "Illustrative support pattern: Tests failure and hardens services. Any write action remains subject to this department's controls."
+            }
+          ],
+          "systems": "Existing data platforms, identity, metadata, ITSM, API gateway and deployment tooling; no new unified lake required.",
+          "actions": "Assemble evidence and propose the next step across devops & platform workflows. Execute only explicitly authorised, tested actions; escalate exceptions to the named owner.",
+          "controls": "Infrastructure and releases require environment-scoped credentials, tested changes, owner approval and a rollback checkpoint.",
+          "metricIds": [
+            "release-cycle"
+          ]
+        },
+        {
+          "id": "business-intelligence",
+          "title": "Business Intelligence",
+          "domain": "Foundations",
+          "challenge": "Executives struggle to access timely insight through fragmented tools and manual prep.",
+          "roles": [
+            {
+              "title": "Reporting",
+              "body": "Illustrative support pattern: Generates executive reports within approved scope. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "NL Query",
+              "body": "Illustrative support pattern: Answers plain-English questions. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Anomaly Alert",
+              "body": "Illustrative support pattern: Flags KPI deviations. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Forecasting",
+              "body": "Illustrative support pattern: Produces predictive forecasts. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Dashboard",
+              "body": "Illustrative support pattern: Builds self-service dashboards. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Data Storytelling",
+              "body": "Illustrative support pattern: Turns analysis into executive narratives. Any write action remains subject to this department's controls."
+            },
+            {
+              "title": "Metric Governance",
+              "body": "Illustrative support pattern: Maintains a single KPI source of truth. Any write action remains subject to this department's controls."
+            }
+          ],
+          "systems": "Existing data platforms, identity, metadata, ITSM, API gateway and deployment tooling; no new unified lake required.",
+          "actions": "Assemble evidence and propose the next step across business intelligence workflows. Execute only explicitly authorised, tested actions; escalate exceptions to the named owner.",
+          "controls": "Action-specific permissions limit reach and reversibility. Obtain owner approval for consequential changes; retain evidence, intervention controls and a tested recovery path.",
+          "metricIds": [
+            "report-time"
+          ]
+        }
+      ],
+      "architecture": {
+        "orchestration": "Domain-limited orchestration delegates named tasks with scoped identities, purpose-limited context and explicit handoffs. No omnipotent master agent or unrestricted shared memory.",
+        "domains": "Business, Operations and Foundations collaborate through approved evidence and action contracts. Selecting a department highlights its application path; this is a Telecom application view, not a replacement CogniOS model.",
+        "foundation": "Reuse permissioned OSS/BSS, CRM, billing, partner records and read-only telemetry. Integrate supported APIs, reviewed adapters and semantic mappings where appropriate; a new data lake is not required and orchestration is not model training.",
+        "execution": "Owner-authorised workflows enforce permissions, approvals, intervention, audit and recovery. NEP/NOC retains network control. Partner systems and platform capabilities retain their existing ownership."
+      },
+      "scenarios": [
+        {
+          "id": "billing-dispute-investigation",
+          "title": "Billing dispute investigation",
+          "departmentId": "billing",
+          "owner": "Billing process owner",
+          "boundary": "Credits and dispute settlements require financial limits and named approval. Rating-engine patches require tested change control and rollback; never silently change charging.",
+          "auditRecovery": "Record input provenance, proposed action, approver, executed change and verification. Stop on unexpected impact; restore the prior approved state or open a compensating case when reversal is not possible.",
+          "metricIds": [
+            "dispute-resolution"
+          ],
+          "stages": {
+            "detect": "A disputed invoice and customer explanation enter the billing case queue.",
+            "investigate": "Retrieve permitted billing records, check identity, freshness and contradictory evidence; request missing context rather than guessing.",
+            "propose": "Prepare a reasoned billing dispute investigation recommendation with alternatives, expected impact and the action-specific permission required.",
+            "approveExecute": "Credits and dispute settlements require financial limits and named approval. Rating-engine patches require tested change control and rollback; never silently change charging. Record approval before using the authorised execution interface; otherwise hand off without taking action.",
+            "verify": "Confirm the intended outcome, check customer and service impact, and compare the defined KPI with the agreed baseline. Close only with owner-accepted evidence."
+          }
+        },
+        {
+          "id": "qualified-sales-handoff",
+          "title": "Qualified sales handoff",
+          "departmentId": "sales",
+          "owner": "Sales process owner",
+          "boundary": "Action-specific permissions limit reach and reversibility. Obtain owner approval for consequential changes; retain evidence, intervention controls and a tested recovery path.",
+          "auditRecovery": "Record input provenance, proposed action, approver, executed change and verification. Stop on unexpected impact; restore the prior approved state or open a compensating case when reversal is not possible.",
+          "metricIds": [
+            "lead-meeting"
+          ],
+          "stages": {
+            "detect": "A prospective customer requests a product conversation through an approved channel.",
+            "investigate": "Retrieve permitted sales records, check identity, freshness and contradictory evidence; request missing context rather than guessing.",
+            "propose": "Prepare a reasoned qualified sales handoff recommendation with alternatives, expected impact and the action-specific permission required.",
+            "approveExecute": "Action-specific permissions limit reach and reversibility. Obtain owner approval for consequential changes; retain evidence, intervention controls and a tested recovery path. Record approval before using the authorised execution interface; otherwise hand off without taking action.",
+            "verify": "Confirm the intended outcome, check customer and service impact, and compare the defined KPI with the agreed baseline. Close only with owner-accepted evidence."
+          }
+        },
+        {
+          "id": "relevant-recharge-offer",
+          "title": "Relevant recharge offer",
+          "departmentId": "marketing-cvm",
+          "owner": "Marketing & CVM process owner",
+          "boundary": "Tariff and offer changes need commercial approval, consent, fairness and applicable consumer-protection review. No unrestricted repricing.",
+          "auditRecovery": "Record input provenance, proposed action, approver, executed change and verification. Stop on unexpected impact; restore the prior approved state or open a compensating case when reversal is not possible.",
+          "metricIds": [
+            "offer-conversion"
+          ],
+          "stages": {
+            "detect": "An opted-in subscriber becomes eligible for a reviewed recharge offer.",
+            "investigate": "Retrieve permitted marketing & cvm records, check identity, freshness and contradictory evidence; request missing context rather than guessing.",
+            "propose": "Prepare a reasoned relevant recharge offer recommendation with alternatives, expected impact and the action-specific permission required.",
+            "approveExecute": "Tariff and offer changes need commercial approval, consent, fairness and applicable consumer-protection review. No unrestricted repricing. Record approval before using the authorised execution interface; otherwise hand off without taking action.",
+            "verify": "Confirm the intended outcome, check customer and service impact, and compare the defined KPI with the agreed baseline. Close only with owner-accepted evidence."
+          }
+        },
+        {
+          "id": "roaming-fraud-investigation",
+          "title": "Roaming fraud investigation",
+          "departmentId": "roaming",
+          "owner": "Roaming process owner",
+          "boundary": "Partner steering is an authorised NEP/NOC handoff. Fraud restrictions and settlements require owner approval and a documented reversal path.",
+          "auditRecovery": "Record input provenance, proposed action, approver, executed change and verification. Stop on unexpected impact; restore the prior approved state or open a compensating case when reversal is not possible.",
+          "metricIds": [
+            "fraud-loss"
+          ],
+          "stages": {
+            "detect": "Authorised roaming telemetry flags an unusual usage pattern; no restriction is applied.",
+            "investigate": "Retrieve permitted roaming records, check identity, freshness and contradictory evidence; request missing context rather than guessing.",
+            "propose": "Prepare a reasoned roaming fraud investigation recommendation with alternatives, expected impact and the action-specific permission required.",
+            "approveExecute": "Partner steering is an authorised NEP/NOC handoff. Fraud restrictions and settlements require owner approval and a documented reversal path. Record approval before using the authorised execution interface; otherwise hand off without taking action.",
+            "verify": "Confirm the intended outcome, check customer and service impact, and compare the defined KPI with the agreed baseline. Close only with owner-accepted evidence."
+          }
+        },
+        {
+          "id": "revenue-leakage-reconciliation",
+          "title": "Revenue leakage reconciliation",
+          "departmentId": "revenue-assurance",
+          "owner": "Revenue Assurance process owner",
+          "boundary": "Action-specific permissions limit reach and reversibility. Obtain owner approval for consequential changes; retain evidence, intervention controls and a tested recovery path.",
+          "auditRecovery": "Record input provenance, proposed action, approver, executed change and verification. Stop on unexpected impact; restore the prior approved state or open a compensating case when reversal is not possible.",
+          "metricIds": [
+            "recovery-value"
+          ],
+          "stages": {
+            "detect": "Reconciliation flags a mismatch between eligible usage, rating and billed amounts.",
+            "investigate": "Retrieve permitted revenue assurance records, check identity, freshness and contradictory evidence; request missing context rather than guessing.",
+            "propose": "Prepare a reasoned revenue leakage reconciliation recommendation with alternatives, expected impact and the action-specific permission required.",
+            "approveExecute": "Action-specific permissions limit reach and reversibility. Obtain owner approval for consequential changes; retain evidence, intervention controls and a tested recovery path. Record approval before using the authorised execution interface; otherwise hand off without taking action.",
+            "verify": "Confirm the intended outcome, check customer and service impact, and compare the defined KPI with the agreed baseline. Close only with owner-accepted evidence."
+          }
+        },
+        {
+          "id": "offer-auction-experiment",
+          "title": "Offer auction experiment",
+          "departmentId": "marketing-cvm",
+          "owner": "Marketing & CVM process owner",
+          "boundary": "Tariff and offer changes need commercial approval, consent, fairness and applicable consumer-protection review. No unrestricted repricing.",
+          "auditRecovery": "Record input provenance, proposed action, approver, executed change and verification. Stop on unexpected impact; restore the prior approved state or open a compensating case when reversal is not possible.",
+          "metricIds": [
+            "offer-conversion"
+          ],
+          "stages": {
+            "detect": "An approved campaign test compares eligible offers; the auction is a proposal mechanism, not an unrestricted bidding agent.",
+            "investigate": "Retrieve permitted marketing & cvm records, check identity, freshness and contradictory evidence; request missing context rather than guessing.",
+            "propose": "Prepare a reasoned offer auction experiment recommendation with alternatives, expected impact and the action-specific permission required.",
+            "approveExecute": "Tariff and offer changes need commercial approval, consent, fairness and applicable consumer-protection review. No unrestricted repricing. Record approval before using the authorised execution interface; otherwise hand off without taking action.",
+            "verify": "Confirm the intended outcome, check customer and service impact, and compare the defined KPI with the agreed baseline. Close only with owner-accepted evidence."
+          }
+        },
+        {
+          "id": "plan-and-bundle-proposal",
+          "title": "Plan and bundle proposal",
+          "departmentId": "marketing-cvm",
+          "owner": "Marketing & CVM process owner",
+          "boundary": "Tariff and offer changes need commercial approval, consent, fairness and applicable consumer-protection review. No unrestricted repricing.",
+          "auditRecovery": "Record input provenance, proposed action, approver, executed change and verification. Stop on unexpected impact; restore the prior approved state or open a compensating case when reversal is not possible.",
+          "metricIds": [
+            "arpu"
+          ],
+          "stages": {
+            "detect": "A reviewed segment shows a potential mismatch between bundle needs and current product options.",
+            "investigate": "Retrieve permitted marketing & cvm records, check identity, freshness and contradictory evidence; request missing context rather than guessing.",
+            "propose": "Prepare a reasoned plan and bundle proposal recommendation with alternatives, expected impact and the action-specific permission required.",
+            "approveExecute": "Tariff and offer changes need commercial approval, consent, fairness and applicable consumer-protection review. No unrestricted repricing. Record approval before using the authorised execution interface; otherwise hand off without taking action.",
+            "verify": "Confirm the intended outcome, check customer and service impact, and compare the defined KPI with the agreed baseline. Close only with owner-accepted evidence."
+          }
+        },
+        {
+          "id": "employee-service-request",
+          "title": "Employee service request",
+          "departmentId": "back-office",
+          "owner": "Back Office process owner",
+          "boundary": "Action-specific permissions limit reach and reversibility. Obtain owner approval for consequential changes; retain evidence, intervention controls and a tested recovery path.",
+          "auditRecovery": "Record input provenance, proposed action, approver, executed change and verification. Stop on unexpected impact; restore the prior approved state or open a compensating case when reversal is not possible.",
+          "metricIds": [
+            "employee-query"
+          ],
+          "stages": {
+            "detect": "An employee submits a routine policy or service request through an authorised channel.",
+            "investigate": "Retrieve permitted back office records, check identity, freshness and contradictory evidence; request missing context rather than guessing.",
+            "propose": "Prepare a reasoned employee service request recommendation with alternatives, expected impact and the action-specific permission required.",
+            "approveExecute": "Action-specific permissions limit reach and reversibility. Obtain owner approval for consequential changes; retain evidence, intervention controls and a tested recovery path. Record approval before using the authorised execution interface; otherwise hand off without taking action.",
+            "verify": "Confirm the intended outcome, check customer and service impact, and compare the defined KPI with the agreed baseline. Close only with owner-accepted evidence."
+          }
+        }
+      ],
+      "rafm": {
+        "title": "Revenue assurance & fraud, connected by evidence",
+        "body": "Correlate usage, billing and partner evidence without merging all data into a new lake. Keep leakage and fraud cases distinct, avoid double-counting recovery, and join investigations through permissioned case references.",
+        "scenarioIds": [
+          "revenue-leakage-reconciliation",
+          "roaming-fraud-investigation"
+        ]
+      },
+      "adaptations": [
+        {
+          "title": "Real-time offer auctions for CLM",
+          "body": "Adaptation hypothesis from customer lifecycle: compare approved offers using a bounded allocation experiment.",
+          "constraints": "Requires consent, fairness, transparent terms and market-specific consumer and telecom review. Financial offers require applicable licensing and affordability safeguards; QoS and routing changes require NEP/NOC authority.",
+          "metricIds": [
+            "offer-conversion"
+          ]
+        },
+        {
+          "title": "Continuous plan & add-on optimisation",
+          "body": "Adaptation hypothesis from dynamic pricing: propose plan and add-on changes for commercial review.",
+          "constraints": "Requires consent, fairness, transparent terms and market-specific consumer and telecom review. Financial offers require applicable licensing and affordability safeguards; QoS and routing changes require NEP/NOC authority.",
+          "metricIds": [
+            "arpu"
+          ]
+        },
+        {
+          "title": "Multi-product bundle optimisation",
+          "body": "Adaptation hypothesis from bundling & revenue: test appropriate multi-product bundles with transparent terms.",
+          "constraints": "Requires consent, fairness, transparent terms and market-specific consumer and telecom review. Financial offers require applicable licensing and affordability safeguards; QoS and routing changes require NEP/NOC authority.",
+          "metricIds": [
+            "bundle-attachment"
+          ]
+        },
+        {
+          "title": "Next-best-offer & next-best-action",
+          "body": "Adaptation hypothesis from personalisation: recommend a relevant next offer or service action.",
+          "constraints": "Requires consent, fairness, transparent terms and market-specific consumer and telecom review. Financial offers require applicable licensing and affordability safeguards; QoS and routing changes require NEP/NOC authority.",
+          "metricIds": [
+            "offer-conversion"
+          ]
+        },
+        {
+          "title": "Telco-fintech convergence & BNPL",
+          "body": "Adaptation hypothesis from new revenue: explore licensed partner financial products only after suitability review.",
+          "constraints": "Requires consent, fairness, transparent terms and market-specific consumer and telecom review. Financial offers require applicable licensing and affordability safeguards; QoS and routing changes require NEP/NOC authority.",
+          "metricIds": []
+        },
+        {
+          "title": "Device-led promotions & flash sales",
+          "body": "Adaptation hypothesis from devices & retail: prepare inventory-aware promotions under approved pricing limits.",
+          "constraints": "Requires consent, fairness, transparent terms and market-specific consumer and telecom review. Financial offers require applicable licensing and affordability safeguards; QoS and routing changes require NEP/NOC authority.",
+          "metricIds": [
+            "inventory-cost"
+          ]
+        },
+        {
+          "title": "Content + connectivity bundles",
+          "body": "Adaptation hypothesis from content & media: test content and connectivity packages with explicit subscription consent.",
+          "constraints": "Requires consent, fairness, transparent terms and market-specific consumer and telecom review. Financial offers require applicable licensing and affordability safeguards; QoS and routing changes require NEP/NOC authority.",
+          "metricIds": [
+            "bundle-attachment"
+          ]
+        },
+        {
+          "title": "Network congestion & QoS-tier pricing",
+          "body": "Adaptation hypothesis from network monetisation: evaluate permitted QoS-tier offers with network-owner handoffs, not independent network control.",
+          "constraints": "Requires consent, fairness, transparent terms and market-specific consumer and telecom review. Financial offers require applicable licensing and affordability safeguards; QoS and routing changes require NEP/NOC authority.",
+          "metricIds": [
+            "arpu"
+          ]
+        }
+      ],
+      "capabilityRange": [
+        {
+          "title": "Manual",
+          "body": "People perform the work with documented evidence.",
+          "controls": "Named ownership, access controls and reviewable records.",
+          "appropriate": "Novel, infrequent or high-exposure decisions."
+        },
+        {
+          "title": "Assisted",
+          "body": "Tools assemble information and suggest options; people decide and act.",
+          "controls": "Source checking, professional review and no unapproved writes.",
+          "appropriate": "Ambiguous work that benefits from human judgment."
+        },
+        {
+          "title": "Automated",
+          "body": "Deterministic rules execute defined tasks.",
+          "controls": "Tested rules, bounded permissions, monitoring and recovery.",
+          "appropriate": "Stable, repeatable actions with clear exception paths."
+        },
+        {
+          "title": "Orchestrated",
+          "body": "Permissioned workflows coordinate work across accountable teams.",
+          "controls": "Domain isolation, action-specific approval, audit and intervention.",
+          "appropriate": "Evidence-rich journeys with explicit handoffs and approvals."
+        },
+        {
+          "title": "Bounded delegated action",
+          "body": "Tested workflows act within a deliberately limited authority envelope.",
+          "controls": "Exposure sets the ceiling; evidence earns authority within it. Stop conditions, monitoring and tested recovery remain mandatory.",
+          "appropriate": "Only where exposure permits and evidence supports delegated action; not a required destination."
+        }
+      ],
+      "delivery": {
+        "innovate": "Assess the process, prioritise hypotheses and define the operator baseline, exposure and accountable owner.",
+        "demonstrate": "Generate bounded evidence with a scoped pilot, comparison design, explicit stop conditions and customer-impact measures.",
+        "activate": "Integrate production interfaces, authorise actions, rehearse intervention and recovery, and prepare accountable teams.",
+        "operate": "Monitor outcomes, cost and harm; review evidence and permissions, improve through approved changes and retire ineffective workflows."
+      },
+      "marketConstraints": "For the selected edition, review data residency, lawful purpose, retention, cross-border processing, customer consent, complaints and telecom consumer protection with qualified local owners. Network and partner approvals remain explicit. This is not a compliance assurance; launch depends on edition-specific legal and operational review.",
+      "entryPoints": [
+        {
+          "title": "Readiness conversation",
+          "body": "Bring a process and its baseline to a Value Scan; assess the decision and evidence gaps within Innovate."
+        },
+        {
+          "title": "Scoped pilot",
+          "body": "Agree an evidence plan within Demonstrate. Timing and production scope depend on access, integration and approval—not a fixed-day promise."
+        },
+        {
+          "title": "Innovation workshop",
+          "body": "Explore adaptation hypotheses and prioritise work within Innovate; use the same delivery and authority model."
+        }
+      ],
+      "metrics": [
+        {
+          "id": "cost-contact",
+          "name": "Cost per resolved contact",
+          "definition": "Total scoped service cost divided by resolved contacts; relative reduction versus the same channel mix and baseline period.",
+          "classification": "target",
+          "value": "30–50% relative reduction",
+          "context": "Illustrative KPI target. Agree the target during discovery against the operator's baseline and validate in a scoped pilot; not an achieved result, forecast or guarantee."
+        },
+        {
+          "id": "sales-cycle",
+          "name": "Sales cycle duration",
+          "definition": "Median days from accepted qualified lead to signed contract for comparable products; relative reduction versus the operator baseline.",
+          "classification": "target",
+          "value": "20–30% relative reduction",
+          "context": "Illustrative KPI target. Agree the target during discovery against the operator's baseline and validate in a scoped pilot; not an achieved result, forecast or guarantee."
+        },
+        {
+          "id": "churn",
+          "name": "Subscriber churn rate",
+          "definition": "Subscribers leaving in the measurement period divided by subscribers at period start; relative reduction versus a comparable untreated cohort.",
+          "classification": "target",
+          "value": "10–25% relative reduction",
+          "context": "Illustrative KPI target. Agree the target during discovery against the operator's baseline and validate in a scoped pilot; not an achieved result, forecast or guarantee."
+        },
+        {
+          "id": "dispute-resolution",
+          "name": "Disputes resolved within approved authority",
+          "definition": "Disputes fully resolved without repeat contact in the agreed observation window divided by eligible disputes; approval-required decisions remain excluded.",
+          "classification": "unresolved",
+          "context": "Metric definition is proposed for discovery. The supplied figure is withheld pending clarification of baseline, scope and measurement."
+        },
+        {
+          "id": "data-entry",
+          "name": "Manual data-entry effort",
+          "definition": "Staff minutes spent entering scoped records at matched volume and accuracy; relative reduction versus operator baseline.",
+          "classification": "target",
+          "value": "40% relative reduction",
+          "context": "Illustrative KPI target. Agree the target during discovery against the operator's baseline and validate in a scoped pilot; not an achieved result, forecast or guarantee."
+        },
+        {
+          "id": "digital-sales",
+          "name": "Digital sales completions",
+          "definition": "Completed digital purchases in matched periods, with cancellations and channel displacement reported separately; relative increase versus baseline.",
+          "classification": "target",
+          "value": "30–50% relative increase",
+          "context": "Illustrative KPI target. Agree the target during discovery against the operator's baseline and validate in a scoped pilot; not an achieved result, forecast or guarantee."
+        },
+        {
+          "id": "leakage",
+          "name": "Confirmed revenue leakage rate",
+          "definition": "Confirmed unbilled or misrated eligible usage value divided by total eligible usage value; relative reduction versus operator baseline, excluding fraud overlap.",
+          "classification": "target",
+          "value": "40–60% relative reduction",
+          "context": "Illustrative KPI target. Agree the target during discovery against the operator's baseline and validate in a scoped pilot; not an achieved result, forecast or guarantee."
+        },
+        {
+          "id": "fraud-loss",
+          "name": "Confirmed fraud loss rate",
+          "definition": "Confirmed fraud losses net of recovery divided by scoped revenue, with false positives and customer harm reported separately; relative reduction.",
+          "classification": "target",
+          "value": "30–50% relative reduction",
+          "context": "Illustrative KPI target. Agree the target during discovery against the operator's baseline and validate in a scoped pilot; not an achieved result, forecast or guarantee."
+        },
+        {
+          "id": "nps",
+          "name": "Net Promoter Score",
+          "definition": "Percentage of promoters minus percentage of detractors on the same survey population. Changes are percentage points, not relative percent.",
+          "classification": "unresolved",
+          "context": "Metric definition is proposed for discovery. The supplied figure is withheld pending clarification of baseline, scope and measurement."
+        },
+        {
+          "id": "settlement-time",
+          "name": "Roaming settlement duration",
+          "definition": "Median elapsed time from period close to agreed settlement for comparable partners; relative reduction versus operator baseline.",
+          "classification": "target",
+          "value": "20–30% relative reduction",
+          "context": "Illustrative KPI target. Agree the target during discovery against the operator's baseline and validate in a scoped pilot; not an achieved result, forecast or guarantee."
+        },
+        {
+          "id": "wholesale-disputes",
+          "name": "Wholesale billing dispute rate",
+          "definition": "Disputed invoices divided by invoices issued in comparable periods and partner scope; relative reduction.",
+          "classification": "target",
+          "value": "50% relative reduction",
+          "context": "Illustrative KPI target. Agree the target during discovery against the operator's baseline and validate in a scoped pilot; not an achieved result, forecast or guarantee."
+        },
+        {
+          "id": "bad-debt",
+          "name": "Bad debt rate",
+          "definition": "Written-off receivables divided by billed revenue for matched cohorts and observation windows; relative reduction, monitored alongside fairness and hardship outcomes.",
+          "classification": "target",
+          "value": "20–35% relative reduction",
+          "context": "Illustrative KPI target. Agree the target during discovery against the operator's baseline and validate in a scoped pilot; not an achieved result, forecast or guarantee."
+        },
+        {
+          "id": "insight-time",
+          "name": "Time to approved insight",
+          "definition": "Median elapsed time from accepted analytical request to validated result at matched complexity; relative reduction.",
+          "classification": "target",
+          "value": "60–80% relative reduction",
+          "context": "Illustrative KPI target. Agree the target during discovery against the operator's baseline and validate in a scoped pilot; not an achieved result, forecast or guarantee."
+        },
+        {
+          "id": "data-quality",
+          "name": "Customer record quality",
+          "definition": "Share of sampled records passing agreed completeness, accuracy and uniqueness checks; no compound quality score without agreed weights.",
+          "classification": "unresolved",
+          "context": "Metric definition is proposed for discovery. The supplied figure is withheld pending clarification of baseline, scope and measurement."
+        },
+        {
+          "id": "mttr",
+          "name": "IT service restoration time",
+          "definition": "Median elapsed time from confirmed scoped IT incident to verified service restoration; relative reduction, excluding network control.",
+          "classification": "target",
+          "value": "60–80% relative reduction",
+          "context": "Illustrative KPI target. Agree the target during discovery against the operator's baseline and validate in a scoped pilot; not an achieved result, forecast or guarantee."
+        },
+        {
+          "id": "integration-time",
+          "name": "Integration delivery duration",
+          "definition": "Median elapsed time from approved interface design to accepted integration at matched complexity; relative reduction.",
+          "classification": "target",
+          "value": "50% relative reduction",
+          "context": "Illustrative KPI target. Agree the target during discovery against the operator's baseline and validate in a scoped pilot; not an achieved result, forecast or guarantee."
+        },
+        {
+          "id": "release-cycle",
+          "name": "Release cycle duration",
+          "definition": "Median elapsed time from approved change to verified release for comparable change classes; relative reduction with failure rate held within agreed limits.",
+          "classification": "target",
+          "value": "70% relative reduction",
+          "context": "Illustrative KPI target. Agree the target during discovery against the operator's baseline and validate in a scoped pilot; not an achieved result, forecast or guarantee."
+        },
+        {
+          "id": "report-time",
+          "name": "Report preparation effort",
+          "definition": "Staff minutes from available approved data to checked report at matched scope and quality; relative reduction.",
+          "classification": "target",
+          "value": "80% relative reduction",
+          "context": "Illustrative KPI target. Agree the target during discovery against the operator's baseline and validate in a scoped pilot; not an achieved result, forecast or guarantee."
+        },
+        {
+          "id": "offer-conversion",
+          "name": "Offer conversion rate",
+          "definition": "Accepted eligible offers divided by delivered eligible offers within an agreed attribution window. Absolute rate and relative uplift are different measurements.",
+          "classification": "unresolved",
+          "context": "Metric definition is proposed for discovery. The supplied figure is withheld pending clarification of baseline, scope and measurement."
+        },
+        {
+          "id": "lead-meeting",
+          "name": "Lead-to-meeting conversion",
+          "definition": "Qualified meetings held divided by eligible leads contacted in an agreed cohort. Supplied multiple needs baseline and qualification consistency.",
+          "classification": "unresolved",
+          "context": "Metric definition is proposed for discovery. The supplied figure is withheld pending clarification of baseline, scope and measurement."
+        },
+        {
+          "id": "recovery-value",
+          "name": "Verified recovered revenue",
+          "definition": "Revenue actually recovered, net of recovery costs and reversals, in a defined operator and billing period. No universal monetary promise.",
+          "classification": "unresolved",
+          "context": "Metric definition is proposed for discovery. The supplied figure is withheld pending clarification of baseline, scope and measurement."
+        },
+        {
+          "id": "arpu",
+          "name": "Average revenue per user",
+          "definition": "Scoped recognised service revenue divided by average active subscribers in a matched period; relative increase, controlling mix and tariff effects.",
+          "classification": "target",
+          "value": "5–12% relative increase",
+          "context": "Illustrative KPI target. Agree the target during discovery against the operator's baseline and validate in a scoped pilot; not an achieved result, forecast or guarantee."
+        },
+        {
+          "id": "bundle-attachment",
+          "name": "Bundle attachment rate",
+          "definition": "Eligible customers adding the specified bundle divided by customers offered it in an agreed period; relative increase versus baseline.",
+          "classification": "target",
+          "value": "15–25% relative increase",
+          "context": "Illustrative KPI target. Agree the target during discovery against the operator's baseline and validate in a scoped pilot; not an achieved result, forecast or guarantee."
+        },
+        {
+          "id": "inventory-cost",
+          "name": "Device inventory carrying cost",
+          "definition": "Carrying cost for matched inventory volume and service availability over the agreed period; relative reduction.",
+          "classification": "target",
+          "value": "20–30% relative reduction",
+          "context": "Illustrative KPI target. Agree the target during discovery against the operator's baseline and validate in a scoped pilot; not an achieved result, forecast or guarantee."
+        },
+        {
+          "id": "employee-query",
+          "name": "Employee query resolution",
+          "definition": "Eligible employee queries fully resolved with verified answers and no repeat contact in the agreed window divided by eligible queries.",
+          "classification": "unresolved",
+          "context": "Metric definition is proposed for discovery. The supplied figure is withheld pending clarification of baseline, scope and measurement."
+        },
+        {
+          "id": "ra-cycle",
+          "name": "RA/fraud case resolution duration",
+          "definition": "Median time from validated alert to verified closure, reported separately for revenue leakage and fraud cases.",
+          "classification": "unresolved",
+          "context": "Metric definition is proposed for discovery. The supplied figure is withheld pending clarification of baseline, scope and measurement."
+        },
+        {
+          "id": "ra-opex",
+          "name": "RA/fraud operating cost",
+          "definition": "Cost of the scoped control process per reviewed case, with accuracy and customer-harm guardrails.",
+          "classification": "unresolved",
+          "context": "Metric definition is proposed for discovery. The supplied figure is withheld pending clarification of baseline, scope and measurement."
+        }
+      ],
+      "reviewBlockers": [
+        "Commercial owner must approve illustrative target ambition and metric definitions before publication.",
+        "Resolve or explicitly accept withholding the conflicting offer-conversion figure, relative NPS claims, universal recovery dollars and other unresolved source figures in the private inventory.",
+        "Selected-edition privacy, consumer-protection, tariff, credit, network and deployment constraints require qualified local review.",
+        "Editorial owner must approve the source-to-section correction record and confirm no source claim is represented as Cognirise delivery evidence."
+      ]
+    }
+  },
+  "markets": [
+    "uae"
+  ],
+  "summary": "Connect customer, commercial and operational work through bounded, evidence-tested workflows. Keep network control with your NEP and NOC, and give every consequential action a clear owner.",
+  "mediaIds": [
+    "216128b4-dca4-43f5-b326-dbdcd1850a99"
+  ]
+}
