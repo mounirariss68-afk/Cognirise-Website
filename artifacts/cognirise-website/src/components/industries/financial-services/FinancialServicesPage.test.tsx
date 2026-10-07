@@ -26,7 +26,7 @@ test("page covers all slide 8–14 content groups", () => {
     assert.ok(html.includes(row), row);
   }
   for (const c of fsCases.items) assert.match(html, new RegExp(`data-testid="case-fs-${c.id}"`));
-  assert.match(html, /Use AI to reduce manual work in financial services\./);
+  assert.match(html, /Redesign how banks lend, serve and operate\./);
   assert.match(html, /Illustrative productivity targets/);
   assert.match(html, /Illustrative workflow/);
   assert.match(html, /Reported gate pass rate: 71%/);

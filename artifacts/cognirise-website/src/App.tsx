@@ -170,7 +170,7 @@ export function Router() {
     <>
       <PublicSitemap />
       <Shell>
-        {(!embedsBackInHero || unavailable) && <NavigationBackControl />}
+        {((!embedsBackInHero && !(path === "/platforms/cognios" && !released)) || unavailable) && <NavigationBackControl />}
         {unavailable ? <NotFound /> :
         <Switch>
         <Route path="/" component={Home} />

@@ -4,11 +4,12 @@ import { BrandButton } from "@/components/ui/brand-button";
 import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
 import { assetUrl } from "@/lib/assets";
 import {
-  fsAreas, fsCases, fsClose, fsCredit, fsHero, fsLevels, fsProjects, fsResearch, fsVoice,
+  fsAreas, fsCases, fsClose, fsHero, fsLevels, fsProjects, fsResearch, fsVoice,
 } from "@/content/financial-services-launch";
 import { fsStyles } from "./fsStyles";
 import { FsAreasTable, FsLevelsTable, FsProjectsGrid, FsSectionHead, FsVoiceTable } from "./FsTables";
-import { FsCreditFlow, FsTransferTable, FsVoiceFlow } from "./FsDiagrams";
+import { FsVoiceFlow } from "./FsDiagrams";
+import { FsConnectedWorkflow } from "./FsConnectedWorkflow";
 
 export function FinancialServicesPage() {
   return (
@@ -52,14 +53,7 @@ export function FinancialServicesPage() {
         <FsProjectsGrid />
       </section>
 
-      <section className="fs-section alt" aria-labelledby="fs-credit-title">
-        <FsSectionHead id="fs-credit-title" kicker={fsCredit.label} title={fsCredit.title} intro={fsCredit.intro} />
-        <FsCreditFlow />
-        <div style={{ marginTop: 56 }}>
-          <h3 style={{ fontSize: 22, marginBottom: 18 }}>Who does each part of the work</h3>
-          <FsTransferTable />
-        </div>
-      </section>
+      <FsConnectedWorkflow />
 
       <section className="fs-section" aria-labelledby="fs-voice-title-h" data-slide="11-12">
         <FsSectionHead id="fs-voice-title-h" kicker="Voice service" title={fsVoice.title} intro={fsVoice.intro} />

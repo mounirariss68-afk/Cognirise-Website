@@ -8,13 +8,13 @@ export const fsStyles = `
 .fs-kicker::before{content:"";width:26px;height:2px;background:linear-gradient(90deg,var(--violet),var(--pink),var(--coral))}
 .fs-src{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .fs-hero{display:grid;grid-template-columns:.9fr 1.1fr;gap:5vw;padding:34px 4.8vw 64px}
-.fs-hero-copy{display:flex;flex-direction:column;justify-content:space-between;min-height:600px}
+.fs-hero-copy{display:flex;flex-direction:column;justify-content:space-between;min-height:600px;gap:40px}
 .fs-hero-top{display:flex;flex-direction:column;gap:28px}
 .fs-hero-bottom h1{font-size:clamp(38px,4.8vw,74px);line-height:1.02;max-width:720px}
 .fs-hero-bottom p{max-width:560px;margin:26px 0 0;color:var(--muted);font-size:18px;line-height:1.65}
 .fs-hero-actions{display:flex;flex-wrap:wrap;align-items:center;gap:26px;margin-top:34px}
 .fs-text-link{display:inline-flex;align-items:center;gap:8px;border-bottom:1px solid var(--pink);padding-bottom:4px;font-size:14px;font-weight:600;color:var(--ink);text-decoration:none}
-.fs-hero-image{height:600px;overflow:hidden;clip-path:polygon(10% 0,100% 0,100% 91%,0 100%,0 12%);background:var(--deep)}
+.fs-hero-image{height:100%;min-height:600px;overflow:hidden;clip-path:polygon(10% 0,100% 0,100% 91%,0 100%,0 12%);background:var(--deep)}
 .fs-hero-image img{width:100%;height:100%;object-fit:cover;display:block}
 .fs-section{padding:96px 4.8vw;border-top:1px solid var(--line)}
 .fs-section.alt{background:var(--ivory)}
@@ -75,7 +75,7 @@ export const fsStyles = `
 .fs-research em{display:block;margin-top:6px;font-style:normal;font-size:13px}
 @media (max-width:1023px){
 .fs-hero{grid-template-columns:1fr;padding:24px 20px 48px}
-.fs-hero-copy{min-height:0;gap:28px}.fs-hero-image{height:360px;order:2}
+.fs-hero-copy{min-height:0;gap:32px}.fs-hero-image{height:360px;min-height:0;order:2}
 .fs-section{padding:64px 20px}.fs-head,.fs-split,.fs-close{grid-template-columns:1fr}
 .fs-projects{grid-template-columns:1fr}.fs-project,.fs-project:nth-child(even){padding:26px 0;border-right:0}
 .fs-flow{grid-template-columns:1fr}.fs-lane-label{border-bottom:0;padding:18px 0 0}

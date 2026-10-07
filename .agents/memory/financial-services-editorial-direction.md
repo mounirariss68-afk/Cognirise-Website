@@ -9,6 +9,12 @@ Use slides 8–14 of the user-supplied Cognirise Financial Services Capabilities
 
 **How to apply:** Explain actual work, human approvals and measurable outcomes. Distinguish deck targets from measured results and supplier claims. Preserve anonymous client identities and the launch restriction on partner links. Verify the public release actually renders the new content, not merely an updated fallback seed.
 
+Plain language must still convey a substantive executive-level proposition, not explain obvious benefits of AI.
+
+**Why:** On 7 October 2026 the owner rejected “Use AI to reduce manual work in financial services” as an obvious statement, clarifying that removing jargon must not make the message simplistic.
+
+**How to apply:** Lead with specific changes to lending, service and operations, then explain the work and outcomes. Avoid both inflated slogans and generic AI-efficiency claims.
+
 For the initial launch, treat the replacement page as a bounded public content override, not evidence that the CMS edition has been updated or approved.
 
 **Why:** The urgent website launch must not depend on migrating the complete new editorial structure into the unfinished CMS, nor overwrite unpublished edits.
@@ -17,6 +23,6 @@ For the initial launch, treat the replacement page as a bounded public content o
 
 Present the credit-decision example as a genuinely connected workflow, not separate rows of boxes. Hover/focus should explain relationships; click/tap should reveal the work at each step. Make the exception loop and the human decision before execution explicit.
 
-**Why:** On 7 October 2026 the owner rejected the static boxed workflow and asked to rethink its design completely with hover and click interaction.
+**Why:** On 7 October 2026 the owner rejected the static boxed workflow and asked to rethink its design completely with hover and click interaction. After exploring an alternative guided casebook, they selected the connected interactive workflow for the website.
 
 **How to apply:** Preserve the original task ownership and audit evidence while changing the visual structure. Keep controls usable on keyboard and touch, and retain the illustrative, bank-specific nature of the example.

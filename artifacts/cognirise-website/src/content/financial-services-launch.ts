@@ -17,8 +17,8 @@ export const FINANCIAL_SERVICES_LAUNCH_OVERRIDE =
 
 export const fsHero = {
   eyebrow: "Financial services",
-  title: "Use AI to reduce manual work in financial services.",
-  body: "Prepare credit files, answer routine customer questions, check documents and support software delivery. We help financial institutions connect AI to the systems their teams use, define what it may do, and measure the result.",
+  title: "Redesign how banks lend, serve and operate.",
+  body: "From credit analysis and customer service to compliance checks and software delivery, we help financial institutions redesign workflows, integrate AI with existing systems, and measure improvements in turnaround time, service quality and cost.",
   primary: { label: "Discuss a process to improve", href: "/contact" },
   secondary: { label: "See delivery examples", href: "#fs-examples" },
   image: "/images/cognirise/industries/pulse-industry-financial-services.png",

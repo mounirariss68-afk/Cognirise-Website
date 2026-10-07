@@ -1,7 +1,8 @@
 import { ArrowDown } from "lucide-react";
 import { BrandButton } from "@/components/ui/brand-button";
 import { ArchitectureStage } from "@/components/cognios/ArchitectureStage";
-import { assetUrl } from "@/lib/assets";
+import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
+import { PlatformsHeroMedia } from "@/components/platforms/platforms-hero-media";
 import "./CogniOSPlatform.css";
 
 const proof = ["Full lifecycle governance", "Performance management", "Scheduling & orchestration", "On-prem AI/ML ops", "App builder"];
@@ -58,20 +59,23 @@ export default function CogniOSPlatform() {
   return (
     <main className="co-page">
       <section className="co-hero co-frame public-hero-shell" aria-labelledby="co-title">
-        <Eyebrow>Products / CogniOS</Eyebrow>
         <div className="co-hero-grid">
           <div className="co-hero-copy">
+            <div className="co-hero-top">
+              <NavigationBackControl embedded />
+              <Eyebrow>Products / CogniOS</Eyebrow>
+            </div>
+            <div className="co-hero-narrative">
             <h1 id="co-title" className="co-heading">The operating system for <span>enterprise AI.</span></h1>
             <p>CogniOS manages the full lifecycle of your agentic workflows, from design and approval to scheduling, monitoring and retirement. It runs your models on your own infrastructure and lets you spawn new AI applications from the Cogni toolset in days.</p>
             <div className="co-actions">
               <BrandButton href="/contact" data-testid="link-cognios-demo-hero">Book a demo</BrandButton>
               <a href="#architecture" className="co-jump" data-testid="link-cognios-architecture">See the architecture <ArrowDown size={16} aria-hidden="true" /></a>
             </div>
+            </div>
           </div>
-          <div className="co-hero-art" aria-hidden="true">
-            <img src={assetUrl("/images/cognirise/site-cognios.jpg")} alt="" />
-            <div className="co-art-top"><span>CogniOS</span><span>Operating system / AI</span></div>
-            <div className="co-art-bottom"><strong>Design → Run → Govern</strong><span>CogniOS /<br />Cognirise</span></div>
+          <div className="co-hero-art co-hero-film" aria-hidden="true">
+            <PlatformsHeroMedia />
           </div>
         </div>
         <div className="co-proof" aria-label="CogniOS at a glance">
