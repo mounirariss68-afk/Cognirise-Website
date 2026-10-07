@@ -1,0 +1,65 @@
+.selected-telecom {
+  --launch-ink: #102957;
+  --launch-paper: #fdfbf7;
+  color: var(--launch-ink);
+  background: var(--launch-paper);
+  min-height: 100vh;
+}
+.selected-telecom-nav {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 0 4vw;
+  border-bottom: 1px solid #d8dce5;
+  background: rgb(253 251 247 / 96%);
+  backdrop-filter: blur(12px);
+}
+.selected-telecom-mark {
+  text-decoration: none;
+  color: var(--launch-ink);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .1em;
+}
+.selected-telecom-mark span {
+  margin-left: 8px;
+  color: #b34893;
+}
+.selected-telecom-nav > div {
+  display: flex;
+  gap: clamp(12px, 2vw, 28px);
+  align-items: center;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+.selected-telecom-nav > div > a {
+  flex: 0 0 auto;
+  text-decoration: none;
+  font-size: 12px;
+  color: #405777;
+}
+.selected-telecom-nav a:hover,
+.selected-telecom-nav a:focus-visible { color: #b34893; }
+.selected-telecom section[id] { scroll-margin-top: 60px; }
+.selected-telecom section[id] + section[id] { border-top: 1px solid #d4dae5; }
+.selected-telecom section > main { min-height: 0; }
+@media (max-width: 740px) {
+  .selected-telecom-nav {
+    display: block;
+    padding: 13px 18px 0;
+  }
+  .selected-telecom-mark { display: inline-block; margin-bottom: 9px; }
+  .selected-telecom-nav > div {
+    margin: 0 -18px;
+    padding: 0 18px 11px;
+  }
+  .selected-telecom-nav > div > a { font-size: 11px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .selected-telecom * { scroll-behavior: auto !important; }
+}
