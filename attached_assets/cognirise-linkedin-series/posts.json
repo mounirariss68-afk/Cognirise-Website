@@ -1,0 +1,102 @@
+[
+  {
+    "day": 1,
+    "week": 1,
+    "title": "Disrupt the work, not just the interface",
+    "theme": "Our point of view",
+    "headline": ["A better answer.", "Or a better way to work?"],
+    "art": "transformation-new-operating-form",
+    "visual": "The approved violet–magenta–coral waves breaking through a monumental wall: changing the work itself, not decorating the existing process.",
+    "post": "A better AI answer is useful. A better way of getting the work done is a different ambition.\n\nConsider a customer dispute.\n\nA chatbot can explain the policy. But the customer may still be waiting while someone finds the contract, reconciles the transactions, checks the exception and asks for approval.\n\nThe answer has improved. The work has barely changed.\n\nThat is the distinction behind Cognirise.\n\nWe look at the whole workflow: where information is missing, where judgment matters, where handoffs create delay and which actions genuinely need approval.\n\nThen we decide what AI should prepare, what systems should execute and what people must continue to own.\n\nSometimes the right intervention is an agent. Sometimes it is a better data connection. Sometimes the process needs to change before either will help.\n\nMy view: disruption becomes meaningful when it changes an outcome someone cares about—not when it adds another interface.\n\nWhich workflow in your business has a modern front end but still depends on a very manual process behind it?\n\n#Cognirise #EnterpriseAI #BusinessTransformation"
+  },
+  {
+    "day": 2,
+    "week": 1,
+    "title": "Close the gap between advice and delivery",
+    "theme": "Consulting & Engineering with AI",
+    "headline": ["The strategy should", "survive the handover."],
+    "art": "human-ai-collaboration-shared-judgment",
+    "visual": "The original shared-judgment artwork, bringing human and machine forces into one composition. A visual for business understanding and engineering working together.",
+    "post": "The handover from strategy to delivery is where a good AI idea can lose its meaning.\n\nThe business team defines the ambition.\nThe technology team receives a specification.\nThe delivery team discovers the constraints.\nThe operating team inherits the result.\n\nEach handover creates another opportunity to lose context.\n\nBülent and I wanted Cognirise to work differently.\n\nOur Consulting & Engineering with AI service brings senior operators and forward-deployed engineers into the same delivery effort. The people framing the business problem stay connected to the people building and testing the solution.\n\nThat means asking practical questions early:\n\nWho will use this?\nWhat must change in their working day?\nWhich systems and data does it depend on?\nWho owns it after launch?\n\nOur platforms, client engagements and pilot programmes are all part of that work. The objective is a capability a team can use and run—not a recommendation that someone else has to translate.\n\nWhere does context get lost most often in your organisation: from strategy to build, or from build to operations?\n\n#Cognirise #AIEngineering #EnterpriseAI"
+  },
+  {
+    "day": 3,
+    "week": 1,
+    "title": "What a 48-hour prototype is really for",
+    "theme": "Demonstrate: test before a larger commitment",
+    "headline": ["48 hours.", "Something real to test."],
+    "art": "agentic-workflows-directed-action",
+    "visual": "Directed Pulse currents through architectural boundaries: a focused path through one meaningful workflow, not a promise of an entire production system in two days.",
+    "post": "A 48-hour prototype should make a decision easier—not make a sales pitch more impressive.\n\nWhen we say “prototypes in 48 hours” at Cognirise, we mean a focused demonstration around an agreed problem and decision boundary.\n\nNot a production rollout. Not a shortcut around security or integration work.\n\nThe point is to give people something they can challenge.\n\nDoes the workflow make sense?\nAre the right facts available?\nWhere does a person need to intervene?\nWhat assumption fails when someone actually tries it?\n\nA prototype can reveal that the proposed solution is too broad. It can expose an awkward handoff or a missing data source. It can also give a team the confidence to proceed.\n\nAll of those are useful outcomes.\n\nThis is the Demonstrate stage of our IDAO methodology: turn an opportunity into evidence before making a larger commitment.\n\nSpeed matters because learning earlier changes what you choose to build—not because every complex problem can be solved in two days.\n\nWhat would you need a prototype to prove before approving the next stage of investment?\n\n#Cognirise #AIPrototyping #EnterpriseAI"
+  },
+  {
+    "day": 4,
+    "week": 1,
+    "title": "A pilot needs a route into operations",
+    "theme": "The IDAO methodology",
+    "headline": ["A pilot is a beginning.", "Not the finish line."],
+    "art": "orchestration-many-forces-one-rhythm",
+    "visual": "Pulse currents passing through successive architectural frames. The image suggests progression; the four canonical IDAO stages are explained in the post rather than invented as a diagram.",
+    "post": "Who owns the solution on the Monday after the pilot ends?\n\nIt is a simple question. It changes the conversation.\n\nA promising demonstration is not yet an operating capability. Someone still needs to approve changes, monitor performance, handle exceptions and support the people using it.\n\nThat is why our delivery methodology is IDAO:\n\nINNOVATE — identify a specific opportunity, an accountable owner and the outcome worth proving.\n\nDEMONSTRATE — build a focused prototype and use the evidence to proceed, reshape or stop.\n\nACTIVATE — turn the validated direction into a usable capability, with the engineering, controls and readiness needed for release.\n\nOPERATE — monitor the outcome, establish support and governance routines, and transfer the knowledge needed to own and improve it.\n\nEach stage has a decision to make. Moving forward should depend on evidence, not simply on having completed the previous activity.\n\nFor me, the most important part is the last one. An AI solution creates lasting value only if people can operate it after the excitement of the launch has passed.\n\nDoes your pilot plan name the operational owner as clearly as it names the project sponsor?\n\n#Cognirise #AIDelivery #OperatingModels"
+  },
+  {
+    "day": 5,
+    "week": 1,
+    "title": "Meet CogniOS",
+    "theme": "Our core platform",
+    "headline": ["CogniOS", "Beyond the first demo."],
+    "art": "governed-ai-control-in-motion",
+    "visual": "The original controlled-motion architectural artwork. It represents an operating environment, not a product screenshot or a literal architecture diagram.",
+    "post": "The first AI demo gets attention. The operating model determines what happens next.\n\nOnce workflows move into everyday use, the questions become more demanding.\n\nWhich version is running?\nWho can approve a consequential action?\nHow is performance monitored?\nWhen should a workflow be changed—or retired?\n\nThose questions shaped CogniOS, the core operating system in our enterprise AI platform family.\n\nCogniOS is built to manage the lifecycle of agentic workflows: from design and approval through scheduling, monitoring and retirement.\n\nIt brings the work around the model into view: the workflow, the tools, the human checkpoints and the responsibilities that make a system usable in a real organisation.\n\nAlongside it, CogniAgents, CogniDocs and CogniBase address operational tasks, enterprise knowledge and system connections.\n\nWe will introduce those capabilities in the next posts. The principle connecting them is straightforward: useful AI needs an operating environment, not just an impressive response.\n\nWhat would your team need to see before trusting an AI workflow in daily operations?\n\n#Cognirise #CogniOS #EnterpriseAI"
+  },
+  {
+    "day": 6,
+    "week": 2,
+    "title": "Meet CogniDocs",
+    "theme": "Knowledge with context and control",
+    "headline": ["CogniDocs", "An answer needs a source."],
+    "art": "knowledge-intelligence-living-index",
+    "visual": "The original living-index artwork: layered enterprise knowledge with directional Pulse currents. The title keeps the practical issue—source authority—visible.",
+    "post": "“Where did that answer come from?” should not be a difficult question.\n\nImagine a colleague asking whether a customer qualifies for an exception.\n\nA fluent answer is not enough. They need the relevant policy, the applicable version and the evidence behind the recommendation. They also need to know whether they are authorised to see the underlying information.\n\nThis is the problem space for CogniDocs: making enterprise knowledge available with context and control.\n\nThat means treating documents as more than a pile of text to search. Sources, access boundaries and version awareness matter to whether an answer is useful.\n\nThe same question can have different implications for a service agent, a risk reviewer and an external customer.\n\nMy view is that enterprise knowledge should help people make a defensible decision, not simply help them find a convincing paragraph faster.\n\nThe example above is illustrative, but the design question is very practical.\n\nWhen your team asks AI a question today, can they check both the source and whether it is the right one to use?\n\n#Cognirise #CogniDocs #KnowledgeManagement"
+  },
+  {
+    "day": 7,
+    "week": 2,
+    "title": "Meet CogniAgents",
+    "theme": "Agents and the Agent Authority Model",
+    "headline": ["CogniAgents", "Capability is not permission."],
+    "art": "logistics-moving-network",
+    "visual": "Pulse routes moving through a structured network. The visual expresses coordinated work while the headline distinguishes ability from permission.",
+    "post": "An agent can prepare a refund. That does not mean it should be allowed to issue one.\n\nThat distinction matters more than how convincingly the agent explains its reasoning.\n\nAt Cognirise, we separate what an agent can do from what it is authorised to do.\n\nCogniAgents focuses on governed agents coordinating operational tasks. Our Agent Authority Model addresses the accompanying question: what authority is appropriate for the work?\n\nConsider an illustrative billing dispute.\n\nAn agent might assemble the account history, identify a discrepancy and draft a recommendation.\n\nA financial adjustment is a different action. It needs the permissions, limits and approval appropriate to its consequences.\n\nThe workflow should also make clear when to stop, how to escalate and what evidence must be retained.\n\nThat is not an argument against autonomy. It is an argument for being precise about it.\n\nFor me, “human in the loop” is incomplete unless we can say which human, at which decision and with what authority.\n\nWhich action in your business would you let an agent prepare today—but not yet execute?\n\n#Cognirise #CogniAgents #ResponsibleAI"
+  },
+  {
+    "day": 8,
+    "week": 2,
+    "title": "Meet CogniBase",
+    "theme": "Connecting intelligence to enterprise systems",
+    "headline": ["CogniBase", "Connect AI to the work."],
+    "art": "telecommunications-signal-field",
+    "visual": "The original signal-field artwork, showing currents connecting substantial structures. It is a metaphor for enterprise integration, not a telecom-only product claim.",
+    "post": "Your business does not run inside a prompt box.\n\nIt runs across finance systems, customer records, documents, approval processes and the people who know what the exceptions mean.\n\nAn AI workflow has to connect to that environment if it is going to do useful work.\n\nCogniBase is the integration capability in our platform family: composable intelligence integrations for enterprise systems.\n\nThe challenge is not simply whether two systems can exchange data.\n\nIt is whether the workflow can use the right record, in the right context, under the right permissions—and whether an action can be carried out safely in the system that owns it.\n\nTake a service request. Reading an account record, preparing a proposed update and changing the live account are three different responsibilities. Treating them as one unrestricted tool call hides important decisions.\n\nThis is why data and integration foundations belong in the AI conversation from the start, rather than arriving as a surprise after the demo.\n\nWhat is the hardest connection in your environment: access to the data, understanding its meaning, or authority to act on it?\n\n#Cognirise #CogniBase #EnterpriseIntegration"
+  },
+  {
+    "day": 9,
+    "week": 2,
+    "title": "Sovereignty is an operating question",
+    "theme": "Sovereign AI Solutions",
+    "headline": ["Your AI.", "Your control."],
+    "art": "energy-balancing-force",
+    "visual": "The original balancing-force artwork: powerful currents held within clear physical structures. It expresses capability and control without flags or generic cybersecurity imagery.",
+    "post": "An AI system can be hosted locally and still leave important questions about control unanswered.\n\nWho can access the data?\nWho can change the model or the workflow?\nWhich dependencies sit outside your organisation?\nCan your team operate the system without the original delivery partner?\n\nThose are sovereignty questions too.\n\nOur Sovereign AI Solutions work starts with the operating architecture: security, transparency, local authority and the evidence needed to explain how the system behaves.\n\nThe requirements differ by organisation and jurisdiction. There is no single deployment pattern that settles every question.\n\nThat is why I think sovereignty should be discussed before choosing the technology—not added as a label afterwards.\n\nThe objective is useful intelligence that the organisation can control and defend in real use.\n\nHosting is part of that. So are access, ownership, dependencies, support and the ability to change course.\n\nIf you reviewed one AI deployment tomorrow, which aspect of control would be hardest to demonstrate?\n\n#Cognirise #SovereignAI #AIGovernance"
+  },
+  {
+    "day": 10,
+    "week": 2,
+    "title": "Start with one piece of work",
+    "theme": "Bring services, methods and platforms together",
+    "headline": ["One workflow.", "A measurable difference."],
+    "art": "manufacturing-adaptive-line",
+    "visual": "The original adaptive-line artwork: intelligence changing a real operating process. It closes the series with work and outcomes rather than another abstract technology promise.",
+    "post": "If we had one working session together, I would start with your workflow—not our product list.\n\nOver these posts, I have introduced our thinking, our delivery approach and the Cogni platform family.\n\nHere is how I would bring them together.\n\nChoose a piece of work that matters: resolving a dispute, preparing a decision or handling a service request.\n\nMap what happens today. Where do people wait? What do they have to find? Which exceptions create rework? Who can approve the next action?\n\nAgree what a better outcome would look like and how to measure it.\n\nThen choose the right combination of process change, knowledge, integrations and agents. Use a focused prototype to test the important assumptions. Define the route into operations before scaling.\n\nNot every workflow needs every platform. Not every problem needs an agent.\n\nThat is the purpose of bringing consulting, engineering, methods and platforms together: selecting what the work actually needs.\n\nIf there is one workflow in your organisation that deserves this kind of examination, which would you put on the table first?\n\n#Cognirise #AppliedAI #BusinessTransformation"
+  }
+]

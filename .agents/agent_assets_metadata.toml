@@ -799,3 +799,31 @@ mtime_ms = 1791391847536
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/808becaf-6c26-4e1c-9ee4-8cfe7395df8a/fe8e80a3-f0da-4443-90f7-573caef0cc3c"
 storage_version_token = "1791391866912931"
 content_type = "image/png"
+
+[[outputs]]
+id = "BiGt8Fh1Wip7g1j3ANtux"
+uri = "file://attached_assets/cognirise-linkedin-series/posting-guide.html"
+type = "html"
+title = "Cognirise — 10 LinkedIn Posts and Visuals"
+description = "Complete ready-to-post copy, matching visuals and a two-week editorial sequence. Mobile-friendly, self-contained guide."
+logical_id = "e81a5e2c-3e1b-46ba-aa7f-0a3fea17757e"
+content_hash = "sha256:3f07b5c8f66ee793ac76da57735a6529843d392896ffc415787fa815d415447e"
+size = 670563
+mtime_ms = 1791395863252
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/e81a5e2c-3e1b-46ba-aa7f-0a3fea17757e/bce25afb-8bf5-4d86-9771-4786642e7d87"
+storage_version_token = "1791395940725332"
+content_type = "text/html"
+
+[[outputs]]
+id = "H8KQHo1FV5lBwK0BFPGHl"
+uri = "file://attached_assets/cognirise-linkedin-series/Cognirise-10-LinkedIn-Posts-and-Visuals.zip"
+type = "unspecified"
+title = "Download the complete LinkedIn pack"
+description = "All 10 high-resolution PNGs, full post copy, visual guide and editable publishing calendar."
+logical_id = "9936637b-1947-4be8-8e8a-3ee440ef538e"
+content_hash = "sha256:3f8b049670184f662c9f010894dc0318415202cb5185dce0ea5467f78efdcb03"
+size = 21749520
+mtime_ms = 1791395864344
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/9936637b-1947-4be8-8e8a-3ee440ef538e/7d234b5e-7e7c-4197-8222-3b3dbf42128a"
+storage_version_token = "1791395942330196"
+content_type = "application/octet-stream"
