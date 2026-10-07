@@ -1,3 +1,4 @@
+import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
 import { Link } from "wouter";
 import { ArrowDown, ArrowRight } from "lucide-react";
 import { BrandButton } from "@/components/ui/brand-button";
@@ -15,13 +16,15 @@ export default function DigitalAIWorkforce() {
   return (
     <div className="flex flex-col">
       <section className="public-hero-shell px-6 md:px-12 pt-8 md:pt-12 max-w-[1440px] mx-auto w-full">
-        <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-8">
+        <div className="grid grid-cols-1 items-stretch gap-12 pb-12 lg:grid-cols-[0.86fr_1.14fr] lg:gap-16">
+          <div className="relative z-10 flex flex-col justify-between gap-10">
+        <div className="launch-hero-top"><NavigationBackControl embedded />
+        <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
           <div className="h-[1px] w-6 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))]" />
           {heroKicker}
         </div>
-        
-        <div className="grid grid-cols-1 items-end gap-12 pb-12 lg:grid-cols-[0.86fr_1.14fr] lg:gap-16">
-          <div className="pb-4 relative z-10">
+        </div>
+          <div>
             <h1 className="text-5xl md:text-6xl lg:text-[93px] leading-[0.94] font-semibold mb-8 max-w-[660px]">
               Agents in the <em className="not-italic text-[hsl(var(--brand-pink))]">flow of work.</em>
             </h1>
@@ -39,7 +42,8 @@ export default function DigitalAIWorkforce() {
             </div>
           </div>
           
-          <div className="relative h-[400px] lg:h-[640px] clip-diagonal-bottom bg-[hsl(var(--brand-deep))]">
+          </div>
+          <div className="relative h-[400px] lg:h-auto lg:min-h-[640px] clip-diagonal-bottom bg-[hsl(var(--brand-deep))]">
             <img 
               src={assetUrl("/images/cognirise/cognirise-pulse-people.jpg")}
               alt="People and luminous digital threads interacting in a collaborative space." 

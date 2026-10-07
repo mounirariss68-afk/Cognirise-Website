@@ -1,3 +1,4 @@
+import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
 import { getMarketLocationLabel, useMarketStore } from "@/store/market";
 import { assetUrl } from "@/lib/assets";
 import { IndustryPicker } from "@/components/IndustryPicker";
@@ -112,12 +113,14 @@ export default function IndustriesOverview() {
       `}</style>
 
       <section className="io-hero public-hero-shell">
-        <div className="io-kicker">{heroKicker}</div>
         <div className="io-hero-grid">
           <div className="io-hero-copy">
+            <div className="launch-hero-top"><NavigationBackControl embedded /><div className="io-kicker">{heroKicker}</div></div>
+            <div className="launch-hero-narrative">
             <h1>Pressure reveals where intelligence <em>belongs.</em></h1>
             <p>Cognirise combines AI-native advisory, forward-deployed engineering and governed agents to move consequential work into production—where speed matters and control cannot be an afterthought.</p>
           </div>
+            </div>
           <div className="io-hero-image">
             <IndustriesHeroFilm />
             <div className="io-cap">
@@ -132,17 +135,6 @@ export default function IndustriesOverview() {
         <div><b>Built for</b><strong>Consequential enterprise work</strong></div>
         <div><b>Working where</b><strong>Urgency meets scrutiny</strong></div>
         <div><b>Starting point</b><strong>One process under pressure</strong></div>
-      </section>
-
-      <section className="io-intro">
-        <div>
-          <div className="io-kicker">The Cognirise point of view</div>
-          <h2>The sector is the context. The work is the <em>question.</em></h2>
-        </div>
-        <div className="io-intro-copy">
-          <p>Each industry carries its own obligations: trust, sovereignty, continuity, safety, service. We begin there—not with a generic AI pattern.</p>
-          <small>Our teams work with the constraints already shaping the operating environment, then build a governed route from priority problem to production value.</small>
-        </div>
       </section>
 
       <IndustryPicker

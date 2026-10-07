@@ -783,6 +783,17 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Shared launch split-hero contract: top controls, bottom narrative, matched media edge. */
+.launch-hero-top { display:flex; flex-direction:column; align-items:flex-start; gap:26px; }
+.io .io-hero-grid,.at .at-hero-grid,.vs .vs-hero-grid { align-items:stretch; min-height:0; }
+.io .io-hero-copy,.at .at-hero-copy,.vs .vs-hero-copy {
+  display:flex;flex-direction:column;justify-content:space-between;gap:32px;padding-bottom:0;
+}
+@media(min-width:761px){
+  .io .io-hero-image,.at .at-hero-image,.vs .vs-hero-image { height:auto; min-height:620px; }
+  .io .io-hero-image { min-height:565px; }
+}
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }

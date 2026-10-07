@@ -10,6 +10,13 @@ export type TeamProfile = {
   identityImage?: { src: string; alt: string; objectPosition?: string };
 };
 
+// Remove the name from this set only after the owner confirms compliance approval.
+// Retain the complete biography below and in CMS for later restoration.
+const temporarilyHiddenProfiles = new Set(["rami aslan"]);
+export function isPublicTeamProfile(profile: Pick<TeamProfile, "name">) {
+  return !temporarilyHiddenProfiles.has(profile.name.trim().toLowerCase());
+}
+
 const portraitFrames = [
   "polygon(0 0, 100% 10%, 88% 100%, 10% 88%)",
   "polygon(10% 7%, 96% 0, 100% 89%, 0 100%)",

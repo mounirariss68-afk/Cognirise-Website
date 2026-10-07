@@ -26,6 +26,7 @@ export function NavigationBackControl({ className = "", embedded = false }: Navi
         onClick={() => { goBack(); }}
         aria-label="Back to previous page"
         data-testid="navigation-back"
+        style={{ fontSize: 11, lineHeight: "16px", fontWeight: 600 }}
         className="inline-flex items-center gap-1.5 rounded-sm py-1 text-[11px] font-semibold tracking-[0.04em] text-muted-foreground transition-colors hover:text-[hsl(var(--brand-pink))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-pink))] focus-visible:ring-offset-2"
       >
         <ArrowLeft aria-hidden="true" className="h-3 w-3" />

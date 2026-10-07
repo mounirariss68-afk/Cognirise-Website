@@ -24,10 +24,10 @@ test("supports a compact overview-only layout without changing the shared homepa
   assert.match(source, /compact = false/);
   assert.match(source, /home-industry-disclosure--compact/);
   assert.match(source, /\.home-industry-row\{display:flex;height:420px/);
-  assert.match(source, /home-industry-disclosure--compact[\s\S]*home-industry-row\{height:224px\}/);
-  assert.match(source, /home-industry-disclosure--compact \.home-industry-row:has\(\.home-industry-item\.active\)\{height:326px\}/);
-  assert.match(source, /home-industry-disclosure--compact \.home-industry-row:has\(\.home-industry-item\.active\) \.home-industry-item\.active\{grid-template-rows:148px minmax\(0,1fr\)\}/);
-  assert.match(source, /@media\(min-width:768px\) and \(max-width:1100px\)[\s\S]*home-industry-disclosure--compact \.home-industry-row\{height:218px\}[\s\S]*height:318px/);
+  assert.match(source, /home-industry-disclosure--compact[\s\S]*home-industry-row\{height:360px\}/);
+  assert.match(source, /home-industry-disclosure--compact \.home-industry-row:has\(\.home-industry-item\.active\)\{height:440px\}/);
+  assert.match(source, /home-industry-disclosure--compact \.home-industry-row:has\(\.home-industry-item\.active\) \.home-industry-item\.active\{grid-template-rows:240px minmax\(0,1fr\)\}/);
+  assert.match(source, /@media\(min-width:768px\) and \(max-width:1100px\)[\s\S]*home-industry-disclosure--compact \.home-industry-row\{height:320px\}[\s\S]*height:410px/);
   assert.match(source, /home-industry-disclosure--compact \.home-industry-orientation\{font-size:12px/);
   assert.match(source, /home-industry-disclosure--compact \.home-industry-detail\{font-size:12px/);
   assert.match(source, /@media\(max-width:767px\)[\s\S]*home-industry-disclosure--compact \.home-industry-row:has\(\.home-industry-item\.active\)\{height:auto\}/);

@@ -20,7 +20,7 @@ import { getMarketLocationLabel, useMarketStore } from "@/store/market";
 import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
 import { useReleaseContext } from "@/lib/releases";
 import { useCmsPreviewRequestDisabled } from "@/lib/cms";
-import { launchTeam, teamHeroForRegion, teamPortraitClipPath, type TeamProfile } from "@/content/team-launch";
+import { launchTeam, isPublicTeamProfile, teamHeroForRegion, teamPortraitClipPath, type TeamProfile } from "@/content/team-launch";
 
 type PreviewPersonRecord = CmsRecord<PersonContent> & { content: PersonContent };
 
@@ -152,7 +152,7 @@ export default function AboutPeople({ previewPerson }: { previewPerson?: Preview
       })()
     : undefined;
   const visiblePeople = launchPublic ? launchTeam : peopleQuery.delivery === "cms" ? peopleQuery.data : [];
-  const renderedPeople = previewProfile ? [previewProfile] : visiblePeople;
+  const renderedPeople = previewProfile ? [previewProfile] : visiblePeople.filter(isPublicTeamProfile);
   const peopleDelivery = previewPerson || launchPublic ? "cms" as const : peopleQuery.delivery;
   const leadership = renderedPeople.filter((profile) => profile.group === "leadership");
   const advisors = renderedPeople.filter((profile) => profile.group === "advisor");

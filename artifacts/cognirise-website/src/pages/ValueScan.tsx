@@ -1,3 +1,4 @@
+import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
 import { useState } from "react";
 import { ArrowDown, ArrowRight, Check } from "lucide-react";
 import { useSubmitEnquiry, type EnquiryInputMarket } from "@workspace/api-client-react";
@@ -120,8 +121,9 @@ export default function ValueScan() {
       `}</style>
 
       <section className="vs-hero public-hero-shell">
-        <div className="vs-kicker">{heroKicker}</div>
-        <div className="vs-hero-grid"><div className="vs-hero-copy"><h1>Start with one day.<br />Leave with a <em>business case.</em></h1><p className="vs-lead">Bring us one process where urgency, complexity and value have already collided. We will make the practical route visible.</p><BrandButton variant="primary" onClick={() => goTo("start")} icon={<ArrowDown size={15} />}>Explore the session</BrandButton></div><div className="vs-hero-image"><img src={assetUrl("/images/cognirise/site-services.jpg")} alt="A violet and coral current moving through a bright architectural environment." /><div className="vs-word">one day</div><div className="vs-caption"><span>01 / value scan</span>Bring the operating pressure</div></div></div>
+        <div className="vs-hero-grid"><div className="vs-hero-copy">
+          <div className="launch-hero-top"><NavigationBackControl embedded /><div className="vs-kicker">{heroKicker}</div></div>
+          <div className="launch-hero-narrative"><h1>Start with one day.<br />Leave with a <em>business case.</em></h1><p className="vs-lead">Bring us one process where urgency, complexity and value have already collided. We will make the practical route visible.</p><BrandButton variant="primary" onClick={() => goTo("start")} icon={<ArrowDown size={15} />}>Explore the session</BrandButton></div></div><div className="vs-hero-image"><img src={assetUrl("/images/cognirise/site-services.jpg")} alt="A violet and coral current moving through a bright architectural environment." /><div className="vs-word">one day</div><div className="vs-caption"><span>01 / value scan</span>Bring the operating pressure</div></div></div>
       </section>
       <section className="vs-strip" aria-label="Value Scan details"><div><b>Format</b><strong>One focused working session</strong></div><div><b>Starting point</b><strong>One priority process</strong></div><div><b>Location</b><strong>UAE-first, in the room with your team</strong></div></section>
       <section className="vs-intro"><div><div className="vs-kicker">The first move</div><h2>Not a pitch.<br />A working <em>room.</em></h2></div><div className="vs-intro-copy"><p>The Value Scan creates enough shared clarity to decide what should change, what must hold, and what a credible business case needs to answer.</p><small>We look at the work as it exists: the people, process, data, systems and controls around it. The point is a decision, not another discovery deck.</small></div></section>

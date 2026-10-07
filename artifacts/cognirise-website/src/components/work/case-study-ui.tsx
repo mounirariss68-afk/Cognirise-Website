@@ -1,3 +1,4 @@
+import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MouseEvent as ReactMouseEvent } from "react";
 import { Link } from "wouter";
@@ -135,41 +136,24 @@ function DeferredCaseRendition({
   item,
   rendition,
   compact,
+  eager = false,
 }: {
   item: LooseCase;
   rendition: NonNullable<LooseCase["media"]>[number];
   compact: boolean;
+  eager?: boolean;
 }) {
-  const frame = useRef<HTMLElement | null>(null);
-  const [shouldLoad, setShouldLoad] = useState(() => typeof window === "undefined");
-  useEffect(() => {
-    const node = frame.current;
-    if (shouldLoad || !node) return;
-    if (typeof IntersectionObserver === "undefined") {
-      setShouldLoad(true);
-      return;
-    }
-    const observer = new IntersectionObserver((entries) => {
-      if (!entries.some((entry) => entry.isIntersecting)) return;
-      setShouldLoad(true);
-      observer.disconnect();
-    }, { rootMargin: "300px 0px", threshold: 0.5 });
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [shouldLoad]);
   return (
     <figure
-      ref={frame}
       className={`case-rendition ${compact ? "is-compact" : ""}`}
       data-case-media={rendition.url}
     >
       <img
-        src={shouldLoad ? rendition.url : undefined}
-        style={shouldLoad
-          ? { objectPosition: cmsMediaObjectPosition(rendition) }
-          : { visibility: "hidden" }}
+        src={rendition.url}
+        style={{ objectPosition: cmsMediaObjectPosition(rendition) }}
         alt={item.visual?.altText || rendition.altText || "Illustrative interface reconstruction"}
-        loading="lazy"
+        loading={eager ? "eager" : "lazy"}
+        decoding="async"
         draggable={false}
       />
       <figcaption>{rendition.caption || item.visual?.caption || "Illustrative reconstruction using anonymized fixture data."}</figcaption>
@@ -178,12 +162,12 @@ function DeferredCaseRendition({
   );
 }
 
-function PulseInterface({ item, compact = false }: { item: LooseCase; compact?: boolean }) {
+function PulseInterface({ item, compact = false, eager = false }: { item: LooseCase; compact?: boolean; eager?: boolean }) {
   const rows = fixtures(item);
   const template = item.visual?.template || item.visualTemplate || "operations-console";
   const rendition = item.media?.[0];
   if (rendition) {
-    return <DeferredCaseRendition item={item} rendition={rendition} compact={compact} />;
+    return <DeferredCaseRendition item={item} rendition={rendition} compact={compact} eager={eager} />;
   }
   return (
     <div className={`case-interface case-interface--${template.replace(/[^a-z0-9-]/gi, "-")} ${compact ? "is-compact" : ""}`} aria-label={item.visual?.altText || `${template} interface reconstruction`}>
@@ -211,7 +195,7 @@ function publicExplanation(item: LooseCase) {
   return [item.mandate || item.objective, work, item.controls?.[0]].filter(Boolean).join(" ");
 }
 
-function WorkCard({ item, onOpen, editorial = false }: { item: LooseCase; onOpen?: (trigger: HTMLButtonElement) => void; editorial?: boolean }) {
+function WorkCard({ item, onOpen, editorial = false, eager = false }: { item: LooseCase; onOpen?: (trigger: HTMLButtonElement) => void; editorial?: boolean; eager?: boolean }) {
   if (editorial) {
     return (
       <article className="work-card work-card--editorial" data-testid={`card-case-${item.slug}`}>
@@ -227,7 +211,7 @@ function WorkCard({ item, onOpen, editorial = false }: { item: LooseCase; onOpen
           <section><small>04 / Impact</small><h4>What can be said</h4><p>{value(item, "impact")}</p></section>
         </div>
         <div className="work-card__visual">
-          <PulseInterface item={item} />
+          <PulseInterface item={item} eager={eager} />
         </div>
       </article>
     );
@@ -428,7 +412,7 @@ export function CaseStudyRail({ cases }: { cases: LooseCase[] }) {
            <CarouselPrevious ref={previousControl} aria-label="Previous slide" className="static translate-y-0" />
            <CarouselNext ref={nextControl} aria-label="Next slide" className="static translate-y-0" />
          </div>
-          <CarouselContent>{eligible.map((item, index) => <CarouselItem className="case-study-rail__slide" aria-label={`${index + 1} of ${eligible.length}`} key={item.slug}><WorkCard item={item} editorial /></CarouselItem>)}</CarouselContent>
+          <CarouselContent>{eligible.map((item, index) => <CarouselItem className="case-study-rail__slide" aria-label={`${index + 1} of ${eligible.length}`} key={item.slug}><WorkCard item={item} editorial eager={index < 2} /></CarouselItem>)}</CarouselContent>
       </Carousel>
     </section>
   );
@@ -441,7 +425,7 @@ export function CaseStudyLayout({ item }: { item: LooseCase }) {
   }, [item.slug, market]);
   return (
     <main className="case-detail">
-      <section className="case-detail__hero-wrap"><div className="case-detail__hero public-hero-shell"><div><span data-cms-field={item.organizationDescriptor ? "content.organizationDescriptor" : undefined}>{item.organizationDescriptor || item.descriptor || `${item.disclosure} case study`}</span><h1 data-cms-field="title">{item.title}</h1><p data-cms-field={item.objective ? "content.objective" : "content.mandate"}>{item.objective || item.mandate}</p><dl><div><dt>Sector</dt><dd>{item.sector || "Cross-sector"}</dd></div><div><dt>Stage</dt><dd>{value(item, "stage")}</dd></div></dl></div><PulseInterface item={item} /></div></section>
+      <section className="case-detail__hero-wrap"><div className="case-detail__hero public-hero-shell"><div><NavigationBackControl embedded className="mb-8" /><span data-cms-field={item.organizationDescriptor ? "content.organizationDescriptor" : undefined}>{item.organizationDescriptor || item.descriptor || `${item.disclosure} case study`}</span><h1 data-cms-field="title">{item.title}</h1><p data-cms-field={item.objective ? "content.objective" : "content.mandate"}>{item.objective || item.mandate}</p><dl><div><dt>Sector</dt><dd>{item.sector || "Cross-sector"}</dd></div><div><dt>Stage</dt><dd>{value(item, "stage")}</dd></div></dl></div><PulseInterface item={item} /></div></section>
       <section className="case-detail__story">
         {item.context && <article><span>01 / Context</span><h2>The operating context</h2><p>{item.context}</p></article>}
          <article><span>02 / Work</span><h2>The work in motion</h2>{item.work?.map((block, index) => {

@@ -33,7 +33,11 @@ export const OFFICE_LOCATIONS = {
   },
   london: {
     city: "London",
-    address: "The City, United Kingdom",
+    address: "34-37 Liverpool St, London EC2M 7PP, United Kingdom",
+  },
+  amsterdam: {
+    city: "Amsterdam",
+    address: "Keizersgracht 452, Amsterdam, Netherlands",
   },
 } as const;
 

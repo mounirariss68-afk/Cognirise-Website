@@ -31,6 +31,6 @@ test("Contact uses one governed contact email value for its label and mail link"
   assert.match(contact, /href=\{`mailto:\$\{contactEmail\}`\}/);
   assert.match(contact, />\{contactEmail\}<\/a>/);
   assert.doesNotMatch(contact, /mailto:hello@cognirise\.ai/);
-  assert.match(cms, /COMPILED_CONTACT_EMAIL = "hello@cognirise\.ai"/);
+  assert.match(cms, /COMPILED_CONTACT_EMAIL = CONTACT_EMAIL/);
   assert.match(cms, /useGetPublicContactConfiguration/);
 });

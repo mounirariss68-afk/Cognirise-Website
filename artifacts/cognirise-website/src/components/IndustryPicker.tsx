@@ -66,22 +66,22 @@ const pickerStyles = `
   .home-industry-disclosure--compact > .border-t{padding-top:16px;gap:18px}
   .home-industry-disclosure--compact h2{font-size:clamp(34px,3.6vw,52px);margin-top:8px}
   .home-industry-disclosure--compact .home-industry-grid{margin-top:24px}
-  .home-industry-disclosure--compact .home-industry-row{height:224px}
-  .home-industry-disclosure--compact .home-industry-row:has(.home-industry-item.active){height:326px}
+  .home-industry-disclosure--compact .home-industry-row{height:360px}
+  .home-industry-disclosure--compact .home-industry-row:has(.home-industry-item.active){height:440px}
   .home-industry-disclosure--compact .home-industry-trigger{padding:16px 18px 14px;gap:7px}
   .home-industry-disclosure--compact .home-industry-title{font-size:clamp(18px,1.7vw,24px)}
   .home-industry-disclosure--compact .home-industry-orientation{font-size:12px;line-height:1.48}
   .home-industry-disclosure--compact .home-industry-panel-content{padding:0 18px 16px}
   .home-industry-disclosure--compact .home-industry-detail{font-size:12px;line-height:1.52;margin-bottom:9px}
-  .home-industry-disclosure--compact .home-industry-row:has(.home-industry-item.active) .home-industry-item.active{grid-template-rows:148px minmax(0,1fr)}
+  .home-industry-disclosure--compact .home-industry-row:has(.home-industry-item.active) .home-industry-item.active{grid-template-rows:240px minmax(0,1fr)}
   @media(min-width:768px) and (max-width:1100px){
     .home-industry-disclosure--compact{padding-top:28px;padding-bottom:52px}
     .home-industry-disclosure--compact > .border-t{padding-top:14px;gap:16px}
-    .home-industry-disclosure--compact .home-industry-row{height:218px}
-    .home-industry-disclosure--compact .home-industry-row:has(.home-industry-item.active){height:318px}
+    .home-industry-disclosure--compact .home-industry-row{height:320px}
+    .home-industry-disclosure--compact .home-industry-row:has(.home-industry-item.active){height:410px}
     .home-industry-disclosure--compact .home-industry-trigger{padding:15px 16px 13px}
     .home-industry-disclosure--compact .home-industry-panel-content{padding:0 16px 14px}
-    .home-industry-disclosure--compact .home-industry-row:has(.home-industry-item.active) .home-industry-item.active{grid-template-rows:144px minmax(0,1fr)}
+    .home-industry-disclosure--compact .home-industry-row:has(.home-industry-item.active) .home-industry-item.active{grid-template-rows:210px minmax(0,1fr)}
   }
   @media(min-width:768px) and (max-width:1100px){
     .home-industry-row{height:390px}

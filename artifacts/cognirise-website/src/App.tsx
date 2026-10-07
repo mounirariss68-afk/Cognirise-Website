@@ -106,6 +106,15 @@ export function Router() {
   const rawPath = location.split(/[?#]/)[0];
   const path = rawPath === "/" ? rawPath : rawPath.replace(/\/+$/, "");
   const embedsBackInHero = path === "/"
+    || path.startsWith("/work/")
+    || path === "/industries"
+    || path === "/contact"
+    || path === "/value-scan"
+    || path === "/what-we-do/agentic-enterprise-transformation"
+    || path === "/what-we-do/data-ai-foundations"
+    || path === "/what-we-do/engineering-with-ai"
+    || path === "/what-we-do/sovereign-regulated-ai"
+    || path === "/what-we-do/digital-ai-workforce"
     || path === "/about"
     || path === "/platforms"
     || path === "/methodologies"

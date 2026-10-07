@@ -1,3 +1,4 @@
+import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
 import { Link } from "wouter";
 import { ArrowDown, ArrowRight, Minus, Plus } from "lucide-react";
 import { useState } from "react";
@@ -171,9 +172,10 @@ export default function AgenticTransformation() {
       `}</style>
       
       <section className="at-hero public-hero-shell">
-        <div className="at-kicker">{heroKicker}</div>
         <div className="at-hero-grid">
           <div className="at-hero-copy">
+            <div className="launch-hero-top"><NavigationBackControl embedded /><div className="at-kicker">{heroKicker}</div></div>
+            <div className="launch-hero-narrative">
             <h1>Make AI change the <em>work.</em></h1>
             <p>As a capability within Consulting & Engineering with AI, agentic enterprise transformation brings senior operators, forward-deployed engineers and governed agents together around the processes that matter most.</p>
             <div className="at-actions">
@@ -185,6 +187,7 @@ export default function AgenticTransformation() {
               </button>
             </div>
           </div>
+            </div>
           <div className="at-hero-image">
             <img src={assetUrl("/images/cognirise/site-services.jpg")} alt="A vivid current moving through a white and navy architectural landscape." />
             <div className="at-hero-word">work</div>

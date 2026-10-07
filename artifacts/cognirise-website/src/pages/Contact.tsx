@@ -1,13 +1,17 @@
+import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
 import { Link } from "wouter";
 import { BrandButton } from "@/components/ui/brand-button";
 import { getMarketLocationLabel, useMarketStore } from "@/store/market";
-import { contentRecord, useCmsCollection, usePublishedContactEmail } from "@/lib/cms";
+import { contentRecord, useCmsCollection, usePublishedContactEmail, useCmsPreviewRequestDisabled } from "@/lib/cms";
+import { LAUNCH_POLICY } from "@workspace/api-zod";
+import { launchContactOffices } from "@/content/contact-launch";
 import { OfficeContactCard } from "@/components/OfficeContactCard";
 import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
 
 export default function Contact() {
   const { market } = useMarketStore();
   const contactEmail = usePublishedContactEmail();
+  const protectedPreview = useCmsPreviewRequestDisabled();
   const offices = useCmsCollection("office", [], (item) => {
     const office = contentRecord(item, "office");
     return {
@@ -19,11 +23,15 @@ export default function Contact() {
   });
   
   const marketLocation = getMarketLocationLabel(market);
+  const visibleOffices = LAUNCH_POLICY.enabled && !protectedPreview
+    ? launchContactOffices(offices.data)
+    : offices.data;
   const heroKicker = cleanHeroIdentifier(`Contact / ${marketLocation}`, { marketLocation });
 
   return (
     <div className="flex flex-col">
       <section className="public-hero-shell px-6 md:px-12 py-24 max-w-[1440px] mx-auto w-full min-h-[70vh] flex flex-col justify-center">
+        <NavigationBackControl embedded className="mb-8" />
         <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-8">
           <div className="h-[1px] w-6 bg-gradient-to-r from-[hsl(var(--brand-violet))] to-[hsl(var(--brand-coral))]" />
           {heroKicker}
@@ -44,7 +52,7 @@ export default function Contact() {
             <h3 className="text-[10px] font-semibold uppercase tracking-widest text-[hsl(var(--brand-pink))] mb-6">Global Offices</h3>
             
             <div className="space-y-8">
-              {offices.data
+              {visibleOffices
                 .toSorted((left, right) => left.order - right.order)
                 .map((office) => (
                   <OfficeContactCard key={`${office.city}-${office.address}`} {...office} />

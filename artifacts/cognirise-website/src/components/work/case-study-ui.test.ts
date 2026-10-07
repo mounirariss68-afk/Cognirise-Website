@@ -110,10 +110,11 @@ test("carousel keeps drag enabled and synchronizes both end controls after reini
   assert.match(rail, /input\.shiftKey && input\.deltaY/);
   assert.match(rail, /draggable=\{false\}/);
   assert.match(rail, /duration: reducedMotion \? 0 : 25/);
-  assert.match(rail, /loading="lazy"/);
-  assert.match(rail, /new IntersectionObserver/);
+  assert.match(rail, /loading=\{eager \? "eager" : "lazy"\}/);
+  assert.match(rail, /eager=\{index < 2\}/);
+  assert.doesNotMatch(rail, /new IntersectionObserver/);
   assert.match(rail, /data-case-media=\{rendition\.url\}/);
-  assert.match(rail, /src=\{shouldLoad \? rendition\.url : undefined\}/);
+  assert.match(rail, /src=\{rendition\.url\}/);
   assert.match(rail, /tabIndex=\{0\}/);
   assert.match(rail, /focus\(\{ preventScroll: true \}\)/);
   assert.match(rail, /horizontalWheelDelta/);

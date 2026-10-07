@@ -1,3 +1,5 @@
+import { CONTACT_EMAIL } from "@/content/contact-launch";
+import { LAUNCH_POLICY } from "@workspace/api-zod";
 import { createContext, createElement, useContext, type ReactNode } from "react";
 import { getGetPublicContactConfigurationQueryKey, getGetPublicHeroFilmQueryKey, getGetPublishedContentQueryKey, useGetPublishedContent, useGetPublicContactConfiguration, useGetPublicHeroFilm, useListPublishedContent } from "@workspace/api-client-react";
 import type { DocumentKind, PublishedContent } from "@workspace/api-client-react";
@@ -225,7 +227,7 @@ export const COMPILED_LANDING_ROUTES = [
   { sourceKey: "compiled:/methodologies", path: "/methodologies", template: "methodologies" },
 ] as const;
 
-export const COMPILED_CONTACT_EMAIL = "hello@cognirise.ai";
+export const COMPILED_CONTACT_EMAIL = CONTACT_EMAIL;
 
 export function resolvePublishedContactEmail(
   published: { contactEmail?: unknown } | undefined,
@@ -236,6 +238,7 @@ export function resolvePublishedContactEmail(
 }
 
 export function usePublishedContactEmail(): string {
+  const protectedPreview = useCmsPreviewRequestDisabled();
   const { market, locale } = useMarketStore();
   const releaseContext = useReleaseContext();
   const params = publicContactConfigurationParams(market, locale);
@@ -246,6 +249,7 @@ export function usePublishedContactEmail(): string {
       retry: false,
     },
   });
+  if (LAUNCH_POLICY.enabled && !protectedPreview) return CONTACT_EMAIL;
   if (releaseContext) {
     const revision = releaseContext.release.manifest.revisions.find((item) => {
       if (item.kind !== "site-configuration") return false;

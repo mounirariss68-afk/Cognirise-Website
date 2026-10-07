@@ -1,7 +1,14 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { existsSync, readFileSync } from "node:fs";
-import { launchTeam, teamHeroForRegion, teamPortraitClipPath } from "./team-launch";
+import { launchTeam, isPublicTeamProfile, teamHeroForRegion, teamPortraitClipPath } from "./team-launch";
+
+test("compliance hold hides Rami without deleting the saved biography", () => {
+  assert.deepEqual(launchTeam.filter(isPublicTeamProfile).map(p => p.name),
+    ["Mounir Ariss", "Bülent Eğrilmez", "Don Peppers"]);
+  assert.ok(launchTeam.find(p => p.name === "Rami Aslan")?.background);
+  assert.equal(isPublicTeamProfile({ name: " Rami Aslan " }), false);
+});
 
 test("approved roster has complete founders and the two requested advisors", () => {
   assert.deepEqual(launchTeam.map(p => p.name), ["Mounir Ariss", "Bülent Eğrilmez", "Don Peppers", "Rami Aslan"]);
