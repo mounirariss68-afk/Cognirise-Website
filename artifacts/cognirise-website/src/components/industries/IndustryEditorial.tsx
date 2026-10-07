@@ -4,9 +4,11 @@ import { ArrowRight, ExternalLink, ChevronDown } from "lucide-react";
 import { BrandButton } from "@/components/ui/brand-button";
 import { assetUrl } from "@/lib/assets";
 import { useMarketStore, type Market } from "@/store/market";
-import { projectIndustrySnapshotForMarket, type IndustrySectionId, type PublicSectorPov } from "@workspace/api-zod";
+import { LAUNCH_POLICY, projectIndustrySnapshotForMarket, type IndustrySectionId, type PublicSectorPov } from "@workspace/api-zod";
 import type { IndustryContent } from "@/content/industries";
-import { contentRecord, useCmsEntry } from "@/lib/cms";
+import { contentRecord, useCmsEntry, useCmsPreviewRequestDisabled } from "@/lib/cms";
+import { useReleaseContext } from "@/lib/releases";
+import { applyTelecomLaunch } from "@/content/telecom-launch";
 import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
 import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
 import { TelecomEditorial } from "@/components/industries/TelecomEditorial";
@@ -34,8 +36,13 @@ function IndustrySection({
 export function IndustryEditorial({ industry }: { industry: IndustryContent }) {
   const cms = useCmsEntry("industry", industry.slug);
   const published = cms.data ? contentRecord(cms.data, "industry") : null;
-  const view = published ? { ...industry, ...published, slug: industry.slug } : industry;
-  const { market } = useMarketStore();
+  const resolvedView = published ? { ...industry, ...published, slug: industry.slug } : industry;
+  const { market, locale } = useMarketStore();
+  const protectedPreview = useCmsPreviewRequestDisabled();
+  const releaseContext = useReleaseContext();
+  const launchTelecom = LAUNCH_POLICY.enabled && industry.slug === "telecoms"
+    && locale === "en" && !protectedPreview && !releaseContext?.preview;
+  const view = launchTelecom ? applyTelecomLaunch(resolvedView) : resolvedView;
   const publicSectorPov = view.publicSectorPov;
   const publicSectorMarketMismatch = industry.slug === "public-sector"
     && (
@@ -51,10 +58,10 @@ export function IndustryEditorial({ industry }: { industry: IndustryContent }) {
   const publicSectorMissingExactEdition = industry.slug === "public-sector"
     && market !== "uae"
     && !published;
-  if (cms.isAuthoritative && cms.delivery === "loading") {
+  if (!launchTelecom && cms.isAuthoritative && cms.delivery === "loading") {
     return <main className="min-h-[70vh] bg-[#fdfbf7] px-6 py-24 text-[#102957]" aria-busy="true"><NavigationBackControl embedded className="mb-7" /><p>Loading industry perspective…</p></main>;
   }
-  if (publicSectorMarketMismatch || publicSectorMissingExactEdition || (cms.isAuthoritative && (!published || (industry.slug === "education" && !published.educationPov)))) {
+  if (publicSectorMarketMismatch || publicSectorMissingExactEdition || (!launchTelecom && cms.isAuthoritative && (!published || (industry.slug === "education" && !published.educationPov)))) {
     return <main className="min-h-[70vh] bg-[#fdfbf7] px-6 py-24 text-[#102957]"><div className="mx-auto max-w-3xl"><NavigationBackControl embedded className="mb-7" /><h1 className="font-display text-5xl font-semibold">This industry perspective is under review.</h1><p className="mt-6 max-w-xl text-lg text-[#506583]">It will return when an approved edition is published for this market.</p><Link className="mt-8 inline-flex font-bold text-[#db509e]" href="/industries">Explore all industries <ArrowRight size={16} /></Link></div></main>;
   }
   return <IndustryEditorialView view={view} />;
