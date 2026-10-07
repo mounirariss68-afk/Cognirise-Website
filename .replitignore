@@ -3,3 +3,6 @@
 
 # No need to store the pnpm store twice.
 .local
+
+# Design Canvas prototypes and artwork stay in the workspace, not the published app.
+artifacts/mockup-sandbox
