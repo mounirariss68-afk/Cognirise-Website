@@ -1,0 +1,28 @@
+.telecom .telecom-approved {
+  grid-column: 1 / -1;
+  min-width: 0;
+  color: #102957;
+  background: #fdfbf7;
+  font: 400 14px/1.5 Inter, sans-serif;
+}
+.telecom .telecom-approved :is(h2,h3,h4,p) {
+  margin: 0;
+  max-width: none;
+  color: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+.telecom .telecom-approved :is(h2,h3,h4) { font-family: Comfortaa, sans-serif; }
+.telecom .telecom-approved > section { min-height: 0; }
+.telecom .telecom-approved article { display: block; padding: 0; border: 0; }
+.telecom .telecom-approved .tc-metric-list { display:flex;flex-wrap:wrap;gap:8px; }
+.telecom .telecom-approved .tc-metric { display:flex;flex-wrap:wrap;gap:6px 10px;align-items:baseline; }
+.telecom .telecom-approved [id] { scroll-margin-top: 100px; }
+.telecom .tc-approved-section { padding: 44px 4.8vw; }
+.telecom .tc-approved-section > .telecom-approved + .telecom-approved { margin-top:44px; }
+.telecom .tc-opportunity:has(.telecom-approved) { padding:60px 3vw 0;gap:40px; }
+@media(max-width:760px) {
+  .telecom .tc-approved-section { padding:30px 0; }
+  .telecom .tc-opportunity:has(.telecom-approved) { padding:40px 0 0; }
+  .telecom .tc-opportunity:has(.telecom-approved) > :not(.telecom-approved) { padding-inline:21px; }
+}

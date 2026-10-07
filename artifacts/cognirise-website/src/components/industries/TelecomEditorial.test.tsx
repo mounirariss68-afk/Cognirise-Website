@@ -70,7 +70,7 @@ test("full inventory is rendered from data", async () => {
   assert.equal(count(html, /data-testid="button-range-/g), 5);
   assert.equal(count(html, /data-testid="button-scenario-telecom-flagships-/g), 8);
   const roles = pov.departments.reduce((n, d) => n + d.roles.length, 0);
-  assert.ok(html.replaceAll("<!-- -->", "").includes(`${roles} functional roles`));
+  assert.ok(html.replaceAll("<!-- -->", "").includes(`${roles}</strong><span>functional roles`));
   assert.match(html, /Validate first/);
   assert.doesNotMatch(html, /Deploy Now/i);
   assert.match(html, /market=uae/);

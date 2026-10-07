@@ -11,6 +11,14 @@ import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
 import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
 import { industryStyles } from "@/components/industries/IndustryEditorial";
 
+import { TelecomDataProvider } from "./telecom/TelecomData";
+import { ValueMap } from "./telecom/ValueMap";
+import { PriorityMap } from "./telecom/PriorityMap";
+import { WorkforceMap } from "./telecom/WorkforceMap";
+import { ArchitectureTrace } from "./telecom/ArchitectureTrace";
+import { WorkflowLanes } from "./telecom/WorkflowLanes";
+import { InvestigationPaths } from "./telecom/InvestigationPaths";
+
 type Metric = TelecomPov["metrics"][number];
 type Scenario = TelecomPov["scenarios"][number];
 type Department = TelecomPov["departments"][number];
@@ -61,12 +69,10 @@ export function TelecomEditorial({ view, marketOverride }: { view: IndustryConte
   const opportunity = typeof opportunityValue === "string" ? { title: "The enterprise around the network", body: opportunityValue } : opportunityValue;
   const marketLabel = market.toUpperCase();
   const heroKicker = cleanHeroIdentifier(`${marketLabel} / ${view.name}`, { marketLocation: marketLabel });
-  const roleCount = pov.departments.reduce((n, d) => n + d.roles.length, 0);
-  const [workflowId, setWorkflowId] = React.useState(pov.scenarios[0]?.id);
   const reportedSources = pov.metrics.filter((m) => m.classification === "reported" && m.source);
 
   return (
-    <MetricsContext.Provider value={metrics}>
+    <TelecomDataProvider value={pov}><MetricsContext.Provider value={metrics}>
       <main className={`industry industry--${view.variant} telecom`} data-telecom-editorial="">
         <style>{industryStyles}{telecomStyles}</style>
         <section className="ind-hero public-hero-shell" style={{ alignItems: "stretch" }} data-industry-section="hero" aria-labelledby="industry-title">
@@ -87,40 +93,23 @@ export function TelecomEditorial({ view, marketOverride }: { view: IndustryConte
         <section className="ind-opportunity tc-opportunity" data-industry-section="opportunity" aria-labelledby="opportunity-title">
           <div><div className="ind-kicker">Industry opportunity</div><h2 id="opportunity-title">{opportunity.title}</h2></div>
           <div><p data-cms-field={typeof opportunityValue === "string" ? "content.opportunity" : undefined}>{opportunity.body}</p></div>
-          <div className="tc-pools" id="telecom-value-pools" aria-labelledby="pools-title">
-            <div className="tc-head"><div><div className="ind-kicker">Six value pools</div><h3 id="pools-title">Where the business around the network moves.</h3></div><p data-cms-field={`${F}.note`}>{pov.note}</p></div>
-            <p className="tc-note" role="note">{TELECOM_FIGURES_NOTE}</p>
-            <ol className="tc-pool-list">{pov.valuePools.map((pool, i) => <li key={pool.title} className="tc-pool" data-testid={`value-pool-${i}`}>
-              <span className="tc-num">0{i + 1}</span>
-              <div><h4 data-cms-field={`${F}.valuePools.${i}.title`}>{pool.title}</h4><p data-cms-field={`${F}.valuePools.${i}.body`}>{pool.body}</p></div>
-              <div className="tc-rail" aria-hidden="true" />
-              <MetricList ids={pool.metricIds} />
-            </li>)}</ol>
-            <p className="tc-small">Rails are qualitative and equal: the pools are not compared on a common numeric scale.</p>
-          </div>
+          <div className="telecom-approved" id="telecom-value-pools"><ValueMap /></div>
         </section>
 
         <section className="ind-pressure" data-industry-section="pressures" aria-labelledby="pressure-title">
           <div><div className="ind-kicker">Operating pressures</div><h2 id="pressure-title">Margin, service and integration pull in different directions.</h2></div>
           <div className="ind-pressure-list">{view.pressures.map((p, i) => <article key={p.title}><span>0{i + 1}</span><div><h3 data-cms-field={`content.pressures.${i}.title`}>{p.title}</h3><p data-cms-field={`content.pressures.${i}.body`}>{p.body}</p></div></article>)}</div>
-          <PriorityMatrix candidates={pov.candidates} />
+          <div className="telecom-approved" id="telecom-prioritisation"><PriorityMap /></div>
         </section>
 
-        <section className="ind-capabilities" data-industry-section="capabilities" aria-labelledby="capabilities-title">
-          <div className="ind-capabilities-head"><div><div className="ind-kicker">Enterprise workforce</div><h2 id="capabilities-title">{pov.departments.length} departments. Three domains.</h2></div><p>{roleCount} functional roles across the inventory. Roles are illustrative patterns, not shipped agents; each acts only within the permissions its owner approves.</p></div>
-          <Workforce departments={pov.departments} />
-          <Architecture pov={pov} workflowId={workflowId} setWorkflowId={setWorkflowId} />
+        <section className="ind-capabilities tc-approved-section" data-industry-section="capabilities" aria-label="Enterprise workforce and architecture">
+          <div className="telecom-approved" id="telecom-workforce"><WorkforceMap /></div>
+          <div className="telecom-approved" id="telecom-architecture"><ArchitectureTrace /></div>
         </section>
 
-        <section className="ind-evidence" data-industry-section="applications" aria-labelledby="applications-title">
-          <div className="ind-evidence-head"><div><div className="ind-kicker">Illustrative telecom workflows</div><h2 id="applications-title">Bounded workflows, owned decisions.</h2></div><p>These are illustrative telecom workflows, not Cognirise client results or live operations. Step through each stage manually.</p></div>
-          <ScenarioWalkthrough id="telecom-flagships" scenarios={pov.scenarios} departments={pov.departments} selected={workflowId} onSelect={setWorkflowId} />
-          <div className="ind-nested-module" id="telecom-rafm">
-            <div className="ind-kicker">Revenue assurance and fraud</div>
-            <h3 data-cms-field={`${F}.rafm.title`}>{pov.rafm.title}</h3>
-            <p className="tc-lead" data-cms-field={`${F}.rafm.body`}>{pov.rafm.body}</p>
-            <ScenarioWalkthrough id="telecom-rafm-walk" scenarios={pov.scenarios.filter((s) => pov.rafm.scenarioIds.includes(s.id))} departments={pov.departments} />
-          </div>
+        <section className="ind-evidence tc-approved-section" data-industry-section="applications" aria-label="Illustrative telecom workflows">
+          <div className="telecom-approved" id="telecom-flagships"><WorkflowLanes /></div>
+          <div className="telecom-approved" id="telecom-rafm"><InvestigationPaths /></div>
           <div className="ind-nested-module" id="telecom-adaptations">
             <div className="ind-kicker">Cross-industry adaptations</div>
             <h3>Hypotheses to test, not ready-made plays.</h3>
@@ -162,96 +151,8 @@ export function TelecomEditorial({ view, marketOverride }: { view: IndustryConte
           <aside><Link href={href(view.service.href)}>Relevant service: {view.service.label} <ArrowRight size={14} /></Link><BrandButton href={href("/value-scan")}>Book a value scan</BrandButton></aside>
         </section>
       </main>
-    </MetricsContext.Provider>
+    </MetricsContext.Provider></TelecomDataProvider>
   );
-}
-
-function PriorityMatrix({ candidates }: { candidates: TelecomPov["candidates"] }) {
-  const [sel, setSel] = React.useState(candidates[0]?.id);
-  const c = candidates.find((x) => x.id === sel) ?? candidates[0];
-  const ci = candidates.indexOf(c);
-  return <div className="ind-nested-module tc-matrix" id="telecom-prioritisation">
-    <div className="ind-kicker">Opportunity prioritisation</div>
-    <h3>Illustrative hypotheses, positioned for discussion.</h3>
-    <p className="tc-small">Positions are illustrative and agreed with the operator in Innovate. Marker size carries no meaning.</p>
-    <div className="tc-matrix-grid">
-      <div className="tc-plot" role="group" aria-label="Prioritisation matrix: value against feasibility">
-        <span className="tc-q tc-q--tr">Validate first</span><span className="tc-q tc-q--tl">Strategic bets</span><span className="tc-q tc-q--br">Quick checks</span><span className="tc-q tc-q--bl">Revisit later</span>
-        <span className="tc-axis tc-axis--x">Feasibility</span><span className="tc-axis tc-axis--y">Value hypothesis</span>
-        {candidates.map((x, i) => <button key={x.id} type="button" className={`tc-dot ${x.id === c.id ? "active" : ""}`} style={{ left: `${x.feasibilityPosition}%`, bottom: `${x.valuePosition}%` }} aria-pressed={x.id === c.id} aria-label={`${x.title}: value ${x.valuePosition}, feasibility ${x.feasibilityPosition} (illustrative)`} onClick={() => setSel(x.id)} data-testid={`button-candidate-${x.id}`}>{i + 1}</button>)}
-      </div>
-      <div className="tc-detail" aria-live="polite">
-        <div className="tc-cand-list">{candidates.map((x, i) => <button key={x.id} type="button" aria-pressed={x.id === c.id} className={x.id === c.id ? "active" : ""} onClick={() => setSel(x.id)}><span>{i + 1}</span>{x.title}</button>)}</div>
-        <h4 data-cms-field={`${F}.candidates.${ci}.title`}>{c.title}</h4>
-        <dl>{([["Value hypothesis", "valueHypothesis"], ["Data readiness", "readiness"], ["Dependencies", "dependencies"], ["Action authority", "authority"], ["Validation needs", "validation"]] as const).map(([label, k]) => <div key={k}><dt>{label}</dt><dd data-cms-field={`${F}.candidates.${ci}.${k}`}>{c[k]}</dd></div>)}</dl>
-      </div>
-    </div>
-  </div>;
-}
-
-function Workforce({ departments }: { departments: Department[] }) {
-  const [sel, setSel] = React.useState(departments[0]?.id);
-  const d = departments.find((x) => x.id === sel) ?? departments[0];
-  const di = departments.indexOf(d);
-  return <div className="tc-workforce" id="telecom-workforce">
-    <div className="tc-lanes">{DOMAINS.map((domain) => { const list = departments.filter((x) => x.domain === domain); return <div key={domain} className="tc-lane" role="group" aria-label={`${domain} domain, ${list.length} departments`}>
-      <h3>{domain} <span>{list.length}</span></h3>
-      {list.map((x) => <button key={x.id} type="button" aria-pressed={x.id === d.id} aria-controls="telecom-dept-detail" className={x.id === d.id ? "active" : ""} onClick={() => setSel(x.id)} data-testid={`button-department-${x.id}`}>{x.title}<small>{x.roles.length} roles</small></button>)}
-    </div>; })}</div>
-    <div className="tc-dept" id="telecom-dept-detail" aria-live="polite">
-      <div className="ind-kicker">{d.domain} / selected department</div>
-      <h3 data-cms-field={`${F}.departments.${di}.title`}>{d.title}</h3>
-      <p className="tc-lead" data-cms-field={`${F}.departments.${di}.challenge`}>{d.challenge}</p>
-      <h4>Illustrative functional roles</h4>
-      <ul className="tc-roles">{d.roles.map((r, ri) => <li key={r.title}><strong data-cms-field={`${F}.departments.${di}.roles.${ri}.title`}>{r.title}</strong><span data-cms-field={`${F}.departments.${di}.roles.${ri}.body`}>{r.body}</span></li>)}</ul>
-      <dl className="tc-dl">{([["Systems", "systems"], ["Actions", "actions"], ["Controls", "controls"]] as const).map(([l, k]) => <div key={k}><dt>{l}</dt><dd data-cms-field={`${F}.departments.${di}.${k}`}>{d[k]}</dd></div>)}</dl>
-      <h4>KPIs</h4><MetricList ids={d.metricIds} />
-    </div>
-  </div>;
-}
-
-function Architecture({ pov, workflowId, setWorkflowId }: { pov: TelecomPov; workflowId?: string; setWorkflowId: (id: string) => void }) {
-  const s = pov.scenarios.find((x) => x.id === workflowId);
-  const dept = pov.departments.find((d) => d.id === s?.departmentId);
-  const layers = [["orchestration", "Domain-limited orchestration"], ["domains", "Business, operations and foundation domains"], ["foundation", "Data and integration foundation"], ["execution", "Authorised execution and handoffs"]] as const;
-  return <div className="ind-nested-module tc-arch" id="telecom-architecture">
-    <div className="ind-kicker">Telecom application view of Cognirise architecture</div>
-    <h3>How a workflow travels through the system.</h3>
-    <label className="tc-select">Highlight a workflow <select value={workflowId} onChange={(e) => setWorkflowId(e.target.value)} data-testid="select-architecture-workflow">{pov.scenarios.map((x) => <option key={x.id} value={x.id}>{x.title}</option>)}</select></label>
-    <ol className="tc-layers">{layers.map(([k, label]) => <li key={k} className={k === "domains" || k === "orchestration" || k === "execution" ? "lit" : ""}>
-      <h4>{label}</h4><p data-cms-field={`${F}.architecture.${k}`}>{pov.architecture[k]}</p>
-      {k === "domains" && dept && <div className="tc-route" aria-label="Selected domains">{DOMAINS.map((d) => <span key={d} className={d === dept.domain ? "on" : ""}>{d}{d === dept.domain ? `: ${dept.title}` : ""}</span>)}</div>}
-      {k === "execution" && s && <p className="tc-route-note"><strong>Boundary:</strong> {s.boundary}</p>}
-    </li>)}</ol>
-    <p className="tc-small">Network telemetry is an input; network changes are handed to authorised NEP/NOC owners. No agent holds independent network control or unrestricted shared memory.</p>
-  </div>;
-}
-
-function ScenarioWalkthrough({ id, scenarios, departments, selected, onSelect }: { id: string; scenarios: Scenario[]; departments: Department[]; selected?: string; onSelect?: (id: string) => void }) {
-  const [local, setLocal] = React.useState(scenarios[0]?.id);
-  const current = selected ?? local;
-  const s = scenarios.find((x) => x.id === current) ?? scenarios[0];
-  const [stage, setStage] = React.useState(0);
-  const tabs = React.useRef<(HTMLButtonElement | null)[]>([]);
-  if (!s) return null;
-  const pick = (v: string) => { setStage(0); onSelect ? onSelect(v) : setLocal(v); };
-  const onKey = (e: React.KeyboardEvent, i: number) => {
-    let n = i;
-    if (e.key === "ArrowRight") n = (i + 1) % STAGES.length; else if (e.key === "ArrowLeft") n = (i - 1 + STAGES.length) % STAGES.length; else if (e.key === "Home") n = 0; else if (e.key === "End") n = STAGES.length - 1; else return;
-    e.preventDefault(); setStage(n); tabs.current[n]?.focus();
-  };
-  const dept = departments.find((d) => d.id === s.departmentId);
-  return <div className="tc-walk" id={id}>
-    {scenarios.length > 1 && <div className="tc-scen-list" role="group" aria-label="Choose a workflow">{scenarios.map((x) => <button key={x.id} type="button" aria-pressed={x.id === s.id} className={x.id === s.id ? "active" : ""} onClick={() => pick(x.id)} data-testid={`button-scenario-${id}-${x.id}`}>{x.title}</button>)}</div>}
-    <div className="tc-walk-body">
-      <div className="tc-walk-meta"><span className="tc-tag">Illustrative workflow</span><h4>{s.title}</h4><p>{dept?.title}</p><dl className="tc-dl"><div><dt>Owner</dt><dd>{s.owner}</dd></div><div><dt>Approval boundary</dt><dd>{s.boundary}</dd></div><div><dt>Audit and recovery</dt><dd>{s.auditRecovery}</dd></div></dl><MetricList ids={s.metricIds} /></div>
-      <div>
-        <div className="tc-stages" role="tablist" aria-label={`${s.title} stages`}>{STAGES.map(([k, l], i) => <button key={k} ref={(el) => { tabs.current[i] = el; }} role="tab" id={`${id}-tab-${k}`} aria-selected={stage === i} aria-controls={`${id}-panel`} tabIndex={stage === i ? 0 : -1} className={stage === i ? "active" : ""} onClick={() => setStage(i)} onKeyDown={(e) => onKey(e, i)}><span>0{i + 1}</span>{l}</button>)}</div>
-        <div className="tc-stage-panel" role="tabpanel" id={`${id}-panel`} aria-labelledby={`${id}-tab-${STAGES[stage][0]}`}><p>{s.stages[STAGES[stage][0]]}</p>
-          <div className="tc-stage-nav"><button type="button" disabled={stage === 0} onClick={() => setStage(stage - 1)}>Previous stage</button><button type="button" disabled={stage === STAGES.length - 1} onClick={() => setStage(stage + 1)}>Next stage</button></div></div>
-      </div>
-    </div>
-  </div>;
 }
 
 function OutcomesMatrix({ departments }: { departments: Department[] }) {

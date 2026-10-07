@@ -21,3 +21,10 @@ createRoot(document.getElementById('root')!, {
     <App />
   </ErrorBoundary>,
 );
+
+import "./components/industries/telecom/approved.css";
+import "./components/industries/telecom/ValueMap.css";
+import "./components/industries/telecom/PriorityMap.css";
+import "./components/industries/telecom/workforce-map.css";
+import "./components/industries/telecom/architecture-trace.css";
+import "./components/industries/telecom/TelecomVariants.css";
