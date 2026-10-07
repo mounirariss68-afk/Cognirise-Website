@@ -32,7 +32,7 @@ function bankingContent(payload: unknown) {
 function publicSectorContent(payload: unknown) {
   if (!isObject(payload) || !isObject(payload.content)) return false;
   if (payload.slug !== "public-sector" && payload.content.name !== "Public Sector") return false;
-  const pov = payload.content.publicSectorPov;
+  const pov = payload.content.publicSectorNative ?? payload.content.publicSectorPov;
   return isObject(pov) && typeof pov.market === "string" ? { content: payload.content, pov } : false;
 }
 

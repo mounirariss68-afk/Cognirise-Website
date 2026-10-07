@@ -16,7 +16,7 @@ type Section = {
   expandable?: boolean;
 };
 
-const sectionPresentation: Record<IndustrySectionId, Omit<Section, "id" | "number" | "title">> = {
+const sectionPresentation: Record<(typeof INDUSTRY_SECTION_OUTLINE)[number]["id"], Omit<Section, "id" | "number" | "title">> = {
   hero: { component: "Industry split hero", description: "Proposition and approved cinematic raster artwork." },
   opportunity: { component: "Editorial statement panel", description: "Always-visible strategic shift." },
   pressures: { component: "Numbered pressure rows", description: "Visible problem statements with optional detail.", expandable: true },
@@ -27,7 +27,7 @@ const sectionPresentation: Record<IndustrySectionId, Omit<Section, "id" | "numbe
   sources: { component: "Linked source list", description: "Evidence labels and further evidence destination.", expandable: true },
   cta: { component: "CTA band / BrandButton", description: "Direct offer, primary next step and service destination." },
 };
-const sections: Section[] = INDUSTRY_SECTION_OUTLINE.map((section, index) => ({
+const legacySections: Section[] = INDUSTRY_SECTION_OUTLINE.map((section, index) => ({
   ...sectionPresentation[section.id],
   id: section.id,
   title: section.label,
@@ -80,6 +80,12 @@ export function IndustryVisualWorkspace({
   /** Canonical readiness target. The parent supplies this instead of a label. */
   focusPath?: string;
 }) {
+  const sections: Section[] = content.publicSectorNative?.version === 2
+    ? [legacySections[0], ...content.publicSectorNative.sections.map((section: { id: IndustrySectionId; title: string }, index: number) => ({
+      id: section.id, title: section.title, number: String(index + 2).padStart(2, "0"),
+      component: "AI-native government editorial module", description: "Exact regional manuscript, semantic tables and static illustrations.",
+    }))]
+    : legacySections;
   const [selected, setSelected] = useState<IndustrySectionId>("hero");
   const [disclosure, setDisclosure] = useState<"expanded" | "collapsed" | undefined>(undefined);
   const [viewport, setViewport] = useState<Viewport>("desktop");

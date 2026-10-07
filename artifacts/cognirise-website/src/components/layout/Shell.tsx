@@ -432,6 +432,7 @@ export function Shell({
     if (
       currentPath.startsWith("/preview/")
       || currentPath === "/industries/financial-services"
+      || currentPath === "/industries/public-sector"
       || ROUTE_OWNED_METADATA_PATHS.has(currentPath)
     ) return;
     const articleTitle = currentPath.startsWith("/insights/") && "AI Transformation Perspective | Cognirise";

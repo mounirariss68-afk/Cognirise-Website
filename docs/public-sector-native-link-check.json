@@ -1,0 +1,259 @@
+{
+  "checkedAt": "2026-10-07",
+  "method": "Automated HTTP reachability; not independent research or legal verification. Access challenges do not establish a broken citation.",
+  "links": [
+    {
+      "url": "https://aclanthology.org/2026.eacl-long.46/",
+      "status": 200,
+      "destination": "https://aclanthology.org/2026.eacl-long.46/"
+    },
+    {
+      "url": "https://arxiv.org/abs/2410.08928",
+      "status": 200,
+      "destination": "https://arxiv.org/abs/2410.08928"
+    },
+    {
+      "url": "https://arxiv.org/html/2508.13044v1",
+      "status": 200,
+      "destination": "https://arxiv.org/html/2508.13044v1"
+    },
+    {
+      "url": "https://arxiv.org/html/2510.27543v1",
+      "status": 200,
+      "destination": "https://arxiv.org/html/2510.27543v1"
+    },
+    {
+      "url": "https://arxiv.org/html/2601.05101v1",
+      "status": 200,
+      "destination": "https://arxiv.org/html/2601.05101v1"
+    },
+    {
+      "url": "https://cbddo.gov.tr/mevzuat/2019-12-sayili-bilgi-guvenligi-tedbirleri-cumhurbaskanligi-genelgesi/",
+      "status": "network-unconfirmed",
+      "reason": "<urlopen error timed out>"
+    },
+    {
+      "url": "https://cbddo.gov.tr/uyzs",
+      "status": "network-unconfirmed",
+      "reason": "<urlopen error timed out>"
+    },
+    {
+      "url": "https://dga.gov.sa/en/programs/qiyas",
+      "status": 403
+    },
+    {
+      "url": "https://en.digst.dk/systems/digital-post/about-the-national-digital-post/background/",
+      "status": 200,
+      "destination": "https://en.digst.dk/systems/digital-post/about-the-national-digital-post/background/"
+    },
+    {
+      "url": "https://en.ilsole24ore.com/art/digital-identity-eu-accelerates-wallet-italy-spid-and-cieid-grow-AHkwOOaD",
+      "status": 200,
+      "destination": "https://en.ilsole24ore.com/art/digital-identity-eu-accelerates-wallet-italy-spid-and-cieid-grow-AHkwOOaD"
+    },
+    {
+      "url": "https://english.aawsat.com/business/5306409-saudi-digital-government-authority-announces-rise-digital-experience-maturity",
+      "status": 200,
+      "destination": "https://english.aawsat.com/business/5306409-saudi-digital-government-authority-announces-rise-digital-experience-maturity"
+    },
+    {
+      "url": "https://eudiwallet.com/country-readiness/",
+      "status": 200,
+      "destination": "https://eudiwallet.com/country-readiness/"
+    },
+    {
+      "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32018R1724",
+      "status": 202,
+      "destination": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32018R1724"
+    },
+    {
+      "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=LEGISSUM:4740182",
+      "status": 202,
+      "destination": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=LEGISSUM:4740182"
+    },
+    {
+      "url": "https://gds.blog.gov.uk/2026/05/14/gov-uk-chat-launches/",
+      "status": 200,
+      "destination": "https://gds.blog.gov.uk/2026/05/14/gov-uk-chat-launches/"
+    },
+    {
+      "url": "https://gulfnews.com/uae/government/uae-launches-automatic-passport-and-emirates-id-renewals-1.500381132",
+      "status": 200,
+      "destination": "https://gulfnews.com/uae/government/uae-launches-automatic-passport-and-emirates-id-renewals-1.500381132"
+    },
+    {
+      "url": "https://mediaoffice.ae/en/news/2025/june/16-06/mohammed-bin-rashid-launches-phase-2-of-zero-bureaucracy-programme",
+      "status": 200,
+      "destination": "https://mediaoffice.ae/en/news/2025/june/16-06/mohammed-bin-rashid-launches-phase-2-of-zero-bureaucracy-programme"
+    },
+    {
+      "url": "https://news.err.ee/991789/parents-no-longer-have-to-apply-for-family-benefits",
+      "status": 200,
+      "destination": "https://news.err.ee/991789/parents-no-longer-have-to-apply-for-family-benefits"
+    },
+    {
+      "url": "https://oecd-opsi.org/innovations/proactive-family-benefits/",
+      "status": 403
+    },
+    {
+      "url": "https://oecd.ai/en/dashboards/policy-initiatives/digital-government-strategy-2023-2030-6950",
+      "status": 200,
+      "destination": "https://oecd.ai/en/dashboards/policy-initiatives/digital-government-strategy-2023-2030-6950"
+    },
+    {
+      "url": "https://preview.aclanthology.org/eacl-dois/2025.arabicnlp-main.21",
+      "status": 404
+    },
+    {
+      "url": "https://sharjah24.ae/en/Articles/2026/09/09/Ma8",
+      "status": 200,
+      "destination": "https://sharjah24.ae/en/Articles/2026/09/09/Ma8"
+    },
+    {
+      "url": "https://themarkup.org/artificial-intelligence/2026/01/30/mamdani-to-kill-the-nyc-ai-chatbot-we-caught-telling-businesses-to-break-the-law",
+      "status": 200,
+      "destination": "https://themarkup.org/artificial-intelligence/2026/01/30/mamdani-to-kill-the-nyc-ai-chatbot-we-caught-telling-businesses-to-break-the-law"
+    },
+    {
+      "url": "https://tr.investing.com/news/general-news/turkiyede-internet-kullanm-909a-yukseldi-edevlet-eticaret-ve-dijital-alskanlklarda-arts-suruyor-3515833",
+      "status": 403
+    },
+    {
+      "url": "https://turkiye.gov.tr/edevlet-istatistikleri",
+      "status": 200,
+      "destination": "https://turkiye.gov.tr/edevlet-istatistikleri"
+    },
+    {
+      "url": "https://u.ae/en/about-the-uae/digital-uae/digital-technology/Agentic-AI-for-Government-Services",
+      "status": 200,
+      "destination": "https://u.ae/en/about-the-uae/digital-uae/digital-technology/Agentic-AI-for-Government-Services"
+    },
+    {
+      "url": "https://u.ae/en/about-the-uae/digital-uae/digital-transformation/strategies-policies-and-initiatives/uae-mgovernment-initiative",
+      "status": 200,
+      "destination": "https://u.ae/en/about-the-uae/digital-uae/digital-transformation/strategies-policies-and-initiatives/uae-mgovernment-initiative"
+    },
+    {
+      "url": "https://uaecabinet.ae/en/news/under-directives-of-uae-president-and-in-world-first-mohammed-bin-rashid-reveals-new-uae-government-framework-to-deploy-agentic-ai-across-50-of-government-sectors-operations-within-two-years",
+      "status": 403
+    },
+    {
+      "url": "https://www.aile.gov.tr/SYGM/PDF/Turkiyenin_Butunlesik_Sosyal_Yardim_Sistemi.pdf",
+      "status": 200,
+      "destination": "https://www.aile.gov.tr/SYGM/PDF/Turkiyenin_Butunlesik_Sosyal_Yardim_Sistemi.pdf"
+    },
+    {
+      "url": "https://www.argaam.com/en/article/articledetail/id/1802243",
+      "status": 200,
+      "destination": "https://www.argaam.com/en/article/articledetail/id/1802243"
+    },
+    {
+      "url": "https://www.capgemini.com/news/press-releases/egovernment-benchmark-2025-digitalization-of-public-services-in-the-eu-accelerates-but-cybersecurity-and",
+      "status": 404
+    },
+    {
+      "url": "https://www.capgemini.com/wp-content/uploads/2026/06/eGovernment-Benchmark-Report-2026_Capgemini.pdf",
+      "status": 200,
+      "destination": "https://www.capgemini.com/wp-content/uploads/2026/06/eGovernment-Benchmark-Report-2026_Capgemini.pdf"
+    },
+    {
+      "url": "https://www.cyberlawwatch.com/2026/07/31/eu-digital-omnibus-on-ai-enters-into-force/",
+      "status": 200,
+      "destination": "https://www.cyberlawwatch.com/2026/07/31/eu-digital-omnibus-on-ai-enters-into-force/"
+    },
+    {
+      "url": "https://www.dge.gov.ae/en/news/2025-gitex-tamm-4",
+      "status": 200,
+      "destination": "https://www.dge.gov.ae/en/news/2025-gitex-tamm-4"
+    },
+    {
+      "url": "https://www.dge.gov.ae/en/news/adg-digital-strategy",
+      "status": 200,
+      "destination": "https://www.dge.gov.ae/en/news/adg-digital-strategy"
+    },
+    {
+      "url": "https://www.difc.com/business/registrars-and-commissioners/commissioner-of-data-protection/regulation-10",
+      "status": 429
+    },
+    {
+      "url": "https://www.digitaldubai.ae/newsroom/news/world-economic-forum-recognizes-the-uae-pass-as-a-global-model-for-integrated-government-digital-infrastruct",
+      "status": 200,
+      "destination": "https://www.digitaldubai.ae/error-pages/404"
+    },
+    {
+      "url": "https://www.eadtrust.eu/en/blog/december-2026-deadline-eudi-wallet/",
+      "status": 200,
+      "destination": "https://www.eadtrust.eu/en/blog/december-2026-deadline-eudi-wallet/"
+    },
+    {
+      "url": "https://www.erdem-erdem.av.tr/turkiye-yapay-zeka-eylem-plani-2026-2030-genelgesi-resmi-gazetede-yayimlandi",
+      "status": 200,
+      "destination": "https://www.erdem-erdem.av.tr/turkiye-yapay-zeka-eylem-plani-2026-2030-genelgesi-resmi-gazetede-yayimlandi"
+    },
+    {
+      "url": "https://www.gibsondunn.com/eu-ai-act-omnibus-agreement-postponed-high-risk-deadlines-and-other-key-changes/",
+      "status": 200,
+      "destination": "https://www.gibsondunn.com/eu-ai-act-omnibus-agreement-postponed-high-risk-deadlines-and-other-key-changes/"
+    },
+    {
+      "url": "https://www.khaleejtimes.com/uae/uae-introduce-arabic-language-law-2027-protect-identity",
+      "status": 200,
+      "destination": "https://www.khaleejtimes.com/uae/uae-introduce-arabic-language-law-2027-protect-identity"
+    },
+    {
+      "url": "https://www.morganlewis.com/pubs/2024/09/saudi-arabia-personal-data-protection-law-transition-period-ends-september-14",
+      "status": 403
+    },
+    {
+      "url": "https://www.morganlewis.com/pubs/2026/06/uae-establishes-federal-authority-for-artificial-intelligence-and-data",
+      "status": 403
+    },
+    {
+      "url": "https://www.numerique.gouv.fr/sinformer/espace-presse/10-ans-franceconnect/",
+      "status": 200,
+      "destination": "https://www.numerique.gouv.fr/sinformer/espace-presse/10-ans-franceconnect/"
+    },
+    {
+      "url": "https://www.nvi.gov.tr/dunden-bugune-mernis",
+      "status": 200,
+      "destination": "https://www.nvi.gov.tr/dunden-bugune-mernis"
+    },
+    {
+      "url": "https://www.spa.gov.sa/en/N2192468",
+      "status": 200,
+      "destination": "https://www.spa.gov.sa/en/N2192468"
+    },
+    {
+      "url": "https://www.spa.gov.sa/en/N2362144",
+      "status": 200,
+      "destination": "https://www.spa.gov.sa/en/N2362144"
+    },
+    {
+      "url": "https://www.spa.gov.sa/en/N2533339",
+      "status": 200,
+      "destination": "https://www.spa.gov.sa/en/N2533339"
+    },
+    {
+      "url": "https://www.thenationalnews.com/news/uae/2026/07/23/ajman-uses-agentic-ai-to-renew-trade-licence-in-uae-government-first",
+      "status": 200,
+      "destination": "https://www.thenationalnews.com/news/uae/2026/07/23/ajman-uses-agentic-ai-to-renew-trade-licence-in-uae-government-first/"
+    },
+    {
+      "url": "https://www.thenationalnews.com/news/uae/2026/10/05/dubai-launches-agentic-ai-accelerator-to-transform-public-facing-government-services/",
+      "status": 200,
+      "destination": "https://www.thenationalnews.com/news/uae/2026/10/05/dubai-launches-agentic-ai-accelerator-to-transform-public-facing-government-services/"
+    },
+    {
+      "url": "https://aclanthology.org/2025.arabicnlp-main.21/",
+      "status": 200,
+      "destination": "https://aclanthology.org/2025.arabicnlp-main.21/",
+      "corrects": "https://preview.aclanthology.org/eacl-dois/2025.arabicnlp-main.21"
+    },
+    {
+      "url": "https://www.capgemini.com/news/press-releases/egovernment-benchmark-2025-digitalization-of-public-services-in-the-eu-accelerates-but-cybersecurity-and-cross-border-challenges-remain/",
+      "status": 200,
+      "destination": "https://www.capgemini.com/news/press-releases/egovernment-benchmark-2025-digitalization-of-public-services-in-the-eu-accelerates-but-cybersecurity-and-cross-border-challenges-remain/",
+      "corrects": "https://www.capgemini.com/news/press-releases/egovernment-benchmark-2025-digitalization-of-public-services-in-the-eu-accelerates-but-cybersecurity-and"
+    }
+  ]
+}

@@ -13,6 +13,7 @@ export { GetDocumentParams } from "./generated/api";
 export type { GetDocumentParams as GetDocumentPath } from "./generated/types/getDocumentParams";
 export { GetDocumentQueryParams } from "./generated/api";
 export * from "./cms-content";
+export * from "./public-sector-native";
 export * from "./pulse-platform-defaults";
 export * from "./methodology-editorial";
 export * from "./navigation";

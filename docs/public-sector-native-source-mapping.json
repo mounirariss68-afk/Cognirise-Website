@@ -1,0 +1,412 @@
+{
+  "uae": {
+    "attachment": "attached_assets/public-sector_uae_1791362671434.html",
+    "sha256": "40fa8dede357b7ebc87d8c15f6d1c2a1cfddbf0eb52cca863d9a15cc0d15cf1a",
+    "sectionSequence": [
+      {
+        "id": "distinction",
+        "title": "Most governments use AI. Almost none is AI-native."
+      },
+      {
+        "id": "elements",
+        "title": "Six elements constitute it. Governance is one of six, not the whole."
+      },
+      {
+        "id": "position",
+        "title": "A government that has already done this three times."
+      },
+      {
+        "id": "change-1",
+        "title": "Conversation opens the service. A structured object completes it."
+      },
+      {
+        "id": "change-2",
+        "title": "What we mean by “the card”."
+      },
+      {
+        "id": "change-3",
+        "title": "The state takes the first step, for a definable class of service."
+      },
+      {
+        "id": "change-4",
+        "title": "The assistant arrives, and the question is whose."
+      },
+      {
+        "id": "change-5",
+        "title": "Language is an engineering constraint, not a translation task."
+      },
+      {
+        "id": "change-6",
+        "title": "The rules that will shape this, and where they come from."
+      },
+      {
+        "id": "tracks",
+        "title": "Two tracks, always running. Neither waits for the other."
+      },
+      {
+        "id": "priorities",
+        "title": "Six priorities. Not six phases."
+      },
+      {
+        "id": "impact",
+        "title": "Three of the four real benefits are not cost reduction."
+      },
+      {
+        "id": "closing",
+        "title": "Start where the foundation already reaches."
+      },
+      {
+        "id": "research",
+        "title": "Sources, checked 7 October 2026"
+      }
+    ],
+    "tables": 8,
+    "illustrations": 3,
+    "researchLinks": [
+      "https://uaecabinet.ae/en/news/under-directives-of-uae-president-and-in-world-first-mohammed-bin-rashid-reveals-new-uae-government-framework-to-deploy-agentic-ai-across-50-of-government-sectors-operations-within-two-years",
+      "https://u.ae/en/about-the-uae/digital-uae/digital-technology/Agentic-AI-for-Government-Services",
+      "https://www.thenationalnews.com/news/uae/2026/07/23/ajman-uses-agentic-ai-to-renew-trade-licence-in-uae-government-first",
+      "https://sharjah24.ae/en/Articles/2026/09/09/Ma8",
+      "https://www.thenationalnews.com/news/uae/2026/10/05/dubai-launches-agentic-ai-accelerator-to-transform-public-facing-government-services/",
+      "https://mediaoffice.ae/en/news/2025/june/16-06/mohammed-bin-rashid-launches-phase-2-of-zero-bureaucracy-programme",
+      "https://www.dge.gov.ae/en/news/adg-digital-strategy",
+      "https://www.dge.gov.ae/en/news/2025-gitex-tamm-4",
+      "https://gulfnews.com/uae/government/uae-launches-automatic-passport-and-emirates-id-renewals-1.500381132",
+      "https://www.digitaldubai.ae/newsroom/news/world-economic-forum-recognizes-the-uae-pass-as-a-global-model-for-integrated-government-digital-infrastruct",
+      "https://u.ae/en/about-the-uae/digital-uae/digital-transformation/strategies-policies-and-initiatives/uae-mgovernment-initiative",
+      "https://www.morganlewis.com/pubs/2026/06/uae-establishes-federal-authority-for-artificial-intelligence-and-data",
+      "https://www.difc.com/business/registrars-and-commissioners/commissioner-of-data-protection/regulation-10",
+      "https://arxiv.org/html/2510.27543v1",
+      "https://arxiv.org/html/2601.05101v1",
+      "https://www.khaleejtimes.com/uae/uae-introduce-arabic-language-law-2027-protect-identity",
+      "https://gds.blog.gov.uk/2026/05/14/gov-uk-chat-launches/",
+      "https://oecd-opsi.org/innovations/proactive-family-benefits/",
+      "https://themarkup.org/artificial-intelligence/2026/01/30/mamdani-to-kill-the-nyc-ai-chatbot-we-caught-telling-businesses-to-break-the-law"
+    ],
+    "inheritedResearchLinks": [
+      "https://uaecabinet.ae/en/news/under-directives-of-uae-president-and-in-world-first-mohammed-bin-rashid-reveals-new-uae-government-framework-to-deploy-agentic-ai-across-50-of-government-sectors-operations-within-two-years",
+      "https://u.ae/en/about-the-uae/digital-uae/digital-technology/Agentic-AI-for-Government-Services",
+      "https://www.thenationalnews.com/news/uae/2026/07/23/ajman-uses-agentic-ai-to-renew-trade-licence-in-uae-government-first",
+      "https://sharjah24.ae/en/Articles/2026/09/09/Ma8",
+      "https://www.thenationalnews.com/news/uae/2026/10/05/dubai-launches-agentic-ai-accelerator-to-transform-public-facing-government-services/",
+      "https://mediaoffice.ae/en/news/2025/june/16-06/mohammed-bin-rashid-launches-phase-2-of-zero-bureaucracy-programme",
+      "https://www.dge.gov.ae/en/news/adg-digital-strategy",
+      "https://www.dge.gov.ae/en/news/2025-gitex-tamm-4",
+      "https://gulfnews.com/uae/government/uae-launches-automatic-passport-and-emirates-id-renewals-1.500381132",
+      "https://www.digitaldubai.ae/newsroom/news/world-economic-forum-recognizes-the-uae-pass-as-a-global-model-for-integrated-government-digital-infrastruct",
+      "https://u.ae/en/about-the-uae/digital-uae/digital-transformation/strategies-policies-and-initiatives/uae-mgovernment-initiative",
+      "https://www.morganlewis.com/pubs/2026/06/uae-establishes-federal-authority-for-artificial-intelligence-and-data",
+      "https://www.difc.com/business/registrars-and-commissioners/commissioner-of-data-protection/regulation-10",
+      "https://arxiv.org/html/2510.27543v1",
+      "https://arxiv.org/html/2601.05101v1",
+      "https://www.khaleejtimes.com/uae/uae-introduce-arabic-language-law-2027-protect-identity",
+      "https://gds.blog.gov.uk/2026/05/14/gov-uk-chat-launches/",
+      "https://oecd-opsi.org/innovations/proactive-family-benefits/",
+      "https://themarkup.org/artificial-intelligence/2026/01/30/mamdani-to-kill-the-nyc-ai-chatbot-we-caught-telling-businesses-to-break-the-law"
+    ],
+    "citationCorrections": {},
+    "inheritedResearchDate": "2026-10-07",
+    "executorResearchVerification": false
+  },
+  "ksa": {
+    "attachment": "attached_assets/public-sector_ksa_1791362671434.html",
+    "sha256": "cab1639b71e1f49d1be40a0d5789e7ff0031e9e90eb3301c372d08b2f8065c75",
+    "sectionSequence": [
+      {
+        "id": "distinction",
+        "title": "Most governments use AI. Almost none is AI-native."
+      },
+      {
+        "id": "elements",
+        "title": "Six elements constitute it. Governance is one of six, not the whole."
+      },
+      {
+        "id": "position",
+        "title": "From 52nd to 6th in six years."
+      },
+      {
+        "id": "change-1",
+        "title": "Conversation opens the service. A structured object completes it."
+      },
+      {
+        "id": "change-2",
+        "title": "What we mean by “the card”."
+      },
+      {
+        "id": "change-3",
+        "title": "The state takes the first step, for a definable class of service."
+      },
+      {
+        "id": "change-4",
+        "title": "The assistant arrives, and the question is whose."
+      },
+      {
+        "id": "change-5",
+        "title": "Language is an engineering constraint, not a translation task."
+      },
+      {
+        "id": "change-6",
+        "title": "The rules that will shape this, and where they come from."
+      },
+      {
+        "id": "tracks",
+        "title": "Two tracks, always running. Neither waits for the other."
+      },
+      {
+        "id": "priorities",
+        "title": "Six priorities. Not six phases."
+      },
+      {
+        "id": "impact",
+        "title": "Three of the four real benefits are not cost reduction."
+      },
+      {
+        "id": "closing",
+        "title": "Start where the foundation already reaches."
+      },
+      {
+        "id": "research",
+        "title": "Sources, checked 7 October 2026"
+      }
+    ],
+    "tables": 7,
+    "illustrations": 3,
+    "researchLinks": [
+      "https://www.spa.gov.sa/en/N2533339",
+      "https://oecd.ai/en/dashboards/policy-initiatives/digital-government-strategy-2023-2030-6950",
+      "https://dga.gov.sa/en/programs/qiyas",
+      "https://english.aawsat.com/business/5306409-saudi-digital-government-authority-announces-rise-digital-experience-maturity",
+      "https://www.spa.gov.sa/en/N2192468",
+      "https://www.spa.gov.sa/en/N2362144",
+      "https://www.argaam.com/en/article/articledetail/id/1802243",
+      "https://www.morganlewis.com/pubs/2024/09/saudi-arabia-personal-data-protection-law-transition-period-ends-september-14",
+      "https://aclanthology.org/2025.arabicnlp-main.21/",
+      "https://arxiv.org/html/2510.27543v1",
+      "https://arxiv.org/html/2601.05101v1",
+      "https://gds.blog.gov.uk/2026/05/14/gov-uk-chat-launches/",
+      "https://oecd-opsi.org/innovations/proactive-family-benefits/",
+      "https://themarkup.org/artificial-intelligence/2026/01/30/mamdani-to-kill-the-nyc-ai-chatbot-we-caught-telling-businesses-to-break-the-law"
+    ],
+    "inheritedResearchLinks": [
+      "https://www.spa.gov.sa/en/N2533339",
+      "https://oecd.ai/en/dashboards/policy-initiatives/digital-government-strategy-2023-2030-6950",
+      "https://dga.gov.sa/en/programs/qiyas",
+      "https://english.aawsat.com/business/5306409-saudi-digital-government-authority-announces-rise-digital-experience-maturity",
+      "https://www.spa.gov.sa/en/N2192468",
+      "https://www.spa.gov.sa/en/N2362144",
+      "https://www.argaam.com/en/article/articledetail/id/1802243",
+      "https://www.morganlewis.com/pubs/2024/09/saudi-arabia-personal-data-protection-law-transition-period-ends-september-14",
+      "https://preview.aclanthology.org/eacl-dois/2025.arabicnlp-main.21",
+      "https://arxiv.org/html/2510.27543v1",
+      "https://arxiv.org/html/2601.05101v1",
+      "https://gds.blog.gov.uk/2026/05/14/gov-uk-chat-launches/",
+      "https://oecd-opsi.org/innovations/proactive-family-benefits/",
+      "https://themarkup.org/artificial-intelligence/2026/01/30/mamdani-to-kill-the-nyc-ai-chatbot-we-caught-telling-businesses-to-break-the-law"
+    ],
+    "citationCorrections": {
+      "https://preview.aclanthology.org/eacl-dois/2025.arabicnlp-main.21": "https://aclanthology.org/2025.arabicnlp-main.21/"
+    },
+    "inheritedResearchDate": "2026-10-07",
+    "executorResearchVerification": false
+  },
+  "turkiye": {
+    "attachment": "attached_assets/public-sector_turkiye_1791362671434.html",
+    "sha256": "495a06777b3e4b0ad393f6784d318c383270208db051882dc955bae2e3b35860",
+    "sectionSequence": [
+      {
+        "id": "distinction",
+        "title": "Most governments use AI. Almost none is AI-native."
+      },
+      {
+        "id": "elements",
+        "title": "Six elements constitute it. Governance is one of six, not the whole."
+      },
+      {
+        "id": "position",
+        "title": "The register came first."
+      },
+      {
+        "id": "change-1",
+        "title": "Conversation opens the service. A structured object completes it."
+      },
+      {
+        "id": "change-2",
+        "title": "What we mean by “the card”."
+      },
+      {
+        "id": "change-3",
+        "title": "The state takes the first step, for a definable class of service."
+      },
+      {
+        "id": "change-4",
+        "title": "The assistant arrives, and the question is whose."
+      },
+      {
+        "id": "change-5",
+        "title": "Language is an engineering constraint, not a translation task."
+      },
+      {
+        "id": "change-6",
+        "title": "The rules that will shape this, and where they come from."
+      },
+      {
+        "id": "tracks",
+        "title": "Two tracks, always running. Neither waits for the other."
+      },
+      {
+        "id": "priorities",
+        "title": "Six priorities. Not six phases."
+      },
+      {
+        "id": "impact",
+        "title": "Three of the four real benefits are not cost reduction."
+      },
+      {
+        "id": "closing",
+        "title": "Start where the foundation already reaches."
+      },
+      {
+        "id": "research",
+        "title": "Sources, checked 7 October 2026"
+      }
+    ],
+    "tables": 7,
+    "illustrations": 3,
+    "researchLinks": [
+      "https://www.erdem-erdem.av.tr/turkiye-yapay-zeka-eylem-plani-2026-2030-genelgesi-resmi-gazetede-yayimlandi",
+      "https://turkiye.gov.tr/edevlet-istatistikleri",
+      "https://www.nvi.gov.tr/dunden-bugune-mernis",
+      "https://www.aile.gov.tr/SYGM/PDF/Turkiyenin_Butunlesik_Sosyal_Yardim_Sistemi.pdf",
+      "https://tr.investing.com/news/general-news/turkiyede-internet-kullanm-909a-yukseldi-edevlet-eticaret-ve-dijital-alskanlklarda-arts-suruyor-3515833",
+      "https://cbddo.gov.tr/mevzuat/2019-12-sayili-bilgi-guvenligi-tedbirleri-cumhurbaskanligi-genelgesi/",
+      "https://arxiv.org/html/2508.13044v1",
+      "https://aclanthology.org/2026.eacl-long.46/",
+      "https://cbddo.gov.tr/uyzs",
+      "https://gds.blog.gov.uk/2026/05/14/gov-uk-chat-launches/",
+      "https://oecd-opsi.org/innovations/proactive-family-benefits/",
+      "https://themarkup.org/artificial-intelligence/2026/01/30/mamdani-to-kill-the-nyc-ai-chatbot-we-caught-telling-businesses-to-break-the-law"
+    ],
+    "inheritedResearchLinks": [
+      "https://www.erdem-erdem.av.tr/turkiye-yapay-zeka-eylem-plani-2026-2030-genelgesi-resmi-gazetede-yayimlandi",
+      "https://turkiye.gov.tr/edevlet-istatistikleri",
+      "https://www.nvi.gov.tr/dunden-bugune-mernis",
+      "https://www.aile.gov.tr/SYGM/PDF/Turkiyenin_Butunlesik_Sosyal_Yardim_Sistemi.pdf",
+      "https://tr.investing.com/news/general-news/turkiyede-internet-kullanm-909a-yukseldi-edevlet-eticaret-ve-dijital-alskanlklarda-arts-suruyor-3515833",
+      "https://cbddo.gov.tr/mevzuat/2019-12-sayili-bilgi-guvenligi-tedbirleri-cumhurbaskanligi-genelgesi/",
+      "https://arxiv.org/html/2508.13044v1",
+      "https://aclanthology.org/2026.eacl-long.46/",
+      "https://cbddo.gov.tr/uyzs",
+      "https://gds.blog.gov.uk/2026/05/14/gov-uk-chat-launches/",
+      "https://oecd-opsi.org/innovations/proactive-family-benefits/",
+      "https://themarkup.org/artificial-intelligence/2026/01/30/mamdani-to-kill-the-nyc-ai-chatbot-we-caught-telling-businesses-to-break-the-law"
+    ],
+    "citationCorrections": {},
+    "inheritedResearchDate": "2026-10-07",
+    "executorResearchVerification": false
+  },
+  "europe": {
+    "attachment": "attached_assets/public-sector_europe_1791362671433.html",
+    "sha256": "ea1413af96f7bed6a69d9534a77b253ed105351fb2c5cdbf1f6686ca3d9708c4",
+    "sectionSequence": [
+      {
+        "id": "distinction",
+        "title": "Most governments use AI. Almost none is AI-native."
+      },
+      {
+        "id": "elements",
+        "title": "Six elements constitute it. Governance is one of six, not the whole."
+      },
+      {
+        "id": "position",
+        "title": "The only bloc that has made interoperability a legal duty."
+      },
+      {
+        "id": "change-1",
+        "title": "Conversation opens the service. A structured object completes it."
+      },
+      {
+        "id": "change-2",
+        "title": "What we mean by “the card”."
+      },
+      {
+        "id": "change-3",
+        "title": "The state takes the first step, for a definable class of service."
+      },
+      {
+        "id": "change-4",
+        "title": "The assistant arrives, and the question is whose."
+      },
+      {
+        "id": "change-5",
+        "title": "Language is an engineering constraint, not a translation task."
+      },
+      {
+        "id": "change-6",
+        "title": "The rules that will shape this, and where they come from."
+      },
+      {
+        "id": "tracks",
+        "title": "Two tracks, always running. Neither waits for the other."
+      },
+      {
+        "id": "priorities",
+        "title": "Six priorities. Not six phases."
+      },
+      {
+        "id": "impact",
+        "title": "Three of the four real benefits are not cost reduction."
+      },
+      {
+        "id": "closing",
+        "title": "Start where the foundation already reaches."
+      },
+      {
+        "id": "research",
+        "title": "Sources, checked 7 October 2026"
+      }
+    ],
+    "tables": 7,
+    "illustrations": 3,
+    "researchLinks": [
+      "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32018R1724",
+      "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=LEGISSUM:4740182",
+      "https://www.capgemini.com/wp-content/uploads/2026/06/eGovernment-Benchmark-Report-2026_Capgemini.pdf",
+      "https://www.capgemini.com/news/press-releases/egovernment-benchmark-2025-digitalization-of-public-services-in-the-eu-accelerates-but-cybersecurity-and-cross-border-challenges-remain/",
+      "https://eudiwallet.com/country-readiness/",
+      "https://www.eadtrust.eu/en/blog/december-2026-deadline-eudi-wallet/",
+      "https://www.cyberlawwatch.com/2026/07/31/eu-digital-omnibus-on-ai-enters-into-force/",
+      "https://www.gibsondunn.com/eu-ai-act-omnibus-agreement-postponed-high-risk-deadlines-and-other-key-changes/",
+      "https://oecd-opsi.org/innovations/proactive-family-benefits/",
+      "https://news.err.ee/991789/parents-no-longer-have-to-apply-for-family-benefits",
+      "https://en.digst.dk/systems/digital-post/about-the-national-digital-post/background/",
+      "https://www.numerique.gouv.fr/sinformer/espace-presse/10-ans-franceconnect/",
+      "https://en.ilsole24ore.com/art/digital-identity-eu-accelerates-wallet-italy-spid-and-cieid-grow-AHkwOOaD",
+      "https://arxiv.org/abs/2410.08928",
+      "https://gds.blog.gov.uk/2026/05/14/gov-uk-chat-launches/",
+      "https://themarkup.org/artificial-intelligence/2026/01/30/mamdani-to-kill-the-nyc-ai-chatbot-we-caught-telling-businesses-to-break-the-law"
+    ],
+    "inheritedResearchLinks": [
+      "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32018R1724",
+      "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=LEGISSUM:4740182",
+      "https://www.capgemini.com/wp-content/uploads/2026/06/eGovernment-Benchmark-Report-2026_Capgemini.pdf",
+      "https://www.capgemini.com/news/press-releases/egovernment-benchmark-2025-digitalization-of-public-services-in-the-eu-accelerates-but-cybersecurity-and",
+      "https://eudiwallet.com/country-readiness/",
+      "https://www.eadtrust.eu/en/blog/december-2026-deadline-eudi-wallet/",
+      "https://www.cyberlawwatch.com/2026/07/31/eu-digital-omnibus-on-ai-enters-into-force/",
+      "https://www.gibsondunn.com/eu-ai-act-omnibus-agreement-postponed-high-risk-deadlines-and-other-key-changes/",
+      "https://oecd-opsi.org/innovations/proactive-family-benefits/",
+      "https://news.err.ee/991789/parents-no-longer-have-to-apply-for-family-benefits",
+      "https://en.digst.dk/systems/digital-post/about-the-national-digital-post/background/",
+      "https://www.numerique.gouv.fr/sinformer/espace-presse/10-ans-franceconnect/",
+      "https://en.ilsole24ore.com/art/digital-identity-eu-accelerates-wallet-italy-spid-and-cieid-grow-AHkwOOaD",
+      "https://arxiv.org/abs/2410.08928",
+      "https://gds.blog.gov.uk/2026/05/14/gov-uk-chat-launches/",
+      "https://themarkup.org/artificial-intelligence/2026/01/30/mamdani-to-kill-the-nyc-ai-chatbot-we-caught-telling-businesses-to-break-the-law"
+    ],
+    "citationCorrections": {
+      "https://www.capgemini.com/news/press-releases/egovernment-benchmark-2025-digitalization-of-public-services-in-the-eu-accelerates-but-cybersecurity-and": "https://www.capgemini.com/news/press-releases/egovernment-benchmark-2025-digitalization-of-public-services-in-the-eu-accelerates-but-cybersecurity-and-cross-border-challenges-remain/"
+    },
+    "inheritedResearchDate": "2026-10-07",
+    "executorResearchVerification": false
+  }
+}

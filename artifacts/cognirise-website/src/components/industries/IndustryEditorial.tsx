@@ -12,6 +12,7 @@ import { applyTelecomLaunch } from "@/content/telecom-launch";
 import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
 import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
 import { TelecomEditorial } from "@/components/industries/TelecomEditorial";
+import { PublicSectorNativeEditorial } from "@/components/industries/PublicSectorNativeEditorial";
 import {
   SpatialDisclosure,
   SpatialDisclosureItem,
@@ -43,7 +44,7 @@ export function IndustryEditorial({ industry }: { industry: IndustryContent }) {
   const launchTelecom = LAUNCH_POLICY.enabled && industry.slug === "telecoms"
     && locale === "en" && !protectedPreview && !releaseContext?.preview;
   const view = launchTelecom ? applyTelecomLaunch(resolvedView) : resolvedView;
-  const publicSectorPov = view.publicSectorPov;
+  const publicSectorPov = view.publicSectorNative ?? view.publicSectorPov;
   const publicSectorMarketMismatch = industry.slug === "public-sector"
     && (
       (publicSectorPov && publicSectorPov.market !== market)
@@ -56,9 +57,8 @@ export function IndustryEditorial({ industry }: { industry: IndustryContent }) {
   // non-canonical edition is absent, do not silently render the compiled UAE
   // record as a market fallback.
   const publicSectorMissingExactEdition = industry.slug === "public-sector"
-    && market !== "uae"
     && !published;
-  if (!launchTelecom && cms.isAuthoritative && cms.delivery === "loading") {
+  if (!launchTelecom && (cms.isAuthoritative || industry.slug === "public-sector") && cms.delivery === "loading") {
     return <main className="min-h-[70vh] bg-[#fdfbf7] px-6 py-24 text-[#102957]" aria-busy="true"><NavigationBackControl embedded className="mb-7" /><p>Loading industry perspective…</p></main>;
   }
   if (publicSectorMarketMismatch || publicSectorMissingExactEdition || (!launchTelecom && cms.isAuthoritative && (!published || (industry.slug === "education" && !published.educationPov)))) {
@@ -71,8 +71,8 @@ export function IndustryEditorialView({ view: baseView, marketOverride }: { view
   const { market: selectedMarket } = useMarketStore();
   const market = marketOverride ?? selectedMarket;
   const publicSectorMarketMismatch = baseView.slug === "public-sector"
-    && baseView.publicSectorPov
-    && baseView.publicSectorPov.market !== market;
+    && (baseView.publicSectorNative ?? baseView.publicSectorPov)
+    && (baseView.publicSectorNative ?? baseView.publicSectorPov)!.market !== market;
   const view = React.useMemo(
     () => publicSectorMarketMismatch
       ? baseView
@@ -84,6 +84,9 @@ export function IndustryEditorialView({ view: baseView, marketOverride }: { view
   }
   if (publicSectorMarketMismatch) {
     return <main className="min-h-[70vh] bg-[#fdfbf7] px-6 py-24 text-[#102957]"><div className="mx-auto max-w-3xl"><NavigationBackControl embedded className="mb-7" /><h1 className="font-display text-5xl font-semibold">This industry perspective is under review.</h1><p className="mt-6 max-w-xl text-lg text-[#506583]">It will return when an approved edition is published for this market.</p><Link className="mt-8 inline-flex font-bold text-[#db509e]" href="/industries">Explore all industries <ArrowRight size={16} /></Link></div></main>;
+  }
+  if (baseView.slug === "public-sector" && view.publicSectorNative) {
+    return <PublicSectorNativeEditorial view={view} marketOverride={marketOverride} />;
   }
   const imageSource = view.image.startsWith("http://") || view.image.startsWith("https://")
     ? view.image

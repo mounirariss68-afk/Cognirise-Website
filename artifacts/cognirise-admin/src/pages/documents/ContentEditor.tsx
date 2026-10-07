@@ -7,6 +7,7 @@ import {
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { TelecomPovEditor } from "./TelecomPovEditor";
+import { PublicSectorNativeEditor } from "./PublicSectorNativeEditor";
 import { belongsToIndustrySection, isIndustrySectionId } from "@workspace/api-zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -520,7 +521,8 @@ export function ContentEditor({ kind, value, onChange, errors, publicationErrors
           onChange={(bankingPov) => set("bankingPov", bankingPov)}
           section={industrySection}
         />}
-        {(value.name === "Public Sector" || value.legacyPath === "/industries/public-sector") && <PublicSectorPovEditor
+        {value.publicSectorNative && <PublicSectorNativeEditor value={value.publicSectorNative} onChange={(next) => set("publicSectorNative", next)} section={industrySection} />}
+        {!value.publicSectorNative && (value.name === "Public Sector" || value.legacyPath === "/industries/public-sector") && <PublicSectorPovEditor
           value={value.publicSectorPov}
           onChange={(publicSectorPov) => set("publicSectorPov", publicSectorPov)}
           section={industrySection}

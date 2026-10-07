@@ -73,7 +73,7 @@ const repositoryRoot = path.resolve(
   "..",
 );
 const args = process.argv.slice(2);
-const commands = ["setup", "totp", "cleanup", "baseline"] as const;
+const commands = ["setup", "totp", "cleanup", "retire", "baseline"] as const;
 const requestedCommands = args.filter((value): value is (typeof commands)[number] =>
   (commands as readonly string[]).includes(value),
 );
@@ -109,6 +109,9 @@ function usage(): void {
       "    --role administrator|editor",
       "  NODE_ENV=development pnpm --filter @workspace/scripts cms:owner-browser-fixture --",
       "    --development cleanup --credentials /tmp/cognirise-owner-fixture.json",
+      "  NODE_ENV=development pnpm --filter @workspace/scripts cms:owner-browser-fixture --",
+      "    --development retire --credentials /tmp/cognirise-owner-fixture.json",
+      "    (revoke access and retain users/documents referenced by real audit history)",
       "  NODE_ENV=development pnpm --filter @workspace/scripts cms:owner-browser-fixture --",
       "    --development baseline --baseline /tmp/cognirise-cms-preservation-baseline.json",
       "",
@@ -961,6 +964,37 @@ async function cleanup(pool: PoolLike, filePath: string): Promise<void> {
   process.stdout.write(`CMS browser fixture cleaned up (${state.prefix}).\n`);
 }
 
+async function retire(pool: PoolLike, filePath: string): Promise<void> {
+  const state = await readPrivateState(filePath);
+  assertOwnedIds(state);
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1,0))", [state.prefix]);
+    const userIds = state.users.map(user => user.id);
+    const users = await client.query<{ id: string; email: string; role: Role }>(
+      "SELECT id::text id,email,role FROM cms_users WHERE id=ANY($1::uuid[]) FOR UPDATE", [userIds]);
+    for (const user of users.rows) {
+      const expected = state.users.find(candidate => candidate.id === user.id);
+      if (!expected || expected.email !== user.email || expected.role !== user.role || !user.email.startsWith(`${state.prefix}.`)) {
+        throw new Error("Refusing retirement because a recorded user no longer matches its fixture identity.");
+      }
+    }
+    // Publishing/customization can legitimately attach this actor to real
+    // immutable history. Never erase that history just to delete a fixture.
+    await client.query("DELETE FROM cms_sessions WHERE user_id=ANY($1::uuid[])", [userIds]);
+    await client.query("UPDATE cms_users SET status='suspended',updated_at=now() WHERE id=ANY($1::uuid[])", [userIds]);
+    await client.query("COMMIT");
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+  await unlink(filePath);
+  process.stdout.write(`CMS publishing fixture access retired; immutable history retained (${state.prefix}).\n`);
+}
+
 async function printTotp(security: SecurityHelpers, filePath: string): Promise<void> {
   const state = await readPrivateState(filePath);
   if (state.phase !== "ready") {
@@ -978,13 +1012,13 @@ async function printTotp(security: SecurityHelpers, filePath: string): Promise<v
 
 async function main(): Promise<void> {
   if (requestedCommands.length > 1) {
-    throw new Error("Pass exactly one of setup, totp, cleanup, or baseline.");
+    throw new Error("Pass exactly one of setup, totp, cleanup, retire, or baseline.");
   }
   if (command === "--help" || command === "-h" || !command) {
     usage();
     return;
   }
-  if (!["setup", "totp", "cleanup", "baseline"].includes(command)) {
+  if (!["setup", "totp", "cleanup", "retire", "baseline"].includes(command)) {
     throw new Error(`Unknown command ${command}. Use --help for usage.`);
   }
   requireDevelopmentTarget();
@@ -1049,7 +1083,8 @@ async function main(): Promise<void> {
       const security = await loadSecurity();
       await provision(pool, security, filePath);
     } else {
-      await cleanup(pool, filePath);
+      if (command === "retire") await retire(pool, filePath);
+      else await cleanup(pool, filePath);
     }
   } finally {
     await pool.end();

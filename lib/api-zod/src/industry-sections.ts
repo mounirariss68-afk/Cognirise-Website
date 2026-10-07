@@ -15,7 +15,8 @@ export const INDUSTRY_SECTION_IDS = [
   "cta",
 ] as const;
 
-export type IndustrySectionId = (typeof INDUSTRY_SECTION_IDS)[number];
+import { PUBLIC_SECTOR_NATIVE_SECTION_IDS } from "./public-sector-native";
+export type IndustrySectionId = (typeof INDUSTRY_SECTION_IDS)[number] | (typeof PUBLIC_SECTOR_NATIVE_SECTION_IDS)[number];
 export const INDUSTRY_PREVIEW_STATUSES = ["ready", "unavailable", "expired", "revoked"] as const;
 export type IndustryPreviewStatus = (typeof INDUSTRY_PREVIEW_STATUSES)[number];
 
@@ -35,7 +36,7 @@ export const INDUSTRY_SECTION_OUTLINE = [
  * Structured-content paths owned by each fixed visual section. The map is
  * shared with authoring validation only; it is not persisted into revisions.
  */
-export const INDUSTRY_SECTION_CONTENT_PATHS: Readonly<Record<IndustrySectionId, readonly string[]>> = {
+export const INDUSTRY_SECTION_CONTENT_PATHS: Readonly<Record<(typeof INDUSTRY_SECTION_IDS)[number], readonly string[]>> = {
   hero: [
     "legacyPath", "name", "shortName", "thesis", "accent", "dek", "image", "imageAlt", "heroMedia", "heroMediaId", "variant",
     "bankingPov.descriptor", "bankingPov.hero",
@@ -76,13 +77,20 @@ export const INDUSTRY_SECTION_CONTENT_PATHS: Readonly<Record<IndustrySectionId, 
 
 export function belongsToIndustrySection(path: string, section: IndustrySectionId) {
   const contentPath = path.replace(/^content\./, "");
-  return INDUSTRY_SECTION_CONTENT_PATHS[section].some((prefix) =>
+  const nativeIndex = PUBLIC_SECTOR_NATIVE_SECTION_IDS.indexOf(section as typeof PUBLIC_SECTOR_NATIVE_SECTION_IDS[number]);
+  if (contentPath.startsWith("publicSectorNative.")) {
+    if (nativeIndex >= 0) return contentPath.startsWith(`publicSectorNative.sections.${nativeIndex}.`)
+      || contentPath === `publicSectorNative.sections.${nativeIndex}`
+      || (section === "research" && /publicSectorNative\.(researchDateQualification|reviewBlockers|sourceDate)/.test(contentPath));
+    return section === "hero" && /^publicSectorNative\.(market|marketLabel|version)$/.test(contentPath);
+  }
+  return (INDUSTRY_SECTION_CONTENT_PATHS[section as keyof typeof INDUSTRY_SECTION_CONTENT_PATHS] ?? []).some((prefix) =>
     contentPath === prefix || contentPath.startsWith(`${prefix}.`),
   );
 }
 
 export function isIndustrySectionId(value: unknown): value is IndustrySectionId {
-  return typeof value === "string" && (INDUSTRY_SECTION_IDS as readonly string[]).includes(value);
+  return typeof value === "string" && [...INDUSTRY_SECTION_IDS, ...PUBLIC_SECTOR_NATIVE_SECTION_IDS].includes(value as IndustrySectionId);
 }
 
 export function isIndustryPreviewStatusMessage(value: unknown): value is {

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { telecomPovSchema } from "./telecom-pov";
+import { publicSectorNativeSchema } from "./public-sector-native";
 import {
   type HScore,
   type Oversight,
@@ -673,6 +674,7 @@ export const industryContentSchema = z.object({
   educationPov: educationPovSchema.optional(),
   bankingPov: z.lazy(() => bankingPovSchema).optional(),
   publicSectorPov: publicSectorPovSchema.optional(),
+  publicSectorNative: publicSectorNativeSchema.optional(),
   telecomPov: telecomPovSchema.optional(),
   heroMedia: optionalMediaReference,
   heroMediaId: legacyMediaId,
@@ -696,6 +698,9 @@ export const industryContentSchema = z.object({
       path: ["publicSectorPov"],
       message: "The Public Sector POV is available only to Public Sector.",
     });
+  }
+  if (value.publicSectorNative && (value.name !== "Public Sector" || value.publicSectorPov)) {
+    context.addIssue({ code: "custom", path: ["publicSectorNative"], message: "Native Public Sector editions belong only to Public Sector and cannot also use the legacy POV." });
   }
   if (value.telecomPov && value.legacyPath !== "/industries/telecoms") {
     context.addIssue({ code: "custom", path: ["telecomPov"], message: "Telecom POV belongs only to Telecoms." });
@@ -1683,6 +1688,9 @@ function publishRuleIssues(kind: CmsDocumentKind, value: CmsContent): Publicatio
     if (industry.publicSectorPov?.reviewBlockers?.length) {
       add("PUBLIC_SECTOR_REVIEW_BLOCKERS", "content.publicSectorPov.reviewBlockers", "Public Sector review blockers must be cleared before publication.");
     }
+    if (industry.publicSectorNative?.reviewBlockers.length) {
+      add("PUBLIC_SECTOR_REVIEW_BLOCKERS", "content.publicSectorNative.reviewBlockers", "Resolve current manuscript review blockers before publication.");
+    }
   }
   if (kind === "framework") {
     const framework = value as FrameworkContent;
@@ -2169,7 +2177,7 @@ function publicSectorDeliveryErrors(input: unknown): string[] {
   if (!parsed.success) return [];
   const snapshot = parsed.data;
   const content = snapshot.content as IndustryContent;
-  const pov = content.publicSectorPov;
+  const pov = content.publicSectorNative ?? content.publicSectorPov;
   if (!pov) return [];
   const errors: string[] = [];
   if (snapshot.slug !== "public-sector" || content.name !== "Public Sector") {

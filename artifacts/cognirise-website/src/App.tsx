@@ -295,6 +295,10 @@ export function Router() {
       </Shell>
     </>
   );
+  // These independent regional editions use the supported exact-publication
+  // API, not the older UAE whole-site manifest. That API returns only approved
+  // immutable revisions with exact media pins and forbids market fallback.
+  if (path === "/industries/public-sector") return routedPage;
   return released || methodologyUsesReleaseAwareFallback
     ? <ReleaseProvider release={release.data}>{routedPage}</ReleaseProvider>
     : routedPage;

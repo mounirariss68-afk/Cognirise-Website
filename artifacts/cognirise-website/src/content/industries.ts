@@ -73,6 +73,7 @@ export type IndustryContent = {
   };
   bankingPov?: import("@workspace/api-zod").BankingPov;
   publicSectorPov?: import("@workspace/api-zod").PublicSectorPov;
+  publicSectorNative?: import("@workspace/api-zod").PublicSectorNative;
   telecomPov?: import("@workspace/api-zod").TelecomPov;
   verificationDate: string;
   reviewDate: string;

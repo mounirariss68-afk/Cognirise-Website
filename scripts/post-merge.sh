@@ -32,10 +32,8 @@ pnpm --filter @workspace/scripts cms:reconcile-site-hero-media -- --apply-db --t
 # Schema push applies columns and tables only; this development-only command
 # performs the guarded historical availability/source reconciliation afterwards.
 pnpm --filter @workspace/scripts cms:reconcile-document-availability -- --target=development
-# Task 319 stages four exact Public Sector market drafts after the immutable
-# hero and availability reconciliations. It never advances publication or
-# availability pointers; conflicts are reported and preserved.
-pnpm --filter @workspace/scripts cms:setup-public-sector-postmerge
+# The October replacement is delivered below through the fresh authenticated
+# CMS API. The superseded September draft importer must not run against it.
 pnpm --filter @workspace/scripts cms:reconcile-value-to-scale-hero -- --apply-db --target=development
 pnpm --filter @workspace/scripts cms:reconcile-offices -- --apply-db --target=development
 # Task 338 performs a read-only homepage preflight, then stages only the
@@ -67,15 +65,17 @@ guardrails_api_pid=""
 guardrails_fixture_credentials="$(mktemp /tmp/cognirise-guardrails-release.XXXXXX)"
 rm -f "$guardrails_fixture_credentials"
 cleanup_guardrails_release() {
+  local cleanup_status=0
   if [[ -f "$guardrails_fixture_credentials" ]]; then
     NODE_ENV=development pnpm --filter @workspace/scripts cms:owner-browser-fixture -- \
-      --development cleanup --credentials "$guardrails_fixture_credentials" || true
+      --development retire --credentials "$guardrails_fixture_credentials" || cleanup_status=1
   fi
   if [[ -n "$guardrails_api_pid" ]]; then
     kill "$guardrails_api_pid" 2>/dev/null || true
     wait "$guardrails_api_pid" 2>/dev/null || true
   fi
   rm -f "$guardrails_api_log"
+  return "$cleanup_status"
 }
 trap cleanup_guardrails_release EXIT
 pnpm --filter @workspace/api-server build
@@ -101,5 +101,8 @@ NODE_ENV=development pnpm --filter @workspace/scripts cms:owner-browser-fixture 
 NODE_ENV=development pnpm --filter @workspace/scripts cms:release-guardrails-set-prove-hold -- \
   --credentials="$guardrails_fixture_credentials" \
   --api-base="http://127.0.0.1:${guardrails_api_port}/api" --verify-preview
+NODE_ENV=development pnpm --filter @workspace/scripts cms:release-public-sector-native -- \
+  --credentials="$guardrails_fixture_credentials" \
+  --api-base="http://127.0.0.1:${guardrails_api_port}/api" --report-conflict
 cleanup_guardrails_release
 trap - EXIT

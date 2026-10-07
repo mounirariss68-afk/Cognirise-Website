@@ -4,6 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "cms:release-public-sector-native": "tsx ./src/cms/public-sector-native-release.ts --target=development",
+    "cms:stage-public-sector-native": "tsx ./src/cms/public-sector-native.ts --apply-db --target=development",
     "hello": "tsx ./src/hello.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "pnpm run typecheck && tsx --test src/**/*.test.ts",
