@@ -117,4 +117,18 @@ test("draft About override renders the person immediately without the suppressed
   assert.match(markup, /A draft contribution that must remain visible in the About aside/);
   assert.doesNotMatch(markup, /Loading team profiles/);
   assert.doesNotMatch(markup, /Structured focus/);
+  assert.doesNotMatch(markup, /Ömer Barbaros Yiş|omer-barbaros-yis-20261007/);
+});
+
+test("public launch renders Omer once in the board, not leadership, and preserves the compliance hold", () => {
+  const markup = renderToStaticMarkup(
+    React.createElement(QueryClientProvider, { client: new QueryClient() },
+      React.createElement(Router, { ssrPath: "/about" }, React.createElement(AboutPeople))),
+  );
+  assert.equal(markup.split('data-testid="profile-advisor-oby"').length - 1, 1);
+  assert.doesNotMatch(markup, /profile-leadership-oby|Rami Aslan/);
+  const board = markup.slice(markup.indexOf('id="board-of-advisors"'));
+  assert.match(board, /Advisory Board.*Ömer Barbaros Yiş/);
+  assert.match(board, /omer-barbaros-yis-20261007\.jpg/);
+  assert.match(board, /What Ömer brings to Cognirise/);
 });

@@ -5,14 +5,14 @@ import { launchTeam, isPublicTeamProfile, teamHeroForRegion, teamPortraitClipPat
 
 test("compliance hold hides Rami without deleting the saved biography", () => {
   assert.deepEqual(launchTeam.filter(isPublicTeamProfile).map(p => p.name),
-    ["Mounir Ariss", "Bülent Eğrilmez", "Don Peppers"]);
+    ["Mounir Ariss", "Bülent Eğrilmez", "Don Peppers", "Ömer Barbaros Yiş"]);
   assert.ok(launchTeam.find(p => p.name === "Rami Aslan")?.background);
   assert.equal(isPublicTeamProfile({ name: " Rami Aslan " }), false);
 });
 
-test("approved roster has complete founders and the two requested advisors", () => {
-  assert.deepEqual(launchTeam.map(p => p.name), ["Mounir Ariss", "Bülent Eğrilmez", "Don Peppers", "Rami Aslan"]);
-  assert.equal(launchTeam.filter(p => p.group === "advisor").length, 2);
+test("approved roster has complete founders and three advisors, one held", () => {
+  assert.deepEqual(launchTeam.map(p => p.name), ["Mounir Ariss", "Bülent Eğrilmez", "Don Peppers", "Rami Aslan", "Ömer Barbaros Yiş"]);
+  assert.equal(launchTeam.filter(p => p.group === "advisor").length, 3);
   for (const person of launchTeam) {
     assert.ok(person.background.length > 100);
     assert.ok(person.contribution.length > 100);
@@ -21,6 +21,18 @@ test("approved roster has complete founders and the two requested advisors", () 
     assert.ok(founder.identityImage);
     assert.ok(existsSync(new URL(`../../public${founder.identityImage!.src}`, import.meta.url)));
   }
+});
+
+test("Omer appears once as an advisor with a versioned portrait and dated reach", () => {
+  const profiles = launchTeam.filter(p => p.initials === "OBY");
+  assert.equal(profiles.length, 1);
+  const [omer] = profiles;
+  assert.equal(omer.group, "advisor");
+  assert.equal(omer.title, "Advisory Board");
+  assert.match(omer.background, /150,000 followers.*fifth-most-followed.*7 October 2026/);
+  assert.match(omer.identityImage!.src, /omer-barbaros-yis-20261007\.jpg$/);
+  assert.match(omer.identityImage!.alt, /Ömer Barbaros Yiş/);
+  assert.ok(existsSync(new URL(`../../public${omer.identityImage!.src}`, import.meta.url)));
 });
 
 test("Saudi, Türkiye and Europe have distinct existing regional images, with rest-of-world using Europe", () => {

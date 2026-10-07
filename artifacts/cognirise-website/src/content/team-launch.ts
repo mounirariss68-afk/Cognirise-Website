@@ -54,6 +54,12 @@ export const launchTeam: TeamProfile[] = [
     background: "More than 25 years across North America, Europe, the Middle East and Africa. CEO of Türk Telekom (2013–2017) — Türkiye’s largest telecom operator, with some 35,000 employees serving 40+ million customers — after leading Oger Telecom as CEO and executive board member. Earlier, head of M&A and corporate finance at the Oger Group, concluding transactions exceeding US$25 billion, following banking roles at Citigroup and TD covering telecom and technology. Board roles have spanned Avea, TTNET, Cell-C and operators across four more countries. Since 2018, a co-founder of venture and private-equity initiatives. McGill BCom and MBA.",
     contribution: "The operator’s seat: what transformation looks like when you’re accountable for 35,000 people and a nation’s network — plus an investor’s discipline on our economics and telecom depth that anchors one of our core industries.",
   },
+  {
+    initials: "OBY", name: "Ömer Barbaros Yiş", title: "Advisory Board", group: "advisor",
+    background: "General Manager of Karaca International. Previously E-Commerce General Manager and Board Member at LC Waikiki, leading its e-commerce business from 2021 to 2024. Earlier, Chief Marketing Officer at Turkcell, customer and revenue management director at Türk Telekom, and Global Telecommunications Industry Director at Peppers & Rogers Group. More than 20 years across telecoms, retail, marketing and digital commerce. A prominent professional voice on LinkedIn: around 150,000 followers and Türkiye’s fifth-most-followed person, as reported by Cognirise on 7 October 2026.",
+    contribution: "Ömer brings a commercial and customer perspective to practical AI adoption: which needs matter in a market, how to explain the value of a new service, and what helps people use it. His experience leading marketing and digital commerce can help Cognirise test its proposition against customer expectations. His professional audience offers a channel for sharing useful AI examples and hearing market feedback, without treating reach as a guarantee of adoption.",
+    identityImage: { src: assetUrl("/images/cognirise/people/omer-barbaros-yis-20261007.jpg"), alt: "Ömer Barbaros Yiş, Cognirise Advisory Board, wearing a dark blazer", objectPosition: "50% 50%" },
+  },
 ];
 
 export function teamHeroForRegion(region: string) {
