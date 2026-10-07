@@ -17,6 +17,16 @@ External SVG diagrams must embed complete valid font bytes; page font loading do
 
 For LinkedIn headers, use the original image-led LinkedIn designs and their Pulse source artwork as the visual baseline, not just the brand colours.
 
+For the website-launch LinkedIn post, the owner approved full-bleed original
+waves-breaking-through-a-wall artwork, with the logo top left and only
+“Built in practice. Now online.” bottom right.
+
+**Why:** The owner preferred this minimal artwork-led composition over the
+editorial split layout and explicitly confirmed the final version.
+
+**How to apply:** Preserve this approved launch composition when adapting or
+re-exporting it; do not restore extra launch labels, descriptions or footer bars.
+
 **Why:** The user rejected newly generated futuristic cityscapes and split-image header layouts as far from Cognirise Pulse, and asked to return to the initial LinkedIn designs.
 
 **How to apply:** Start from the original header and post compositions. Preserve the deep navy and ivory monumental structures and fine violet–magenta–coral currents. For text-free variants, remove editorial copy without introducing a different architectural style or added split-image dividers.
