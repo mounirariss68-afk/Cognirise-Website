@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { existsSync, readFileSync } from "node:fs";
-import { launchTeam, teamHeroForRegion } from "./team-launch";
+import { launchTeam, teamHeroForRegion, teamPortraitClipPath } from "./team-launch";
 
 test("approved roster has complete founders and the two requested advisors", () => {
   assert.deepEqual(launchTeam.map(p => p.name), ["Mounir Ariss", "Bülent Eğrilmez", "Don Peppers", "Rami Aslan"]);
@@ -27,8 +27,15 @@ test("About owns the embedded Back control and preserves the UAE approved media"
   const about = readFileSync(new URL("../pages/AboutPeople.tsx", import.meta.url), "utf8");
   const app = readFileSync(new URL("../App.tsx", import.meta.url), "utf8");
   assert.match(about, /<NavigationBackControl embedded/);
-  assert.equal(about.split("[clip-path:polygon(0_0,100%_10%,88%_100%,10%_88%)]").length - 1, 2,
-    "Portraits and advisor initials must retain the same approved irregular shape");
+  assert.equal(about.split("clipPath: teamPortraitClipPath(profile.group, index)").length - 1, 2,
+    "Photos and initials both use the per-profile irregular frame");
   assert.match(app, /embedsBackInHero[\s\S]*?path === "\/about"/);
   assert.match(about, /launchPublic && market !== "uae" \? teamHeroForRegion\(market\) : governedLeadershipVisual/);
+});
+
+test("the two founders and two advisors each have a different irregular frame", () => {
+  const frames = ["leadership", "advisor"].flatMap(group =>
+    [0, 1].map(index => teamPortraitClipPath(group as "leadership" | "advisor", index)));
+  assert.equal(new Set(frames).size, 4);
+  for (const frame of frames) assert.match(frame, /^polygon\(/);
 });

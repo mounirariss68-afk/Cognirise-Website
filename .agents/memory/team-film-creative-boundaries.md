@@ -15,8 +15,8 @@ For the public Team still image, retain the owner-approved UAE scene and use sim
 
 **How to apply:** Preserve the collaborative workplace and Pulse-coloured physical model. Treat generated regional scenes as illustrations, separate from real founder portraits extracted from owner-provided bios.
 
-Keep the original visibly irregular quadrilateral frames for founders and advisors, including initials when no portrait is available.
+Keep visibly irregular quadrilateral frames for founders and advisors, including initials when no portrait is available. Vary the corner angles slightly for each person rather than repeating one identical frame.
 
-**Why:** On 7 October 2026 the owner asked to retain the earlier irregular shape after new portraits were given a more rectangular crop.
+**Why:** On 7 October 2026 the owner asked to retain the earlier irregular shape after new portraits were given a more rectangular crop, then explicitly requested a slightly different shape for each photo.
 
 **How to apply:** Updating portrait assets or biographies is not permission to simplify their distinctive frame.

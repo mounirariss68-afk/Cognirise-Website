@@ -10,6 +10,17 @@ export type TeamProfile = {
   identityImage?: { src: string; alt: string; objectPosition?: string };
 };
 
+const portraitFrames = [
+  "polygon(0 0, 100% 10%, 88% 100%, 10% 88%)",
+  "polygon(10% 7%, 96% 0, 100% 89%, 0 100%)",
+  "polygon(0 10%, 91% 0, 100% 100%, 7% 92%)",
+  "polygon(7% 0, 100% 6%, 91% 92%, 0 100%)",
+];
+
+export function teamPortraitClipPath(group: TeamProfile["group"], index: number) {
+  return portraitFrames[(index + (group === "advisor" ? 2 : 0)) % portraitFrames.length];
+}
+
 // Public launch roster authorized by the owner. Sources and CMS handover notes
 // are in docs/team-launch-content.md; protected previews do not use this roster.
 export const launchTeam: TeamProfile[] = [
@@ -27,13 +38,13 @@ export const launchTeam: TeamProfile[] = [
   },
   {
     initials: "DP", name: "Don Peppers", title: "Advisory Board", group: "advisor",
-    background: "Don is an author, speaker and co-founder of Peppers & Rogers Group. The Times of London included him among its “Top 50 Business Brains”, and Accenture’s Institute for Strategic Change named him one of the world’s 50 “most important living business thinkers”. He co-authored The One to One Future with Martha Rogers, helping establish the ideas behind one-to-one marketing and customer relationship management. His work focuses on customer experience, customer strategy and building lasting customer relationships.",
-    contribution: "Don brings a customer perspective to AI decisions: whether a new service makes life easier, earns trust and strengthens the relationship. His experience helps connect automation and personalisation to customer needs and long-term business value.",
+    background: "Co-founder of Peppers & Rogers Group and CX Speakers. Co-author with Martha Rogers of The One to One Future (1993), which helped establish one-to-one marketing and customer relationship management. Their nine books together have sold more than a million copies in 18 languages. Included in The Times of London’s “Top 50 Business Brains” and Accenture’s list of the world’s 50 “most important living business thinkers”. Earlier, CEO of Chiat/Day’s direct marketing unit. BSc in astronautical engineering, US Air Force Academy; Master’s in Public Affairs, Princeton.",
+    contribution: "The customer’s seat: whether AI makes a service more useful, earns trust and gives customers a reason to stay — plus decades of experience connecting customer relationships to business value, so we measure more than efficiency alone.",
   },
   {
     initials: "RA", name: "Rami Aslan", title: "Advisory Board", group: "advisor",
-    background: "Rami is a former CEO and board member of Türk Telekom and Oger Telecom. He began his career in banking with TD Bank and Citigroup before moving into telecoms, corporate finance and investment. His experience spans North America, Europe, the Middle East and Africa, including the integration and transformation of large telecom and technology businesses.",
-    contribution: "Rami brings an operator’s and investor’s view of enterprise change. His experience in running large organisations, integrating businesses and allocating capital helps test whether an AI programme has a sound business case, a workable operating model and a clear path to delivery.",
+    background: "More than 25 years across North America, Europe, the Middle East and Africa. CEO of Türk Telekom (2013–2017) — Türkiye’s largest telecom operator, with some 35,000 employees serving 40+ million customers — after leading Oger Telecom as CEO and executive board member. Earlier, head of M&A and corporate finance at the Oger Group, concluding transactions exceeding US$25 billion, following banking roles at Citigroup and TD covering telecom and technology. Board roles have spanned Avea, TTNET, Cell-C and operators across four more countries. Since 2018, a co-founder of venture and private-equity initiatives. McGill BCom and MBA.",
+    contribution: "The operator’s seat: what transformation looks like when you’re accountable for 35,000 people and a nation’s network — plus an investor’s discipline on our economics and telecom depth that anchors one of our core industries.",
   },
 ];
 

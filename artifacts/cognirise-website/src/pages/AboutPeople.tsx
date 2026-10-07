@@ -20,7 +20,7 @@ import { getMarketLocationLabel, useMarketStore } from "@/store/market";
 import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
 import { useReleaseContext } from "@/lib/releases";
 import { useCmsPreviewRequestDisabled } from "@/lib/cms";
-import { launchTeam, teamHeroForRegion, type TeamProfile } from "@/content/team-launch";
+import { launchTeam, teamHeroForRegion, teamPortraitClipPath, type TeamProfile } from "@/content/team-launch";
 
 type PreviewPersonRecord = CmsRecord<PersonContent> & { content: PersonContent };
 
@@ -39,13 +39,13 @@ function ProfileList({ profiles, label, delivery, previewPerson = false }: { pro
               {profile.identityImage ? (
                 <img
                   data-pulse-image-resilient="true"
-                  className="h-48 w-40 object-cover [clip-path:polygon(0_0,100%_10%,88%_100%,10%_88%)]"
+                  className="h-48 w-40 object-cover"
                   src={profile.identityImage.src}
                   alt={profile.identityImage.alt}
-                  style={{ objectPosition: profile.identityImage.objectPosition }}
+                  style={{ objectPosition: profile.identityImage.objectPosition, clipPath: teamPortraitClipPath(profile.group, index) }}
                 />
               ) : (
-                <span aria-label={`${profile.name} identity placeholder`} className="grid h-24 w-24 place-items-center bg-gradient-to-br from-[hsl(var(--brand-violet))] via-[hsl(var(--brand-pink))] to-[hsl(var(--brand-coral))] font-display text-2xl font-bold text-white [clip-path:polygon(0_0,100%_10%,88%_100%,10%_88%)]">{profile.initials}</span>
+                <span aria-label={`${profile.name} identity placeholder`} style={{ clipPath: teamPortraitClipPath(profile.group, index) }} className="grid h-24 w-24 place-items-center bg-gradient-to-br from-[hsl(var(--brand-violet))] via-[hsl(var(--brand-pink))] to-[hsl(var(--brand-coral))] font-display text-2xl font-bold text-white">{profile.initials}</span>
               )}
               <span className="text-xs font-bold text-[hsl(var(--brand-coral))]">{String(index + 1).padStart(2, "0")} / {String(profiles.length).padStart(2, "0")}</span>
             </div>
