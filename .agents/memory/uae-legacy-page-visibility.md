@@ -14,3 +14,9 @@ Owner-confirmed launch contact details are an explicit exception to release prec
 **Why:** The owner supplied replacement London and Amsterdam addresses and the support mailbox while CMS migration remained incomplete. Stale published contact details must not override these corrections.
 
 **How to apply:** Keep this narrowly scoped to the confirmed contact details, preserve other offices and immutable history, and hand the corrected values back to governed publishing before removing the launch override.
+
+The owner also explicitly approved a new Core Values page for the current launch and confirmed Istanbul at Boğaziçi Teknopark, Istanbul, Türkiye, without a street address or phone.
+
+**Why:** These are explicit additions to the approved launch scope, not authorization to expose other draft pages or claim additional offices.
+
+**How to apply:** Keep public launch additions separate from immutable publication and capability previews; preserve the supplied founders’ wording and transparency qualifier.

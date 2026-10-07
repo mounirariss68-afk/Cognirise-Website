@@ -20,6 +20,7 @@ const pages = [
     heroHeadingTestId: "portfolio-title",
     heroBodyTestId: "portfolio-description",
   }],
+  ["core-values", "/about/core-values", "Core Values", "CoreValues.tsx", "landing"],
 ];
 const marketSource = fs.readFileSync(path.join(root, "artifacts/cognirise-website/src/store/market.ts"), "utf8");
 const uaeLocation = marketSource.match(/\{\s*id:\s*"uae"[^}]*locationLabel:\s*"([^"]+)"/)?.[1];

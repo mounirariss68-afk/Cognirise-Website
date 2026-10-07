@@ -84,6 +84,7 @@ import CaseStudyDetail from "@/pages/CaseStudyDetail";
 import InsightsEditorial from "@/pages/InsightsEditorial";
 import InsightArticle from "@/pages/InsightArticle";
 import AboutPeople from "@/pages/AboutPeople";
+import CoreValues from "@/pages/CoreValues";
 import Partners from "@/pages/Partners";
 import Contact from "@/pages/Contact";
 import ValueScan from "@/pages/ValueScan";
@@ -116,6 +117,7 @@ export function Router() {
     || path === "/what-we-do/sovereign-regulated-ai"
     || path === "/what-we-do/digital-ai-workforce"
     || path === "/about"
+    || path === "/about/core-values"
     || path === "/platforms"
     || path === "/methodologies"
     || path === "/methodologies/ai-use-case-prioritization"
@@ -267,6 +269,11 @@ export function Router() {
         <Route path="/insights/:slug" component={InsightArticle} />
         
         {/* Company */}
+        <Route path="/about/core-values">
+          {released
+            ? <GovernedLandingRoute pagePath="/about/core-values" compiled={CoreValues} />
+            : <CoreValues />}
+        </Route>
         <Route path="/about">
           {released
             ? <GovernedLandingRoute pagePath="/about" compiled={AboutPeople} />

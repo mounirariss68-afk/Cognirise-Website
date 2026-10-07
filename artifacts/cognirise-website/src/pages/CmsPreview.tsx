@@ -31,6 +31,7 @@ import { BankingEditorial } from "@/components/industries/BankingEditorial";
 import { Shell, type PreviewMarketContext, type PreviewNavigationSnapshot } from "@/components/layout/Shell";
 import { GovernedLandingRoute } from "@/components/GovernedLandingRoute";
 import AboutPeople from "@/pages/AboutPeople";
+import CoreValues from "@/pages/CoreValues";
 import Home from "@/pages/Home";
 import InsightsEditorial from "@/pages/InsightsEditorial";
 import MethodologiesPortfolio from "@/pages/MethodologiesPortfolio";
@@ -72,6 +73,7 @@ type IndustryPreviewStatus = "ready" | "unavailable" | "expired" | "revoked";
 const landingCompiledRoutes = {
   "/": Home,
   "/about": AboutPeople,
+  "/about/core-values": CoreValues,
   "/partners": Partners,
   "/platforms": PlatformsOverview,
   "/insights": InsightsEditorial,
@@ -324,7 +326,7 @@ function DraftPreviewContent({ preview, warnings }: { preview: Preview; warnings
       <>
         <PreviewWarningPanel warnings={warnings} missingMedia={missingMedia} />
         <GovernedLandingRoute
-          pagePath={pagePath as "/" | "/about" | "/partners" | "/platforms" | "/insights" | "/methodologies"}
+          pagePath={pagePath as "/" | "/about" | "/about/core-values" | "/partners" | "/platforms" | "/insights" | "/methodologies"}
           compiled={compiled}
           pageOverride={page}
         />

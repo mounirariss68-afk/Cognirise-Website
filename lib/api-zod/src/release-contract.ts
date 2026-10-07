@@ -114,6 +114,7 @@ export const CMS_RELEASE_REGISTRY = cmsReleaseRegistrySchema.parse({
     page("insights", "/insights", "landing-page", "insights"),
     page("insight.detail", "/insights/:slug", "publication", "insight-detail", "dynamic"),
     page("about", "/about", "landing-page", "about"),
+    page("core-values", "/about/core-values", "landing-page", "core-values"),
     page("partners", "/partners", "landing-page", "partners"),
     page("faq", "/faq", "landing-page", "faq"),
     page("contact", "/contact", "landing-page", "contact"),

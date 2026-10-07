@@ -13,7 +13,9 @@ test("Contact renders the ordered published office collection from the CMS", asy
 
   assert.match(contact, /useCmsCollection\("office"/);
   assert.match(contact, /contentRecord\(item, "office"\)/);
-  assert.match(contact, /\.toSorted\(\(left, right\) => left\.order - right\.order\)/);
+  assert.match(contact, /sortedContactOffices\(offices.data\)/);
+  assert.match(contact, /LAUNCH_POLICY.enabled && !protectedPreview/);
+  assert.match(contact, /!protectedPreview && <figure/);
   assert.match(contact, /phone: office\.phone/);
   assert.match(contact, /<OfficeContactCard[^>]+\{\.\.\.office\}/);
   assert.match(officeCard, /phone \? \(/);

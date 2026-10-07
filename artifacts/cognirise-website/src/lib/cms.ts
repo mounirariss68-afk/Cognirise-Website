@@ -221,6 +221,7 @@ export function resolvePreviewIndustryMedia(
 export const COMPILED_LANDING_ROUTES = [
   { sourceKey: "compiled:/", path: "/", template: "landing" },
   { sourceKey: "compiled:/about", path: "/about", template: "landing" },
+  { sourceKey: "compiled:/about/core-values", path: "/about/core-values", template: "landing" },
   { sourceKey: "compiled:/partners", path: "/partners", template: "landing" },
   { sourceKey: "compiled:/platforms", path: "/platforms", template: "landing" },
   { sourceKey: "compiled:/insights", path: "/insights", template: "landing" },

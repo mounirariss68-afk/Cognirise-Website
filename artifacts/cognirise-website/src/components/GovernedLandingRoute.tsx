@@ -6,7 +6,7 @@ import { contentRecord, governedLandingDelivery, LandingSlotDeliveryError, useCm
 import { ServiceError } from "@/components/error-boundary";
 
 export type GovernedLandingRouteProps = {
-  pagePath: "/" | "/about" | "/partners" | "/platforms" | "/insights" | "/methodologies";
+  pagePath: "/" | "/about" | "/about/core-values" | "/partners" | "/platforms" | "/insights" | "/methodologies";
   compiled: ComponentType;
   pageOverride?: CmsRecord<LandingPageContent>;
 };

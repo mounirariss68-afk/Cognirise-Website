@@ -28,6 +28,7 @@ export const NAVIGATION_ITEM_REGISTRY = [
   { id: "insights", label: "Insights", destination: "/insights" },
   { id: "about", label: "About", destination: "/about" },
   { id: "about.leadership", label: "Our Team", parentId: "about", destination: "/about" },
+  { id: "about.core-values", label: "Core Values", parentId: "about", destination: "/about/core-values" },
   { id: "about.partners", label: "Partners", parentId: "about", destination: "/partners" },
   { id: "about.faq", label: "FAQ", parentId: "about", destination: "/faq" },
   { id: "about.contact", label: "Contact", parentId: "about", destination: "/contact" },

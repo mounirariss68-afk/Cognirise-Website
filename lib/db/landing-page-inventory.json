@@ -1407,5 +1407,753 @@
         "relatedIds": []
       }
     }
+  },
+  {
+    "slug": "core-values",
+    "path": "/about/core-values",
+    "title": "Core Values",
+    "sourceKey": "compiled:/about/core-values",
+    "snapshot": {
+      "slug": "core-values",
+      "title": "Core Values",
+      "summary": "Neither of them was chosen in a workshop. The founders of Cognirise lived by the first long before this firm existed, and each of them made the second a personal promise long ago. This page says what they mean in practice, so that you can hold us to them.",
+      "markets": [
+        "uae"
+      ],
+      "mediaIds": [],
+      "content": {
+        "schemaVersion": 1,
+        "pagePath": "/about/core-values",
+        "template": "landing",
+        "narrative": "Two values. Held for decades.",
+        "sections": [
+          {
+            "type": "narrative",
+            "id": "hero",
+            "heading": "Two values. Held for decades.",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Neither of them was chosen in a workshop. The founders of Cognirise lived by the first long before this firm existed, and each of them made the second a personal promise long ago. This page says what they mean in practice, so that you can hold us to them."
+              }
+            ],
+            "order": 0
+          },
+          {
+            "type": "cta",
+            "id": "core-values-cta-contact",
+            "label": "Contact us",
+            "href": "/contact",
+            "style": "primary",
+            "order": 1
+          },
+          {
+            "type": "narrative",
+            "id": "core-values-cta-heading-line-1",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Meet the people"
+              }
+            ],
+            "order": 2
+          },
+          {
+            "type": "narrative",
+            "id": "core-values-cta-heading-line-2",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "behind these values."
+              }
+            ],
+            "order": 3
+          },
+          {
+            "type": "cta",
+            "id": "core-values-cta-team",
+            "label": "Meet the team",
+            "href": "/about",
+            "style": "primary",
+            "order": 4
+          },
+          {
+            "type": "narrative",
+            "id": "core-values-founder-aside",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "The founders of Cognirise worked together at Peppers & Rogers Group before founding this firm. The values on this page are the ones they brought with them."
+              }
+            ],
+            "order": 5
+          },
+          {
+            "type": "narrative",
+            "id": "core-values-founder-bulent-name",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Bülent Eğrilmez"
+              }
+            ],
+            "order": 6
+          },
+          {
+            "type": "narrative",
+            "id": "core-values-founder-bulent-role",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "CTO & Co-founder"
+              }
+            ],
+            "order": 7
+          },
+          {
+            "type": "narrative",
+            "id": "core-values-founder-eyebrow",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "01 / A message from our founders"
+              }
+            ],
+            "order": 8
+          },
+          {
+            "type": "narrative",
+            "id": "core-values-founder-intro",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Most firms publish a list of values. We publish the two we have actually lived by, because those are the ones you can hold us to."
+              }
+            ],
+            "order": 9
+          },
+          {
+            "type": "narrative",
+            "id": "core-values-founder-mounir-name",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Mounir Ariss"
+              }
+            ],
+            "order": 10
+          },
+          {
+            "type": "narrative",
+            "id": "core-values-founder-mounir-role",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "CEO & Co-founder"
+              }
+            ],
+            "order": 11
+          },
+          {
+            "type": "narrative",
+            "id": "core-values-founder-title",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Why only two."
+              }
+            ],
+            "order": 12
+          },
+          {
+            "type": "narrative",
+            "id": "core-values-hero-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Neither of them was chosen in a workshop. The founders of Cognirise lived by the first long before this firm existed, and each of them made the second a personal promise long ago. This page says what they mean in practice, so that you can hold us to them."
+              }
+            ],
+            "order": 13
+          },
+          {
+            "type": "narrative",
+            "id": "core-values-hero-eyebrow",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "About · Core Values"
+              }
+            ],
+            "order": 14
+          },
+          {
+            "type": "narrative",
+            "id": "core-values-hero-heading",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Two values. Held for decades."
+              }
+            ],
+            "order": 15
+          },
+          {
+            "type": "narrative",
+            "id": "core-values-hero-panel-accent",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "help each other succeed."
+              }
+            ],
+            "order": 16
+          },
+          {
+            "type": "narrative",
+            "id": "core-values-hero-panel-lead",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "We succeed because we"
+              }
+            ],
+            "order": 17
+          },
+          {
+            "type": "narrative",
+            "id": "core-values-letter-opening",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "People stay when they know where they stand."
+              }
+            ],
+            "order": 18
+          },
+          {
+            "type": "narrative",
+            "id": "core-values-letter-p1-emphasis",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "we succeed because we help each other succeed."
+              }
+            ],
+            "order": 19
+          },
+          {
+            "type": "narrative",
+            "id": "core-values-letter-p1-lead",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "The first of our values comes from the Peppers & Rogers Group, where all of us worked earlier in our careers. The phrase we used there was simple:"
+              }
+            ],
+            "order": 20
+          },
+          {
+            "type": "narrative",
+            "id": "core-values-letter-p1-rest",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "It was not a slogan on a wall. It was how the firm ran. Nobody got ahead by making a colleague look bad. When someone was struggling on an engagement, the people around them stepped in without being asked and without keeping score. Politics had no oxygen."
+              }
+            ],
+            "order": 21
+          },
+          {
+            "type": "narrative",
+            "id": "core-values-letter-p2",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "The same instinct carried through to our clients. We cared whether they succeeded, not only whether the engagement closed, and that gave us a sense of stewardship over their work that none of us has lost. We still think of client work as something we are entrusted with rather than something we are paid for."
+              }
+            ],
+            "order": 22
+          },
+          {
+            "type": "narrative",
+            "id": "core-values-letter-p3-emphasis",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "fair in how we treat others, honest in our dealings, and transparent to the extent possible."
+              }
+            ],
+            "order": 23
+          },
+          {
+            "type": "narrative",
+            "id": "core-values-letter-p3-lead",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "The second value is personal to each of us. We have all seen a great deal of unfair and biased treatment over the years, of people and of organisations, and we each made ourselves the same promise long ago: to do everything in our power to be"
+              }
+            ],
+            "order": 24
+          },
+          {
+            "type": "narrative",
+            "id": "core-values-letter-p3-rest",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "That promise has driven most of what we have done since. It is also the reason some of our partnerships, friendships and client relationships have now lasted more than twenty-five years."
+              }
+            ],
+            "order": 25
+          },
+          {
+            "type": "narrative",
+            "id": "core-values-letter-p4",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "We built Cognirise on these two values because they are the ones we know how to keep. Everything else on this site, from how we price work to what we build and who owns it afterwards, follows from them."
+              }
+            ],
+            "order": 26
+          },
+          {
+            "type": "narrative",
+            "id": "core-values-letter-sign-name",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "The founders of Cognirise"
+              }
+            ],
+            "order": 27
+          },
+          {
+            "type": "narrative",
+            "id": "core-values-letter-sign-roles",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Mounir Ariss, CEO & Co-founder · Bülent Eğrilmez, CTO & Co-founder"
+              }
+            ],
+            "order": 28
+          },
+          {
+            "type": "migration-media",
+            "id": "core-values-portrait-bulent",
+            "sourcePath": "/images/cognirise/people/bulent-egrilmez-20261007.jpg",
+            "altText": "Bülent Eğrilmez, CTO and Co-founder of Cognirise",
+            "ownership": "compiled-landing",
+            "resolution": "unresolved",
+            "order": 29
+          },
+          {
+            "type": "migration-media",
+            "id": "core-values-portrait-mounir",
+            "sourcePath": "/images/cognirise/people/mounir-ariss.jpg",
+            "altText": "Mounir Ariss, CEO and Co-founder of Cognirise",
+            "ownership": "compiled-landing",
+            "resolution": "unresolved",
+            "order": 30
+          },
+          {
+            "type": "narrative",
+            "id": "core-values-tests-close",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "If we fall short of any of these, tell a founder directly. Our names are on the"
+              }
+            ],
+            "order": 31
+          },
+          {
+            "type": "narrative",
+            "id": "core-values-tests-eyebrow",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "03 / Hold us to them"
+              }
+            ],
+            "order": 32
+          },
+          {
+            "type": "narrative",
+            "id": "core-values-tests-intro",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Values that cannot be tested against behaviour are decoration. These are the tests."
+              }
+            ],
+            "order": 33
+          },
+          {
+            "type": "cta",
+            "id": "core-values-tests-team-link",
+            "label": "team page",
+            "href": "/about",
+            "style": "primary",
+            "order": 34
+          },
+          {
+            "type": "narrative",
+            "id": "core-values-tests-title",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "What you can expect from us."
+              }
+            ],
+            "order": 35
+          },
+          {
+            "type": "narrative",
+            "id": "core-values-value-1-stand",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Nobody at Cognirise wins alone, and no client is left to carry an outcome alone. This is the value the founders have held longest, and it has five layers."
+              }
+            ],
+            "order": 36
+          },
+          {
+            "type": "narrative",
+            "id": "core-values-value-1-title",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "We succeed because we help each other succeed."
+              }
+            ],
+            "order": 37
+          },
+          {
+            "type": "narrative",
+            "id": "core-values-value-2-stand",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Fair in how we treat people. Honest in our dealings. Transparent to the extent possible. The last three words are deliberate: where we cannot be open, we say so, rather than pretending there is nothing to say."
+              }
+            ],
+            "order": 38
+          },
+          {
+            "type": "narrative",
+            "id": "core-values-value-2-title",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Fair, honest and transparent."
+              }
+            ],
+            "order": 39
+          },
+          {
+            "type": "narrative",
+            "id": "core-values-values-eyebrow",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "02 / The values"
+              }
+            ],
+            "order": 40
+          },
+          {
+            "type": "narrative",
+            "id": "core-values-values-intro",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Each value has several layers. The layers are the point: a value that cannot be tested against behaviour is a slogan."
+              }
+            ],
+            "order": 41
+          },
+          {
+            "type": "narrative",
+            "id": "core-values-values-title",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "What we mean, in practice."
+              }
+            ],
+            "order": 42
+          },
+          {
+            "type": "narrative",
+            "id": "cv-test-1",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "You hear the bad news from us first, and early."
+              }
+            ],
+            "order": 43
+          },
+          {
+            "type": "narrative",
+            "id": "cv-test-2",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "The people who sell the work are the people who do it. Leadership, engineering and accountability stay in the same room."
+              }
+            ],
+            "order": 44
+          },
+          {
+            "type": "narrative",
+            "id": "cv-test-3",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "You own what we build. Nothing is withheld to keep you dependent on us."
+              }
+            ],
+            "order": 45
+          },
+          {
+            "type": "narrative",
+            "id": "cv-test-4",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "If we think you are about to spend money on the wrong thing, we say so, even when the right thing is smaller, or is not us."
+              }
+            ],
+            "order": 46
+          },
+          {
+            "type": "narrative",
+            "id": "cv-v1-politics-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "No side channels, no managing upward at a colleague's expense, no taking credit for someone else's work. We hire for this, and we part ways over it."
+              }
+            ],
+            "order": 47
+          },
+          {
+            "type": "narrative",
+            "id": "cv-v1-politics-title",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Zero tolerance for politics"
+              }
+            ],
+            "order": 48
+          },
+          {
+            "type": "narrative",
+            "id": "cv-v1-stewardship-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "The value does not stop at our own walls. We care whether a client's programme works after we have left, not only whether our engagement closed well. It is why the client owns everything we build, why we say so when we think a piece of work will not land, and why we would rather show a working prototype in 48 hours than ask anyone to decide on a slide."
+              }
+            ],
+            "order": 49
+          },
+          {
+            "type": "narrative",
+            "id": "cv-v1-stewardship-title",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Stewardship of client success"
+              }
+            ],
+            "order": 50
+          },
+          {
+            "type": "narrative",
+            "id": "cv-v1-support-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "When someone is stretched, the people around them step in without being asked and without keeping score. That includes the founders."
+              }
+            ],
+            "order": 51
+          },
+          {
+            "type": "narrative",
+            "id": "cv-v1-support-title",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Support"
+              }
+            ],
+            "order": 52
+          },
+          {
+            "type": "narrative",
+            "id": "cv-v1-teamwork-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Work is shared, credit is shared, and problems are shared early. The question is never whose job it is. It is whether it gets done well."
+              }
+            ],
+            "order": 53
+          },
+          {
+            "type": "narrative",
+            "id": "cv-v1-teamwork-title",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Teamwork"
+              }
+            ],
+            "order": 54
+          },
+          {
+            "type": "narrative",
+            "id": "cv-v1-understanding-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Before we judge a colleague's decision or a client's constraint, we ask why it was made. Most friction disappears at that point, and what remains is worth the argument."
+              }
+            ],
+            "order": 55
+          },
+          {
+            "type": "narrative",
+            "id": "cv-v1-understanding-title",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Understanding"
+              }
+            ],
+            "order": 56
+          },
+          {
+            "type": "narrative",
+            "id": "cv-v2-fairness-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "One standard for everyone: colleagues, clients, partners, suppliers and candidates. Decisions about people are made on the work, not on who they know or where they come from."
+              }
+            ],
+            "order": 57
+          },
+          {
+            "type": "narrative",
+            "id": "cv-v2-fairness-title",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Fairness"
+              }
+            ],
+            "order": 58
+          },
+          {
+            "type": "narrative",
+            "id": "cv-v2-honesty-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "We say what we believe the answer is, including when it is not the answer the client hoped for, and including when the honest answer is that they do not need us."
+              }
+            ],
+            "order": 59
+          },
+          {
+            "type": "narrative",
+            "id": "cv-v2-honesty-title",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Honesty"
+              }
+            ],
+            "order": 60
+          },
+          {
+            "type": "narrative",
+            "id": "cv-v2-produces-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Partnerships, friendships and trusted-advisor relationships that have lasted more than twenty-five years. Relationships of that length are not built on contracts. They are built on people knowing where they stand."
+              }
+            ],
+            "order": 61
+          },
+          {
+            "type": "narrative",
+            "id": "cv-v2-produces-title",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "What it produces"
+              }
+            ],
+            "order": 62
+          },
+          {
+            "type": "narrative",
+            "id": "cv-v2-transparency-body",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Clients see how we work, what things cost and why, what we found and what we did not. When something cannot be shared, we say that it cannot, and where we can, we say why."
+              }
+            ],
+            "order": 63
+          },
+          {
+            "type": "narrative",
+            "id": "cv-v2-transparency-title",
+            "body": [
+              {
+                "type": "paragraph",
+                "text": "Transparency"
+              }
+            ],
+            "order": 64
+          }
+        ],
+        "cta": {
+          "label": "Contact us",
+          "href": "/contact",
+          "style": "primary"
+        },
+        "seo": {
+          "title": "Core Values | Cognirise",
+          "description": "The two values Cognirise is run on: we succeed because we help each other succeed, and we are fair, honest and transparent with everyone we work with. A message from our founders and what each value means in practice."
+        },
+        "legal": {},
+        "visualReferences": [],
+        "visibility": "public",
+        "order": 0,
+        "sources": [
+          {
+            "label": "Compiled Core Values page",
+            "url": "https://www.cognirise.com/about/core-values"
+          }
+        ],
+        "verificationDate": "2026-09-09",
+        "reviewDate": "2027-03-09",
+        "relatedIds": []
+      }
+    }
   }
 ]

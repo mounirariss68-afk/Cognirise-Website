@@ -105,6 +105,10 @@ const pageMeta: Record<string, { title: string; description: string }> = {
     title: "Our Team | Cognirise",
     description: "Meet the Cognirise leadership team and Board of Advisors behind our senior-led AI transformation work.",
   },
+  "/about/core-values": {
+    title: "Core Values | Cognirise",
+    description: "The two values Cognirise is run on: we succeed because we help each other succeed, and we are fair, honest and transparent with everyone we work with. A message from our founders and what each value means in practice.",
+  },
   "/partners": {
     title: "Partners | Cognirise",
     description: "The alliance and technology network that supports our operating model.",
@@ -115,7 +119,7 @@ const pageMeta: Record<string, { title: string; description: string }> = {
   },
   "/contact": {
     title: "Contact Us | Cognirise",
-    description: "Connect with Cognirise or contact our confirmed offices in Dubai, Riyadh and London.",
+    description: "Connect with Cognirise in Amsterdam, Dubai, Istanbul, London and Riyadh, or book an AI Value Scan.",
   },
   "/value-scan": {
     title: "Book an AI Value Scan | Cognirise",
@@ -224,6 +228,7 @@ const compiledNavigation: NavigationItem[] = [
     href: "/about",
     items: [
       { id: "about.leadership", label: "Our Team", href: "/about" },
+      { id: "about.core-values", label: "Core Values", href: "/about/core-values" },
       { id: "about.partners", label: "Partners", href: "/partners" },
       { id: "about.contact", label: "Contact", href: "/contact" },
     ]
@@ -367,6 +372,13 @@ export function Shell({
       id: "platforms", label: "Platforms", href: "/platforms/cognios",
     });
   }
+  // Explicit owner-approved launch addition, never injected into capability snapshots.
+  if (!navigationOverride && (LAUNCH_POLICY.enabled || (market === "uae" && locale === "en"))) {
+    const about = visibleNavigation.find((item) => item.id === "about");
+    if (about && !about.items?.some((item) => routePath(item.href) === "/about/core-values")) {
+      about.items = [...(about.items ?? []), { id: "about.core-values", label: "Core Values", href: "/about/core-values" }];
+    }
+  }
   const footerLinks = (items: Array<{ href: string; label: string }>) =>
     items.filter((item) => (navigationOverride || launchHrefAllowed(item.href)) &&
       (!availabilityManifest || releaseHrefAvailable(availabilityManifest, item.href)));
@@ -492,6 +504,9 @@ export function Shell({
 
   const handleMouseLeave = () => {
     timeoutRef.current = setTimeout(() => {
+      // Pointer exit must not close a submenu being explored by keyboard.
+      if (document.activeElement?.closest("li")?.querySelector('[aria-expanded="true"]')
+        || document.activeElement?.closest('[id^="desktop-menu-"]')) return;
       setActiveDropdown(null);
     }, 200);
   };
