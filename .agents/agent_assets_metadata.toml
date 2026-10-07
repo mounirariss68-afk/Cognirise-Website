@@ -617,3 +617,17 @@ mtime_ms = 1790706326218
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/8299ea1e-1924-4744-88c1-88dbbbfba315/26737059-3d38-40cb-9d11-2b61eb6f911b"
 storage_version_token = "1790706601349874"
 content_type = "image/jpeg"
+
+[[outputs]]
+id = "qpkl3UF5l7pxsc5XR1jQ6"
+uri = "file://attached_assets/generated_images/team-gokhan-subtle-background.png"
+type = "image"
+title = "Team photo — subtle Gokhan replacement"
+description = "Gokhan replaces the background man, with soft photographic blur. The foreground people and original composition are preserved."
+logical_id = "ed4d07ba-8390-4db4-9d9a-ad3cd829cc0a"
+content_hash = "sha256:b706771b7bf509f4ecb258fa759ef7296d11c60ca31de5e7c7525ea8ac00b759"
+size = 587197
+mtime_ms = 1791360601394
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/ed4d07ba-8390-4db4-9d9a-ad3cd829cc0a/7c03ca7c-3ab5-41f4-b866-d34162171817"
+storage_version_token = "1791360640182686"
+content_type = "image/png"
