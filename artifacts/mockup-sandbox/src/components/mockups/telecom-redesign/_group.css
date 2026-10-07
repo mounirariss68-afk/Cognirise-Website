@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+:root {
+  /* Paper */
+  --background: 30 40% 98%; 
+  /* Ink */
+  --foreground: 219 69% 20%; 
+  /* Line */
+  --border: 218 28% 84%; 
+
+  --card: 30 40% 98%; 
+  --card-foreground: 219 69% 20%; 
+  --card-border: 218 28% 84%; 
+
+  --popover: 30 40% 98%; 
+  --popover-foreground: 219 69% 20%; 
+  --popover-border: 218 28% 84%; 
+
+  /* Ink */
+  --primary: 219 69% 20%; 
+  --primary-foreground: 0 0% 100%; 
+
+  /* Soft */
+  --secondary: 220 33% 95%; 
+  --secondary-foreground: 219 69% 20%; 
+
+  /* Line/Muted */
+  --muted: 220 33% 95%; 
+  --muted-foreground: 218 25% 42%; 
+
+  /* Pink */
+  --accent: 326 64% 59%; 
+  --accent-foreground: 0 0% 100%; 
+
+  /* Coral */
+  --destructive: 10 100% 68%; 
+  --destructive-foreground: 0 0% 100%; 
+
+  --input: 218 28% 84%; 
+  --ring: 253 66% 61%; 
+  
+  --brand-violet: 253 66% 61%;
+  --brand-pink: 326 64% 59%;
+  --brand-coral: 10 100% 68%;
+  --brand-deep: 217 76% 12%;
+
+  --app-font-sans: 'Inter', sans-serif;
+  --app-font-display: 'Comfortaa', sans-serif;
+  --app-font-mono: Menlo, monospace;
+  --radius: 0; 
+}
+.telecom-exploration{font-family:Inter,sans-serif;color:#102957;background:#fdfbf7;} .telecom-exploration *{box-sizing:border-box;} .telecom-exploration h1,.telecom-exploration h2,.telecom-exploration h3{font-family:Comfortaa,sans-serif;}
