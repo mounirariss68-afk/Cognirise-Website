@@ -757,3 +757,17 @@ mtime_ms = 1791391400493
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/d05615fc-6ec7-4ee0-aa7e-6b2ef7ec0a80/1bbfbdb0-7df5-4b31-b9c3-c65ab4aa2079"
 storage_version_token = "1791391427235088"
 content_type = "image/png"
+
+[[outputs]]
+id = "vKkcwzXFuS5ZtHy7Q5hml"
+uri = "file://attached_assets/cognirise-website-launch/cognirise-linkedin-launch-waves-through-wall.png"
+type = "image"
+title = "Cognirise Launch — Waves Breaking Through"
+description = "Updated 1600 × 1600 LinkedIn PNG with the original Pulse waves breaking through a wall, official Cognirise logo and launch announcement."
+logical_id = "f9823eed-b787-4d25-9daa-db0f3a1abe29"
+content_hash = "sha256:a9f38f35a978beef4cb6f9f77f3f45c40332707f0782014f4742a3b445770bd1"
+size = 1037284
+mtime_ms = 1791391520261
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/f9823eed-b787-4d25-9daa-db0f3a1abe29/e651a1b7-7403-4a8e-bd73-02ad69706446"
+storage_version_token = "1791391543845876"
+content_type = "image/png"
