@@ -7,6 +7,7 @@
 - [CogniOS reference architecture](cognios-reference-architecture.md) — Stack six L0 layers between A/B columns; show L1 boxes side by side and L2 full-width below.
 - [Social asset self-containment](social-asset-self-containment.md) — Embed imagery in downloadable SVGs and visually verify matching PNG exports before delivery.
 - [Publishing footprint](publishing-footprint.md) — Keep Canvas designs workspace-only; reduce creative-tool dependencies without deleting content or breaking CMS media validation.
+- [Website domain transfer](website-domain-transfer.md) — Root and www were connected to the previous Replit project; transfer domain bindings rather than unpublish that project.
 - [Wide artwork composition](wide-artwork-composition.md) — Extend the illustrated field to reach wide ratios; never substitute blank padding or low-detail enlargement.
 - [CMS publication boundaries](cms-publication-boundaries.md) — Public content and media authority comes from the approved published revision, never mutable draft-level references.
 - [Hover transition verification](hover-transition-verification.md) — Automation hover helpers can hide transition timing; verify motion with direct pointer events and frame samples.

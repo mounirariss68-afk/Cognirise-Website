@@ -13,7 +13,12 @@
   line-height: inherit;
 }
 .telecom .telecom-approved :is(h2,h3,h4) { font-family: Comfortaa, sans-serif; }
-.telecom .telecom-approved > section { min-height: 0; }
+/* Integrated modules follow content height, not the standalone preview canvas.
+   Match the module classes so this wins over their later-loaded styles,
+   including the mobile full-viewport minimums. Keep diagram sizing intact. */
+.telecom .telecom-approved > section:is(.telecom-exploration, .tv-shell) {
+  min-height: 0;
+}
 .telecom .telecom-approved article { display: block; padding: 0; border: 0; }
 .telecom .telecom-approved .tc-metric-list { display:flex;flex-wrap:wrap;gap:8px; }
 .telecom .telecom-approved .tc-metric { display:flex;flex-wrap:wrap;gap:6px 10px;align-items:baseline; }

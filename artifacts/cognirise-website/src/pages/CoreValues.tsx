@@ -2,7 +2,7 @@ import { Link } from "wouter";
 import { ArrowRight } from "lucide-react";
 import { assetUrl } from "@/lib/assets";
 import { useGovernedLanding } from "@/components/GovernedLandingRoute";
-import { landingCta, landingMedia, landingText } from "@/lib/cms";
+import { landingCta, landingText } from "@/lib/cms";
 import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
 import "./CoreValues.css";
 
@@ -54,10 +54,7 @@ export default function CoreValues() {
   const heroPanelAccent = landingText(g, "core-values-hero-panel-accent", "help each other succeed.");
 
   const founderEyebrow = landingText(g, "core-values-founder-eyebrow", "01 / A message from our founders");
-  const founderTitle = landingText(g, "core-values-founder-title", "Why only two.");
   const founderIntro = landingText(g, "core-values-founder-intro", "Most firms publish a list of values. We publish the two we have actually lived by, because those are the ones you can hold us to.");
-  const mounirPortrait = landingMedia(g, "core-values-portrait-mounir", { src: assetUrl("/images/cognirise/people/mounir-ariss.jpg"), alt: "Mounir Ariss, CEO and Co-founder of Cognirise" });
-  const bulentPortrait = landingMedia(g, "core-values-portrait-bulent", { src: assetUrl("/images/cognirise/people/bulent-egrilmez-20261007.jpg"), alt: "Bülent Eğrilmez, CTO and Co-founder of Cognirise" });
   const mounirName = landingText(g, "core-values-founder-mounir-name", "Mounir Ariss");
   const mounirRole = landingText(g, "core-values-founder-mounir-role", "CEO & Co-founder");
   const bulentName = landingText(g, "core-values-founder-bulent-name", "Bülent Eğrilmez");
@@ -108,8 +105,8 @@ export default function CoreValues() {
   const contactCta = landingCta(g, "core-values-cta-contact", { label: "Contact us", href: "/contact" });
 
   const founders = [
-    { key: "mounir", initials: "MA", name: mounirName, role: mounirRole, portrait: mounirPortrait, pos: "50% 25%" },
-    { key: "bulent", initials: "BE", name: bulentName, role: bulentRole, portrait: bulentPortrait, pos: "50% 50%" },
+    { key: "mounir", name: mounirName, role: mounirRole },
+    { key: "bulent", name: bulentName, role: bulentRole },
   ];
 
   return (
@@ -141,21 +138,19 @@ export default function CoreValues() {
         <div className="cv-wrap">
           <header className="cv-head">
             <div>
-              <p className="cv-eyebrow">{founderEyebrow}</p>
-              <h2 id="cv-founder-title">{founderTitle}</h2>
+              <p id="cv-founder-title" className="cv-eyebrow">{founderEyebrow}</p>
             </div>
             <p className="cv-intro">{founderIntro}</p>
           </header>
 
           <div className="cv-founder">
             <aside className="cv-founder-rail" aria-label="Authors">
+              <figure className="cv-founders-photo">
+                <img data-pulse-image-resilient="true" src={assetUrl("/images/cognirise/people/founders-together-20261007.webp")} alt="Cognirise co-founders Mounir Ariss and Bülent Eğrilmez together" width={1024} height={768} loading="lazy" />
+              </figure>
               <ul className="cv-founders">
-                {founders.map((f, i) => (
-                  <li key={f.key} className={`cv-founder-card cv-founder-card--${i}`} data-testid={`card-founder-${f.key}`}>
-                    <div className="cv-portrait">
-                      <span className="cv-initials" aria-hidden="true">{f.initials}</span>
-                      <img data-pulse-image-resilient="true" src={f.portrait.src} alt={f.portrait.alt} style={{ objectPosition: f.pos }} loading="lazy" onError={(e) => { e.currentTarget.style.display = "none"; }} />
-                    </div>
+                {founders.map((f) => (
+                  <li key={f.key} className="cv-founder-card" data-testid={`card-founder-${f.key}`}>
                     <p className="cv-role">{f.role}</p>
                     <p className="cv-name">{f.name}</p>
                   </li>

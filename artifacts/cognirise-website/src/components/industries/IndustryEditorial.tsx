@@ -9,6 +9,7 @@ import type { IndustryContent } from "@/content/industries";
 import { contentRecord, useCmsEntry, useCmsPreviewRequestDisabled } from "@/lib/cms";
 import { useReleaseContext } from "@/lib/releases";
 import { applyTelecomLaunch } from "@/content/telecom-launch";
+import { applyPublicSectorLaunch, publicSectorLaunchEnabled } from "@/content/public-sector-launch";
 import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
 import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
 import { TelecomEditorial } from "@/components/industries/TelecomEditorial";
@@ -35,20 +36,29 @@ function IndustrySection({
 }
 
 export function IndustryEditorial({ industry }: { industry: IndustryContent }) {
-  const cms = useCmsEntry("industry", industry.slug);
-  const published = cms.data ? contentRecord(cms.data, "industry") : null;
-  const resolvedView = published ? { ...industry, ...published, slug: industry.slug } : industry;
   const { market, locale } = useMarketStore();
   const protectedPreview = useCmsPreviewRequestDisabled();
   const releaseContext = useReleaseContext();
   const launchTelecom = LAUNCH_POLICY.enabled && industry.slug === "telecoms"
     && locale === "en" && !protectedPreview && !releaseContext?.preview;
-  const view = launchTelecom ? applyTelecomLaunch(resolvedView) : resolvedView;
+  const launchPublicSector = publicSectorLaunchEnabled({
+    enabled: LAUNCH_POLICY.enabled,
+    slug: industry.slug,
+    locale,
+    protectedPreview,
+    releasePreview: Boolean(releaseContext?.preview),
+  });
+  const cms = useCmsEntry("industry", industry.slug, { preferCompiled: launchPublicSector });
+  const published = cms.data ? contentRecord(cms.data, "industry") : null;
+  const resolvedView = published ? { ...industry, ...published, slug: industry.slug } : industry;
+  const launchOverride = launchTelecom || launchPublicSector;
+  const view = launchPublicSector ? applyPublicSectorLaunch(industry, market)
+    : launchTelecom ? applyTelecomLaunch(resolvedView) : resolvedView;
   const publicSectorPov = view.publicSectorNative ?? view.publicSectorPov;
   const publicSectorMarketMismatch = industry.slug === "public-sector"
     && (
       (publicSectorPov && publicSectorPov.market !== market)
-      || (published && (
+      || (!launchPublicSector && published && (
         published.requestedMarket !== market
         || published.market !== market
       ))
@@ -57,11 +67,11 @@ export function IndustryEditorial({ industry }: { industry: IndustryContent }) {
   // non-canonical edition is absent, do not silently render the compiled UAE
   // record as a market fallback.
   const publicSectorMissingExactEdition = industry.slug === "public-sector"
-    && !published;
-  if (!launchTelecom && (cms.isAuthoritative || industry.slug === "public-sector") && cms.delivery === "loading") {
+    && !launchPublicSector && !published;
+  if (!launchOverride && (cms.isAuthoritative || industry.slug === "public-sector") && cms.delivery === "loading") {
     return <main className="min-h-[70vh] bg-[#fdfbf7] px-6 py-24 text-[#102957]" aria-busy="true"><NavigationBackControl embedded className="mb-7" /><p>Loading industry perspective…</p></main>;
   }
-  if (publicSectorMarketMismatch || publicSectorMissingExactEdition || (!launchTelecom && cms.isAuthoritative && (!published || (industry.slug === "education" && !published.educationPov)))) {
+  if (publicSectorMarketMismatch || publicSectorMissingExactEdition || (!launchOverride && cms.isAuthoritative && (!published || (industry.slug === "education" && !published.educationPov)))) {
     return <main className="min-h-[70vh] bg-[#fdfbf7] px-6 py-24 text-[#102957]"><div className="mx-auto max-w-3xl"><NavigationBackControl embedded className="mb-7" /><h1 className="font-display text-5xl font-semibold">This industry perspective is under review.</h1><p className="mt-6 max-w-xl text-lg text-[#506583]">It will return when an approved edition is published for this market.</p><Link className="mt-8 inline-flex font-bold text-[#db509e]" href="/industries">Explore all industries <ArrowRight size={16} /></Link></div></main>;
   }
   return <IndustryEditorialView view={view} />;
