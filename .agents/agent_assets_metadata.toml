@@ -855,3 +855,171 @@ mtime_ms = 1791438692531
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/d3d98e92-7088-40a1-aa87-ed4fa2d61a45/6555e863-7731-424e-80f1-cee3d5ce92d7"
 storage_version_token = "1791438753339014"
 content_type = "image/png"
+
+[[outputs]]
+id = "RKLvCFg6bTOx13bfUnQzk"
+uri = "file://attached_assets/cognirise-linkedin-company-headers/4200x700/01-governed-intelligence-4200x700.jpg"
+type = "image"
+title = "01 · Governed intelligence"
+description = "Cognirise LinkedIn company-page cover · 4200 × 700 · logo top right · no added copy."
+logical_id = "beb0c1f6-7d5c-4fbb-84f3-c3fb84a56a4a"
+content_hash = "sha256:02d391b7600723cd9a2204c757990fd81218d0f61fbbe6b5486126f957aec6af"
+size = 597417
+mtime_ms = 1791454367320
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/beb0c1f6-7d5c-4fbb-84f3-c3fb84a56a4a/35fe0bc2-5500-4cc2-8c16-4b6644984bcf"
+storage_version_token = "1791454566682767"
+content_type = "image/jpeg"
+
+[[outputs]]
+id = "joj6aDQ5IPFtlitKfdxDQ"
+uri = "file://attached_assets/cognirise-linkedin-company-headers/4200x700/02-shared-judgment-4200x700.jpg"
+type = "image"
+title = "02 · Shared judgment"
+description = "Cognirise LinkedIn company-page cover · 4200 × 700 · logo top right · no added copy."
+logical_id = "6a77ff26-40be-4f1a-b938-afe35abc3d8d"
+content_hash = "sha256:72dc47cf4b2cd88c9d74a04c35224996d19820a3b5cef09c9e5cb56563a8b27f"
+size = 821249
+mtime_ms = 1791454366188
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/6a77ff26-40be-4f1a-b938-afe35abc3d8d/7d232e18-9c76-4f5f-8a38-b6f2e46b0f6d"
+storage_version_token = "1791454568279811"
+content_type = "image/jpeg"
+
+[[outputs]]
+id = "u2XAcnYQ7c22FyJyvqxZO"
+uri = "file://attached_assets/cognirise-linkedin-company-headers/4200x700/03-operating-rhythm-4200x700.jpg"
+type = "image"
+title = "03 · Operating rhythm"
+description = "Cognirise LinkedIn company-page cover · 4200 × 700 · logo top right · no added copy."
+logical_id = "a2fafb49-e043-4bbb-8578-dd5bc728b388"
+content_hash = "sha256:3a1d99075922f52381d4c3932aff844d5a2e5f20e7aa87670159e619990d3b3a"
+size = 778280
+mtime_ms = 1791454373108
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/a2fafb49-e043-4bbb-8578-dd5bc728b388/5b3ff576-9a12-4143-9c7b-c3421e9bf252"
+storage_version_token = "1791454569685486"
+content_type = "image/jpeg"
+
+[[outputs]]
+id = "T_smvfgJtYE2nO5psMtMf"
+uri = "file://attached_assets/cognirise-linkedin-company-headers/4200x700/04-living-knowledge-4200x700.jpg"
+type = "image"
+title = "04 · Living knowledge"
+description = "Cognirise LinkedIn company-page cover · 4200 × 700 · logo top right · no added copy."
+logical_id = "8ee44062-bbd6-4dd0-bfa2-33663d9fa296"
+content_hash = "sha256:b256347eba4b12ccfeb311f60c0e0c8849a6c53b753b6990c9f3b864fcbe0532"
+size = 524866
+mtime_ms = 1791454394916
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/8ee44062-bbd6-4dd0-bfa2-33663d9fa296/22f5b7a3-dd8c-4c0c-bfd1-68059a879809"
+storage_version_token = "1791454571063999"
+content_type = "image/jpeg"
+
+[[outputs]]
+id = "2jBmZJcxMmft9k8qen_uO"
+uri = "file://attached_assets/cognirise-linkedin-company-headers/4200x700/05-directed-action-4200x700.jpg"
+type = "image"
+title = "05 · Directed action"
+description = "Cognirise LinkedIn company-page cover · 4200 × 700 · logo top right · no added copy."
+logical_id = "4f18eb07-a713-4507-9778-82d409646c24"
+content_hash = "sha256:25632342459cb90b18c8c1ad9201f4383e02ae58f53565c5c23190ac757f5c44"
+size = 502865
+mtime_ms = 1791454393756
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/4f18eb07-a713-4507-9778-82d409646c24/07655c9f-0519-476f-9084-8e6eaca28ebd"
+storage_version_token = "1791454572401269"
+content_type = "image/jpeg"
+
+[[outputs]]
+id = "wnfRexh0ufILFuFLADIij"
+uri = "file://attached_assets/cognirise-linkedin-company-headers/4200x700/06-balancing-forces-4200x700.jpg"
+type = "image"
+title = "06 · Balancing forces"
+description = "Cognirise LinkedIn company-page cover · 4200 × 700 · logo top right · no added copy."
+logical_id = "a864c24b-740c-496f-8fcc-2c8d561b187a"
+content_hash = "sha256:19b01c60e995e8abfea3f6bdec2104a123653cc5b5c1d76ee21fe9a12c21d373"
+size = 404003
+mtime_ms = 1791454408416
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/a864c24b-740c-496f-8fcc-2c8d561b187a/d0feca40-8a5e-40bc-849b-5c39be3107a2"
+storage_version_token = "1791454573727391"
+content_type = "image/jpeg"
+
+[[outputs]]
+id = "AY7XtqM5BDnKcCHrxa2G4"
+uri = "file://attached_assets/cognirise-linkedin-company-headers/4200x700/07-connected-intelligence-4200x700.jpg"
+type = "image"
+title = "07 · Connected intelligence"
+description = "Cognirise LinkedIn company-page cover · 4200 × 700 · logo top right · no added copy."
+logical_id = "3ac20a67-1ad6-4716-8c96-2910491e77d7"
+content_hash = "sha256:f5f1de17206544501b8b852f9530949be6c17cd854201c90339908d70c4be72c"
+size = 655362
+mtime_ms = 1791454428644
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/3ac20a67-1ad6-4716-8c96-2910491e77d7/6b1626fe-1107-496e-b304-0c41a0761413"
+storage_version_token = "1791454575104379"
+content_type = "image/jpeg"
+
+[[outputs]]
+id = "naM3SfdsDkSgisWlPfZN8"
+uri = "file://attached_assets/cognirise-linkedin-company-headers/4200x700/08-adaptive-work-4200x700.jpg"
+type = "image"
+title = "08 · Adaptive work"
+description = "Cognirise LinkedIn company-page cover · 4200 × 700 · logo top right · no added copy."
+logical_id = "7eeb87b0-f7f5-42bc-8e86-9203a0de5d16"
+content_hash = "sha256:840a01df666788270cbec082096841f7110fb0e26477e2f0d93de5c02b370e52"
+size = 481777
+mtime_ms = 1791454430276
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/7eeb87b0-f7f5-42bc-8e86-9203a0de5d16/4591f1a3-0ef4-4a98-8b90-016c494e7ba5"
+storage_version_token = "1791454576482389"
+content_type = "image/jpeg"
+
+[[outputs]]
+id = "vWh1bH_PihHEN4-wv3ilv"
+uri = "file://attached_assets/cognirise-linkedin-company-headers/4200x700/09-moving-network-4200x700.jpg"
+type = "image"
+title = "09 · Moving network"
+description = "Cognirise LinkedIn company-page cover · 4200 × 700 · logo top right · no added copy."
+logical_id = "ab774d2b-ba8a-4c8b-a457-f168b2d378a0"
+content_hash = "sha256:2328f970caca59b5f676e86aecbbd7c57a9693c75c84039506cb39034112a0de"
+size = 439928
+mtime_ms = 1791454450992
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/ab774d2b-ba8a-4c8b-a457-f168b2d378a0/2cf5a0eb-b729-4a01-b62a-5708cc28813b"
+storage_version_token = "1791454577827275"
+content_type = "image/jpeg"
+
+[[outputs]]
+id = "9T28TUDgPWWSsluZTGkyn"
+uri = "file://attached_assets/cognirise-linkedin-company-headers/4200x700/10-responsive-enterprise-4200x700.jpg"
+type = "image"
+title = "10 · Responsive enterprise"
+description = "Cognirise LinkedIn company-page cover · 4200 × 700 · logo top right · no added copy."
+logical_id = "cdc5d2d7-6b4b-4f95-b25c-42e8a1174796"
+content_hash = "sha256:d0248f638a61f8d6b369b41c012143863d9e5752ca9a6fd3f333e4baeebccbee"
+size = 364759
+mtime_ms = 1791454464740
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/cdc5d2d7-6b4b-4f95-b25c-42e8a1174796/0a5c60ca-c52e-428e-9ad9-84dfb37e61e3"
+storage_version_token = "1791454579232009"
+content_type = "image/jpeg"
+
+[[outputs]]
+id = "kylf00OJmE2W0fUNWjwqq"
+uri = "file://attached_assets/cognirise-linkedin-company-headers/Cognirise-company-header-preview.jpg"
+type = "image"
+title = "Compare all 10 company-page headers"
+description = "Numbered overview of the ten different Pulse designs."
+logical_id = "4de53ed2-34ce-47e4-862f-167d0c0b6639"
+content_hash = "sha256:3a7fe3c9b4626083ceb901c25dcc30fd6a75428a0bd2defe9aefabf390308c79"
+size = 641993
+mtime_ms = 1791454472884
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/4de53ed2-34ce-47e4-862f-167d0c0b6639/220725c9-d951-4324-a987-8313fe7509e3"
+storage_version_token = "1791454580633200"
+content_type = "image/jpeg"
+
+[[outputs]]
+id = "bThTjsLX5wXw895t0Pzeq"
+uri = "file://attached_assets/cognirise-linkedin-company-headers/Cognirise-10-LinkedIn-Company-Headers.zip"
+type = "unspecified"
+title = "Download all 10 Cognirise company-page headers"
+description = "Ten designs, each in 4200 × 700 JPEG and 1512 × 256 PNG. Includes the preview and upload notes; every upload file is under 3 MB."
+logical_id = "947d768a-5836-491c-9b64-a0e62dec8c9f"
+content_hash = "sha256:c76effab16d91493795a0b62970b64ffe22026e3b28efe32149f390773c203b8"
+size = 10718914
+mtime_ms = 1791454473436
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/947d768a-5836-491c-9b64-a0e62dec8c9f/27f7d873-0011-43e3-afca-3e1bbba48939"
+storage_version_token = "1791454582154449"
+content_type = "application/octet-stream"

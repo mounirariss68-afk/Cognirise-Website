@@ -26,6 +26,17 @@ and explicitly requested a different image for the next series.
 **How to apply:** Preserve the Pulse palette and editorial layout, but choose
 a distinct scene and silhouette for subsequent campaign posts.
 
+Keep Cognirise company-page covers separate from personal-profile headers.
+Company covers use a shallow panoramic Pulse composition with the official
+logo inset at the top right and no added headline unless requested.
+
+**Why:** The owner explicitly distinguished the company-page requirement
+from the existing personal-page designs.
+
+**How to apply:** Reframe the original artwork for the company cover shape,
+verify current upload specifications, and check the actual exports rather
+than stretching a personal banner. Allow for responsive edge cropping.
+
 For the website-launch LinkedIn post, the owner approved full-bleed original
 waves-breaking-through-a-wall artwork, with the logo top left and only
 “Built in practice. Now online.” bottom right.
