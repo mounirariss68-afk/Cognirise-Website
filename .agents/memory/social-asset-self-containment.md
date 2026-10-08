@@ -37,6 +37,16 @@ from the existing personal-page designs.
 verify current upload specifications, and check the actual exports rather
 than stretching a personal banner. Allow for responsive edge cropping.
 
+Review company covers in LinkedIn's “View as member” view before diagnosing
+an upload or crop failure from the “Edit page” thumbnail.
+
+**Why:** The administrative cover preview can be much shallower than the
+upload crop frame and clip branding independently of the public cover.
+
+**How to apply:** Confirm the uploaded file's dimensions and inspect the
+public desktop/mobile views before changing the design to fit an admin
+thumbnail. Do not promise that corner placement survives every layout.
+
 For the website-launch LinkedIn post, the owner approved full-bleed original
 waves-breaking-through-a-wall artwork, with the logo top left and only
 “Built in practice. Now online.” bottom right.
