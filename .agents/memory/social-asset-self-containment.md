@@ -17,6 +17,15 @@ External SVG diagrams must embed complete valid font bytes; page font loading do
 
 For LinkedIn headers, use the original image-led LinkedIn designs and their Pulse source artwork as the visual baseline, not just the brand colours.
 
+Do not reuse the waves-breaking-through-a-wall launch artwork as the first
+visual of a follow-on LinkedIn series.
+
+**Why:** The owner has already used that artwork for the website-launch post
+and explicitly requested a different image for the next series.
+
+**How to apply:** Preserve the Pulse palette and editorial layout, but choose
+a distinct scene and silhouette for subsequent campaign posts.
+
 For the website-launch LinkedIn post, the owner approved full-bleed original
 waves-breaking-through-a-wall artwork, with the logo top left and only
 “Built in practice. Now online.” bottom right.

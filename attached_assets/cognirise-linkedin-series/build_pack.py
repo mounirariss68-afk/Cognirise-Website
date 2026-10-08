@@ -1,5 +1,6 @@
 """Export the LinkedIn editorial series as ready-to-post images and a copy guide."""
 from pathlib import Path
+import argparse
 import base64
 import concurrent.futures
 import csv
@@ -14,6 +15,9 @@ POSTS = json.loads((OUT / "posts.json").read_text())
 ART = ROOT / "artifacts/mockup-sandbox/public/images/cognirise/pulse-library"
 LOGO = ROOT / "artifacts/cognirise-website/public/images/cognirise/logo-white.svg"
 FONT = ROOT / "node_modules/.pnpm/@fontsource+comfortaa@5.3.0/node_modules/@fontsource/comfortaa/files/comfortaa-latin-400-normal.woff"
+parser = argparse.ArgumentParser()
+parser.add_argument("--days", nargs="+", type=int, help="Render only these days; rebuild the complete guide and ZIP.")
+ARGS = parser.parse_args()
 
 
 def data_uri(path, mime):
@@ -24,7 +28,7 @@ def render(post):
     number = f"{post['day']:02}"
     target = OUT / "images" / f"{number}-cognirise-linkedin.png"
     source = OUT / "sources" / f"{number}.html"
-    artwork = ART / f"cognirise-pulse-{post['art']}.jpg"
+    artwork = ROOT / post["artwork_file"] if post.get("artwork_file") else ART / f"cognirise-pulse-{post['art']}.jpg"
     for path in [target.parent, source.parent, OUT / "previews"]:
         path.mkdir(parents=True, exist_ok=True)
     source.write_text(f"""<!doctype html><html><head><meta charset="utf-8"><style>
@@ -62,7 +66,7 @@ for post in POSTS:
           f"hook {len(post['post'].split(chr(10))[0])} characters", flush=True)
 
 with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-    for number in executor.map(render, POSTS):
+    for number in executor.map(render, [p for p in POSTS if not ARGS.days or p["day"] in ARGS.days]):
         print("Rendered", number, flush=True)
 
 INTRO = """# Cognirise: 10 LinkedIn posts

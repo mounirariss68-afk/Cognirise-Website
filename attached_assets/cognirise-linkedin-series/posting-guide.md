@@ -50,7 +50,7 @@ The art is conceptual brand illustration, not a screenshot of the product or a l
 
 **Image text:** A better answer. / Or a better way to work?
 
-**Visual:** The approved violet–magenta–coral waves breaking through a monumental wall: changing the work itself, not decorating the existing process.
+**Visual:** Separate violet–magenta–coral currents connect through sculptural ivory channels and bridges: redesigning the whole workflow rather than adding another interface.
 
 **Image file:** images/01-cognirise-linkedin.png
 
