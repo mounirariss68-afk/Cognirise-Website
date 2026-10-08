@@ -827,3 +827,17 @@ mtime_ms = 1791395864344
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/9936637b-1947-4be8-8e8a-3ee440ef538e/7d234b5e-7e7c-4197-8222-3b3dbf42128a"
 storage_version_token = "1791395942330196"
 content_type = "application/octet-stream"
+
+[[outputs]]
+id = "cZFCRXLmO7G2Q_4p65L3H"
+uri = "file://.local/outputs/linkedin-launch-engagement.chart.html"
+type = "text"
+title = "92 LinkedIn visitors explored About pages."
+description = "What the tracked LinkedIn audience explored after arrival during the first approximately 15 hours after launch. Categories overlap."
+logical_id = "21c07b5c-a367-4c8e-a5c3-0ba5e370d1dc"
+content_hash = "sha256:c94da8a572b92cb723f529159bc38a44ea117733f43c56a18f8febe308417572"
+size = 3354
+mtime_ms = 1791431720768
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/21c07b5c-a367-4c8e-a5c3-0ba5e370d1dc/2d0c617a-4f18-40ac-b7d6-b7871b2b2745"
+storage_version_token = "1791431722466748"
+content_type = "text/html;profile=replit-chart"
