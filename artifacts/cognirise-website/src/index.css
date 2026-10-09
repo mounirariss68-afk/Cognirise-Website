@@ -370,6 +370,8 @@
 /* Cognirise Pulse motion grammar: arrival → signal → transfer → resolution. */
 .pulse-motion-page {
   min-width: 0;
+  /* Sections slide in from 16px to the side while they reveal; clip that so the page never scrolls sideways. */
+  overflow-x: clip;
 }
 
 .pulse-motion-page [data-pulse-reveal] {
@@ -458,6 +460,13 @@
   border-color: hsl(var(--foreground) / .24);
   box-shadow: none;
   backdrop-filter: blur(10px);
+}
+
+/* The secondary button on a dark band (the closing band). */
+.pulse-action-secondary.pulse-action-on-dark {
+  color: #fff;
+  background: rgba(255, 255, 255, .08);
+  border-color: rgba(255, 255, 255, .45);
 }
 
 .pulse-action-layout {

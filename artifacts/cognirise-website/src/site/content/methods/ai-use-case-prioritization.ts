@@ -1,0 +1,111 @@
+import { aiUseCasePrioritizationEditorial } from "@workspace/api-zod";
+
+/** Code-owned copy for the Use-case prioritisation page. */
+type Seed = typeof aiUseCasePrioritizationEditorial.seed;
+const seed = aiUseCasePrioritizationEditorial.seed;
+
+export const UCP_HERO = {
+  breadcrumb: "Methods / 03",
+  title: "Use-case prioritisation.",
+  description: "A working tool for deciding which AI opportunities to advance, in what order, and which to stop, before any money is committed.",
+  supportingText: "The scores are yours, against your own context, not a market benchmark. The result points each opportunity at the step where it should enter our four-step method, or at Stop.",
+  imageSrc: "/images/cognirise/method-ucp-governed-ai-v3.jpg",
+  imageAlt: "Architectural gateways and transparent panels crossed by a flowing stream of violet, pink and coral light.",
+  imageCaptionSubtitle: "The portfolio",
+  imageCaptionTitle: "Put the effort where it pays.",
+};
+
+export const UCP_EDITORIAL = {
+  ...seed,
+  relationship: {
+    ...seed.relationship,
+    startHereWhen: "You have several opportunities, or one defined use case, and need to decide which should advance, in what order, and where each enters delivery.",
+    decision: "Which opportunities should advance, in what order, and which should stop?",
+    output: "A comparable scorecard and a clear recommendation for each opportunity: enter at Innovate, Demonstrate or Activate, or Stop.",
+    connectsToIdaoBefore: "Recommends whether an opportunity should stop, be investigated in",
+    connectsToIdaoBetweenInnovateAndDemonstrate: ", proved through",
+    connectsToIdaoBetweenDemonstrateAndActivate: ", or built in",
+    connectsToIdaoAfter: ".",
+    connectsToAuthority: "Looks at exposure and the oversight required (the control-cost score) to set the order and the entry step. The Agent Authority Model later sets the limits for the handovers inside the delivered workflow.",
+    reassessWhen: "The business value changes, new platform capabilities change feasibility, or a stopped opportunity clears the dependency that blocked it.",
+    doesNotDecide: "Whether the organisation as a whole is ready (use Value-to-Scale) or whether one workflow is ready for an agent (use the operations readiness check).",
+  },
+  portfolio: {
+    ...seed.portfolio,
+    kicker: "The portfolio",
+    heading: "Score each opportunity on six things.",
+    introduction: "Each score uses your evidence and your judgement on a 1 to 5 scale. The total helps put comparable opportunities in order; set thresholds decide the entry step or a stop.",
+    boundary: "These are not market benchmarks, probabilities or a certification. Compare opportunities scored by the same group of people, record any uncertainty as a caveat, and revisit the scores when the evidence changes.",
+    addOpportunity: "Add another opportunity",
+    progressHeading: "Progress",
+    progressBetweenCounts: "of",
+    progressAfterCounts: "opportunities have a name and an outcome.",
+    progressNotice: "Answers stay in this page only. Reloading or leaving clears unsaved work.",
+    resetAssessment: "Reset the assessment",
+  },
+  assessmentCard: {
+    ...seed.assessmentCard,
+    opportunityPrefix: "Opportunity 0",
+    removeOpportunity: "Remove opportunity",
+    opportunityNamePlaceholder: "Opportunity name",
+    outcomeSought: "Outcome sought",
+    outcomePlaceholder: "What business or service outcome would improve?",
+    caveatsAndConstraints: "Caveats and constraints",
+    caveatsPlaceholder: "Record specific risks, data privacy concerns or dependencies.",
+    dependencies: "Dependencies",
+    dependenciesPlaceholder: "Name the data, access, policy, platform or owner decisions it needs first.",
+    evaluationCriteria: "The six scores",
+    scale: "1 to 5",
+    viewStage: "See the step",
+    controlBurdenNote: {
+      heading: "On control cost:",
+      beforeAuthorityLink: "it reflects the exposure and the oversight required, and it can change the priority, the scope or the entry step.",
+      authorityLink: { label: "Use the Agent Authority Model", href: "/methodologies/agent-authority-model" },
+      afterAuthorityLink: "separately for any handover where a mistake costs money or trust.",
+    },
+  },
+  sampleOpportunities: [
+    {
+      name: "Customer onboarding document extraction",
+      caveats: "Strict data privacy requirements: personal data handling must be approved and controlled.",
+      dependencies: "Approved data access, retention rules and a named information owner.",
+    },
+    {
+      name: "Chat interface on the legacy core system",
+      caveats: "API access to the legacy core banking system is undocumented and unstable.",
+      dependencies: "A stable read-only integration contract and a named system owner.",
+    },
+  ],
+  analysis: {
+    ...seed.analysis,
+    kicker: "Analysis",
+    heading: "What the scores say",
+    introduction: "The order and the dependencies to resolve, based on the six scores.",
+    groups: [
+      { title: "Ready to build (Activate)", description: "High feasibility and low adoption friction. These are ready to be built for production without a discovery phase first." },
+      { title: "Needs evidence (Demonstrate and Innovate)", description: "High value, but held back by feasibility, adoption friction or a lack of evidence. Prove these in a limited setting before scaling them." },
+      { title: "Do not fund (Stop)", description: "Low value, or a delivery risk that is too high. Stop these before spending more on them." },
+    ],
+    empty: "Add opportunities to see the analysis.",
+    sequencePrefix: "Order",
+    unnamedOpportunity: "Unnamed opportunity",
+    resolveBeforeEntry: "Resolve before entry:",
+    caveat: "Caveat:",
+    totalScore: "Total score",
+  },
+  nextSteps: {
+    ...seed.nextSteps,
+    heading: "Next steps",
+    body: "Bring your scored portfolio to a Value Scan. We will test the highest-scoring opportunity and map the path to production with your team.",
+    valueScan: { label: "Book a Value Scan", href: "/value-scan" },
+    idaoHeading: "The four steps",
+    idaoBody: "See how an approved opportunity moves through Innovate, Demonstrate, Activate and Operate, with a person approving each gate.",
+    idaoLink: { label: "See the method", href: "/methodologies/idao" },
+    creatingReport: "Creating the report…",
+    downloadResults: "Download results (PDF)",
+    downloadFailure: "The results PDF could not be created. Please try again.",
+    print: "Print",
+    incompleteExport: "Add a name and an outcome to every opportunity before exporting a complete result.",
+    localPdfNotice: "The PDF is created in your browser. Your notes are never sent to Cognirise.",
+  },
+} as unknown as Seed;

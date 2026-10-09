@@ -18,11 +18,9 @@ import {
 import { useMethodSessionState, useUnsavedWorkWarning } from "@/lib/use-method-session-state";
 import { downloadReadinessResultsPdf } from "@/lib/pulse-assessment-reports";
 import { MethodologyCmsDelivery, methodologyEditorial, methodologyHero, useMethodologyCmsContent, useMethodologyCmsSeo } from "@/components/MethodologyCmsLayout";
-import {
-  agenticOperationsReadinessEditorial,
-  agenticOperationsReadinessHeroSeed,
-  methodologySeoSeed,
-} from "@workspace/api-zod";
+import { agenticOperationsReadinessEditorial } from "@workspace/api-zod";
+import { AOR_EDITORIAL, AOR_HERO } from "@/site/content/methods/agentic-operations-readiness";
+import { methodSeo } from "@/site/content/methods/seo";
 
 type Answer = ReadinessAnswers[keyof ReadinessAnswers];
 
@@ -35,20 +33,20 @@ const CONDITIONS = [
   {
     id: "stability",
     title: "Workflow stability",
-    question: "Is the current workflow sufficiently understood and stable to specify?",
-    ready: "The trigger, sequence, owner, expected outcome and material variants are evidenced.",
-    prepare: "The main path is known, but variants or baseline performance remain incomplete.",
-    stop: "The workflow changes materially by person, shift or case, with no accountable standard.",
-    resolve: "Map the current workflow, name its owner, quantify baseline performance and agree which variants are in scope.",
+    question: "Is the current workflow understood well enough, and stable enough, to specify?",
+    ready: "The trigger, the sequence, the owner, the expected outcome and the main variants are documented with evidence.",
+    prepare: "The main path is known, but the variants or the baseline performance are incomplete.",
+    stop: "The workflow changes materially by person, shift or case, and nobody owns a standard.",
+    resolve: "Map the current workflow, name its owner, measure the baseline and agree which variants are in scope.",
   },
   {
     id: "access",
-    title: "Data & tool access",
-    question: "Can the work reach the right data and tools under enforceable permissions?",
-    ready: "Required sources and actions are available, current, permissioned and testable.",
+    title: "Data and tool access",
+    question: "Can the work reach the right data and tools under permissions that are enforced?",
+    ready: "The sources and actions it needs are available, current, permissioned and testable.",
     prepare: "Access is possible, but one or more sources, credentials, tool actions or data-quality controls are unresolved.",
-    stop: "Delivery would require prohibited access, untraceable data or an action the organisation cannot lawfully authorise.",
-    resolve: "Confirm source authority, identity, least-privilege permissions, tool contracts, data quality and retention.",
+    stop: "Delivery would need prohibited access, untraceable data or an action the organisation cannot lawfully authorise.",
+    resolve: "Confirm the source of truth, identity, least-privilege permissions, tool contracts, data quality and retention.",
   },
   {
     id: "observability",
@@ -56,12 +54,12 @@ const CONDITIONS = [
     question: "Can operators see what happened, why it happened and whether it worked?",
     ready: "Inputs, actions, outcomes, quality signals and material failures can be traced to a case.",
     prepare: "Basic logs exist, but outcome measurement, case traceability or alert ownership is incomplete.",
-    stop: "A consequential failure could occur without detection or reconstruction.",
-    resolve: "Define case-level traceability, outcome measures, alerts, review cadence and a named monitoring owner.",
+    stop: "A costly failure could happen without being detected or reconstructed.",
+    resolve: "Define case-level traceability, outcome measures, alerts, a review cadence and a named monitoring owner.",
   },
   {
     id: "fallback",
-    title: "Fallback & recovery",
+    title: "Fallback and recovery",
     question: "Can service continue safely when the agent or a dependency is unavailable?",
     ready: "A tested fallback preserves service and recovery restores a known safe state.",
     prepare: "A fallback exists on paper but capacity, timing, recovery state or rehearsal is unproven.",
@@ -70,21 +68,21 @@ const CONDITIONS = [
   },
   {
     id: "exceptions",
-    title: "Exceptions & boundaries",
-    question: "Are unusual, ambiguous and prohibited cases identifiable before harm occurs?",
-    ready: "Known exceptions have detection rules, a safe route and a named decision owner.",
-    prepare: "Common exceptions are covered, but the long tail, escalation service level or prohibited cases remain incomplete.",
-    stop: "The agent cannot distinguish normal work from cases that must not proceed.",
-    resolve: "Build the exception inventory, prohibited-case rules, escalation route, service level and accountable resolver.",
+    title: "Exceptions and limits",
+    question: "Can unusual, ambiguous and prohibited cases be spotted before harm is done?",
+    ready: "Known exceptions have detection rules, a safe path and a named decision owner.",
+    prepare: "Common exceptions are covered, but the long tail, the escalation service level or the prohibited cases are incomplete.",
+    stop: "The agent cannot tell normal work from cases that must not proceed.",
+    resolve: "Build the exception inventory, the prohibited-case rules, the escalation path, the service level and name who resolves them.",
   },
   {
     id: "economics",
     title: "Operating economics",
     question: "Does the workflow remain worthwhile after control, exception and run costs?",
     ready: "Volume, unit cost, control cost, exception load and expected benefit support a credible operating case.",
-    prepare: "Value is plausible, but volumes, adoption, exception effort or run costs are assumptions.",
-    stop: "The evidenced operating case is negative, or the value depends on removing necessary controls.",
-    resolve: "Evidence demand, cost-to-serve, exception effort, control overhead, adoption and the threshold for stopping.",
+    prepare: "The value is plausible, but the volumes, adoption, exception effort or run costs are assumptions.",
+    stop: "The operating case, on the evidence, is negative, or the value depends on removing controls that are needed.",
+    resolve: "Gather evidence on demand, cost to serve, exception effort, control cost, adoption and the point at which to stop.",
   },
 ] as const;
 
@@ -127,12 +125,12 @@ function Kicker({ children, inverse = false }: { children: React.ReactNode; inve
 
 function AgenticOperationsReadinessContent() {
   const cms = useMethodologyCmsContent("agentic-operations-readiness");
-  useMethodologyCmsSeo(cms, methodologySeoSeed("agentic-operations-readiness"));
+  useMethodologyCmsSeo(cms, methodSeo("/methodologies/agentic-operations-readiness"));
   const editorial = methodologyEditorial<
     "agentic-operations-readiness",
     typeof agenticOperationsReadinessEditorial
-  >("agentic-operations-readiness", cms, agenticOperationsReadinessEditorial.seed);
-  const hero = methodologyHero(cms, agenticOperationsReadinessHeroSeed);
+  >("agentic-operations-readiness", cms, AOR_EDITORIAL);
+  const hero = methodologyHero(cms, AOR_HERO);
   const [requestedSavedId] = useState(() => getSavedReadinessId(window.location.search));
   const [saved, setSaved] = useState<SavedState | null>(null);
   const [sessionNamespace, setSessionNamespace] = useState(requestedSavedId ?? "draft");
@@ -257,21 +255,21 @@ function AgenticOperationsReadinessContent() {
     ? {
         label: "Proceed",
         line: "The workflow has evidence across all six operating conditions.",
-        detail: "Take the bounded workflow into IDAO. Before live handover, use Agent Authority to set authority for each Knowledge, Decision and Action handover.",
+        detail: "Take the workflow into the four steps. Before it goes live, use the Agent Authority Model to set the authority for each Knowledge, Decision and Action handover.",
         color: "#38b78f",
       }
     : result === "stop"
       ? {
           label: "Stop",
-          line: "At least one condition makes agent delivery unacceptable in the current scope.",
-          detail: "Do not design around the blocker. Change the workflow, scope or operating constraint, then reassess from evidence.",
+          line: "At least one condition rules out agent delivery in the current scope.",
+          detail: "Do not design around the blocker. Change the workflow, the scope or the operating constraint, then reassess from the evidence.",
           color: "#ff775d",
         }
       : {
           label: "Prepare",
           line: completed === CONDITIONS.length
-            ? "The workflow may be viable, but operating conditions remain unresolved."
-            : "Complete the six conditions before making the decision.",
+            ? "The workflow may be workable, but some operating conditions are unresolved."
+            : "Answer the six conditions before making the decision.",
           detail: "Resolve the named conditions below. Reassess before committing the workflow to agent delivery.",
           color: "#db509e",
         };
@@ -341,15 +339,15 @@ function AgenticOperationsReadinessContent() {
                   <div className="grid gap-6 md:grid-cols-3">
                     <div className="border-t-4 border-[#16805f] bg-[#16805f]/5 p-5">
                       <strong className="text-[13px] font-bold uppercase tracking-wider text-[#16805f]">Proceed</strong>
-                      <p className="mt-3 text-[13px] leading-relaxed text-[#405777]">Enter or update the responsible IDAO stage with the evidence recorded.</p>
+                      <p className="mt-3 text-[13px] leading-relaxed text-[#405777]">Enter or update the right step, with the evidence recorded.</p>
                     </div>
                     <div className="border-t-4 border-[#b5367d] bg-[#b5367d]/5 p-5">
                       <strong className="text-[13px] font-bold uppercase tracking-wider text-[#b5367d]">Prepare</strong>
-                      <p className="mt-3 text-[13px] leading-relaxed text-[#405777]">Turn missing conditions into work at the appropriate IDAO stage, then repeat the test.</p>
+                      <p className="mt-3 text-[13px] leading-relaxed text-[#405777]">Turn the missing conditions into work at the right step, then repeat the test.</p>
                     </div>
                     <div className="border-t-4 border-[#d34f38] bg-[#d34f38]/5 p-5">
                       <strong className="text-[13px] font-bold uppercase tracking-wider text-[#d34f38]">Stop</strong>
-                      <p className="mt-3 text-[13px] leading-relaxed text-[#405777]">Do not enter IDAO delivery for this scope; redefine it, resolve the blocker or stop.</p>
+                      <p className="mt-3 text-[13px] leading-relaxed text-[#405777]">Do not start delivery for this scope. Redefine it, resolve the blocker, or stop.</p>
                     </div>
                   </div>
                   
@@ -379,7 +377,7 @@ function AgenticOperationsReadinessContent() {
               <h2 id="assessment-title" className="font-display text-[clamp(42px,5.5vw,78px)] font-semibold leading-[.96] tracking-[-.05em]">{editorial.assessment.heading}</h2>
             </div>
             <p className="lg:border-l border-[#cbd3e1] lg:pl-10 text-[18px] leading-[1.65] text-[#405777]">
-              Choose the statement that best matches current evidence. “Ready” must be demonstrable. One Stop condition stops the current scope; any Prepare condition names work to complete.
+              Choose the statement that best matches the current evidence. “Ready” must be something you can show. One Stop condition stops the current scope; any Prepare condition names work to complete.
             </p>
           </div>
 

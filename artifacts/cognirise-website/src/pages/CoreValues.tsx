@@ -11,19 +11,19 @@ const valueOneLayers = [
   { id: "cv-v1-understanding", k: "02 / 05", title: "Understanding", body: "Before we judge a colleague's decision or a client's constraint, we ask why it was made. Most friction disappears at that point, and what remains is worth the argument." },
   { id: "cv-v1-support", k: "03 / 05", title: "Support", body: "When someone is stretched, the people around them step in without being asked and without keeping score. That includes the founders." },
   { id: "cv-v1-politics", k: "04 / 05", title: "Zero tolerance for politics", body: "No side channels, no managing upward at a colleague's expense, no taking credit for someone else's work. We hire for this, and we part ways over it." },
-  { id: "cv-v1-stewardship", k: "05 / 05", title: "Stewardship of client success", body: "The value does not stop at our own walls. We care whether a client's programme works after we have left, not only whether our engagement closed well. It is why the client owns everything we build, why we say so when we think a piece of work will not land, and why we would rather show a working prototype in 48 hours than ask anyone to decide on a slide." },
+  { id: "cv-v1-stewardship", k: "05 / 05", title: "Stewardship of client success", body: "The value does not stop at our own walls. We care whether a client's programme works after we have left, not only whether our engagement closed well. It is why the client owns everything we build, and why we say so when we think a piece of work will not land. It is also why we would rather show a working prototype in 48 hours than ask anyone to decide on a slide." },
 ];
 
 const valueTwoLayers = [
   { id: "cv-v2-fairness", k: "01 / 04", title: "Fairness", body: "One standard for everyone: colleagues, clients, partners, suppliers and candidates. Decisions about people are made on the work, not on who they know or where they come from." },
-  { id: "cv-v2-honesty", k: "02 / 04", title: "Honesty", body: "We say what we believe the answer is, including when it is not the answer the client hoped for, and including when the honest answer is that they do not need us." },
+  { id: "cv-v2-honesty", k: "02 / 04", title: "Honesty", body: "We say what we believe the answer is, including when it is not the answer the client hoped for. That includes the times when the honest answer is that they do not need us." },
   { id: "cv-v2-transparency", k: "03 / 04", title: "Transparency", body: "Clients see how we work, what things cost and why, what we found and what we did not. When something cannot be shared, we say that it cannot, and where we can, we say why." },
   { id: "cv-v2-produces", k: "04 / 04", title: "What it produces", body: "Partnerships, friendships and trusted-advisor relationships that have lasted more than twenty-five years. Relationships of that length are not built on contracts. They are built on people knowing where they stand." },
 ];
 
 const expectations = [
   { id: "cv-test-1", k: "01 / 04", text: "You hear the bad news from us first, and early." },
-  { id: "cv-test-2", k: "02 / 04", text: "The people who sell the work are the people who do it. Leadership, engineering and accountability stay in the same room." },
+  { id: "cv-test-2", k: "02 / 04", text: "The people who sell the work are the people who do it. Leadership, engineering and responsibility for the result stay in the same room." },
   { id: "cv-test-3", k: "03 / 04", text: "You own what we build. Nothing is withheld to keep you dependent on us." },
   { id: "cv-test-4", k: "04 / 04", text: "If we think you are about to spend money on the wrong thing, we say so, even when the right thing is smaller, or is not us." },
 ];
@@ -66,7 +66,7 @@ export default function CoreValues() {
   const p1b = landingText(g, "core-values-letter-p1-emphasis", "we succeed because we help each other succeed.");
   const p1c = landingText(g, "core-values-letter-p1-rest", "It was not a slogan on a wall. It was how the firm ran. Nobody got ahead by making a colleague look bad. When someone was struggling on an engagement, the people around them stepped in without being asked and without keeping score. Politics had no oxygen.");
   const p2 = landingText(g, "core-values-letter-p2", "The same instinct carried through to our clients. We cared whether they succeeded, not only whether the engagement closed, and that gave us a sense of stewardship over their work that none of us has lost. We still think of client work as something we are entrusted with rather than something we are paid for.");
-  const p3a = landingText(g, "core-values-letter-p3-lead", "The second value is personal to each of us. We have all seen a great deal of unfair and biased treatment over the years, of people and of organisations, and we each made ourselves the same promise long ago: to do everything in our power to be");
+  const p3a = landingText(g, "core-values-letter-p3-lead", "The second value is personal to each of us. Over the years we have all seen a great deal of unfair and biased treatment, of people and of organisations. Long ago, each of us made the same promise: to be");
   const p3b = landingText(g, "core-values-letter-p3-emphasis", "fair in how we treat others, honest in our dealings, and transparent to the extent possible.");
   const p3c = landingText(g, "core-values-letter-p3-rest", "That promise has driven most of what we have done since. It is also the reason some of our partnerships, friendships and client relationships have now lasted more than twenty-five years.");
   const p4 = landingText(g, "core-values-letter-p4", "We built Cognirise on these two values because they are the ones we know how to keep. Everything else on this site, from how we price work to what we build and who owns it afterwards, follows from them.");
@@ -76,7 +76,7 @@ export default function CoreValues() {
   const valuesEyebrow = landingText(g, "core-values-values-eyebrow", "02 / The values");
   const valuesTitle = landingText(g, "core-values-values-title", "What we mean, in practice.");
   const valuesIntro = landingText(g, "core-values-values-intro", "Each value has several layers. The layers are the point: a value that cannot be tested against behaviour is a slogan.");
-  const v1Title = landingText(g, "core-values-value-1-title", "We succeed because we help each other succeed.");
+  const v1Title = landingText(g, "core-values-value-1-title", "Help each other succeed.");
   const v1Stand = landingText(g, "core-values-value-1-stand", "Nobody at Cognirise wins alone, and no client is left to carry an outcome alone. This is the value the founders have held longest, and it has five layers.");
   const v2Title = landingText(g, "core-values-value-2-title", "Fair, honest and transparent.");
   const v2Stand = landingText(g, "core-values-value-2-stand", "Fair in how we treat people. Honest in our dealings. Transparent to the extent possible. The last three words are deliberate: where we cannot be open, we say so, rather than pretending there is nothing to say.");
@@ -102,7 +102,7 @@ export default function CoreValues() {
   const ctaHeadingA = landingText(g, "core-values-cta-heading-line-1", "Meet the people");
   const ctaHeadingB = landingText(g, "core-values-cta-heading-line-2", "behind these values.");
   const teamCta = landingCta(g, "core-values-cta-team", { label: "Meet the team", href: "/about" });
-  const contactCta = landingCta(g, "core-values-cta-contact", { label: "Contact us", href: "/contact" });
+  const contactCta = landingCta(g, "core-values-cta-contact", { label: "Contact us", href: "/about#contact" });
 
   const founders = [
     { key: "mounir", name: mounirName, role: mounirRole },
@@ -110,7 +110,7 @@ export default function CoreValues() {
   ];
 
   return (
-    <main className="cv overflow-hidden bg-background">
+    <div className="cv overflow-hidden bg-background">
       {/* HERO */}
       <section className="cv-hero" aria-labelledby="cv-title">
         <div className="cv-hero-glow" aria-hidden="true" />
@@ -239,6 +239,6 @@ export default function CoreValues() {
           </div>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

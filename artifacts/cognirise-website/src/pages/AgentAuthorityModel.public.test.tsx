@@ -365,7 +365,7 @@ test("summary editions use governed concise copy and retain every detailed sourc
       governedFixtureGuardrails.designRule.conclusion,
       governedFixtureGuardrails.designRule.failure,
     ]) assert.ok(disclosure.includes(value), `full explanation lost: ${value}`);
-    assert.equal((section.match(/Front-Desk Agent/g) ?? []).length, 1);
+    assert.equal((section.match(/front-desk agent/g) ?? []).length, 1);
     assert.equal((section.match(/Answer a clinic question/g) ?? []).length, 1);
     assert.equal((section.match(/Book an appointment/g) ?? []).length, 1);
     assert.equal((section.match(/Cancel an appointment/g) ?? []).length, 1);

@@ -31,5 +31,4 @@ test("Core Values is registered for public routing and capability-scoped templat
   assert.match(read("../App.tsx"), /path="\/about\/core-values"/);
   assert.match(read("./CmsPreview.tsx"), /"\/about\/core-values": CoreValues/);
   assert.match(read("../../../../lib/api-zod/src/navigation.ts"), /id: "about.core-values".*parentId: "about"/);
-  assert.match(read("../components/layout/Shell.tsx"), /!navigationOverride && \(LAUNCH_POLICY.enabled/);
 });

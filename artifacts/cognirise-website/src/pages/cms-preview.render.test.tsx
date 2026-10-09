@@ -173,8 +173,8 @@ test("protected preview footer uses the returned exact market context", () => {
     requestedLocale: "en",
     navigation: { market: "uae", locale: "en", items: [], pages: [] },
   });
-  assert.match(html, /Market view · Riyadh · Kingdom of Saudi Arabia/);
-  assert.doesNotMatch(html, /Market view · Dubai · UAE/);
+  assert.match(html, /Preview · KSA/);
+  assert.doesNotMatch(html, /Preview · UAE/);
   assert.match(html, /Protected saved-version preview/);
   assert.doesNotMatch(html, /not published/);
 });

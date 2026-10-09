@@ -6,7 +6,9 @@ import { PulseImage } from "@/components/ui/pulse-image";
 import { IDAO_CANON_LAYERS, IDAO_STAGES } from "@/content/idao";
 import { useLaunchImageRegion, launchAudienceEnabled } from "@/lib/launch-region";
 import { assetUrl } from "@/lib/assets";
-import { idaoEditorial, idaoHeroSeed, methodologySeoSeed } from "@workspace/api-zod";
+import { idaoEditorial } from "@workspace/api-zod";
+import { IDAO_EDITORIAL, IDAO_HERO } from "@/site/content/methods/idao";
+import { methodSeo } from "@/site/content/methods/seo";
 import { cleanHeroIdentifier } from "@/lib/hero-identifiers";
 import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
 import { useMarketStore } from "@/store/market";
@@ -55,19 +57,9 @@ function IDAOMethodologyContent() {
   const imageRegion = useLaunchImageRegion();
   const market = launchAudienceEnabled() ? imageRegion ?? "europe" : editorialMarket;
   const cms = useMethodologyCmsContent("idao");
-  useMethodologyCmsSeo(cms, methodologySeoSeed("idao"));
-  const editorial = methodologyEditorial<"idao", typeof idaoEditorial>("idao", cms, idaoEditorial.seed);
-  const hero = methodologyHero(cms, {
-    breadcrumb: idaoHeroSeed.breadcrumb,
-    title: idaoHeroSeed.title,
-    description: idaoHeroSeed.description,
-    supportingText: idaoHeroSeed.supportingText,
-    imageSrc: idaoHeroSeed.media.src,
-    imageAlt: idaoHeroSeed.media.altText,
-    imagePosition: idaoHeroSeed.imagePosition,
-    imageCaptionSubtitle: idaoHeroSeed.imageCaptionSubtitle,
-    imageCaptionTitle: idaoHeroSeed.imageCaptionTitle,
-  });
+  useMethodologyCmsSeo(cms, methodSeo("/methodologies/idao"));
+  const editorial = methodologyEditorial<"idao", typeof idaoEditorial>("idao", cms, IDAO_EDITORIAL);
+  const hero = methodologyHero(cms, IDAO_HERO);
   const regionalHeroSrc = regionalIdaoStageImage(market, "demonstrate");
   const regionalMarketLabel = market in REGIONAL_IDAO_MARKET_LABELS
     ? REGIONAL_IDAO_MARKET_LABELS[market as RegionalIdaoMarket]
@@ -78,7 +70,7 @@ function IDAOMethodologyContent() {
   const [expandedCanonLayers, setExpandedCanonLayers] = useState<Set<string>>(() => new Set());
   const activeTeamDetail = editorial.deliveryTeam.find((item) => item.id === activeTeamMember) ?? editorial.deliveryTeam[0];
 
-  if (launchAudienceEnabled() && !imageRegion) return <main aria-busy="true" className="min-h-[70vh] px-6 py-24">Loading website…</main>;
+  if (launchAudienceEnabled() && !imageRegion) return <div aria-busy="true" className="min-h-[70vh] px-6 py-24" />;
   return (
     <article className="overflow-hidden bg-[#fdfcfb] font-sans text-[#102957] selection:bg-[hsl(var(--brand-pink))] selection:text-white">
       <header className="public-hero-shell px-6 pb-16 pt-9 md:px-[4.8vw] lg:pb-24">
@@ -111,7 +103,7 @@ function IDAOMethodologyContent() {
               src={regionalHeroSrc
                 ? assetUrl(regionalHeroSrc)
                 : ("imageResolved" in hero && hero.imageResolved ? hero.imageSrc : assetUrl(hero.imageSrc))}
-              alt={regionalMarketLabel ? `${hero.imageAlt} Approved ${regionalMarketLabel} market edition.` : hero.imageAlt}
+              alt={regionalMarketLabel ? `${hero.imageAlt} ${regionalMarketLabel} edition.` : hero.imageAlt}
               className="h-full w-full object-cover"
               style={{ objectPosition: hero.imagePosition }}
               eager
@@ -224,7 +216,7 @@ function IDAOMethodologyContent() {
             className="border-t border-[#cbd3e1] bg-[#102957] p-5 text-white lg:px-7 lg:py-6"
           >
             <motion.div key={activeTeamDetail.id} initial={reducedMotion ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: reducedMotion ? 0 : 0.2 }}>
-              <span className="text-[10px] font-bold uppercase tracking-[0.13em]" style={{ color: DELIVERY_TEAM_PRESENTATION[activeTeamDetail.id as DeliveryTeamId].accent }}>{activeTeamDetail.label} capability</span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.13em]" style={{ color: DELIVERY_TEAM_PRESENTATION[activeTeamDetail.id as DeliveryTeamId].accent }}>{activeTeamDetail.label}</span>
               <p className="mt-2 max-w-[1100px] text-[14px] leading-[1.6] text-[#d6deed]">{activeTeamDetail.detail}</p>
             </motion.div>
           </motion.div>

@@ -8,11 +8,9 @@ import { MethodPageHero } from "@/components/MethodPageHero";
 import { useMethodSessionState, useUnsavedWorkWarning } from "@/lib/use-method-session-state";
 import { downloadPrioritizationResultsPdf } from "@/lib/pulse-assessment-reports";
 import { MethodologyCmsDelivery, methodologyEditorial, methodologyHero, useMethodologyCmsContent, useMethodologyCmsSeo } from "@/components/MethodologyCmsLayout";
-import {
-  aiUseCasePrioritizationEditorial,
-  aiUseCasePrioritizationHeroSeed,
-  methodologySeoSeed,
-} from "@workspace/api-zod";
+import { aiUseCasePrioritizationEditorial } from "@workspace/api-zod";
+import { UCP_EDITORIAL, UCP_HERO } from "@/site/content/methods/ai-use-case-prioritization";
+import { methodSeo } from "@/site/content/methods/seo";
 
 export type UseCase = {
   id: string;
@@ -24,12 +22,12 @@ export type UseCase = {
 };
 
 export const DIMENSIONS = [
-  { id: "value", label: "Value & Impact", low: "Marginal", high: "Transformational", desc: "Strategic and economic return." },
-  { id: "feasibility", label: "Feasibility", low: "Unproven", high: "Production-ready", desc: "Data readiness and technical maturity." },
-  { id: "timeToEvidence", label: "Time to Evidence", low: "Quarters", high: "Days", desc: "Speed to prove value." },
-  { id: "adoptionFriction", label: "Adoption Friction", low: "High Disruption", high: "Seamless", desc: "Workflow disruption." },
-  { id: "controlBurden", label: "Control Burden", low: "Critical Risk", high: "Standard Controls", desc: "Risk and compliance overhead." },
-  { id: "reusePotential", label: "Reuse Potential", low: "Isolated", high: "Foundational", desc: "Component or agent reuse." },
+  { id: "value", label: "Value and impact", low: "Small", high: "Large", desc: "The business and financial return." },
+  { id: "feasibility", label: "Feasibility", low: "Unproven", high: "Production-ready", desc: "How ready the data and the technology are." },
+  { id: "timeToEvidence", label: "Time to evidence", low: "Quarters", high: "Days", desc: "How fast value can be proved." },
+  { id: "adoptionFriction", label: "Adoption friction", low: "High disruption", high: "Fits the workflow", desc: "How much the workflow has to change." },
+  { id: "controlBurden", label: "Control cost", low: "Heavy controls", high: "Standard controls", desc: "The risk and compliance work it needs." },
+  { id: "reusePotential", label: "Reuse", low: "One-off", high: "Reusable", desc: "How much of it other work can reuse." },
 ] as const;
 
 function defaultUseCases(
@@ -80,32 +78,32 @@ export function getRecommendation(uc: UseCase) {
   const score = Object.values(uc.scores).reduce((a, b) => a + b, 0);
   
   if (value <= 2) {
-    return { stage: "Stop", color: "text-[#647491]", bg: "bg-[#f1f3f7]", reason: "Low strategic or economic value does not justify the investment.", link: null, score };
+    return { stage: "Stop", color: "text-[#647491]", bg: "bg-[#f1f3f7]", reason: "The value is too low to justify the investment.", link: null, score };
   }
   if (controlBurden <= 2 && feasibility <= 2) {
-    return { stage: "Stop", color: "text-[#647491]", bg: "bg-[#f1f3f7]", reason: "High control burden combined with low technical feasibility presents an unacceptable delivery risk.", link: null, score };
+    return { stage: "Stop", color: "text-[#647491]", bg: "bg-[#f1f3f7]", reason: "Heavy controls combined with low feasibility make the delivery risk too high.", link: null, score };
   }
   if (feasibility <= 2) {
-    return { stage: "Innovate", color: "text-[hsl(var(--brand-violet))]", bg: "bg-[hsl(var(--brand-violet))]/10", reason: "Unproven feasibility requires a bounded technical discovery phase before committing to production.", link: "/methodologies/idao#innovate", score };
+    return { stage: "Innovate", color: "text-[hsl(var(--brand-violet))]", bg: "bg-[hsl(var(--brand-violet))]/10", reason: "Feasibility is unproven, so a short technical discovery comes before any commitment to build.", link: "/methodologies/idao#innovate", score };
   }
   if (timeToEvidence <= 2) {
-    return { stage: "Innovate", color: "text-[hsl(var(--brand-violet))]", bg: "bg-[hsl(var(--brand-violet))]/10", reason: "Long time-to-evidence requires an Innovate cycle to isolate the fastest path to proof.", link: "/methodologies/idao#innovate", score };
+    return { stage: "Innovate", color: "text-[hsl(var(--brand-violet))]", bg: "bg-[hsl(var(--brand-violet))]/10", reason: "Evidence would take too long, so an Innovate cycle finds the fastest path to proof first.", link: "/methodologies/idao#innovate", score };
   }
   if (adoptionFriction <= 2 || controlBurden <= 3) {
-    return { stage: "Demonstrate", color: "text-[hsl(var(--brand-pink))]", bg: "bg-[hsl(var(--brand-pink))]/10", reason: "Significant adoption or control constraints require proving the capability in a restricted environment first.", link: "/methodologies/idao#demonstrate", score };
+    return { stage: "Demonstrate", color: "text-[hsl(var(--brand-pink))]", bg: "bg-[hsl(var(--brand-pink))]/10", reason: "Adoption or control constraints mean the system should be proved in a restricted setting first.", link: "/methodologies/idao#demonstrate", score };
   }
   if (feasibility >= 4 && adoptionFriction >= 4) {
-    return { stage: "Activate", color: "text-[hsl(var(--brand-coral))]", bg: "bg-[hsl(var(--brand-coral))]/10", reason: "High feasibility and low adoption friction indicate the workflow is ready for production integration and scaling.", link: "/methodologies/idao#activate", score };
+    return { stage: "Activate", color: "text-[hsl(var(--brand-coral))]", bg: "bg-[hsl(var(--brand-coral))]/10", reason: "High feasibility and low adoption friction: the workflow is ready to be built for production.", link: "/methodologies/idao#activate", score };
   }
   
-  return { stage: "Demonstrate", color: "text-[hsl(var(--brand-pink))]", bg: "bg-[hsl(var(--brand-pink))]/10", reason: "Balanced feasibility and friction suggest establishing a solid operating baseline before full activation.", link: "/methodologies/idao#demonstrate", score };
+  return { stage: "Demonstrate", color: "text-[hsl(var(--brand-pink))]", bg: "bg-[hsl(var(--brand-pink))]/10", reason: "Feasibility and friction are balanced: set a solid operating baseline before the full build.", link: "/methodologies/idao#demonstrate", score };
 }
 
 function getTags(uc: UseCase) {
   const tags = [];
   if (uc.scores.reusePotential >= 4) tags.push("Foundational");
-  if (uc.scores.timeToEvidence >= 4 && uc.scores.feasibility >= 4) tags.push("Quick Win");
-  if (uc.scores.value >= 4 && uc.scores.feasibility <= 3) tags.push("Strategic Bet");
+  if (uc.scores.timeToEvidence >= 4 && uc.scores.feasibility >= 4) tags.push("Quick win");
+  if (uc.scores.value >= 4 && uc.scores.feasibility <= 3) tags.push("Strategic bet");
   return tags;
 }
 
@@ -216,7 +214,6 @@ function UseCaseCard({ uc, index, updateUseCase, removeUseCase, editorial }: {
                    <label className="text-[13px] font-bold text-[#102957]">{dim.label}</label>
                     <span className="text-[10px] text-[#a0afc0]" title={dim.desc} aria-label={dim.desc}><Info size={14} /></span>
                  </div>
-                  <p className="mb-3 text-[11px] leading-relaxed text-[#647491]">{dim.desc}</p>
                  <ScorePills 
                    value={uc.scores[dim.id]} 
                    onChange={v => updateUseCase(uc.id, { scores: { ...uc.scores, [dim.id]: v } })} 
@@ -237,7 +234,7 @@ function UseCaseCard({ uc, index, updateUseCase, removeUseCase, editorial }: {
        <div className={`px-6 py-5 md:px-10 border-t border-[#cbd3e1] flex items-center justify-between gap-6 ${rec.bg}`} data-testid={`status-recommendation-${uc.id}`}>
         <div className="flex items-center gap-4">
           <span className={`text-[11px] font-bold uppercase tracking-[0.15em] border border-current px-3 py-1 bg-white/50 ${rec.color}`}>{rec.stage}</span>
-          <span className="text-[14px] font-medium text-[#102957] max-w-2xl hidden md:block">{rec.reason}</span>
+          <span className="text-[14px] font-medium text-[#102957] max-w-2xl block">{rec.reason}</span>
         </div>
         {rec.link && (
            <Link href={rec.link} data-testid={`link-idao-stage-${uc.id}`} className={`shrink-0 text-[13px] font-bold flex items-center gap-2 ${rec.color} hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand-pink))]`}>
@@ -245,19 +242,9 @@ function UseCaseCard({ uc, index, updateUseCase, removeUseCase, editorial }: {
           </Link>
         )}
       </div>
-      <div className="px-6 py-4 bg-white md:hidden border-t border-[#cbd3e1]">
-         <span className="text-[14px] font-medium text-[#102957]">{rec.reason}</span>
-      </div>
-       <div className="border-t border-[#cbd3e1] bg-[#fdfcfb] px-6 py-4 md:px-10 flex flex-col sm:flex-row sm:items-center gap-6" data-testid={`text-score-explanation-${uc.id}`}>
-         <div className="flex-[0.4]">
-           <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#647491] block mb-1">Score ({rec.score}/30)</span>
-           <p className="text-[11px] leading-relaxed text-[#536887]">{getScoreExplanation(uc)}</p>
-         </div>
-         <div className="flex-[0.6] sm:border-l sm:border-[#cbd3e1] sm:pl-6">
-           <p className="text-[11px] leading-relaxed text-[#405777]">
-              <strong>{editorial.controlBurdenNote.heading}</strong>{" "}{editorial.controlBurdenNote.beforeAuthorityLink}{" "}<Link href={editorial.controlBurdenNote.authorityLink.href} className="underline font-bold text-[hsl(var(--brand-pink))] hover:text-[#102957]">{editorial.controlBurdenNote.authorityLink.label}</Link>{" "}{editorial.controlBurdenNote.afterAuthorityLink}
-           </p>
-         </div>
+       <div className="border-t border-[#cbd3e1] bg-[#fdfcfb] px-6 py-4 md:px-10" data-testid={`text-score-explanation-${uc.id}`}>
+         <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#647491] block mb-1">Score ({rec.score}/30)</span>
+         <p className="text-[11px] leading-relaxed text-[#536887]">{getScoreExplanation(uc)}</p>
        </div>
     </motion.div>
   );
@@ -312,13 +299,13 @@ function AnalysisGroup({ title, description, items, editorial }: {
 
 function AIUseCasePrioritizationContent() {
   const cms = useMethodologyCmsContent("ai-use-case-prioritization");
-  useMethodologyCmsSeo(cms, methodologySeoSeed("ai-use-case-prioritization"));
+  useMethodologyCmsSeo(cms, methodSeo("/methodologies/ai-use-case-prioritization"));
   const editorial = methodologyEditorial<"ai-use-case-prioritization", typeof aiUseCasePrioritizationEditorial>(
     "ai-use-case-prioritization",
     cms,
-    aiUseCasePrioritizationEditorial.seed,
+    UCP_EDITORIAL,
   );
-  const hero = methodologyHero(cms, aiUseCasePrioritizationHeroSeed);
+  const hero = methodologyHero(cms, UCP_HERO);
   const defaultCases = defaultUseCases(editorial.sampleOpportunities);
   const [useCases, setUseCases] = useMethodSessionState<UseCase[]>(
     "cognirise:method:ai-use-case-prioritization:opportunities",
@@ -386,7 +373,7 @@ function AIUseCasePrioritizationContent() {
   }, [useCases]);
 
   return (
-    <main className="bg-[#fdfcfb] text-[#102957] min-h-screen selection:bg-[hsl(var(--brand-pink))] selection:text-white">
+    <div className="bg-[#fdfcfb] text-[#102957] min-h-screen selection:bg-[hsl(var(--brand-pink))] selection:text-white">
       <MethodPageHero
         {...hero}
         imageResolved={"imageResolved" in hero && hero.imageResolved}
@@ -425,10 +412,10 @@ function AIUseCasePrioritizationContent() {
            <div className="mb-16 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 bg-[#102957] text-white overflow-hidden shadow-lg relative">
              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[hsl(var(--brand-violet))] via-[hsl(var(--brand-pink))] to-[hsl(var(--brand-coral))]" />
              {[
-               ["Stop", "Value at 1–2, or control burden and feasibility both at 1–2.", "text-[#a0afc0]", "bg-[#0b1c3d]"],
-               ["Innovate", "Feasibility or time to evidence at 1–2; isolate the uncertainty first.", "text-[hsl(var(--brand-violet))]", "bg-[#0c2045]"],
-               ["Demonstrate", "Adoption friction at 1–2, control burden at 1–3, or a mixed evidence profile.", "text-[hsl(var(--brand-pink))]", "bg-[#0d234a]"],
-               ["Activate", "Feasibility and adoption readiness both at 4–5, with no prior stop condition.", "text-[hsl(var(--brand-coral))]", "bg-[#0e2752]"],
+               ["Stop", "Value at 1 or 2, or control cost and feasibility both at 1 or 2.", "text-[#a0afc0]", "bg-[#0b1c3d]"],
+               ["Innovate", "Feasibility or time to evidence at 1 or 2: pin down the uncertainty first.", "text-[hsl(var(--brand-violet))]", "bg-[#0c2045]"],
+               ["Demonstrate", "Adoption friction at 1 or 2, control cost at 1 to 3, or mixed evidence.", "text-[hsl(var(--brand-pink))]", "bg-[#0d234a]"],
+               ["Activate", "Feasibility and adoption both at 4 or 5, with no stop condition.", "text-[hsl(var(--brand-coral))]", "bg-[#0e2752]"],
              ].map(([stage, rule, color, bgClass], idx) => (
                <div key={stage} className={`p-8 ${bgClass} ${idx < 3 ? 'border-b md:border-b-0 xl:border-r border-white/10' : ''} ${idx === 1 && 'md:border-b-0 xl:border-r border-white/10'} ${idx === 0 && 'md:border-r border-white/10'}`}>
                  <strong className={`text-[12px] uppercase tracking-[0.15em] ${color}`}>{stage}</strong>
@@ -437,11 +424,22 @@ function AIUseCasePrioritizationContent() {
              ))}
            </div>
 
+           <dl className="mb-10 grid gap-x-8 gap-y-3 sm:grid-cols-2 lg:grid-cols-3 text-[13px] leading-relaxed text-[#405777]">
+              {DIMENSIONS.map((dim) => (
+                <div key={dim.id} className="border-t border-[#cbd3e1] pt-3">
+                  <dt className="font-bold text-[#102957]">{dim.label}</dt>
+                  <dd>{dim.desc}</dd>
+                </div>
+              ))}
+           </dl>
            <div className="space-y-12">
               {useCases.map((uc, index) => (
                   <UseCaseCard key={uc.id} uc={uc} index={index} updateUseCase={updateUseCase} removeUseCase={removeUseCase} editorial={editorial.assessmentCard} />
               ))}
            </div>
+           <p className="mt-6 text-[12px] leading-relaxed text-[#405777]">
+              <strong>{editorial.assessmentCard.controlBurdenNote.heading}</strong>{" "}{editorial.assessmentCard.controlBurdenNote.beforeAuthorityLink}{" "}<Link href={editorial.assessmentCard.controlBurdenNote.authorityLink.href} className="underline font-bold text-[hsl(var(--brand-pink))] hover:text-[#102957]">{editorial.assessmentCard.controlBurdenNote.authorityLink.label}</Link>{" "}{editorial.assessmentCard.controlBurdenNote.afterAuthorityLink}
+           </p>
            
            <button 
              onClick={addUseCase} 
@@ -540,7 +538,7 @@ function AIUseCasePrioritizationContent() {
            </div>
          </div>
       </section>
-    </main>
+    </div>
   );
 }
 

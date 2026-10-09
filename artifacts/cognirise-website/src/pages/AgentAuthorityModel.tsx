@@ -24,12 +24,12 @@ import {
 import { ComparisonDiagram } from "@/components/agent-authority/ComparisonDiagram";
 import { LegacyComparisonDiagram } from "@/components/agent-authority/LegacyComparisonDiagram";
 import { InteractionChart } from "@/components/agent-authority/InteractionChart";
+import { AAM_GUARDRAILS, AAM_PAGE, SHORT_OVERSIGHT } from "@/site/content/agent-authority";
 
 const COMPILED = {
-  title: "The Agent Authority Model",
-  teaser: "A deterministic way to set how much authority each agent handover may exercise on its own.",
-  handoverExplanation:
-    "Govern the handover, not the agent. Knowledge, Decision, and Action describe individual moments when an agent passes something to a person, another agent, or a system. One agent can make several handovers, and each can carry a different exposure and authority ceiling.",
+  title: AAM_PAGE.title,
+  teaser: AAM_PAGE.teaser,
+  handoverExplanation: AAM_PAGE.handoverExplanation,
 };
 
 type AgentAuthorityFrameworkContent = Extract<FrameworkContent, { template: "agent-authority" }>;
@@ -75,7 +75,7 @@ const HANDOVERS = [
 
 const EXPOSURE = [
   ["E1", "R1–R2 and H1", "Out of the loop"],
-  ["E2", "R3, or H2", "On the loop, with a stated intervention window"],
+  ["E2", "R3, or H2", "On the loop (intervention window)"],
   ["E3", "R4, or H3", "In the loop"],
   ["E4", "H4", "In the loop + independent second control"],
   ["E5", "H5", "In the loop + external safety sign-off"],
@@ -112,20 +112,7 @@ const SECTOR_EXAMPLES = [
   },
 ] as const;
 
-const COMPILED_SOURCES = [
-  {
-    label: "EU AI Act, Article 14 — Human oversight",
-    url: "https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
-  },
-  {
-    label: "NIST AI Risk Management Framework",
-    url: "https://www.nist.gov/itl/ai-risk-management-framework",
-  },
-  {
-    label: "Parasuraman, Sheridan & Wickens — Levels of human interaction with automation",
-    url: "https://doi.org/10.1109/3468.844354",
-  },
-] as const;
+const COMPILED_SOURCES = AAM_PAGE.sources;
 
 function Kicker({ children, inverse = false }: { children: React.ReactNode; inverse?: boolean }) {
   return (
@@ -372,7 +359,7 @@ function MatrixExplorer() {
         </div>
         <div className="border-l-2 border-[hsl(var(--brand-pink))] pl-4">
           <p className="text-sm font-semibold leading-[1.55] text-white">
-            Permitted authority: {OVERSIGHT_LABELS[ceiling]}.
+            Permitted authority: {SHORT_OVERSIGHT[ceiling]}.
           </p>
           <p className="mt-2 text-xs leading-[1.55] text-[#b9c7db]">
             The highlighted point sits on the ceiling. Any authority above it must be carried by an approved template,
@@ -393,7 +380,7 @@ type AgentAuthorityLayoutProps = {
 
 export function AgentAuthorityLayout({
   framework,
-  guardrailsRelatedLink: relatedLink = null,
+  guardrailsRelatedLink: relatedLinkProp = null,
   renderPolicy = "cms",
   preview = false,
 }: AgentAuthorityLayoutProps) {
@@ -405,7 +392,8 @@ export function AgentAuthorityLayout({
   const title = text(framework?.title, COMPILED.title);
   const teaser = text(framework?.teaser, COMPILED.teaser);
   const explanation = text(framework?.handoverExplanation, COMPILED.handoverExplanation);
-  const guardrails = framework?.guardrails;
+  // Compiled renders carry the code-owned section; a CMS preview shows its own revision only.
+  const guardrails = framework ? framework.guardrails : AAM_GUARDRAILS;
   const workedExample = framework?.workedExample;
   const workedR = (Number(workedExample?.reversibility?.slice(1)) || 3) as RScore;
   const workedH = (Number(workedExample?.reach?.slice(1)) || 2) as HScore;
@@ -430,7 +418,8 @@ export function AgentAuthorityLayout({
   const sources = Array.isArray(framework?.sources) && framework.sources.length ? framework.sources : COMPILED_SOURCES;
   const cta = framework?.cta && typeof framework.cta.label === "string" && typeof framework.cta.href === "string"
     ? framework.cta
-    : { label: "Bring us one process", href: "/value-scan" };
+    : AAM_PAGE.cta;
+  const relatedLink = framework ? relatedLinkProp : AAM_PAGE.relatedLink;
   const heroImage = heroMedia?.url ?? (preview ? undefined : assetUrl("/images/cognirise/cognirise-pulse-governance.jpg"));
   const imageUrl = heroImage
     ? (heroImage.startsWith("http") ? heroImage : `${window.location.origin}${heroImage}`)
@@ -483,7 +472,7 @@ export function AgentAuthorityLayout({
           >
             <div className="flex flex-col gap-7">
               <NavigationBackControl embedded />
-              <div data-hero-content-edge><Kicker>{cleanHeroIdentifier("Methodologies & frameworks / 01")}</Kicker></div>
+              <div data-hero-content-edge><Kicker>{cleanHeroIdentifier("Methods / 06")}</Kicker></div>
             </div>
             <div className="mt-14 lg:mt-auto">
             <h1 className="font-display text-[clamp(50px,6.5vw,98px)] font-semibold leading-[0.92] tracking-[-0.085em]">
@@ -516,9 +505,9 @@ export function AgentAuthorityLayout({
              )}
             <div className="absolute inset-0 bg-gradient-to-t from-[#071936]/80 via-transparent to-transparent" />
             <figcaption className="absolute bottom-[11%] left-8 right-8 max-w-[480px] text-white">
-              <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/65">The governing rule</span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/65">The rule</span>
               <strong className="mt-2 block font-display text-[clamp(26px,3vw,43px)] leading-[1.04] tracking-[-0.06em]">
-                Exposure sets the ceiling. Evidence earns the climb.
+                {AAM_PAGE.rule}
               </strong>
             </figcaption>
             </figure>
@@ -529,17 +518,14 @@ export function AgentAuthorityLayout({
       <section className="border-y border-[#cbd3e1] px-6 py-20 md:px-[4.8vw] lg:py-28">
         <div className="grid gap-12 lg:grid-cols-[0.92fr_1.08fr] lg:gap-[8vw]">
           <div>
-            <Kicker>The unit we govern</Kicker>
+            <Kicker>The unit we control</Kicker>
             <h2 className="mt-5 font-display text-[clamp(40px,5vw,72px)] font-semibold leading-[0.98] tracking-[-0.08em]">
               The handover, not the agent.
             </h2>
           </div>
           <div className="self-end border-t border-[#102957] pt-6">
             <p className="text-[19px] leading-[1.55] text-[#30486d]">{explanation}</p>
-            <p className="mt-5 text-sm leading-[1.6] text-[#647491]">
-              These are not permanent agent classes. A single agent may answer a question, fix a case outcome,
-              and change a system record—three handovers that can require three different authorities.
-            </p>
+            <p className="mt-5 text-sm leading-[1.6] text-[#647491]">{AAM_PAGE.handoverNote}</p>
             <a href="/methodologies/human-agent-operating-model" className="mt-6 inline-flex items-center gap-2 border-b border-[#102957] pb-2 text-sm font-bold hover:text-[hsl(var(--brand-pink))]">
               Place handovers into the operating model <ArrowRight size={15} />
             </a>
@@ -581,8 +567,7 @@ export function AgentAuthorityLayout({
               Six answers become a control specification.
             </h2>
             <p className="mt-6 max-w-[520px] text-[16px] leading-[1.65] text-[#405777]">
-              The process owner answers the questions. The application calculates the ceiling. Narrative can be
-              edited and reviewed in the CMS; the scoring rules remain deterministic application logic.
+              The process owner answers the questions. The calculator works out the ceiling. The scoring rules are fixed; no judgement is needed.
             </p>
           </div>
           <ol className="border-t border-[#102957]">
@@ -591,7 +576,7 @@ export function AgentAuthorityLayout({
               "Score how the operation can reverse a wrong result, R1–R4.",
               "Score who is affected or would find out, H1–H5.",
               "Compare requested authority with the calculated oversight ceiling.",
-              "Name one accountable operating role—not a team.",
+              "Name one person who answers for the handover, not a team.",
               "State promotion evidence and the condition that demotes authority automatically.",
             ].map((item, index) => (
               <li key={item} className="grid grid-cols-[44px_1fr] gap-3 border-b border-[#cbd3e1] py-5">
@@ -623,8 +608,8 @@ export function AgentAuthorityLayout({
                 ["Reversibility", `R${workedR}`],
                 ["Reach", `H${workedH}`],
                 ["Exposure", `E${workedBand}`],
-                ["Ceiling", OVERSIGHT_LABELS[workedCeiling]],
-                ["Requested authority", OVERSIGHT_LABELS[workedExample?.requestedAuthority ?? "on-loop"]],
+                ["Ceiling", SHORT_OVERSIGHT[workedCeiling]],
+                ["Requested authority", SHORT_OVERSIGHT[workedExample?.requestedAuthority ?? "on-loop"]],
                 ["Owner", workedExample?.accountableRole ?? "Duty Manager, Operations Control Centre"],
                 ["Promotion evidence", workedExample?.promotionEvidence ?? "500 consecutive rebookings with zero disputed reversals and no complaint uplift against the manual control"],
                 ["Automatic demotion", workedExample?.automaticDemotion ?? "Any involuntary downgrade or caused missed connection"],
@@ -654,7 +639,7 @@ export function AgentAuthorityLayout({
             </h2>
           </div>
           <p className="max-w-[390px] text-sm leading-[1.6] text-[#536887]">
-            The same underlying capability can sit at different authorities because operational exposure differs.
+            The same capability can sit at different authorities, because the exposure differs.
           </p>
         </div>
         <div className="overflow-x-auto">
@@ -931,8 +916,7 @@ export function AgentAuthorityLayout({
           </div>
           <div>
             <p className="text-[16px] leading-[1.65] text-[#405777]">
-              Human in, on, and out of the loop is established oversight language. The model combines that
-              vocabulary with published practice on human oversight, reversibility, reach, and levels of automation.
+              In, on and out of the loop is established oversight language. The model combines it with published practice on human oversight, reversibility, reach and levels of automation.
             </p>
             <ul className="mt-8 border-t border-[#102957]">
               {sources.map((source) => (
@@ -976,13 +960,12 @@ export function AgentAuthorityLayout({
       <section className="bg-[#102957] px-6 py-20 text-white md:px-[4.8vw] lg:py-28">
         <div className="grid gap-10 lg:grid-cols-[1fr_auto] lg:items-end">
           <div>
-            <Kicker inverse>From method to operating reality</Kicker>
+            <Kicker inverse>From method to practice</Kicker>
             <h2 className="mt-5 max-w-[900px] font-display text-[clamp(42px,5.5vw,78px)] font-semibold leading-[0.96] tracking-[-0.08em]">
               Bring one handover under pressure.
             </h2>
             <p className="mt-5 max-w-[580px] text-[16px] leading-[1.6] text-[#dce4f0]">
-              Use the assessment privately now. When you need to translate the brief into architecture, controls,
-              and accountable delivery, bring us the process.
+              Use the assessment privately now. When you need to turn the brief into architecture, controls and a delivery plan with a named owner, bring us the process.
             </p>
           </div>
           <BrandButton href={cta.href} variant="inverse">{cta.label}</BrandButton>
@@ -993,8 +976,9 @@ export function AgentAuthorityLayout({
 }
 
 export default function AgentAuthorityModel() {
-  const query = useCmsEntry("framework", "agent-authority-model");
-  const guardrailsQuery = useCmsEntry("framework", "guardrails-framework");
+  // The public page is code-owned: it renders the compiled copy and never waits for the CMS.
+  const query = useCmsEntry("framework", "agent-authority-model", { preferCompiled: true });
+  const guardrailsQuery = useCmsEntry("framework", "guardrails-framework", { preferCompiled: true });
   const renderPolicy = cmsEntryRenderPolicy(query.isAuthoritative, query.delivery);
   const cmsRecord = query.data ? contentRecord(query.data, "framework") : null;
   const framework = cmsRecord?.template === "agent-authority" ? cmsRecord : null;

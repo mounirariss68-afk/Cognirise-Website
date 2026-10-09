@@ -34,13 +34,13 @@ test("CogniOS detail contains every supplied section, item and CTA", async () =>
 test("in-page architecture retains stacked L0, twin spines, L1 side-by-side and L2 beneath", async () => {
   const stage = await readFile(new URL("../components/cognios/ArchitectureStage.tsx", import.meta.url), "utf8");
   const css = await readFile(new URL("../components/cognios/ArchitectureStage.css", import.meta.url), "utf8");
-  const app = await readFile(new URL("../App.tsx", import.meta.url), "utf8");
+  const routes = await readFile(new URL("../site/routes.ts", import.meta.url), "utf8");
   assert.match(stage, /architectureLayers\.map\(\(layer\)/);
   assert.match(stage, /<Spine[\s\S]*side="left"[\s\S]*className="coas-layers"[\s\S]*<Spine[\s\S]*side="right"/);
   assert.match(stage, /className="coas-component-rail"/);
   assert.match(stage, /className="coas-comp-detail-wrap"/);
   assert.match(css, /\.coas-system-grid\s*\{[^}]*grid-template-columns/);
   assert.match(css, /\.coas-component-rail\s*\{[^}]*grid-template-columns/);
-  assert.match(app, /path="\/platforms\/cognios\/architecture"><RedirectWithSearch to="\/platforms\/cognios"/);
-  assert.match(app, /path="\/architecture"><RedirectWithSearch to="\/platforms\/cognios"/);
+  assert.match(routes, /"\/platforms\/cognios\/architecture": "\/platforms\/cognios#architecture"/);
+  assert.match(routes, /"\/architecture": "\/platforms\/cognios#architecture"/);
 });

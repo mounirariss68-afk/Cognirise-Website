@@ -1,14 +1,13 @@
 import { useEffect } from "react";
 import { launchHrefAllowed } from "@workspace/api-zod";
-import { useMarketStore } from "@/store/market";
 import { useLocation } from "wouter";
-import { useReleaseContext } from "@/lib/releases";
+import { PUBLIC_PATHS } from "@/site/routes";
 
 export const STATIC_SITEMAP_PATHS: string[] = [];
 
 export function mergeSitemapItems(items: Array<{ url: string }>, origin: string, unavailablePaths = new Set<string>()) {
    const redirectPaths = new Set([
-     "/services", "/what-we-do", "/work", "/work/",
+     "/services", "/work", "/work/",
      "/cognitalk", "/platforms/cognitalk", "/cogniware", "/platforms/cogniware",
    ]);
   const routableItems = items.filter((entry) => {
@@ -27,8 +26,6 @@ export function mergeSitemapItems(items: Array<{ url: string }>, origin: string,
 }
 
 export function PublicSitemap() {
-  const { market, locale } = useMarketStore();
-  const releaseContext = useReleaseContext();
   const [location] = useLocation();
   const isPreview = location.split(/[?#]/)[0].startsWith("/preview/");
 
@@ -36,10 +33,8 @@ export function PublicSitemap() {
     const id = "public-sitemap-jsonld";
     document.getElementById(id)?.remove();
     if (isPreview) return;
-    const routes = releaseContext?.release.manifest.revisions
-      .flatMap((revision) => revision.route ? [{ url: `${window.location.origin}${revision.route}` }] : []) ?? [];
-    if (!routes.length) return;
-    const allItems = mergeSitemapItems(routes, window.location.origin);
+    // The public pages are code-owned; the list is the route table, not a CMS release.
+    const allItems = mergeSitemapItems(PUBLIC_PATHS.map((path) => ({ url: `${window.location.origin}${path}` })), window.location.origin);
 
     const script = document.createElement("script");
     script.id = id;
@@ -55,7 +50,7 @@ export function PublicSitemap() {
     });
     document.head.appendChild(script);
     return () => script.remove();
-  }, [isPreview, market, locale, releaseContext]);
+  }, [isPreview]);
 
   return null;
 }

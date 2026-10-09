@@ -9,6 +9,7 @@ import { Kicker } from "@/components/guardrails/Kicker";
 import { MarkdownInline } from "@/components/guardrails/MarkdownInline";
 import { LegacyGuardrailsLayout } from "./LegacyGuardrailsLayout";
 import { MethodPageHero } from "@/components/MethodPageHero";
+import { GUARDRAILS_ACTIONS, GUARDRAILS_RECORD } from "@/site/content/guardrails";
 import { NavigationBackControl } from "@/components/navigation/NavigationBackControl";
 
 import { SetProveHoldActionMap } from "@/components/guardrails/SetProveHoldActionMap";
@@ -28,7 +29,7 @@ export function guardrailsMetadata(
     canonicalUrl: null,
     noIndex: true,
   };
-  if (renderPolicy !== "cms" || !framework || framework.template !== "guardrails") return {
+  if ((renderPolicy !== "cms" && renderPolicy !== "compiled-fallback") || !framework || framework.template !== "guardrails") return {
     title: "Content unavailable | Cognirise",
     description: "This content is not currently available.",
     canonicalUrl: null,
@@ -123,14 +124,19 @@ function SectionNavigator() {
   );
 }
 
+type GuardrailsActions = { primary: { label: string; href: string }; secondary: { label: string; href: string }; move: { label: string; href: string } };
+
 export function GuardrailsLayout({
   framework,
   renderPolicy = "cms",
   preview = false,
+  actions,
 }: {
   framework: CmsRecord<GuardrailsContent> | null;
   renderPolicy?: "cms" | "compiled-fallback" | "loading" | "unavailable";
   preview?: boolean;
+  /** Code-owned button targets for the public page; a CMS preview keeps its own. */
+  actions?: GuardrailsActions;
 }) {
   useDynamicMetadata(guardrailsMetadata(framework, renderPolicy, preview));
 
@@ -166,6 +172,9 @@ export function GuardrailsLayout({
   const content = framework as CmsRecord<SetProveHoldGuardrailsContent>;
   const heroMedia = resolveCmsMedia(framework.media, content.heroMedia, content.heroMediaId);
   const heroImage = heroMedia?.url;
+  const primaryAction = actions?.primary ?? content.hero.primaryAction;
+  const secondaryAction = actions?.secondary ?? content.hero.secondaryAction;
+  const moveButton = actions?.move ?? content.moves.cta.button;
 
   return (
     <article data-guardrails-page className="guardrails-page [overflow-wrap:anywhere] bg-[var(--gf-bg)] font-sans text-foreground selection:bg-[var(--gf-accent)] selection:text-white pb-24">
@@ -181,8 +190,8 @@ export function GuardrailsLayout({
         imagePosition={cmsMediaObjectPosition(heroMedia) || "center"}
         actions={
           <div className="flex flex-wrap items-center gap-6">
-            <BrandButton href={content.hero.primaryAction.href} variant="primary">{content.hero.primaryAction.label}</BrandButton>
-            <BrandButton href={content.hero.secondaryAction.href} variant="editorial">{content.hero.secondaryAction.label}</BrandButton>
+            <BrandButton href={primaryAction.href} variant="primary">{primaryAction.label}</BrandButton>
+            <BrandButton href={secondaryAction.href} variant="editorial">{secondaryAction.label}</BrandButton>
           </div>
         }
       />
@@ -320,7 +329,7 @@ export function GuardrailsLayout({
               <p className="text-[length:var(--gf-text-base)] text-[var(--gf-ink-muted)] mb-8 max-w-[36ch] leading-relaxed relative z-10 flex-1">
                 <MarkdownInline text={content.moves.cta.body} />
               </p>
-              <BrandButton href={content.moves.cta.button.href} variant="primary" className="relative z-10 mt-auto">{content.moves.cta.button.label}</BrandButton>
+              <BrandButton href={moveButton.href} variant="primary" className="relative z-10 mt-auto">{moveButton.label}</BrandButton>
             </div>
 
             <a href={content.relatedLink.href} className="group flex flex-col items-start bg-[var(--gf-surface)] border border-[var(--gf-border)] p-8 md:p-10 transition-all duration-300 hover:border-[var(--gf-accent)] hover:shadow-xl hover:shadow-[var(--gf-accent)]/10 relative overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gf-accent)] rounded-xl">
@@ -349,11 +358,14 @@ export function GuardrailsLayout({
 }
 
 export default function GuardrailsFrameworkPage() {
-  const query = useCmsEntry("framework", "guardrails-framework");
+  // The public page is code-owned: it renders the compiled edition and never waits for the CMS.
+  const query = useCmsEntry("framework", "guardrails-framework", { preferCompiled: true });
   const renderPolicy = cmsEntryRenderPolicy(query.isAuthoritative, query.delivery);
-  
-  const cmsRecord = query.data ? contentRecord(query.data, "framework") : null;
-  const framework = cmsRecord?.template === "guardrails" ? (cmsRecord as CmsRecord<GuardrailsContent>) : null;
 
-  return <GuardrailsLayout framework={framework} renderPolicy={renderPolicy} />;
+  const cmsRecord = query.data ? contentRecord(query.data, "framework") : null;
+  const framework = cmsRecord?.template === "guardrails"
+    ? (cmsRecord as CmsRecord<GuardrailsContent>)
+    : renderPolicy === "compiled-fallback" ? (GUARDRAILS_RECORD as CmsRecord<GuardrailsContent>) : null;
+
+  return <GuardrailsLayout framework={framework} renderPolicy={renderPolicy} actions={cmsRecord ? undefined : GUARDRAILS_ACTIONS} />;
 }

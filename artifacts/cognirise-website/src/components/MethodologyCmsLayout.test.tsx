@@ -100,7 +100,7 @@ test("all five methodology routes use one top-level SEO baseline", async () => {
   ] as const;
   for (const [file, template] of routes) {
     const source = await readFile(path.join(root, file), "utf8");
-    assert.match(source, new RegExp(`useMethodologyCmsSeo\\(cms, methodologySeoSeed\\("${template}"\\)\\)`));
+    assert.match(source, new RegExp(`useMethodologyCmsSeo\\(cms, methodSeo\\("/methodologies/${template}"\\)\\)`));
   }
   const editorialRoot = path.resolve(import.meta.dirname, "../../../../lib/api-zod/src/methodology-editorial");
   for (const file of ["agentic-operations-readiness.ts", "human-agent-operating-model.ts"]) {

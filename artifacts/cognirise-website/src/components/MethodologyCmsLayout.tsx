@@ -69,7 +69,10 @@ export function MethodologyCmsDelivery({
 }) {
   const inherited = useContext(MethodologyCmsContext);
   const releaseContext = useReleaseContext();
-  const query = useCmsEntry("framework", slug);
+  // The public method pages are code-owned: they render their compiled editorial
+  // and never wait for the CMS. Protected previews still arrive through the
+  // inherited context above.
+  const query = useCmsEntry("framework", slug, { preferCompiled: true });
   if (inherited) return <>{children}</>;
 
   const policy = cmsEntryRenderPolicy(query.isAuthoritative, query.delivery);

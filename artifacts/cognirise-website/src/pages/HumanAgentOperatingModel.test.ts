@@ -36,7 +36,7 @@ test("Human–Agent Operating Model baseline editorial is retained in its fixed 
 test("Human–Agent Operating Model renders CMS editorial at each original position", async () => {
   const page = await readFile(pagePath, "utf8");
 
-  assert.match(page, /methodologyEditorial<[\s\S]*?"human-agent-operating-model",[\s\S]*?cms,[\s\S]*?humanAgentOperatingModelEditorial\.seed/);
+  assert.match(page, /methodologyEditorial<[\s\S]*?"human-agent-operating-model",[\s\S]*?cms,[\s\S]*?HAOM_EDITORIAL/);
   for (const binding of [
     "editorial.boundary.heading",
     "editorial.playbook.steps",
