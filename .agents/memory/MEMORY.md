@@ -75,4 +75,3 @@
 - [Team film creative boundaries](team-film-creative-boundaries.md) — The living portrait needs a mixed UAE-based team, even gender balance, Pulse grammar, and no reverse-loop footage.
 - [Team editorial style](team-editorial-style.md) — Advisor bios use concrete career facts followed by a concise, specific contribution to Cognirise.
 - [Public Sector source authority](public-sector-editorial-source.md) — October HTML supersedes September Markdown; preserve independent editions and EU claim scope within Europe.
-- [Git restore provenance](git-restore-provenance.md) — A rebased backup can retain its pre-pull label while containing the import; verify ancestry before recommending a restore.

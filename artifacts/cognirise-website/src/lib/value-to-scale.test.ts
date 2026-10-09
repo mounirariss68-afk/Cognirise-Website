@@ -15,8 +15,8 @@ test("high maturity still returns three concrete actions", () => {
   const result = calculateMaturity(answers);
   assert.equal(result.stage.name, "Scaling");
   assert.equal(result.priorities.length, 3);
-  assert.equal(result.priorities[0].action, result.priorities[0].sustainAction);
-  assert.doesNotMatch(result.priorities[0].action, /set its baseline/);
+  assert.match(result.priorities[0].action, /Revalidate/);
+  assert.doesNotMatch(result.priorities[0].action, /establish its baseline/);
 });
 
 test("incomplete answers are excluded from the calculated average", () => {
@@ -36,7 +36,7 @@ test("stage boundaries round to the nearest whole stage", () => {
 test("low scores return improvement actions rather than sustain checks", () => {
   const answers = Object.fromEntries(MATURITY_DIMENSIONS.map((dimension) => [dimension.id, 1]));
   const result = calculateMaturity(answers);
-  assert.match(result.priorities[0].action, /set its baseline/);
+  assert.match(result.priorities[0].action, /establish its baseline/);
 });
 
 test("calculates stage from average rather than being capped by weakest link (unsupported min-score rule)", () => {

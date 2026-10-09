@@ -38,7 +38,7 @@ test("stage recommendations use explicit criteria rather than the total alone", 
 test("high control burden and low feasibility produce an explained stop decision", () => {
   const result = getRecommendation(opportunity({ ...base, feasibility: 2, controlBurden: 2 }));
   assert.equal(result.stage, "Stop");
-  assert.match(result.reason, /controls/i);
+  assert.match(result.reason, /control burden/i);
   assert.match(result.reason, /feasibility/i);
 });
 
@@ -111,7 +111,7 @@ test("CMS editorial fields stay bound at their original page positions", () => {
   assert.match(source, /methodologyEditorial<"ai-use-case-prioritization", typeof aiUseCasePrioritizationEditorial>/);
   assert.match(source, /\{editorial\.portfolio\.heading\}/);
   assert.match(source, /defaultUseCases\(editorial\.sampleOpportunities\)/);
-  assert.match(source, /href=\{editorial\.assessmentCard\.controlBurdenNote\.authorityLink\.href\}/);
+  assert.match(source, /href=\{editorial\.controlBurdenNote\.authorityLink\.href\}/);
   assert.match(source, /href=\{editorial\.nextSteps\.valueScan\.href\}/);
   assert.match(source, /\/methodologies\/idao#innovate/);
   assert.match(source, /\/methodologies\/idao#demonstrate/);

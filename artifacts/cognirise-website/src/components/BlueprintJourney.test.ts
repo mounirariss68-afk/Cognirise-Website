@@ -84,7 +84,7 @@ test("BlueprintJourney preserves the IDAO stage order and timing commitments", (
   assert.ok(demonstrate < activate);
   assert.ok(activate < operate);
   assert.match(content, /time: "48 hours"/);
-  assert.match(content, /time: "2 to 4 weeks \(first release\)"/);
+  assert.match(content, /time: "2–4 weeks \(MVP\)"/);
   assert.match(source, /prototype in 48 hours/);
 });
 

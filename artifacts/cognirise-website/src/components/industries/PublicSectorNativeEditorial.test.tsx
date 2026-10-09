@@ -35,3 +35,8 @@ test("native Public Sector renders all four exact editions with semantic tables,
   }
 });
 
+test("the canonical route uses exact approved publication, not a stale UAE whole-site snapshot", async () => {
+  const app = await readFile(new URL("../../App.tsx", import.meta.url), "utf8");
+  assert.match(app, /if \(path === "\/industries\/public-sector"\) return routedPage/);
+  assert.match(app, /\/industries\/government.*CanonicalRedirect to="\/industries\/public-sector"/);
+});

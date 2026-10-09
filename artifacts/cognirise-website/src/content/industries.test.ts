@@ -192,10 +192,11 @@ test("an already-projected Education preview honors its requested market over th
 });
 
 test("Education metadata reflects the broader audience without changing the route", () => {
-  const content = readFileSync(path.resolve(process.cwd(), "src/site/content/industries.ts"), "utf8");
-  const metadata = content.match(/path: "\/industries\/education",\s*meta: \{([\s\S]*?)\},/)?.[1];
+  const shell = readFileSync(path.resolve(process.cwd(), "src/components/layout/Shell.tsx"), "utf8");
+  const metadata = shell.match(/"\/industries\/education": \{([\s\S]*?)\n  \}/)?.[1];
   assert.ok(metadata);
-  assert.match(metadata, /schools, universities/);
+  assert.match(metadata, /K–12 & Higher Education/);
+  assert.match(metadata, /schools, universities and education authorities/);
 });
 
 test("keeps UAE and Saudi Education editions strictly separated", () => {

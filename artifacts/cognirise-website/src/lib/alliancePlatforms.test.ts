@@ -46,6 +46,12 @@ test("covers the required product capability contract", () => {
   }
 });
 
+test("registers exact routes before the generic platform route and keeps the unknown-route fallback", async () => {
+  const app = await readFile(new URL("../App.tsx", import.meta.url), "utf8");
+  for (const route of routes) assert.match(app, new RegExp(`<Route path=\"${route}\"`));
+  assert.ok(app.indexOf("/platforms/bunjee-ai") < app.indexOf("/platforms/:slug"));
+  assert.match(app, /<Route component=\{NotFound\} \/>/);
+});
 
 test("links every alliance page from the home AI Platforms card and canonical platform inventory", async () => {
   const [serviceLines, overview] = await Promise.all([
@@ -54,4 +60,15 @@ test("links every alliance page from the home AI Platforms card and canonical pl
   ]);
   for (const route of routes) assert.match(serviceLines, new RegExp(route));
   for (const route of routes) assert.match(overview, new RegExp(route));
+});
+
+test("publishes all canonical routes in static sitemap and route metadata", async () => {
+  const [sitemap, shell] = await Promise.all([
+    readFile(new URL("../../public/sitemap.xml", import.meta.url), "utf8"),
+    readFile(new URL("../components/layout/Shell.tsx", import.meta.url), "utf8"),
+  ]);
+  for (const route of routes) {
+    assert.match(sitemap, new RegExp(route));
+    assert.match(shell, new RegExp(`\"${route}\"`));
+  }
 });

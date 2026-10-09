@@ -39,8 +39,8 @@ test("generated PDF text contains the current answers, result, evidence, actions
     assert.ok(normalizedText.includes(dimension.evidence), `missing evidence for ${dimension.name}`);
   }
   assert.match(normalizedText, /Priorities, evidence and next actions/);
-  assert.match(normalizedText, /Choose one material outcome, set its baseline and name the executive owner\./);
-  assert.match(normalizedText, /planning tool, not an audit, a certification or a benchmark/);
+  assert.match(normalizedText, /Choose one material outcome, establish its baseline and name the executive owner\./);
+  assert.match(normalizedText, /directional planning tool, not an audit, certification or benchmark/);
   assert.match(normalizedText, /not sent to Cognirise/);
 });
 
@@ -56,6 +56,6 @@ test("PDF changes when an answer is edited and uses that answer's interpretation
   const text = await readFile(textPath, "utf8");
 
   assert.match(text, /Value strategy — 5 \/ 5 · Scaling/);
-  assert.match(text, /The organisation reuses its foundations and operating practices again and again to keep the value\./);
+  assert.match(text, /The organisation repeatedly reuses foundations and operating practices to sustain value\./);
   assert.doesNotMatch(text, /Value strategy — 1 \/ 5/);
 });

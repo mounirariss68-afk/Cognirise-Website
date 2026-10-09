@@ -5,7 +5,6 @@ import {
   OVERSIGHT_LABELS,
   type EBand,
 } from "@/lib/agent-authority";
-import { SHORT_OVERSIGHT } from "@/site/content/agent-authority";
 
 type GuardrailsContent = NonNullable<Extract<FrameworkContent, { template: "agent-authority" }>["guardrails"]>;
 
@@ -53,6 +52,13 @@ const EXPOSURE_COLUMNS = [
   },
 ] as const;
 
+const ILLUSTRATIVE_BUCKETS = [
+  ["R1–R2 · H1", "undone at will, internal only"],
+  ["R2–R3 · H2", "undone at a cost, one customer"],
+  ["R4 · H2", "irreversible, one customer"],
+  ["R3–R4 · H3+", "regulator-visible, public or safety"],
+] as const;
+
 export function InteractionChart({ figure }: { figure: GuardrailsContent["secondFigure"] }) {
   const chartId = React.useId().replace(/:/g, "");
 
@@ -61,8 +67,9 @@ export function InteractionChart({ figure }: { figure: GuardrailsContent["second
       className="mt-9 min-w-0 max-w-full border border-white/15 bg-[#0b2247] p-4 text-white sm:p-6 lg:p-9"
       aria-label={figure.altText}
       aria-labelledby={`${chartId}-title`}
-       aria-describedby={`${chartId}-description ${chartId}-legend`}
+       aria-describedby={`${chartId}-governed-description ${chartId}-description ${chartId}-legend`}
     >
+       <p id={`${chartId}-governed-description`} className="sr-only">{figure.altText}</p>
       <header className="mb-8 grid gap-4 lg:grid-cols-[0.9fr_1.1fr] lg:items-end lg:gap-8">
         <div>
           <span className="text-sm font-bold uppercase tracking-[0.14em] text-[#ff9fcf]">
@@ -72,21 +79,23 @@ export function InteractionChart({ figure }: { figure: GuardrailsContent["second
             id={`${chartId}-title`}
             className="mt-2 max-w-[25em] font-display text-[clamp(24px,3vw,34px)] font-semibold leading-[1.18] tracking-[-0.04em] text-white"
           >
-            Exposure sets the ceiling. Evidence moves a handover up. Guardrails do both jobs.
+            Exposure sets the ceiling. Evidence earns the climb. Guardrails do both jobs.
           </h3>
           <p
             id={`${chartId}-description`}
             className="mt-3 max-w-[42em] text-base leading-[1.6] text-[#b9c7db]"
           >
-            The five exposure bands run left to right and authority is shown in three rows. The pink staircase is the ceiling; everything beneath it is permitted.
+            The five canonical exposure bands run left to right. Authority is shown in three human-oversight
+            rows; the pink staircase is the exposure ceiling, and everything beneath it is permitted.
           </p>
         </div>
         <p className="border-l-2 border-[#ff9fcf] pl-4 text-base leading-[1.6] text-[#d6deea]">
-          Read the plot from the profile, not from the agent&apos;s confidence. A handover can climb on evidence. Only an approved artefact can carry authority above the ceiling.
+          Read the plot from the profile, not from the agent&apos;s confidence. A handover can climb on evidence,
+          while an approved compensating artefact is the only way to carry authority above its exposure ceiling.
         </p>
       </header>
 
-       <p className="mb-3 text-base leading-[1.6] text-[#b9c7db] lg:hidden">Scroll sideways to see the whole chart, or focus it and use the arrow keys.</p>
+       <p className="mb-3 text-base leading-[1.6] text-[#b9c7db] lg:hidden">Scroll horizontally to explore the chart. Keyboard: focus the chart, then use Left and Right arrows.</p>
        <div
         className="max-w-full overflow-x-auto overscroll-x-contain pb-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff775d] focus-visible:ring-offset-4 focus-visible:ring-offset-[#0b2247]"
         role="region"
@@ -210,7 +219,7 @@ export function InteractionChart({ figure }: { figure: GuardrailsContent["second
                     <span className="mt-1 block text-sm font-semibold leading-[1.35] text-[#ff9fcf]">{col.rule}</span>
                     <span className="mt-1 block text-sm leading-[1.4] text-white/65">{col.meaning}</span>
                     <span className="mt-2 block text-sm leading-[1.4] text-white/45">
-                      Ceiling: {SHORT_OVERSIGHT[canonicalCeiling]}
+                      Canonical ceiling: {OVERSIGHT_LABELS[canonicalCeiling]}
                     </span>
                   </div>
                 );
@@ -221,6 +230,25 @@ export function InteractionChart({ figure }: { figure: GuardrailsContent["second
 
          </div>
        </div>
+           <section
+            className="mt-5 border-t border-white/20 pt-5"
+            aria-label="Original illustrative exposure buckets"
+          >
+            <h4 className="text-sm font-bold uppercase tracking-[0.1em] text-white/70">
+              Illustrative exposure buckets — annotations, not axes
+            </h4>
+             <p className="mt-4 text-sm leading-[1.6] text-white/65">
+               Five canonical bands; illustrative buckets below are examples, not alternative axes.
+             </p>
+             <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              {ILLUSTRATIVE_BUCKETS.map(([profile, description]) => (
+                <div key={profile} className="border border-white/15 px-3 py-3">
+                  <strong className="block text-base font-semibold text-white">{profile}</strong>
+                  <span className="mt-1 block text-sm leading-[1.45] text-white/65">{description}</span>
+                </div>
+              ))}
+            </div>
+          </section>
 
       <section
         id={`${chartId}-legend`}
@@ -232,7 +260,9 @@ export function InteractionChart({ figure }: { figure: GuardrailsContent["second
             A <span className="text-white">Permitted</span>
           </h4>
           <p className="mt-2 text-base leading-[1.6] text-white/80">
-            Everything under the staircase is permitted. The required controls sit here, and they are read off the profile, not chosen: universal, by type, by authority and by exposure.
+            Everything under the staircase is permitted. The controls required here are read off the profile, not
+             chosen. Required controls sit in here — the guardrails the profile makes mandatory — universal, by type, by
+            authority, and by exposure.
           </p>
         </article>
 
@@ -241,7 +271,9 @@ export function InteractionChart({ figure }: { figure: GuardrailsContent["second
             B <span className="text-white">Promotion</span>
           </h4>
           <p className="mt-2 text-base leading-[1.6] text-white/80">
-            A handover launches one level below its target. Meet the required controls, hold the evidence, and it climbs one level. Promotion never moves the ceiling.
+            Evidence earns the climb. Guardrails as required controls: meet them, hold the evidence, and the handover
+            climbs one level — launching one level below target. A better model does not raise the ceiling; promotion
+            never moves it.
           </p>
         </article>
 
@@ -250,13 +282,15 @@ export function InteractionChart({ figure }: { figure: GuardrailsContent["second
             C <span className="text-white">Compensation</span>
           </h4>
           <p className="mt-2 text-base leading-[1.6] text-white/80">
-            A compensating control is a guardrail that carries the authority itself, through an approved artefact. Only it moves the ceiling. Example: a recall message to a patient with no free text, an approved template and a blocking gate on every send.
+             A compensating control raises the ceiling. Guardrails that carry the authority themselves. Only these move the ceiling: only compensation, through
+            an approved artefact, may carry authority above it — never unrestricted agent discretion. Example:
+            recall message to a patient — no free text, approved template, blocking gate on every send.
           </p>
         </article>
       </section>
 
       <p className="mt-6 text-sm leading-[1.5] text-white/50">
-        Reversibility R1 to R4 and reach H1 to H5 as defined in the Agent Authority Model.
+        Reversibility R1–R4 and reach H1–H5 as defined in the Agent Authority Model. Handovers shown are illustrative.
       </p>
 
       <figcaption className="mt-8 border-t border-white/20 px-1 pt-4 text-base leading-[1.6] text-[#b9c7db]">

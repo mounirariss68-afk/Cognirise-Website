@@ -9,10 +9,32 @@ const blueprint = readFileSync(new URL("../components/BlueprintJourney.tsx", imp
 const app = readFileSync(new URL("../App.tsx", import.meta.url), "utf8");
 const shell = readFileSync(new URL("../components/layout/Shell.tsx", import.meta.url), "utf8");
 const editorial = readFileSync(new URL("../../../../lib/api-zod/src/methodology-editorial/idao.ts", import.meta.url), "utf8");
-const siteEditorial = readFileSync(new URL("../site/content/methods/idao.ts", import.meta.url), "utf8");
-const idaoSurface = `${page}\n${content}\n${siteEditorial}`;
+const idaoSurface = `${page}\n${content}\n${editorial}`;
 
+test("routes IDAO and redirects retired service overviews to the homepage practice section", () => {
+  assert.match(app, /path="\/methodologies\/idao" component=\{IDAOMethodology\}/);
+  assert.match(app, /path="\/what-we-do"><AnchoredRedirect to="\/" anchor="service-lines"/);
+  assert.match(app, /path="\/services"><AnchoredRedirect to="\/" anchor="service-lines"/);
+  assert.doesNotMatch(app, /ServicesOverview/);
+});
 
+test("navigation makes What we do direct and exposes the methodology portfolio in order", () => {
+  assert.match(shell, /id: "what-we-do",[\s\S]*?href: "\/",\s*\}/);
+  assert.match(shell, /label: "How we do it"[\s\S]*?label: "IDAO"[\s\S]*?label: "Agent Authority Model"/);
+  assert.match(shell, /aria-expanded/);
+  assert.match(shell, /aria-current/);
+  assert.match(shell, /aria-current=\{!item\.items && isCurrentDestination\(item\.href\) \? "page" : undefined\}/);
+  assert.match(shell, /focus-visible:ring-2/);
+  assert.doesNotMatch(shell, /aria-haspopup="menu"/);
+  assert.deepEqual(
+    NAVIGATION_ITEM_REGISTRY.filter((item) => item.id === "what-we-do" || ("parentId" in item && item.parentId === "what-we-do")).map((item) => item.id),
+    ["what-we-do"],
+  );
+  assert.deepEqual(
+    NAVIGATION_ITEM_REGISTRY.filter((item) => item.id === "methodologies" || ("parentId" in item && item.parentId === "methodologies")).map((item) => item.id),
+    ["methodologies", "methodologies.overview", "methodologies.value-to-scale", "methodologies.use-case-prioritization", "methodologies.idao", "methodologies.agent-authority", "methodologies.guardrails"],
+  );
+});
 
 test("IDAO renders every stage from one shared, substantive content model", () => {
   for (const stage of ["Innovate", "Demonstrate", "Activate", "Operate"]) {
@@ -36,9 +58,9 @@ test("IDAO keeps approved imagery, order and milestone commitments", () => {
     assert.match(content, new RegExp(`blueprint-${image}\\.jpg`));
   }
   assert.match(content, /time: "48 hours"/);
-  assert.match(content, /time: "2 to 4 weeks \(first release\)"/);
-  assert.match(siteEditorial, /working prototype within[\s\S]*48 hours/i);
-  assert.match(siteEditorial, /first release within[\s\S]*2 to 4 weeks/i);
+  assert.match(content, /time: "2–4 weeks \(MVP\)"/);
+  assert.match(editorial, /decision-ready prototype within[\s\S]*48 hours/i);
+  assert.match(editorial, /governed MVP within[\s\S]*2–4 weeks/i);
 });
 
 test("IDAO uses the approved lifecycle imagery for each selected market", () => {
@@ -65,14 +87,14 @@ test("IDAO explains progression, loops, assurance and ownership", () => {
   for (const concept of [
     "loops back",
     "risk and assurance travel",
-    "A controlled lifecycle",
-    "Reusable components",
+    "Governed lifecycle",
+    "Reusable intelligence",
     "Traceable execution",
     "Human decision gates",
     "evaluation",
-    "Security, accessibility, data controls and monitoring",
-    "disciplined handover",
-    "a system you own",
+    "Security, accessibility, data governance and observability",
+    "handover discipline",
+    "client-owned capability",
   ]) {
     assert.match(idaoSurface, new RegExp(concept, "i"));
   }
@@ -121,12 +143,12 @@ test("IDAO opens with an accessible four-part human and agent delivery system", 
 });
 
 test("IDAO keeps baseline editorial defaults and binds CMS edits in place", () => {
-  assert.match(siteEditorial, /four steps from a question to a system your team runs/);
-  assert.match(siteEditorial, /The work ends in your hands, not ours\./);
-  assert.match(siteEditorial, /Bring one process\. Leave with the next step\./);
+  assert.match(editorial, /A governed route from a consequential opportunity to evidence, adoption and a capability your team can own\./);
+  assert.match(editorial, /The work ends in your hands, not ours\./);
+  assert.match(editorial, /Bring one process\. Leave with the next evidence to earn\./);
   assert.equal((editorial.match(/id: "(?:hero-demonstrate|delivery-team|stage-|canon-)/g) ?? []).length, 11);
 
-  assert.match(page, /methodologyEditorial<"idao", typeof idaoEditorial>\("idao", cms, IDAO_EDITORIAL\)/);
+  assert.match(page, /methodologyEditorial<"idao", typeof idaoEditorial>\("idao", cms, idaoEditorial\.seed\)/);
   assert.match(page, /methodologyEditorialMedia\(cms, editorial\.delivery\.teamImage\)/);
   assert.match(page, /methodologyEditorialMedia\(cms, editorial\.stageMedia\[index\]\.image\)/);
   assert.doesNotMatch(page, /assetUrl\(stage\.image\)/);

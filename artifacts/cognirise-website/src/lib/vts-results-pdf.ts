@@ -58,7 +58,7 @@ export function createVtsPulseReport(answers: MaturityAnswers): PulseReport {
       "Reassess after the evidence, ownership or operating context changes.",
     ],
     limitations: [
-      "This is a planning tool, not an audit, a certification or a benchmark.",
+      "This is a directional planning tool, not an audit, certification or benchmark.",
       "Answers are generated locally from this page and are not sent to Cognirise or included in the separate Value Scan form.",
       "Method version: AI Value-to-Scale · current public questionnaire.",
     ],

@@ -2,9 +2,11 @@ import { ArrowRight, ArrowDown, Check, GitBranch, ShieldCheck, Users } from "luc
 import { BrandButton } from "@/components/ui/brand-button";
 import { MethodologyRelationship } from "@/components/MethodologyRelationship";
 import { MethodPageHero } from "@/components/MethodPageHero";
-import { humanAgentOperatingModelEditorial } from "@workspace/api-zod";
-import { HAOM_EDITORIAL, HAOM_HERO } from "@/site/content/methods/human-agent-operating-model";
-import { methodSeo } from "@/site/content/methods/seo";
+import {
+  humanAgentOperatingModelEditorial,
+  humanAgentOperatingModelHeroSeed,
+  methodologySeoSeed,
+} from "@workspace/api-zod";
 import { MethodologyCmsDelivery, methodologyEditorial, methodologyHero, useMethodologyCmsContent, useMethodologyCmsSeo } from "@/components/MethodologyCmsLayout";
 
 const CAPABILITY_ICONS = {
@@ -25,13 +27,13 @@ function Kicker({ children, inverse = false }: { children: React.ReactNode; inve
 
 function HumanAgentOperatingModelContent() {
   const cms = useMethodologyCmsContent("human-agent-operating-model");
-  useMethodologyCmsSeo(cms, methodSeo("/methodologies/human-agent-operating-model"));
+  useMethodologyCmsSeo(cms, methodologySeoSeed("human-agent-operating-model"));
   const editorial = methodologyEditorial<"human-agent-operating-model", typeof humanAgentOperatingModelEditorial>(
     "human-agent-operating-model",
     cms,
-    HAOM_EDITORIAL,
+    humanAgentOperatingModelEditorial.seed,
   );
-  const hero = methodologyHero(cms, HAOM_HERO);
+  const hero = methodologyHero(cms, humanAgentOperatingModelHeroSeed);
   const DESIGN_STEPS = editorial.playbook.steps;
   const DECISION_RIGHTS = editorial.decisionRights.rows;
   const MEASURES = editorial.measures.groups;

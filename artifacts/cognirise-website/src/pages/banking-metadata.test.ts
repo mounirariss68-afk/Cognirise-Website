@@ -2,6 +2,25 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { readFile } from "node:fs/promises";
 
+test("Shell defers protected, governed, and route-owned methodology metadata effects", async () => {
+  const shell = await readFile(new URL("../components/layout/Shell.tsx", import.meta.url), "utf8");
+  const preview = await readFile(new URL("./CmsPreview.tsx", import.meta.url), "utf8");
+  for (const route of [
+    "/methodologies/idao",
+    "/methodologies/ai-use-case-prioritization",
+    "/methodologies/ai-value-to-scale",
+    "/methodologies/agentic-operations-readiness",
+    "/methodologies/human-agent-operating-model",
+  ]) {
+    assert.match(shell, new RegExp(`"${route}"`));
+  }
+  assert.match(shell, /ROUTE_OWNED_METADATA_PATHS\.has\(currentPath\)/);
+  assert.match(shell, /useEffect\(\(\) => \{[\s\S]*?ROUTE_OWNED_METADATA_PATHS\.has\(currentPath\)[\s\S]*?\}, \[currentPath\]\)/);
+  assert.match(
+    preview,
+    /applyMetadata\(\{\s*title: "Protected preview \| Cognirise",\s*description: "Protected CMS saved-version preview\.",\s*canonicalUrl: null,\s*noIndex: true\s*\}\)/,
+  );
+});
 
 test("shared methodology SEO restores Shell's exact original baselines", async () => {
   const definitions = await readFile(

@@ -5,19 +5,17 @@ import { MATURITY_DIMENSIONS, MATURITY_STAGES } from "@/lib/value-to-scale";
 import { MethodologyRelationship } from "@/components/MethodologyRelationship";
 import { MethodPageHero } from "@/components/MethodPageHero";
 import { MethodologyCmsDelivery, methodologyEditorial, methodologyHero, useMethodologyCmsContent, useMethodologyCmsSeo } from "@/components/MethodologyCmsLayout";
-import { aiValueToScaleEditorial } from "@workspace/api-zod";
-import { VTS_EDITORIAL, VTS_HERO } from "@/site/content/methods/ai-value-to-scale";
-import { methodSeo } from "@/site/content/methods/seo";
+import { aiValueToScaleEditorial, aiValueToScaleHeroSeed, methodologySeoSeed } from "@workspace/api-zod";
 
 function AIValueToScaleContent() {
   const cms = useMethodologyCmsContent("ai-value-to-scale");
-  useMethodologyCmsSeo(cms, methodSeo("/methodologies/ai-value-to-scale"));
+  useMethodologyCmsSeo(cms, methodologySeoSeed("ai-value-to-scale"));
   const editorial = methodologyEditorial<"ai-value-to-scale", typeof aiValueToScaleEditorial>(
     "ai-value-to-scale",
     cms,
-    VTS_EDITORIAL,
+    aiValueToScaleEditorial.seed,
   );
-  const hero = methodologyHero(cms, VTS_HERO);
+  const hero = methodologyHero(cms, aiValueToScaleHeroSeed);
   return (
     <article className="overflow-hidden bg-[#fdfcfb] text-[#102957]">
       <MethodPageHero
@@ -114,7 +112,7 @@ function AIValueToScaleContent() {
               {MATURITY_DIMENSIONS.map((dimension) => (
                 <div key={dimension.id} className="border-t border-[hsl(var(--brand-violet))]/40 pt-6">
                   <h4 className="font-display text-xl font-semibold mb-3">{dimension.name}</h4>
-                  <p className="text-[13px] leading-[1.6] text-[#b9c7db]">{dimension.summary}</p>
+                  <p className="text-[13px] leading-[1.6] text-[#b9c7db]">{dimension.question}</p>
                 </div>
               ))}
             </div>

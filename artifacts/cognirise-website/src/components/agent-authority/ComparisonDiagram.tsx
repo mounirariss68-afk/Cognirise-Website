@@ -47,16 +47,18 @@ export function ComparisonDiagram({ figure }: { figure: GuardrailsContent["first
       <div className="border-y border-[#cbd3e1] py-6 sm:py-8">
         <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
           <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#102957]">
-            <span className="text-[#6f4188]">Example pattern</span>{" "}
+            <span className="text-[#6f4188]">Illustrative pattern</span>{" "}
             <span aria-hidden="true">·</span>{" "}
-            front-desk agent
+            not a universal prescription{" "}
+            <span aria-hidden="true">·</span>{" "}
+            Front-Desk Agent
           </p>
-          <p className="text-base text-[#536887]">One common setting → each handover controlled on its own</p>
+          <p className="text-base text-[#536887]">Common setting → individually governed handovers</p>
         </div>
         <p className="mt-3 max-w-[62rem] text-sm leading-[1.5] text-[#536887]">
           <strong className="text-[#102957]">Common setting:</strong> One filter. One prompt. One limit. Applied to everything it does.{" "}
           <span className="font-semibold text-[#a63d28]">Warning:</span> the riskiest act inherits the posture of the safest.
-          <strong className="ml-1 text-[#102957]">Controlled on its own:</strong> each moment the output leaves the agent is rated separately.
+          <strong className="ml-1 text-[#102957]">Individually governed:</strong> Each moment the output leaves the agent is governed on its own.
         </p>
 
         <ol className="mt-7 grid gap-0 md:grid-cols-4">

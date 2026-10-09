@@ -84,7 +84,7 @@ export function createPrioritizationPulseReport(useCases: UseCase[]): PulseRepor
     nextSteps: [
       "Record uncertainty as a caveat and revisit a score when evidence, dependencies or ownership changes.",
       "Bring the highest-value, best-evidenced opportunity to a separate Value Scan if a facilitated route to proof is useful.",
-      "Use the Agent Authority Model separately for any handover where a mistake costs money or trust; control cost is not an authority ceiling.",
+      "Use Agent Authority separately when a consequential handover exists; Control Burden is not an authority ceiling.",
     ],
     limitations: [
       "This is a transparent comparative planning tool, not a financial business case, ROI calculator or roadmap-to-delivery package.",
@@ -125,9 +125,9 @@ export function createReadinessPulseReport(input: ReadinessReportInput): PulseRe
       { heading: "Governance review", paragraphs: [input.governanceReview || `${missing}.`] },
     ],
     nextSteps: [
-      "Resolve each Prepare or Stop condition with evidence, a named owner and a review date.",
+      "Resolve each Prepare or Stop condition with evidence, an accountable owner and a reassessment point.",
       "Carry a Proceed workflow into the appropriate IDAO stage; readiness does not set authority.",
-      "Use the Agent Authority Model separately for each Knowledge, Decision or Action handover that matters.",
+      "Use Agent Authority separately for each consequential Knowledge, Decision or Action handover.",
     ],
     limitations: [
       "The six-condition structure, answer definitions and Proceed / Prepare / Stop logic are Cognirise proprietary method content.",
@@ -164,7 +164,7 @@ export function createAuthorityPulseReport(result: AssessmentResult): PulseRepor
       {
         heading: "Operating controls",
         answers: [
-          { label: "Owner", value: result.accountableRole },
+          { label: "Accountable owner", value: result.accountableRole },
           { label: "Intervention window", value: result.interventionWindow || "Not required at this ceiling." },
           { label: "Promotion evidence", value: result.promotionEvidence },
           { label: "Automatic demotion", value: result.automaticDemotion },
@@ -180,8 +180,8 @@ export function createAuthorityPulseReport(result: AssessmentResult): PulseRepor
     ],
     nextSteps: [
       "Carry this control brief into the operating design for the one assessed handover.",
-      "Reassess when the reach, reversibility, intervention window, artefact or owner changes.",
-      "Repeat the assessment for every other handover that matters; this brief does not set a ceiling for an entire agent.",
+      "Reassess when the reach, reversibility, intervention window, artefact or accountable role changes.",
+      "Repeat the assessment for every other consequential handover; this brief does not set a ceiling for an entire agent.",
     ],
     limitations: [
       "The questionnaire, calculation, exposure bands and authority rules are the approved Agent Authority Model and are unchanged.",

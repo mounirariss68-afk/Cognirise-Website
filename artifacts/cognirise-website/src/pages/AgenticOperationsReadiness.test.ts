@@ -14,8 +14,8 @@ test("publishes the workflow readiness method and portfolio route", () => {
 });
 
 test("tests all six workflow operating conditions", () => {
-  for (const condition of ["Workflow stability", "Data and tool access", "Observability", "Fallback and recovery", "Exceptions and limits", "Operating economics"]) {
-    assert.match(page, new RegExp(condition));
+  for (const condition of ["Workflow stability", "Data & tool access", "Observability", "Fallback & recovery", "Exceptions & boundaries", "Operating economics"]) {
+    assert.match(page, new RegExp(condition.replace("&", "\\&")));
   }
   assert.match(page, /values\.includes\("stop"\)/);
   assert.match(page, /values\.every\(\(value\) => value === "ready"\)/);
@@ -43,7 +43,7 @@ test("keeps the baseline editorial and source record in its shared seed", () => 
 });
 
 test("binds CMS editorial fields in their original page positions", () => {
-  assert.match(page, /methodologyEditorial<[\s\S]*?>\("agentic-operations-readiness", cms, AOR_EDITORIAL\)/);
+  assert.match(page, /methodologyEditorial<[\s\S]*?>\("agentic-operations-readiness", cms, agenticOperationsReadinessEditorial\.seed\)/);
   for (const field of [
     "relationship.startHereWhen",
     "boundary.heading",
