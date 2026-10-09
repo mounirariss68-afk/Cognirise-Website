@@ -1023,3 +1023,31 @@ mtime_ms = 1791454473436
 storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/947d768a-5836-491c-9b64-a0e62dec8c9f/27f7d873-0011-43e3-afca-3e1bbba48939"
 storage_version_token = "1791454582154449"
 content_type = "application/octet-stream"
+
+[[outputs]]
+id = "6tcq2yvC7HvH89U9p7e3g"
+uri = "file://attached_assets/cognirise-sitemap/Cognirise-Website-Sitemap.zip"
+type = "unspecified"
+title = "Download Cognirise website sitemap"
+description = "27 canonical public routes. Includes sitemap.xml, an editable CSV, a self-contained clickable HTML sitemap, and scope notes. Hidden and internal routes are excluded."
+logical_id = "dedead9a-b245-4c0f-ab58-a5fb6dd460ea"
+content_hash = "sha256:9871e95bd1da9511453b7aa95cadcea403a20239fd7e905cb17d1d99798b642a"
+size = 4287
+mtime_ms = 1791456779208
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/dedead9a-b245-4c0f-ab58-a5fb6dd460ea/59396b36-5525-49f2-a9cc-61e873995409"
+storage_version_token = "1791456823397730"
+content_type = "application/octet-stream"
+
+[[outputs]]
+id = "MifxS2J-KJ_sJxJkYZOJ8"
+uri = "file://attached_assets/cognirise-sitemap/sitemap.html"
+type = "html"
+title = "Cognirise sitemap — readable version"
+description = "Clickable, grouped overview of the current public website."
+logical_id = "c8322101-3968-4389-b8e4-bef2ab974462"
+content_hash = "sha256:63b88ed880095d06c94f5ce969fbbb8d33630b926d6065e4ee4647b731d2b99b"
+size = 5633
+mtime_ms = 1791456779199
+storage_uri = "gcs://replit-rams-assets-sisko/rams/assets/repl:b385d353-b4bc-4c5e-8d9f-2fd6527ab54c/c8322101-3968-4389-b8e4-bef2ab974462/dae63f5c-2d26-47f4-95f3-dd3b3eec1565"
+storage_version_token = "1791456824797250"
+content_type = "text/html"
